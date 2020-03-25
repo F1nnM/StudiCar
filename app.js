@@ -1,8 +1,18 @@
-const http = require('http');
+if (typeof (PhusionPassenger) !== 'undefined') {
+    PhusionPassenger.configure({ autoInstall: false });
+}
 
-http.createServer(function (request, response) {
-    response.writeHead(200, { 'Content-Type': 'text/plain' });
-    response.end("Hello, World!\n");
-}).listen(443);
+var express = require('express');
+var app = express();
+app.get('/', function (req, res) {
+    var body = 'Hello World';
+    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Length', body.length);
+    res.end(body);
+});
 
-console.log('App is running...');
+if (typeof (PhusionPassenger) !== 'undefined') {
+    app.listen('passenger');
+} else {
+    app.listen(3000);
+}
