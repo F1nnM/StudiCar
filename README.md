@@ -7,7 +7,7 @@
 ## Getting started
 ### To clone Github-Repository:
 ```bash
-git clone https://[Github-Username]@[Github_password]github.com/F1nnM/StudiCar.git
+git clone https://[Github-Username]:[Github_password]@github.com/F1nnM/StudiCar.git
 ```
 ### To run locally:
 ```bash
