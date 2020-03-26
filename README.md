@@ -30,11 +30,11 @@ or in VS CODE, in the bottom left corner: NPM SCRIPTS > `API/package.json` > `st
 
 The API can be reached at simply http://localhost
 
-### To deploy to [dev-server](https://dev.studicar.mfinn.de)
+### To deploy to [dev-server](https://dev.pwa.studicar.mfinn.de)
 - push to repository
 - easy as that
 
-### To deploy to [prod-server](https://studicar.mfinn.de)
+### To deploy to [prod-server](https://pwa.studicar.mfinn.de)
 - Check if everything works
 - Create pull-request for dev-branch
 - Accept pull-request and merge
