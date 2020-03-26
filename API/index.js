@@ -12,5 +12,5 @@ var server = http.createServer(function (req, res) {
 if (typeof (PhusionPassenger) !== 'undefined') {
     server.listen('passenger');
 } else {
-    server.listen(8080);
+    server.listen(80);
 }
