@@ -19,12 +19,16 @@ npm run dev
 ```
 or in VS CODE, in the bottom left corner: NPM SCRIPTS > `PWA/package.json` > `dev - PWA` > hover > little triangle to run
 
+This will open the page in the browser. The address is http://localhost:3000
+
 #### API
 ```bash
 cd API
 npm run start
 ```
 or in VS CODE, in the bottom left corner: NPM SCRIPTS > `API/package.json` > `start - API` > hover > little triangle to run
+
+The API can be reached at simply http://localhost
 
 ### To deploy to [dev-server](https://dev.studicar.mfinn.de)
 - push to repository
