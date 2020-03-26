@@ -14,7 +14,5 @@
     "url": "https://github.com/F1nnM/StudiCar/issues"
   },
   "homepage": "https://github.com/F1nnM/StudiCar#readme",
-  "dependencies": {
-    "express": "^4.17.1"
-  }
+  "dependencies": {}
 }
