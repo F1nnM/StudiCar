@@ -1,6 +1,6 @@
 # StudiCar (studicar)
 
-A carsharing-app for dual students
+Green.Cheap.Social.
 
 ## Install the dependencies
 ```bash

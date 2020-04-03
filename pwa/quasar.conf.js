@@ -89,7 +89,7 @@ module.exports = function (ctx) {
 
     // animations: 'all', // --- includes all animations
     // https://quasar.dev/options/animations
-    animations: [],
+    animations: 'all',
 
     // https://quasar.dev/quasar-cli/developing-ssr/configuring-ssr
     ssr: {
@@ -103,7 +103,7 @@ module.exports = function (ctx) {
       manifest: {
         name: 'StudiCar',
         short_name: 'StudiCar',
-        description: 'A carsharing-app for dual students',
+        description: 'Green.Cheap.Social.',
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#ffffff',
