@@ -12,6 +12,9 @@
 git clone https://[Github-Username]:[Github_password]@github.com/F1nnM/StudiCar.git
 ```
 ### Running local version
+#### (Optional) Set up VS Code to show npm scripts
+Open settings (CTRL+,) and tick the option _npm.enableScriptExplorer_. 
+
 #### PWA
 ```bash
 cd PWA
