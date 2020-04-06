@@ -33,4 +33,4 @@ yarn-error.log*
 *.sln
 
 # Exclude all generated images
-/src/statics/*
+/src/statics
