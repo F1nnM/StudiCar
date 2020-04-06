@@ -1,6 +1,6 @@
 # StudiCar (studicar)
 
-Green.Cheap.Social.
+Green.Cheap.Social
 
 ## Install the dependencies
 ```bash

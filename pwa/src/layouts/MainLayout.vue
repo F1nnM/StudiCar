@@ -12,11 +12,10 @@
         />
 
         <q-toolbar-title>
-          StudiCar
+          Quasar App
         </q-toolbar-title>
 
-        <div>v{{ $q.screen.width }}</div>
-        
+        <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
     </q-header>
 
@@ -26,16 +25,12 @@
       bordered
       content-class="bg-grey-1"
     >
-    <img
-      src="~assets/quasar-logo-full.svg"
-      style="height: 140px; max-width: 150px; margin: auto; display: block;"
-    />
       <q-list>
         <q-item-label
           header
           class="text-grey-8"
         >
-          Navigation
+          Essential Links
         </q-item-label>
         <EssentialLink
           v-for="link in essentialLinks"
@@ -46,7 +41,6 @@
     </q-drawer>
 
     <q-page-container>
-
       <router-view />
     </q-page-container>
   </q-layout>
@@ -54,7 +48,6 @@
 
 <script>
 import EssentialLink from 'components/EssentialLink'
-
 
 export default {
   name: 'MainLayout',
@@ -68,28 +61,40 @@ export default {
       leftDrawerOpen: false,
       essentialLinks: [
         {
-          title: 'Marktplatz',
-          caption: 'Zur Übersicht',
-          icon: 'home',
-          link: '/'
+          title: 'Docs',
+          caption: 'quasar.dev',
+          icon: 'school',
+          link: 'https://quasar.dev'
         },
         {
-          title: 'Anmeldung',
-          caption: 'Melde dich an',
-          icon: 'save',
-          link: '/#/anmeldung'
+          title: 'Github',
+          caption: 'github.com/quasarframework',
+          icon: 'code',
+          link: 'https://github.com/quasarframework'
         },
         {
-          title: 'Registrierung',
-          caption: 'Erstelle einen Account',
-          icon: 'edit',
-          link: '/#/registrierung'
+          title: 'Discord Chat Channel',
+          caption: 'chat.quasar.dev',
+          icon: 'chat',
+          link: 'https://chat.quasar.dev'
         },
         {
-          title: 'Willkommen',
-          caption: 'Wozu diese App da ist',
-          icon: 'welcome',
-          link: '/#/welcome'
+          title: 'Forum',
+          caption: 'forum.quasar.dev',
+          icon: 'record_voice_over',
+          link: 'https://forum.quasar.dev'
+        },
+        {
+          title: 'Twitter',
+          caption: '@quasarframework',
+          icon: 'rss_feed',
+          link: 'https://twitter.quasar.dev'
+        },
+        {
+          title: 'Facebook',
+          caption: '@QuasarFramework',
+          icon: 'public',
+          link: 'https://facebook.quasar.dev'
         }
       ]
     }

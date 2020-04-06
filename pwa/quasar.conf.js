@@ -89,7 +89,7 @@ module.exports = function (ctx) {
 
     // animations: 'all', // --- includes all animations
     // https://quasar.dev/options/animations
-    animations: 'all',
+    animations: [],
 
     // https://quasar.dev/quasar-cli/developing-ssr/configuring-ssr
     ssr: {
@@ -103,7 +103,7 @@ module.exports = function (ctx) {
       manifest: {
         name: 'StudiCar',
         short_name: 'StudiCar',
-        description: 'Green.Cheap.Social.',
+        description: 'Green.Cheap.Social',
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#ffffff',
@@ -141,7 +141,7 @@ module.exports = function (ctx) {
     // Full list of options: https://quasar.dev/quasar-cli/developing-cordova-apps/configuring-cordova
     cordova: {
       // noIosLegacyBuildFlag: true, // uncomment only if you know what you are doing
-      id: 'org.cordova.quasar.app'
+      id: ''
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/developing-capacitor-apps/configuring-capacitor
