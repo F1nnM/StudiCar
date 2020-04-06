@@ -6,18 +6,14 @@
       "background_color": "#000074",
       "splashscreen_type": "generate"
     },
-    "build_always": true,
+    "build_always": false,
     "__internal": {
       "dev": {
         "pwa": {
           "iconHash": "4ccb11f8fcf30f338d32859047fd3ad3"
         }
       },
-      "build": {
-        "pwa": {
-          "iconHash": "4ccb11f8fcf30f338d32859047fd3ad3"
-        }
-      }
+      "build": {}
     }
   }
 }
