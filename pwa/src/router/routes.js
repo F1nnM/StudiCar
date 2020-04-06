@@ -33,3 +33,5 @@ if (process.env.MODE !== 'ssr') {
       import('pages/Error404.vue')
   })
 }
+
+export default routes
