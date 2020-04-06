@@ -8,13 +8,9 @@
   "author": "Finn <github@finnsweb.de>",
   "private": true,
   "scripts": {
-    "prelint": "npm install",
     "lint": "eslint --ext .js,.vue src",
-    "pretest": "npm install",
     "test": "echo \"No test specified\" && exit 0",
-    "prebuild": "npm install",
     "build": "quasar build -m pwa",
-    "predev": "npm install",
     "dev": "quasar dev -m pwa"
   },
   "dependencies": {
