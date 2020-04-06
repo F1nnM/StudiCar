@@ -8,6 +8,16 @@ const routes = [{
       import('pages/marketplace.vue')
   },
   {
+    path: '/chats',
+    component: () =>
+      import('pages/chats.vue')
+  },
+  {
+    path: '/lift',
+    component: () =>
+      import('pages/lift.vue')
+  },
+  {
     path: '/anmeldung',
     component: () =>
       import('pages/signin.vue')
@@ -18,9 +28,19 @@ const routes = [{
       import('pages/registration.vue')
   },
   {
-    path: '/welcome',
+    path: '/willkommen',
     component: () =>
       import('pages/welcome.vue')
+  },
+  {
+    path: '/profil',
+    component: () =>
+      import('pages/profile.vue')
+  },
+  {
+    path: '/einstellungen',
+    component: () =>
+      import('pages/settings.vue')
   }
   ]
 }]

@@ -11,32 +11,21 @@
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
 
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
+        <q-toolbar-title>Quasar App</q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-      content-class="bg-grey-1"
-    >
+    <q-drawer v-model="leftDrawerOpen" show-if-above bordered content-class="bg-grey-1">
+      <q-img
+        src="~assets/quasar-logo-full.svg"
+        center
+        style="height: 140px; max-width: 150px; margin: 0 20px; object-fit: cover;"
+      />
       <q-list>
-        <q-item-label
-          header
-          class="text-grey-8"
-        >
-          Essential Links
-        </q-item-label>
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
+        <q-item-label header class="text-grey-8">Navigation</q-item-label>
+        <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link" />
       </q-list>
     </q-drawer>
 
@@ -61,43 +50,49 @@ export default {
       leftDrawerOpen: false,
       essentialLinks: [
         {
-          title: 'Docs',
-          caption: 'quasar.dev',
-          icon: 'school',
-          link: 'https://quasar.dev'
+        title: 'Marktplatz',
+        caption: 'Zur Übersicht',
+        icon: 'home',
+        link: '/'
         },
         {
-          title: 'Github',
-          caption: 'github.com/quasarframework',
-          icon: 'code',
-          link: 'https://github.com/quasarframework'
+        title: 'Chats',
+        caption: 'Meine Mitfahrgelenheiten',
+        icon: 'directions_car',
+        link: '/#/chats'
         },
         {
-          title: 'Discord Chat Channel',
-          caption: 'chat.quasar.dev',
-          icon: 'chat',
-          link: 'https://chat.quasar.dev'
+        title: 'Anmeldung',
+        caption: 'Melde dich an',
+        icon: 'save',
+        link: '/#/anmeldung'
         },
         {
-          title: 'Forum',
-          caption: 'forum.quasar.dev',
-          icon: 'record_voice_over',
-          link: 'https://forum.quasar.dev'
+        title: 'Registrierung',
+        caption: 'Erstelle einen Account',
+        icon: 'edit',
+        link: '/#/registrierung'
         },
         {
-          title: 'Twitter',
-          caption: '@quasarframework',
-          icon: 'rss_feed',
-          link: 'https://twitter.quasar.dev'
+        title: 'Willkommen',
+        caption: 'Wozu diese App da ist',
+        icon: 'accessible',
+        link: '/#/willkommen'
         },
         {
-          title: 'Facebook',
-          caption: '@QuasarFramework',
-          icon: 'public',
-          link: 'https://facebook.quasar.dev'
+        title: 'Mein Profil',
+        caption: 'Meine Nutzerdaten und Statistiken',
+        icon: 'account_box',
+        link: '/#/profil'
+        },
+        {
+        title: 'Einstellungen',
+        caption: 'Interne App-Einstellungen',
+        icon: 'perm_data_settings',
+        link: '/#/einstellungen'
         }
-      ]
+        ]
+      }
     }
   }
-}
 </script>
