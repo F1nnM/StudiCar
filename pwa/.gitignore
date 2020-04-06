@@ -33,5 +33,5 @@ yarn-error.log*
 *.sln
 
 # Exclude all generated images
-/src/statics
-/src/statics/icons/*
+src/statics/app-logo-128x128.png
+src/statics/icons
