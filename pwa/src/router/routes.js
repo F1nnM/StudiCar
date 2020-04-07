@@ -41,6 +41,11 @@ const routes = [{
     path: '/einstellungen',
     component: () =>
       import('pages/settings.vue')
+  },
+  {
+    path: '/spielwiese',
+    component: () =>
+      import('pages/playground.vue')
   }
   ]
 }]

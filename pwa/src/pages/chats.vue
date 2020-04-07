@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-md" style="max-width: 350px">
-    <q-list bordered separator>
+    <q-list separator>
       <q-slide-item @left="onLeft" @right="onRight">
         <template v-slot:left>
           <q-icon name="done" />
@@ -21,13 +21,16 @@
           <q-icon name="alarm" />
         </template>
 
-        <q-item>
+        <q-item clickable v-ripple>
           <q-item-section avatar>
             <q-avatar>
               <img src="https://cdn.quasar.dev/img/avatar3.jpg" draggable="false" />
             </q-avatar>
           </q-item-section>
           <q-item-section>Only right action</q-item-section>
+          <q-item-section>
+            <q-item-label caption>Caption</q-item-label>
+          </q-item-section>
         </q-item>
       </q-slide-item>
 

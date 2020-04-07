@@ -4,6 +4,10 @@
       <div class="text-h4">{{ greeting }}, {{ user.name }}</div>
       <hr />
       <br />
+      <p>
+        Der Marktplatz ist so etwas wie das Schwarze Brett von StudiCar. Hier siehst du alle Mitfahrgelegenheiten nach Entfernung geordnet.
+        Aktuell sind {{users_online}} unserer {{users_all}} Benutzer online ({{Math.round(users_online/users_all*100)}}%).
+      </p>
     </div>
   </div>
 </template>
@@ -19,9 +23,12 @@ export default {
       greeting = "Guten Morgen";
     }
     return {
+      users_online: 21,
+      users_all: 224,
       greeting: greeting,
       user: {
         name: "Bernd"
+        
       }
     };
   }
