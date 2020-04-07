@@ -11,22 +11,18 @@
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
 
-        <q-toolbar-title>Quasar App</q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
+        <q-toolbar-title>StudiCar</q-toolbar-title>
       </q-toolbar>
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered content-class="bg-grey-1">
-      <q-img
-        src="~assets/quasar-logo-full.svg"
-        center
-        style="height: 140px; max-width: 150px; margin: 0 20px; object-fit: cover;"
-      />
+      <q-img contain src="~assets/app-logo.svg" style="height: 140px; background-color: white;" />
+      <hr style="margin: 0; background-color: black;" />
       <q-list>
         <q-item-label header class="text-grey-8">Navigation</q-item-label>
         <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link" />
       </q-list>
+      <div style="padding: 10px;">StudiCar v{{ $q.version }}</div>
     </q-drawer>
 
     <q-page-container>
@@ -90,6 +86,12 @@ export default {
         caption: 'Interne App-Einstellungen',
         icon: 'perm_data_settings',
         link: '/#/einstellungen'
+        },
+        {
+        title: 'Spielwiese',
+        caption: 'Endlich wieder Kind sein',
+        icon: 'toys',
+        link: '/#/spielwiese'
         }
         ]
       }
