@@ -35,3 +35,5 @@ yarn-error.log*
 # Exclude all generated images
 src/statics/app-logo-128x128.png
 src/statics/icons
+
+src/helpers/firebaseConfig.js
