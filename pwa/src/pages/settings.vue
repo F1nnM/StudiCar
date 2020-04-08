@@ -5,30 +5,16 @@
       <hr />
       <br />
       <p>Mach dir deine App so, wie du sie willst.</p>
-
-      <div class="q-pa-md">
-        <p>Wie weit soll deine Mitfahrgelegenheit maximal von dir weg sein?</p>
-
-        <q-slider
-          v-model="value"
-          :min="5"
-          :max="40"
-          :step="5"
-          snap
-          label-always
-          :label-value="value+'km'"
-          color="primary"
-        />
-      </div>
     </div>
   </div>
 </template>
 
+      
 <script>
 export default {
   data () {
     return {
-      value: 10
+      
     }
   }
 }

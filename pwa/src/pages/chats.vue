@@ -6,6 +6,7 @@
           <q-icon name="done" />
         </template>
 
+        <p class="text-h6 text-center">Mitfahrgelegenheiten</p>
         <q-item>
           <q-item-section avatar>
             <q-avatar>
