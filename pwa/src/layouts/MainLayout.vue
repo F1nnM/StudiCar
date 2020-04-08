@@ -28,11 +28,46 @@
     <q-page-container>
       <router-view />
     </q-page-container>
+
+    <q-footer elevated>
+      <q-tabs
+        shrink
+        stretch
+        narrow-indicator
+        full-width
+        no-caps
+        dense
+        active-color="primary"
+        active-bg-color="white"
+        indicator-color="primary"
+      >
+        <q-route-tab icon="home" to="/" label="Marktplatz" />
+        <q-route-tab icon="directions_car" to="/chats" label="chats" />
+        <q-route-tab icon="account_box" to="/profil" label="Profil" />
+      </q-tabs>
+      <!-- <q-btn-toggle
+        v-model="model"
+        spread
+        class="my-custom-toggle"
+        bordered
+        no-caps
+        elevated
+        toggle-color="primary"
+        color="white"
+        text-color="primary"
+        :options="[
+          {label: 'Marktplatz', value: 'home'},
+          {label: 'Chats', value: 'chats'},
+          {label: 'Profil', value: 'profile'}
+        ]"
+      />-->
+    </q-footer>
   </q-layout>
 </template>
 
 <script>
 import EssentialLink from 'components/EssentialLink'
+
 
 export default {
   name: 'MainLayout',
@@ -42,8 +77,13 @@ export default {
   },
 
   data () {
+    
+
     return {
       leftDrawerOpen: false,
+      model: 'home',
+      chats: 'Main',
+      show: true,
       essentialLinks: [
         {
         title: 'Marktplatz',

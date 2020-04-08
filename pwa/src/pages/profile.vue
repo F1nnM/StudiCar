@@ -13,6 +13,19 @@
       <p>Mitfahrangebote gesamt: {{lifts_all}}</p>
       <p>Wochendurchschnitt: {{avg_lifts_per_week}}</p>
     </div>
+
+    <p>Wie weit soll deine Mitfahrgelegenheit maximal von dir weg sein?</p>
+
+    <q-slider
+      v-model="distance"
+      :min="5"
+      :max="40"
+      :step="5"
+      snap
+      label-always
+      :label-value="distance+'km'"
+      color="primary"
+    />
   </div>
 </template>
 
@@ -24,7 +37,9 @@ export default {
 data(){
   return{
     since: 'Datum',
-    lifts_all: 45
+    avg_lists_per_week: 1,
+    lifts_all: 45,
+    distance: 20
   }
 }
     
