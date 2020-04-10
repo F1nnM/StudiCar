@@ -1,3 +1,5 @@
+import { uid } from 'quasar'
+
 const routes = [{
   path: '/',
   component: () =>
