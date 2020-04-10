@@ -5,8 +5,8 @@
       <hr />
       <br />
       <p>
-        Der Marktplatz ist so etwas wie das Schwarze Brett von StudiCar. Hier siehst du alle Angebote Mitfahrgelegenheiten, aufsteigend nach Entfernung geordnet.
-        Aktuell sind {{users_online}} unserer {{users_all}} Benutzer online ({{Math.round(users_online/users_all*100)}}%).
+        Der Marktplatz ist so etwas wie das Schwarze Brett von StudiCar. Hier siehst du alle aktuellen Mitfahrgelegenheiten, aufsteigend nach Entfernung geordnet.
+        Aktuell sind übrigens {{users_online}} unserer {{users_all}} Benutzer online (entspricht {{Math.round(users_online/users_all*100)}}%).
       </p>
     </div>
   </div>

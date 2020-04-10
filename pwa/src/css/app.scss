@@ -12,3 +12,25 @@
         }
     }
 }
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: all .1s ease-out;
+}
+
+.slide-enter,
+.slide-leave-to {
+  transform: translateX(-15px);
+}
+
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all .2s ease-out;
+  transform-origin: center top;
+}
+
+.slide-up-enter,
+.slide-up-leave-to {
+  transform: translateY(90vh) scale(.8);
+}

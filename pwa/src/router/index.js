@@ -3,6 +3,19 @@ import VueRouter from 'vue-router'
 
 import routes from './routes'
 
+import { dom } from 'quasar'
+const { ready } = dom
+
+// Execute a Function when DOM is ready:
+ready(function () {
+  try {
+    document.getElementById("hallo").style.backgroundColor = "red";
+  }
+  catch (e) {
+
+  }
+})
+
 Vue.use(VueRouter)
 
 /*

@@ -9,15 +9,14 @@
       <br />Bitte melde dich an, um auf die Funktionen zugreifen zu können.
       <br />
       <p>
-        <a href="/#/registrierung">Bist du noch nicht registriert?</a>
+        <a href="/#/auth/registrierung">Bist du noch nicht registriert?</a>
       </p>
-      <template></template>
+
       <q-separator />
       <template>
         <div class="q-pa-md">
           <q-form @submit="onSubmit" class="q-gutter-md">
             <q-input
-              filled
               v-model="username"
               label="Benutzername"
               hint="Bitte gib deinen Benutzernamen ein"
@@ -26,7 +25,6 @@
             />
 
             <q-input
-              filled
               type="password"
               v-model="pwd"
               label="Passwort"

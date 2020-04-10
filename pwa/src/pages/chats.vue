@@ -1,12 +1,12 @@
 <template>
   <div class="q-pa-md" style="max-width: 350px">
     <q-list separator>
+      <p class="text-h6 text-center">Mitfahrgelegenheiten</p>
       <q-slide-item @left="onLeft" @right="onRight">
         <template v-slot:left>
           <q-icon name="done" />
         </template>
 
-        <p class="text-h6 text-center">Mitfahrgelegenheiten</p>
         <q-item>
           <q-item-section avatar>
             <q-avatar>
@@ -36,7 +36,7 @@
       </q-slide-item>
 
       <q-slide-item @left="onLeft" @right="onRight">
-        <q-item clickable tag="a" href="/#/lift">
+        <q-item clickable tag="a" href="/#/chats/lift">
           <q-item-section avatar>
             <q-avatar>
               <img src="https://cdn.quasar.dev/img/avatar5.jpg" draggable="false" />
