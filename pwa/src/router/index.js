@@ -41,3 +41,28 @@ export default function (/* { store, ssrContext } */) {
 
   return Router
 }
+
+/*
+{
+  lift: {
+    lift_id: int,
+    created_by: uid1,
+    created_at: utc_timestamp,
+    users: [{
+      uid: String
+    }],
+    car: {
+      brand: String,
+      model: String,
+      color: String,
+      number_plate: String,
+      seats: int2
+    }
+    messages: [{
+      sender: uid,
+      timestamp: utc_timestamp,
+      content: String
+    }]
+  }
+}
+*/

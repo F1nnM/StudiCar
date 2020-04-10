@@ -36,13 +36,22 @@
 }
 
 .expand-enter-active,
-.expand-leave-active {
-  transition: all .2s ease-out;
-  transform-origin: center center;
+.collapse-leave-active
+ {
+  transition: all .15s ease-out;
+  transform-origin: center bottom;
 }
 
 .expand-enter,
-.expand-leave-to {
-  opacity: .5;
-  transform: scale(.1);
+.collapse-leave-to
+ {
+  opacity: 0;
+  transform: scaleY(.2) scaleX(.8) translateY(-5vh);
 }
+
+/* PLEASE NOTE:
+
+It can be possible that the above css code is overwritten by soft coded style.
+In this case, take a look at MainLayout.vue first.
+
+*/

@@ -36,7 +36,12 @@
     </q-drawer>
     <q-page-container>
       <transition :name="page_trans" mode="out-in">
-        <router-view />
+        <router-view
+          @pagetrans_zoom="page_trans='expand'"
+          @pagetrans_slide="page_trans='collapse'"
+          @pagetrans_y="page_trans_y = $event"
+          :style="'transform-origin: 20% ' + page_trans_y + 'vh;'"
+        ></router-view>
       </transition>
     </q-page-container>
 
@@ -99,6 +104,7 @@ export default {
       if(loc.includes("add")){
         this.page_trans = 'slide-up'
       }
+      
       else{
         this.page_trans = 'slide'
       }
@@ -112,6 +118,7 @@ export default {
     return {
       leftDrawerOpen: false,
       page_trans: 'slide',
+      page_trans_y: 15,
       tab: 'home',
       chats: 'Main',
       show: true,

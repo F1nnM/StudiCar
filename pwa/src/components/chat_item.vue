@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-slide-item clickable @left="onLeft" @right="onRight">
+    <q-slide-item clickable="true" @click="lift_click" @left="onLeft" @right="onRight">
       <q-separator inset="item" />
       <template v-slot:left>
         <q-icon name="delete_outline" backgroundColor="red" />
@@ -9,7 +9,7 @@
         <q-icon name="delete_outline" />
       </template>
 
-      <q-item clickable tag="a" href="/#/chats/lift" v-ripple>
+      <q-item tag="a" href="/#/chats/lift" v-ripple>
         <q-item-section avatar>
           <q-avatar>
             <img :src="lift.url ? lift.url : 'https://cdn.quasar.dev/img/avatar2.jpg'" />
@@ -77,7 +77,9 @@ export default {
 			},
 
 			lift_click(item){
-				this.page_trans = 'expand'
+				this.$emit('pagetrans_zoom')
+				this.$emit('pagetrans_y', Math.round(item.pageY/window.innerHeight*100))
+				//alert()
 			},
 
 			long_tab({e}){
