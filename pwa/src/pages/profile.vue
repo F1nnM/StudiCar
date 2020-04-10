@@ -59,7 +59,7 @@ export default {
 data(){
   return{
     since: 'Datum',
-    avg_lists_per_week: 1,
+    avg_lifts_per_week: 1,
     lifts_all: 45,
     distance: 20
   }

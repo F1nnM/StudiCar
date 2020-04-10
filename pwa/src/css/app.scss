@@ -34,3 +34,15 @@
 .slide-up-leave-to {
   transform: translateY(90vh) scale(.8);
 }
+
+.expand-enter-active,
+.expand-leave-active {
+  transition: all .2s ease-out;
+  transform-origin: center center;
+}
+
+.expand-enter,
+.expand-leave-to {
+  opacity: .5;
+  transform: scale(.1);
+}

@@ -11,13 +11,14 @@
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
 
-        <q-toolbar-title>StudiCar</q-toolbar-title>
+        <q-toolbar-title>StudiCar {{page_trans}}</q-toolbar-title>
       </q-toolbar>
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered content-class="bg-grey-1">
       <q-slide-transition>
-        <div v-show="leftDrawerOpen">
+        <div v-show="true">
+          <!-- if set to leftDrawerOpen, each time you open the sidebar the image has an expand transition -->
           <q-img
             contain
             src="~assets/app-logo.svg"
@@ -34,7 +35,7 @@
       <div style="padding: 10px;">StudiCar v{{ $q.version }}</div>
     </q-drawer>
     <q-page-container>
-      <transition :name="slide_up ? 'slide-up':'slide'" mode="out-in">
+      <transition :name="page_trans" mode="out-in">
         <router-view />
       </transition>
     </q-page-container>
@@ -93,7 +94,15 @@ export default {
 
   methods:{
     updateURL () {
-      this.slide_up = document.location.href.includes("add")
+      var loc = document.location.href
+      
+      if(loc.includes("add")){
+        this.page_trans = 'slide-up'
+      }
+      else{
+        this.page_trans = 'slide'
+      }
+      
     }
   },
 
@@ -102,8 +111,7 @@ export default {
 
     return {
       leftDrawerOpen: false,
-      slide_up: true,
-      tab_wert: 0,
+      page_trans: 'slide',
       tab: 'home',
       chats: 'Main',
       show: true,
