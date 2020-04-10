@@ -6,7 +6,29 @@
       <br />
       <p>Hier siehst du alle wichtigen Infos zu deinem Profil.</p>
     </div>
-    <q-img src="~assets/sad.svg" style="height: 200px; max-width: 50vw;" />
+    <q-img
+      transition-show="slide-left"
+      src="~assets/sad.svg"
+      style="height: 200px; max-width: 50vw;"
+    >
+      <template v-slot:loading>
+        <div class="absolute-full flex flex-center text-black">
+          <q-inner-loading
+            transition-show="slide-down"
+            transition-hide="slide-down"
+            size="50px"
+            color="light-blue"
+            class="q-ma-md"
+          />
+        </div>
+      </template>
+      <template v-slot:error>
+        <div
+          class="absolute-full flex flex-center text-white"
+        >Bild kann leider nicht geladen werden. Bitte Internetverbindung überprüfen.</div>
+      </template>
+    </q-img>
+
     <br />
     <div style="padding: 20px;">
       <p>Dabei seit: {{since}}</p>

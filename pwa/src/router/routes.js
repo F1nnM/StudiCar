@@ -13,17 +13,22 @@ const routes = [{
       import('pages/chats.vue')
   },
   {
-    path: '/lift',
+    path: '/chats/lift',
     component: () =>
       import('pages/lift.vue')
   },
   {
-    path: '/anmeldung',
+    path: '/chats/lift/add',
+    component: () =>
+      import('pages/add_lift.vue')
+  },
+  {
+    path: '/aanmeldung',
     component: () =>
       import('pages/signin.vue')
   },
   {
-    path: '/registrierung',
+    path: '/rregistrierung',
     component: () =>
       import('pages/registration.vue')
   },
@@ -43,12 +48,38 @@ const routes = [{
       import('pages/settings.vue')
   },
   {
-    path: '/spielwiese',
+    path: '/sspielwiese',
     component: () =>
       import('pages/playground.vue')
   }
   ]
-}]
+},
+{
+  path: '/spielwiese',
+  component: () =>
+    import('layouts/custom_layout.vue'),
+  children: [{
+    path: '',
+    component: () =>
+      import('pages/playground.vue')
+  }]
+},
+{
+  path: '/auth',
+  component: () =>
+    import('layouts/without_nav.vue'),
+  children: [{
+    path: '/auth/anmeldung',
+    component: () =>
+      import('pages/signin.vue')
+  },
+  {
+    path: '/auth/registrierung',
+    component: () =>
+      import('pages/registration.vue')
+  }]
+}
+]
 
 // Always leave this as last one
 if (process.env.MODE !== 'ssr') {
