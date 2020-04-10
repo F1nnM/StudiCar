@@ -1,65 +1,91 @@
 <template>
   <div class="q-pa-md" style="max-width: 350px">
-    <q-list separator>
-      <p class="text-h6 text-center">Mitfahrgelegenheiten</p>
-      <q-slide-item @left="onLeft" @right="onRight">
-        <template v-slot:left>
-          <q-icon name="done" />
-        </template>
-
-        <q-item>
-          <q-item-section avatar>
-            <q-avatar>
-              <img src="https://cdn.quasar.dev/img/avatar2.jpg" draggable="false" />
-            </q-avatar>
-          </q-item-section>
-          <q-item-section>Only left action</q-item-section>
-        </q-item>
-      </q-slide-item>
-
-      <q-slide-item @left="onLeft" @right="onRight">
-        <template v-slot:right>
-          <q-icon name="alarm" />
-        </template>
-
-        <q-item clickable v-ripple>
-          <q-item-section avatar>
-            <q-avatar>
-              <img src="https://cdn.quasar.dev/img/avatar3.jpg" draggable="false" />
-            </q-avatar>
-          </q-item-section>
-          <q-item-section>Only right action</q-item-section>
-          <q-item-section>
-            <q-item-label caption>Caption</q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-slide-item>
-
-      <q-slide-item @left="onLeft" @right="onRight">
-        <q-item clickable tag="a" href="/#/chats/lift">
-          <q-item-section avatar>
-            <q-avatar>
-              <img src="https://cdn.quasar.dev/img/avatar5.jpg" draggable="false" />
-            </q-avatar>
-          </q-item-section>
-          <q-item-section>No actions</q-item-section>
-        </q-item>
-      </q-slide-item>
+    <p class="text-h6 text-center bordered">Mitfahrgelegenheiten</p>
+    <hr />
+    <q-list>
+      <chat_item v-for="item in chats" :key="item.id" :lift="item" />
     </q-list>
   </div>
 </template>
 
 <script>
+
+import chat_item from 'components/chat_item'
+
 export default {
+  components: {
+    chat_item
+  },
+
+  data(){
+    return{
+      chats:[{
+        id: 1,
+        title: 'Lorem ipsum dolor',
+        time: 'vor 3 Min',
+        last: {
+          user: 'Janet',
+          message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+        }
+      },
+      {
+        id: 3,
+        title: 'Zweites Lorem ipsum',
+        time: 'vor 7 Min',
+        last: {
+          user: 'Janet',
+          message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+        }
+      },
+      {
+        id: 2,
+        title: 'Zweites Lorem ipsum',
+        time: 'vor 4 Min',
+        last: {
+          user: 'Janet',
+          message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+        }
+      },
+      {
+        id: 4,
+        title: 'Zweites Lorem ipsum',
+        time: 'vor 6 Min',
+        last: {
+          user: 'Janet',
+          message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+        }
+      },
+      {
+        id: 5,
+        title: 'Zweites Lorem ipsum',
+        time: 'vor 13 Min',
+        last: {
+          user: 'Janet',
+          message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+        }
+      }]
+    }
+  },
+
   methods: {
     onLeft ({ reset }) {
-      this.$q.notify('Left action triggered. Resetting in 1 second.')
+      alert("SWIPED LEFT")
+      
       this.finalize(reset)
     },
 
     onRight ({ reset }) {
-      this.$q.notify('Right action triggered. Resetting in 1 second.')
+      alert("SWIPED RIGHT")
+      
       this.finalize(reset)
+    },
+
+    lift_click(item){
+      alert(item);
+    },
+
+    long_tab({e}){
+      alert("LONG")
     },
 
     finalize (reset) {

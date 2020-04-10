@@ -37,6 +37,28 @@
 
 <script>
 export default {
+
+  name: 'lift_chat',
+  page_trans: 'expand',
+  value: 'HEÖÖP',
+  props:{
+    title:{
+      type: String,
+      required: true
+    },
+    chat:{
+      type: Array,
+      required: true
+    },
+    users:{
+      type: Array,
+      required: true
+    },
+    created:{
+      type: String,
+      required: true
+    }
+  }
     
 }
 </script>
