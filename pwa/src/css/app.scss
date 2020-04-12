@@ -13,6 +13,23 @@
     }
 }
 
+.custom-chat-label{
+    position: relative;
+    &:after{
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 10vw;
+        border-top: 1px solid lightgray;
+    }
+
+    >.q-message-label.text-center{
+    margin: 0px;
+}
+}
+
 .slide-enter-active,
 .slide-leave-active {
   transition: all .1s ease-out;

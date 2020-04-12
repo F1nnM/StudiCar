@@ -41,7 +41,7 @@
           @pagetrans_slide="page_trans='collapse'"
           @pagetrans_y="page_trans_y = $event"
           :style="'transform-origin: 20% ' + page_trans_y + 'vh;'"
-        ></router-view>
+        />
       </transition>
     </q-page-container>
 
@@ -62,25 +62,14 @@
       >
         <q-route-tab icon="home" to="/" label="Marktplatz" />
         <q-route-tab icon="add_circle_outline" to="/chats/lift/add" label="Neue Fahrt" />
-        <q-route-tab icon="directions_car" to="/chats" label="Chats" />
+        <q-route-tab
+          @click="page_trans = 'slide-up'"
+          icon="directions_car"
+          to="/chats"
+          label="Chats"
+        />
         <q-route-tab icon="account_box" to="/profil" label="Profil" />
       </q-tabs>
-      <!-- <q-btn-toggle
-        v-model="model"
-        spread
-        class="my-custom-toggle"
-        bordered
-        no-caps
-        elevated
-        toggle-color="primary"
-        color="white"
-        text-color="primary"
-        :options="[
-          {label: 'Marktplatz', value: 'home'},
-          {label: 'Chats', value: 'chats'},
-          {label: 'Profil', value: 'profile'}
-        ]"
-      />-->
     </q-footer>
   </q-layout>
 </template>

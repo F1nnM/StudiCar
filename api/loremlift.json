@@ -1,0 +1,25 @@
+{
+    "id": 64165,
+    "created_by": 61668646,
+    "created_at": 1573618642779,
+    "users": [
+        61668646,
+        65163163,
+        611655814,
+        61565165
+    ],
+    "car": {
+        "brand": "Audi",
+        "model": "A3",
+        "color": "green",
+        "number_plate": "B-HU-569",
+        "seats": 4
+    },
+    "messages": [
+        {
+            "sender": 61668646,
+            "timestamp": 1573619642779,
+            "content": "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
+        }
+    ]
+}
