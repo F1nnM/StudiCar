@@ -24,13 +24,15 @@
           </q-item-label>
         </q-item-section>
 
-        <q-item-section side top>{{lift.time}}</q-item-section>
+        <q-item-section side top>{{generate_time_string(lift.time)}}</q-item-section>
       </q-item>
     </q-slide-item>
   </div>
 </template>
 
 <script>
+
+import { date } from 'quasar'
 
 export default {
   name: 'chat_item',
@@ -47,7 +49,7 @@ export default {
 						required: true
 				},
 				time: {
-						type: String
+						type: Number
 				},
 				last: {
 					type: Object,
@@ -80,10 +82,56 @@ export default {
 				this.$emit('pagetrans_zoom')
 				this.$emit('pagetrans_y', Math.round(item.pageY/window.innerHeight*100))
 				//alert()
+				debugger;
 			},
 
 			long_tab({e}){
 				alert("LONG")
+			},
+
+			generate_time_string(time){
+				var display_text;
+				time = new Date(time) // conversion to JS Date Object we can work with
+				if(diff('minutes') <= 2){
+					display_text = 'gerade eben'
+				}
+				else if(diff('minutes') <= 30){
+					display_text = 'vor ' + diff('minutes') + ' Minuten'
+				}
+				else if(was_today()){ // checks whether message was still today
+					display_text = date.formatDate(time, 'HH:mm')
+				}
+				else if(diff('days') == 1){ // else checks whether message was yesterday
+					display_text = 'gestern um ' + date.formatDate(time, 'HH:mm')
+				}
+				else if(diff('days') == 2){ // else checks whether message was the day before yesterday
+					display_text = 'vorgestern um ' + date.formatDate(time, 'HH:mm')
+				}
+				else if(diff('days') < 7){
+					display_text = 'vor ' + diff('days') + ' Tagen'
+				}
+				else{
+					display_text = 'Vor über einer Woche'
+				}
+
+				return display_text
+
+				function diff(unit){
+					console.warn(date.getDateDiff(new Date(), time, unit))
+					return date.getDateDiff(new Date(), time, unit)
+				}
+
+				function was_today(){
+					var this_day = date.isSameDate(time, new Date(), 'day')
+					var this_month = date.isSameDate(time, new Date(), 'month')
+					var this_year = date.isSameDate(time, new Date(), 'year')
+					if(this_day && this_month && this_year){
+						return true
+					}
+					else{
+						return false
+					}
+				}
 			},
 
 			finalize (reset) {

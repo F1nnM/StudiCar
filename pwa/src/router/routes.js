@@ -25,16 +25,6 @@ const routes = [{
       import('pages/add_lift.vue')
   },
   {
-    path: '/aanmeldung',
-    component: () =>
-      import('pages/signin.vue')
-  },
-  {
-    path: '/rregistrierung',
-    component: () =>
-      import('pages/registration.vue')
-  },
-  {
     path: '/willkommen',
     component: () =>
       import('pages/welcome.vue')
@@ -43,6 +33,11 @@ const routes = [{
     path: '/profil',
     component: () =>
       import('pages/profile.vue')
+  },
+  {
+    path: '/profil/other',
+    component: () =>
+      import('pages/other_user.vue')
   },
   {
     path: '/einstellungen',

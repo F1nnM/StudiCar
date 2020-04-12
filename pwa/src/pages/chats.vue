@@ -4,8 +4,8 @@
     <hr />
     <q-list>
       <chat_item
-        v-for="item in chats"
-        :key="item.id"
+        v-for="item in sort_chats()"
+        :key="item.time"
         :lift="item"
         v-on:pagetrans_zoom="$emit('pagetrans_zoom')"
         v-on:pagetrans_slide="$emit('pagetrans_slide')"
@@ -29,7 +29,7 @@ export default {
       chats:[{
         id: 1,
         title: 'Lorem ipsum dolor',
-        time: 'vor 3 Min',
+        time: 1586101000127,
         last: {
           user: 'Janet',
           message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
@@ -38,7 +38,7 @@ export default {
       {
         id: 3,
         title: 'Zweites Lorem ipsum',
-        time: 'vor 7 Min',
+        time: 1586201000127,
         last: {
           user: 'Janet',
           message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
@@ -47,7 +47,7 @@ export default {
       {
         id: 2,
         title: 'Zweites Lorem ipsum',
-        time: 'vor 4 Min',
+        time: 1586301000127,
         last: {
           user: 'Janet',
           message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
@@ -56,7 +56,7 @@ export default {
       {
         id: 4,
         title: 'Zweites Lorem ipsum',
-        time: 'vor 6 Min',
+        time: 1586400000127,
         last: {
           user: 'Janet',
           message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
@@ -65,7 +65,7 @@ export default {
       {
         id: 5,
         title: 'Zweites Lorem ipsum',
-        time: 'vor 13 Min',
+        time: 1586401000127,
         last: {
           user: 'Janet',
           message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
@@ -74,7 +74,7 @@ export default {
       {
         id: 5,
         title: 'Zweites Lorem ipsum',
-        time: 'vor 13 Min',
+        time: 1586501000127,
         last: {
           user: 'Janet',
           message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
@@ -83,7 +83,7 @@ export default {
       {
         id: 5,
         title: 'Zweites Lorem ipsum',
-        time: 'vor 13 Min',
+        time: 1586601000127,
         last: {
           user: 'Janet',
           message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
@@ -92,7 +92,7 @@ export default {
       {
         id: 5,
         title: 'Zweites Lorem ipsum',
-        time: 'vor 13 Min',
+        time: 1586701000127,
         last: {
           user: 'Janet',
           message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
@@ -101,16 +101,25 @@ export default {
       {
         id: 5,
         title: 'Zweites Lorem ipsum',
-        time: 'vor 13 Min',
+        time: 1000701000127,
         last: {
-          user: 'Janet',
+          user: 'Ältestes',
           message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
         }
       },
       {
         id: 5,
         title: 'Zweites Lorem ipsum',
-        time: 'vor 13 Min',
+        time: 1586701400127,
+        last: {
+          user: 'Neuestes',
+          message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+        }
+      },
+      {
+        id: 5,
+        title: 'Zweites Lorem ipsum',
+        time: 1586701300127,
         last: {
           user: 'Janet',
           message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
@@ -148,6 +157,19 @@ export default {
       this.timer = setTimeout(() => {
         reset()
       }, 1000)
+    },
+
+    sort_chats() {
+      function compare(a, b) {
+        debugger;
+        if (a.time < b.time)
+          return -1;
+        if (a.time > b.time)
+          return 1;
+        return 0;
+      }
+
+      return this.chats.sort(compare).reverse();
     }
   },
 
