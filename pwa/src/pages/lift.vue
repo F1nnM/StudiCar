@@ -324,7 +324,6 @@ export default {
     send_message(){
       // check whether last message was from this user
       var last_msg = this.lift.messages[this.lift.messages.length - 1]
-      debugger;
       if(last_msg.sender == this.user){
         // yes, last message was from this user
         last_msg.content.push(this.text)
