@@ -161,7 +161,6 @@ export default {
 
     sort_chats() {
       function compare(a, b) {
-        debugger;
         if (a.time < b.time)
           return -1;
         if (a.time > b.time)

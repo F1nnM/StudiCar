@@ -82,7 +82,6 @@ export default {
 				this.$emit('pagetrans_zoom')
 				this.$emit('pagetrans_y', Math.round(item.pageY/window.innerHeight*100))
 				//alert()
-				debugger;
 			},
 
 			long_tab({e}){
