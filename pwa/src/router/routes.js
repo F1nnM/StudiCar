@@ -35,19 +35,14 @@ const routes = [{
       import('pages/profile.vue')
   },
   {
-    path: '/profil/other',
-    component: () =>
-      import('pages/other_user.vue')
-  },
-  {
     path: '/einstellungen',
     component: () =>
       import('pages/settings.vue')
   },
   {
-    path: '/sspielwiese',
+    path: '/view-user',
     component: () =>
-      import('pages/playground.vue')
+      import('pages/view_user.vue')
   }
   ]
 },

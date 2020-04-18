@@ -166,8 +166,6 @@ import { date } from 'quasar'
 export default {
   data(){
     return{
-      loaded: true,
-      chat_loaded: false,
       lift_info: false,
       text: '',
       user: 61668646,

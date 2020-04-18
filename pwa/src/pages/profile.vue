@@ -32,36 +32,62 @@
     <br />
     <div style="padding: 20px;">
       <p>Dabei seit: {{since}}</p>
-      <p>Mitfahrangebote gesamt: {{lifts_all}}</p>
-      <p>Wochendurchschnitt: {{avg_lifts_per_week}}</p>
+      <p>Mitfahrangebote gesamt: {{global.user.liftsAll}}</p>
+      <p>Wochendurchschnitt: {{global.user.avgLifts}}</p>
     </div>
 
-    <p>Wie weit soll deine Mitfahrgelegenheit maximal von dir weg sein?</p>
+    <p>
+      Entfernung: maximal {{distance}}km
+      <q-btn @click="editDistance = true" icon="edit" />
+    </p>
 
-    <q-slider
-      v-model="distance"
-      :min="5"
-      :max="40"
-      :step="5"
-      snap
-      label-always
-      :label-value="distance+'km'"
-      color="primary"
-    />
+    <q-dialog v-model="editDistance" full-height full-width>
+      <q-card class="column full-height" style="width: 300px">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">Entfernung einstellen</div>
+          <q-space />
+          <q-btn icon="close" @click="saveDistance()" flat round dense v-close-popup />
+        </q-card-section>
+        <q-card-section>
+          <p
+            class="text-caption"
+          >Wie weit soll deine Mitfahrgelegenheit maximal von dir entfernt sein?</p>
+
+          <q-slider
+            v-model="distance"
+            :min="5"
+            :max="40"
+            :step="5"
+            snap
+            label-always
+            :label-value="distance+'km'"
+            color="primary"
+          />
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
 <script>
+import { date } from 'quasar'
 
 export default {
-
-
+ 
 data(){
   return{
-    since: 'Datum',
-    avg_lifts_per_week: 1,
-    lifts_all: 45,
-    distance: 20
+    since: date.formatDate(this.global.user.createdAt, 'MMMM YYYY', {
+      months: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli',
+      'August', 'September', 'Oktober', 'November', 'Dezember']
+    }),
+    distance: this.global.user.settings.liftMaxDistance,
+    editDistance: false
+  }
+},
+
+methods: {
+  saveDistance(){
+    this.global.user.settings.liftMaxDistance = this.distance
   }
 }
     

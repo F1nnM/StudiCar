@@ -11,7 +11,7 @@
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
 
-        <q-toolbar-title>StudiCar {{page_trans}}</q-toolbar-title>
+        <q-toolbar-title>StudiCar {{pageTrans}}</q-toolbar-title>
       </q-toolbar>
     </q-header>
 
@@ -35,12 +35,12 @@
       <div style="padding: 10px;">StudiCar v{{ $q.version }}</div>
     </q-drawer>
     <q-page-container>
-      <transition :name="page_trans" mode="out-in">
+      <transition :name="pageTrans" mode="out-in">
         <router-view
-          @pagetrans_zoom="page_trans='expand'"
-          @pagetrans_slide="page_trans='collapse'"
-          @pagetrans_y="page_trans_y = $event"
-          :style="'transform-origin: 20% ' + page_trans_y + 'vh;'"
+          @pagetrans_zoom="pageTrans='expand'"
+          @pagetrans_slide="pageTrans='collapse'"
+          @pagetrans_y="pageTransY = $event"
+          :style="'transform-origin: 20% ' + pageTransY + 'vh;'"
         />
       </transition>
     </q-page-container>
@@ -58,12 +58,12 @@
         v-model="tab"
         class="text-black bg-white"
         align="justify"
-        @click="updateURL"
+        @click="updateURL()"
       >
         <q-route-tab icon="home" to="/" label="Marktplatz" />
         <q-route-tab icon="add_circle_outline" to="/chats/lift/add" label="Neue Fahrt" />
         <q-route-tab
-          @click="page_trans = 'slide-up'"
+          @click="pageTrans = 'slide-up'"
           icon="directions_car"
           to="/chats"
           label="Chats"
@@ -90,14 +90,17 @@ export default {
     updateURL () {
       var loc = document.location.href
       
-      if(loc.includes("add")){
-        this.page_trans = 'slide-up'
+      if(loc.includes('add')){
+        this.pageTrans = 'slide-up'
+      }
+
+      else if(loc.includes('view')){
+        this.pageTrans = 'slide'
       }
       
       else{
-        this.page_trans = 'slide'
+        this.pageTrans = 'slide'
       }
-      
     }
   },
 
@@ -106,8 +109,7 @@ export default {
 
     return {
       leftDrawerOpen: false,
-      page_trans: 'slide',
-      page_trans_y: 15,
+      pageTransY: 15,
       tab: 'home',
       chats: 'Main',
       show: true,
@@ -135,6 +137,12 @@ export default {
         caption: 'Erstelle einen Account',
         icon: 'edit',
         link: '/#/auth/registrierung'
+        },
+        {
+        title: 'Benutzer besuchen',
+        caption: 'Profil eines anderen Benutzers ansehen',
+        icon: 'accessibility_new',
+        link: '/#/view-user'
         },
         {
         title: 'Willkommen',
@@ -165,6 +173,3 @@ export default {
     }
   }
 </script>
-
-<style scoped>
-</style>

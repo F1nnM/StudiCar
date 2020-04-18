@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-md">
-    <p class="text-h6 text-center">Neue Fahrt hinzufügen</p>
+    <p class="text-h6 text-center">Eine Fahrt anbieten</p>
   </div>
 </template>
 

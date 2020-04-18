@@ -1,12 +1,13 @@
 <template>
   <div class="q-pa-md">
     <div class="q-gutter-y-md" style="max-width: 600px">
-      <div class="text-h4">{{ greeting }}, {{ user.name }}</div>
-      <hr />
+      <div
+        class="text-h5 custom-underline c-u-l c-u-2 c-u-md"
+      >{{global.systemInfo.greeting}}, {{global.user.name}}</div>
       <br />
       <p>
         Der Marktplatz ist so etwas wie das Schwarze Brett von StudiCar. Hier siehst du alle aktuellen Mitfahrgelegenheiten, aufsteigend nach Entfernung geordnet.
-        Aktuell sind übrigens {{users_online}} unserer {{users_all}} Benutzer online (entspricht {{Math.round(users_online/users_all*100)}}%).
+        Aktuell sind übrigens {{global.systemInfo.usersOnline}} unserer {{global.systemInfo.usersAll}} Benutzer online (entspricht {{Math.round(global.systemInfo.usersOnline/global.systemInfo.usersAll*100)}}%).
       </p>
     </div>
   </div>
@@ -15,21 +16,8 @@
 <script>
 export default {
   data() {
-    var hours = new Date().getHours();
-    var greeting = "Willkommen";
-    if (hours > 18) {
-      greeting = "Guten Abend";
-    } else if (hours < 8) {
-      greeting = "Guten Morgen";
-    }
     return {
-      users_online: 21,
-      users_all: 224,
-      greeting: greeting,
-      user: {
-        name: "Bernd"
-        
-      }
+      
     };
   }
 };

@@ -38,7 +38,7 @@
             <br />
           </div>
 
-          <q-dialog v-model="dialog" full-height full-width>
+          <q-dialog v-model="dialog">
             <q-card class="column">
               <q-toolbar>
                 <q-avatar>
@@ -51,16 +51,25 @@
 
                 <q-btn flat round dense icon="close" v-close-popup />
               </q-toolbar>
-              <q-stepper v-model="step" vertical color="primary" animated>
+
+              <q-stepper v-model="step" vertical color="primary" animated style="max-width: 80vw;">
                 <q-step :name="1" title="Allgemeines" icon="stay_current_portrait" :done="step > 1">
-                  <div v-for="n in 10" :key="n">{{general}}</div>
+                  <q-card>
+                    <q-card-section class="scroll">{{global.systemInfo.about.general}}</q-card-section>
+                    <q-card-section style="max-height: 50vh" class="scroll">
+                      <p
+                        v-for="n in 15"
+                        :key="n"
+                      >Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum repellendus sit voluptate voluptas eveniet porro. Rerum blanditiis perferendis totam, ea at omnis vel numquam exercitationem aut, natus minima, porro labore.</p>
+                    </q-card-section>
+                  </q-card>
                   <q-stepper-navigation>
                     <q-btn @click="step = 2" color="primary" label="Weiter" />
                   </q-stepper-navigation>
                 </q-step>
 
                 <q-step :name="2" title="Datenschutz" icon="security" :done="step > 2">
-                  {{privacy}}
+                  {{global.systemInfo.about.privacy}}
                   <q-stepper-navigation>
                     <q-btn @click="step = 3" color="primary" label="Weiter" />
                     <q-btn flat @click="step = 1" color="primary" label="Zurück" class="q-ml-sm" />
@@ -68,7 +77,7 @@
                 </q-step>
 
                 <q-step :name="3" title="Rechtliches" icon="sort">
-                  {{lawful}}
+                  {{global.systemInfo.about.lawful}}
                   <q-stepper-navigation>
                     <q-btn flat @click="step = 2" color="primary" label="Zurück" class="q-ml-sm" />
                     <q-btn v-close-popup color="primary" label="Ok, akzeptiert" @click="onSubmit" />
@@ -96,10 +105,7 @@ export default {
       pwd: null,
       dialog: false,
       hide_footer: true,
-      step: 1,
-      general: 'Hier steht das allgemeine Zeug',
-      lawful: 'Hier stehen dann die rechtlichen Sachen',
-      privacy: 'Hier stehen dann die Sachen, die mit dem Datenschutz zu tun haben'
+      step: 1
     }
   },
 
@@ -111,21 +117,4 @@ export default {
   }
 }
 
-// prototypes:
-/*
-GENERAL:
-Zur Nutzung deines Accounts musst du einen Benutzernamen und ein Passwort vergeben. Wie das gespeichert und verarbeitet wird, kannst du gleich beim Datenschutz lesen.
-Der Benutzername ist ein Schlüssel im System. Solltest du ihn nicht mehr wissen, kannst du nicht mehr auf deinen Account zugreifen. Merke ihn dir daher gut
-oder schreib ihn dir am besten irgendwo auf.
-Dein Passwort benötigst du, um dich in der App anzumelden. Solltest du es vergessen haben, kannst du in den Einstellungen dein Passwort zurücksetzen lassen,
-allerdings senden wir dir dein neues, automatisch generiertes Passwort per Mail zu, du musst deine Mailadresse also im Voraus in der App eingegeben haben.
-Sollte dies nicht der Fall sein, wirst du dir leider einen neuen Account erstellen müssen.
-
-PRIVACY:
-- Tom, Jules, Finn -
-
-LAWFUL:
-- Jules -
-
-*/
 </script>
