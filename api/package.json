@@ -8,5 +8,8 @@
     "start": "node index.js"
   },
   "author": "Finn Melzer <studicar@mfinn.de>",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "mariadb": "^2.3.1"
+  }
 }
