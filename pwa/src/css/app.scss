@@ -1,38 +1,38 @@
 // app global css in SCSS form
 
-.rise-content{
-    animation: rise 1s ease-out;
+.rise-content {
+  animation: rise 1s ease-out;
 
-    @keyframes rise{
-        from{
-            transform: translateY(50px);
-        }
-        to{
-            transform: translateY(0px);
-        }
+  @keyframes rise {
+    from {
+      transform: translateY(50px);
     }
+    to {
+      transform: translateY(0px);
+    }
+  }
 }
 
-.custom-chat-label{
-    position: relative;
-    &:after{
-        content: '';
-        position: absolute;
-        top: -5px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 10vw;
-        border-top: 1px solid lightgray;
-    }
+.custom-chat-label {
+  position: relative;
+  &:after {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10vw;
+    border-top: 1px solid lightgray;
+  }
 
-    >.q-message-label.text-center{
+  > .q-message-label.text-center {
     margin: 0px;
-}
+  }
 }
 
 .slide-enter-active,
 .slide-leave-active {
-  transition: all .1s ease-out;
+  transition: all 0.1s ease-out;
 }
 
 .slide-enter,
@@ -40,30 +40,27 @@
   transform: translateX(-15px);
 }
 
-
 .slide-up-enter-active,
 .slide-up-leave-active {
-  transition: all .2s ease-out;
+  transition: all 0.2s ease-out;
   transform-origin: center top;
 }
 
 .slide-up-enter,
 .slide-up-leave-to {
-  transform: translateY(90vh) scale(.8);
+  transform: translateY(90vh) scale(0.8);
 }
 
 .expand-enter-active,
-.collapse-leave-active
- {
-  transition: all .15s ease-out;
+.collapse-leave-active {
+  transition: all 0.15s ease-out;
   transform-origin: center bottom;
 }
 
 .expand-enter,
-.collapse-leave-to
- {
+.collapse-leave-to {
   opacity: 0;
-  transform: scaleY(.2) scaleX(.8) translateY(-5vh);
+  transform: scaleY(0.2) scaleX(0.8) translateY(-5vh);
 }
 
 /* PLEASE NOTE:
@@ -72,3 +69,69 @@ It can be possible that the above css code is overwritten by soft coded style.
 In this case, take a look at MainLayout.vue first.
 
 */
+
+.other-user-image {
+  -webkit-clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
+  clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
+}
+
+.custom-underline {
+  position: relative;
+  &:after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-bottom: 1px solid black;
+    width: 50%;
+    padding-bottom: 2px;
+  }
+
+  &.c-u-l:after {
+    left: 0;
+    transform: translateX(5%);
+  }
+
+  &.c-u-m:after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  &.c-u-r:after {
+    right: 0;
+    transform: translateX(-5%);
+  }
+
+  &.c-u-2:after {
+    width: 50%;
+  }
+
+  &.c-u-4:after {
+    width: 25%;
+  }
+
+  &.c-u-8:after {
+    width: 80%;
+  }
+
+  &.c-u-xs:after {
+    padding-bottom: 1px;
+  }
+
+  &.c-u-sm:after {
+    padding-bottom: 4px;
+  }
+
+  &.c-u-md:after {
+    padding-bottom: 10px;
+  }
+
+  &.c-u-lg:after {
+    padding-bottom: 20px;
+  }
+
+  &.c-u-xl:after {
+    padding-bottom: 40px;
+  }
+}
