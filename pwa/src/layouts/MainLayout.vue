@@ -35,7 +35,7 @@
       <div style="padding: 10px;">StudiCar v{{ $q.version }}</div>
     </q-drawer>
     <q-page-container>
-      <transition :name="pageTrans" mode="out-in">
+      <transition :name="getTrans()" mode="out-in">
         <router-view
           @pagetrans_zoom="pageTrans='expand'"
           @pagetrans_slide="pageTrans='collapse'"
@@ -58,16 +58,10 @@
         v-model="tab"
         class="text-black bg-white"
         align="justify"
-        @click="updateURL()"
       >
         <q-route-tab icon="home" to="/" label="Marktplatz" />
         <q-route-tab icon="add_circle_outline" to="/chats/lift/add" label="Neue Fahrt" />
-        <q-route-tab
-          @click="pageTrans = 'slide-up'"
-          icon="directions_car"
-          to="/chats"
-          label="Chats"
-        />
+        <q-route-tab icon="directions_car" to="/chats" label="Chats" />
         <q-route-tab icon="account_box" to="/profil" label="Profil" />
       </q-tabs>
     </q-footer>
@@ -101,6 +95,29 @@ export default {
       else{
         this.pageTrans = 'slide'
       }
+    },
+
+    getTrans(){
+      var loc = document.location.href
+      
+        if(loc.includes('add')){ // chats/lift/add is being visited
+          this.pageTrans = 'slide-up'
+        }
+        else if(loc.includes('lift')) { // when not above is visited and this condition  is true, chats/lift is being visited
+          this.pageTrans = 'expand'
+        }
+        else if(loc.includes('chats')){
+          if(this.pageTrans == 'liftToChats'){ // only show a collapse transition if that value is set (would be if the 'back' btn of a lift has been clicked)
+            this.pageTrans = 'collapse'
+          }
+        }
+        else{
+          this.pageTrans = 'slide'
+        }
+        return this.pageTrans
+      
+
+      
     }
   },
 
@@ -157,10 +174,10 @@ export default {
         link: '/#/profil'
         },
         {
-        title: 'Einstellungen',
-        caption: 'Interne App-Einstellungen',
-        icon: 'perm_data_settings',
-        link: '/#/einstellungen'
+        title: 'Scanner',
+        caption: 'Einen StudiCar Code scannen',
+        icon: 'filter_center_focus',
+        link: '/#/scanner'
         },
         {
         title: 'Spielwiese',

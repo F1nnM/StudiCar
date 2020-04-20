@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-md" style="max-width: 350px">
+  <div class="q-pa-md">
     <p class="text-h6 text-center bordered">Mitfahrgelegenheiten</p>
     <hr />
     <q-list>
@@ -32,7 +32,13 @@ export default {
 
   methods: {
     onLeft ({ reset }) {
-      alert("SWIPED LEFT")
+      //alert("SWIPED LEFT")
+      
+      this.finalize(reset)
+    },
+    
+    onRight ({ reset }) {
+      //alert("SWIPED RIGHT")
       
       this.finalize(reset)
     },
@@ -45,12 +51,6 @@ export default {
       this.$emit('pagetrans_slide')
     },
 
-    onRight ({ reset }) {
-      alert("SWIPED RIGHT")
-      
-      this.finalize(reset)
-    },
-
     long_tab({e}){
       alert("LONG")
     },
@@ -58,7 +58,7 @@ export default {
     finalize (reset) {
       this.timer = setTimeout(() => {
         reset()
-      }, 1000)
+      }, 50)
     },
 
     sortChats() {

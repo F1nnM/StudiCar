@@ -40,14 +40,21 @@
   transform: translateX(-15px);
 }
 
-.slide-up-enter-active,
 .slide-up-leave-active {
+  transition: all 0.1s ease-out;
+  transform-origin: left center;
+}
+
+.slide-up-leave-to {
+  transform: translateX(-100vw);
+}
+
+.slide-up-enter-active {
   transition: all 0.2s ease-out;
   transform-origin: center top;
 }
 
-.slide-up-enter,
-.slide-up-leave-to {
+.slide-up-enter {
   transform: translateY(90vh) scale(0.8);
 }
 
@@ -71,6 +78,7 @@ In this case, take a look at MainLayout.vue first.
 */
 
 .other-user-image {
+  // the octagon
   -webkit-clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
   clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
 }
