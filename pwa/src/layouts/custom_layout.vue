@@ -28,11 +28,12 @@
     </q-drawer>
 
     <q-page-container>
-      <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
-        <!-- Wrapping only one DOM element, defined by QBtn -->
-        <q-btn color="secondary" icon="mail" label="Email" />
-        <router-view />
-      </transition>
+      <router-view
+          @pagetrans_zoom="pageTrans='expand'"
+          @pagetrans_slide="pageTrans='collapse'"
+          @pagetrans_y="pageTransY = $event"
+          :style="'transform-origin: 20% ' + pageTransY + 'vh;'"
+        />
     </q-page-container>
 
     <q-footer elevated v-show="show_footer">
