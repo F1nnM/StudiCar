@@ -1,6 +1,8 @@
 // Configuration for your app
 // https://quasar.dev/quasar-cli/quasar-conf-js
 
+const fs = require('fs')
+
 module.exports = function (ctx) {
   return {
     // app boot file (/src/boot)
@@ -84,7 +86,10 @@ module.exports = function (ctx) {
     devServer: {
       https: true,
       port: 3000,
-      open: true // opens browser window automatically
+      open: true, // opens browser window automatically
+      key: fs.readFileSync('server.key'),
+      cert: fs.readFileSync('server.pem'),
+      ca: fs.readFileSync('ca.pem'),
     },
 
     // animations: 'all', // --- includes all animations
