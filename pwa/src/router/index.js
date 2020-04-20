@@ -11,6 +11,8 @@ Vue.use(VueRouter)
 
 Vue.prototype.pageTrans = 'slide'
 
+Vue.prototype.chatOpen = false
+
 Vue.prototype.global = {
   systemInfo: {
     greeting: ((new Date).getHours() < 8 ? 'Guten Morgen' : ((new Date).getHours() > 18 ? 'Guten Abend' : 'Willkommen')),
@@ -149,7 +151,7 @@ Vue.prototype.preferences = {
     green: 'Ich unterhalte mich auch in der Früh gern mit den anderen'
   },
   smoking: {
-    red: 'Ich kann Rauch im Auto überhaupt nicht ausstehen',
+    red: 'Ich kann Rauchen im Auto überhaupt nicht ausstehen',
     yellow: 'Ich bin eigentlich gegen Rauchen im Auto, könnte mich aber zur Not damit abfinden',
     green: 'Ich hab nichts gegen Rauchen im Auto'
   },

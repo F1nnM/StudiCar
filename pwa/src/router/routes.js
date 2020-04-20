@@ -43,6 +43,11 @@ const routes = [{
     path: '/view-user',
     component: () =>
       import('pages/view_user.vue')
+  },
+  {
+    path: '/scanner',
+    component: () =>
+      import('pages/scanner.vue')
   }
   ]
 },

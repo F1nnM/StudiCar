@@ -346,6 +346,7 @@ export default {
 
     go_back(){
       this.$emit('pagetrans_slide')
+      this.chatOpen = false
       window.location.href = '/#/chats'
     }
   }

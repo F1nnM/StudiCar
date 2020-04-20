@@ -2,7 +2,7 @@
   <div>
     <q-splitter v-model="splitter">
       <template v-slot:before>
-        <div class="q-pa-md">
+        <div class="q-px-md q-py-sm">
           <q-card>
             <q-img src="~assets/loremimage.jpg" class="other-user-image">
               <template v-slot:loading>
@@ -16,11 +16,10 @@
             </q-img>
           </q-card>
         </div>
-
-        <div class="q-pa-md">
+        <div class="q-mx-md q-mb-xs">
           <q-card>
             <q-card-section>
-              <p class="text-uppercase text-caption">
+              <p class="text-uppercase text-caption q-mt-none q-mb-xs">
                 Präferenzen im Auto
                 <q-btn clickable @click="prefInfo = !prefInfo" flat icon="info" />
               </p>
@@ -40,7 +39,6 @@
                         <q-tab name="music" icon="music_note" />
                       </q-tabs>
                     </template>
-
                     <template v-slot:after>
                       <q-tab-panels
                         v-model="prefInfoTab"
@@ -137,30 +135,22 @@
         </div>
       </template>
       <template v-slot:after>
-        <q-list class="shadow-2 rounded-borders" style="max-width: 250px; width: 100%;">
+        <q-list class="shadow-2 rounded-borders" style="width: 100%;">
           <q-item>
             <q-item-section>
               <p
-                class="text-h4 overflow q-pt-md custom-underline c-u-2 c-u-md c-u-l"
+                class="text-h4 overflow q-pt-xs custom-underline c-u-2 c-u-md c-u-l"
               >{{viewedUser.name}}</p>
             </q-item-section>
           </q-item>
 
-          <q-item-label header>Fahrten</q-item-label>
-          <q-item>
-            <q-item-section>angeboten: {{viewedUser.lifts.offered}}</q-item-section>
-          </q-item>
-          <q-item>
-            <q-item-section>gesamt: {{viewedUser.lifts.all}}</q-item-section>
-          </q-item>
-          <q-item>
-            <q-item-section>durchschnittlich: {{viewedUser.lifts.average}}/W</q-item-section>
-          </q-item>
+          <q-item-label header class="q-pt-xs">Fahrten</q-item-label>
+          <q-item>angeboten: {{viewedUser.lifts.offered}}</q-item>
+          <q-item>gesamt: {{viewedUser.lifts.all}}</q-item>
+          <q-item>durchschnittlich: {{viewedUser.lifts.average}}/W</q-item>
 
-          <q-item-label header>Dabei seit</q-item-label>
-          <q-item>
-            <q-item-section>{{viewedUser.createdAt}}</q-item-section>
-          </q-item>
+          <q-item-label header class="q-pt-xs">Dabei seit</q-item-label>
+          <q-item>{{viewedUser.createdAt}}</q-item>
         </q-list>
       </template>
     </q-splitter>
