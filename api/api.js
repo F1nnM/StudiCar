@@ -12,6 +12,18 @@ module.exports = {
   },
   'POST': {
     '/sqlTest': async (req, res, options) => {
+      if (!options.data) {
+        res.writeHead(400);
+        res.end("No field 'data' supplied!");
+      }
+      let result = await runQuery("INSERT INTO `TEST` (`ID`, `data`) VALUES (NULL, ?)", options.data);
+      res.write(JSON.stringify(result))
+    },
+    '/addUser': async (req, res, options) => {
+      if (!options.data) {
+        res.writeHead(400);
+        res.end("No field 'data' supplied!");
+      }
       let result = await runQuery("INSERT INTO `TEST` (`ID`, `data`) VALUES (NULL, ?)", options.data || '');
       res.write(JSON.stringify(result))
     }
