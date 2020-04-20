@@ -37,3 +37,7 @@ src/statics/app-logo-128x128.png
 src/statics/icons
 
 src/helpers/firebaseConfig.js
+
+server.pem
+server.key
+ca.pem
