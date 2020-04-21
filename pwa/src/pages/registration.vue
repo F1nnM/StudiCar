@@ -17,7 +17,7 @@
       <div class="q-pa-md">
         <q-form @submit="onSubmit" class="q-gutter-md">
           <q-input
-            hint="Wie willst du in der App heißen?"
+            hint="Unter welcher Email können wir dich erreichen?"
             lazy-rules
             :rules="[ val => val && val.length > 0 || 'Deine Email ist ein Schlüssel fürs System...']"
             v-model="email"
