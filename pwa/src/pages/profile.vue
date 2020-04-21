@@ -41,6 +41,8 @@
       <q-btn @click="editDistance = true" icon="edit" />
     </p>
 
+    <SignOutButton />
+
     <q-dialog v-model="editDistance" full-height full-width>
       <q-card class="column full-height" style="width: 300px">
         <q-card-section class="row items-center q-pb-none">
@@ -70,26 +72,38 @@
 </template>
 
 <script>
-import { date } from 'quasar'
+import { date } from "quasar";
+import SignOutButton from "../components/SignOutButton";
 
 export default {
- 
-data(){
-  return{
-    since: date.formatDate(this.global.user.createdAt, 'MMMM YYYY', {
-      months: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli',
-      'August', 'September', 'Oktober', 'November', 'Dezember']
-    }),
-    distance: this.global.user.settings.liftMaxDistance,
-    editDistance: false
-  }
-},
+  components: { SignOutButton },
+  data() {
+    return {
+      since: date.formatDate(this.global.user.createdAt, "MMMM YYYY", {
+        months: [
+          "Januar",
+          "Februar",
+          "März",
+          "April",
+          "Mai",
+          "Juni",
+          "Juli",
+          "August",
+          "September",
+          "Oktober",
+          "November",
+          "Dezember"
+        ]
+      }),
+      distance: this.global.user.settings.liftMaxDistance,
+      editDistance: false
+    };
+  },
 
-methods: {
-  saveDistance(){
-    this.global.user.settings.liftMaxDistance = this.distance
+  methods: {
+    saveDistance() {
+      this.global.user.settings.liftMaxDistance = this.distance;
+    }
   }
-}
-    
-}
+};
 </script>
