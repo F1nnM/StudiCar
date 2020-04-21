@@ -30,6 +30,7 @@ module.exports = {
     },
     '/addUser': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid', 'name', 'gender', 'mail'], res)) {
+        var jdenticon = require("jdenticon")
         let size = 200
         let png = jdenticon.toPng(options.name, size);
         
