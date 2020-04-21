@@ -11,7 +11,10 @@
       <p>
         <a href="/#/auth/registrierung">Bist du noch nicht registriert?</a>
       </p>
-
+      <q-separator />
+      <GoogleSignInButton />
+      <br />
+      <span>or use Email</span>
       <q-separator />
       <template>
         <div class="q-pa-md">
@@ -47,7 +50,11 @@
 </template>
 
 <script>
+import GoogleSignInButton from '../components/GoogleButton'
 export default {
+  components: {
+    GoogleSignInButton
+  },
   data () {
     return {
       email: '',
