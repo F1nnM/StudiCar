@@ -22,7 +22,7 @@
             <q-input
               v-model="email"
               label="Email"
-              hint="Bitte gib deinen Mail-Adresse ein"
+              hint="Bitte gib deine Email-Adresse ein"
               lazy-rules
               :rules="[ val => val && val.length > 0 || 'Ohne Mail-Adresse wird die Anmeldung schwierig...']"
             />
