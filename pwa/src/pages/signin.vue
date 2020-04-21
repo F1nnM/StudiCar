@@ -63,6 +63,8 @@ export default {
   },
   methods: {
     onSubmit() {
+      this.$router.replace({name: 'marketplace'}).catch(() => {})
+      /*
       let credentials = {
         email: this.email,
         password: this.password
@@ -75,6 +77,7 @@ export default {
           this.$q.notify('Invalid Login!')
           console.error(`Not signed in: ${error.message}`)
         })
+        */
     }
   }
 }

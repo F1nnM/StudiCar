@@ -81,21 +81,6 @@ export default {
   },
 
   methods:{
-    updateURL () {
-      var loc = document.location.href
-      
-      if(loc.includes('add')){
-        this.pageTrans = 'slide-up'
-      }
-
-      else if(loc.includes('view')){
-        this.pageTrans = 'slide'
-      }
-      
-      else{
-        this.pageTrans = 'slide'
-      }
-    },
 
     getTrans(){
       var loc = document.location.href

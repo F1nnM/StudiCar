@@ -28,12 +28,7 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view
-          @pagetrans_zoom="pageTrans='expand'"
-          @pagetrans_slide="pageTrans='collapse'"
-          @pagetrans_y="pageTransY = $event"
-          :style="'transform-origin: 20% ' + pageTransY + 'vh;'"
-        />
+      <router-view />
     </q-page-container>
 
     <q-footer elevated v-show="show_footer">
@@ -73,7 +68,8 @@ export default {
 
     return {
       leftDrawerOpen: false,
-      show_footer: true
+      show_footer: true,
+      tab: 'home'
     }
     }
   }
