@@ -3,9 +3,11 @@ if (typeof (PhusionPassenger) !== 'undefined') {
 }
 
 var fs = require("fs");
-process.onerror = function (message, source, lineno, colno, error) {
+process.on('uncaughtException', function (err) {
+  console.log('Caught exception: ', err);
   fs.appendFile('err.log', message);
-}
+});
+
 
 var http = require('http');
 var server = http.createServer();
