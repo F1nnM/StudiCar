@@ -15,6 +15,7 @@ module.exports = async function runQuery(sql, data) {
     conn = await pool.getConnection();
     result = await conn.query(sql, data);
   } catch (error) {
+    throw error;
     return { error }
   } finally {
     if (conn) conn.release(); //release to pool
