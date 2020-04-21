@@ -14,7 +14,7 @@
       <q-separator />
       <GoogleSignInButton />
       <br />
-      <span>or use Email</span>
+      <span>oder verwende deine Email</span>
       <q-separator />
       <template>
         <div class="q-pa-md">
