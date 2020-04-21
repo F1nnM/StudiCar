@@ -34,3 +34,8 @@ export const SQL_TEST_ADD = {
   path: "/sqlTest",
   method: "POST"
 }
+
+export const SQL_USER_ADD = {
+  path: "/addUser",
+  method: "POST"
+}
