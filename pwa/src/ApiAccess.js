@@ -1,7 +1,5 @@
-const basePath = process.env.DEV ? "http://localhost" :
+export const basePath = process.env.DEV ? "http://localhost" :
   (window.location.hostname.startsWith("dev") ? "https://dev.api.studicar.mfinn.de" : "https://api.studicar.mfinn.de")
-
-console.log(process);
 
 export function sendApiRequest(action, options, successCallback, errorCallback) {
   if (!(action.path && action.method))

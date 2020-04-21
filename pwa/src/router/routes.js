@@ -6,6 +6,7 @@ const routes = [{
     import('layouts/MainLayout.vue'),
   children: [{
     path: '',
+    name: 'marketplace',
     component: () =>
       import('pages/marketplace.vue')
   },
@@ -67,6 +68,7 @@ const routes = [{
     import('layouts/without_nav.vue'),
   children: [{
     path: '/auth/anmeldung',
+    name: 'signIn',
     component: () =>
       import('pages/signin.vue')
   },

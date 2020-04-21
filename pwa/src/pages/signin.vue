@@ -17,16 +17,16 @@
         <div class="q-pa-md">
           <q-form @submit="onSubmit" class="q-gutter-md">
             <q-input
-              v-model="username"
-              label="Benutzername"
-              hint="Bitte gib deinen Benutzernamen ein"
+              v-model="email"
+              label="Email"
+              hint="Bitte gib deinen Mail-Adresse ein"
               lazy-rules
-              :rules="[ val => val && val.length > 0 || 'Ohne Benutzername wird die Anmeldung schwierig...']"
+              :rules="[ val => val && val.length > 0 || 'Ohne Mail-Adresse wird die Anmeldung schwierig...']"
             />
 
             <q-input
               type="password"
-              v-model="pwd"
+              v-model="password"
               label="Passwort"
               hint="Bitte gib auch dein Passwort ein"
               lazy-rules
@@ -50,23 +50,24 @@
 export default {
   data () {
     return {
-      contentStyle: {
-        backgroundColor: 'rgba(0,0,0,0.02)',
-        color: '#555'
-      },
-
-      contentActiveStyle: {
-        backgroundColor: '#eee',
-        color: 'black'
-      },
-
-      thumbStyle: {
-        right: '2px',
-        borderRadius: '5px',
-        backgroundColor: '#027be3',
-        width: '5px',
-        opacity: 0.75
+      email: '',
+      password: ''
+    }
+  },
+  methods: {
+    onSubmit() {
+      let credentials = {
+        email: this.email,
+        password: this.password
       }
+      this.$store.dispatch('auth/signIn', credentials)
+        .then(user => {
+          this.$router.replace({ name: 'dashboard' }).catch(() => {})
+        })
+        .catch(error => {
+          this.$q.notify('Invalid Login!')
+          console.error(`Not signed in: ${error.message}`)
+        })
     }
   }
 }
