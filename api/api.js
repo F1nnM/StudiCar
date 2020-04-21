@@ -29,8 +29,14 @@ module.exports = {
       }
     },
     '/addUser': async (req, res, options) => {
-      if (!isOptionMissing(options, ['FbId', 'Name', 'Gender', 'Course', ], res)) {
-        let result = await runQuery("INSERT INTO `TEST` (`ID`, `data`) VALUES (NULL, ?)", options.data || '');
+      if (!isOptionMissing(options, ['fbid', 'name', 'gender', 'mail'], res)) {
+        let size = 200
+        let png = jdenticon.toPng(options.name, size);
+
+        let result = await runQuery(
+          "INSERT INTO `USER` (`ID`, `FB_ID`, `NAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKE`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`)" +
+          "VALUES (NULL, ?, ?, ?, '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED')",
+          options.FbId, options.name, options.gender, png, options.mail);
         res.write(JSON.stringify(result))
       }
     }
