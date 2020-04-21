@@ -17,6 +17,8 @@ server.on('request', async (req, res) => {
 
   var urlParts = require("url").parse(req.url);
 
+  console.log("yay");
+
   switch (req.method) {
     case "OPTIONS":
 
@@ -25,7 +27,6 @@ server.on('request', async (req, res) => {
       return;
 
     case "GET":
-
       if (!api.GET[urlParts.pathname]) {
         res.writeHead(404);
         res.end;
@@ -42,30 +43,31 @@ server.on('request', async (req, res) => {
       }
 
       await api.GET[urlParts.pathname](req, res, options);
-      res.end();
-
       break;
 
     case "POST":
-
-      if (!api.GET[urlParts.pathname]) {
+      console.log("yay2");
+      if (!api.POST[urlParts.pathname]) {
+        console.log("hi");
         res.writeHead(404);
-        res.end;
+        res.end();
         break;
       }
 
       let buffer = []
       req.on('data', chunk => {
         buffer.push(chunk)
+        console.log("yay4");
       })
       req.on('end', async () => {
         let options = {};
         if (buffer.length > 0)
           options = JSON.parse(buffer);
+        console.log("yay6");
         await api.POST[urlParts.pathname](req, res, options);
-        res.end();
+        console.log("yay5");
       })
-
+      console.log("yay3");
       break;
   }
 
