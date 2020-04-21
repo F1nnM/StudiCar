@@ -6,6 +6,7 @@
     <br />
     <button @click="writeTestData();">Add Data</button>
     <button @click="getTestData();">Load Data</button>
+    <button @click="tryUserAdd();">Try User Add</button>
     <div>
       <p class="error">{{ error }}</p>
 
@@ -19,7 +20,7 @@
 </template>
 
 <script>
-import { sendApiRequest, SQL_TEST_READ, SQL_TEST_ADD } from "../ApiAccess";
+import { sendApiRequest, SQL_TEST_READ, SQL_TEST_ADD, SQL_USER_ADD } from "../ApiAccess";
 import { QrcodeStream } from "vue-qrcode-reader";
 export default {
   components: { QrcodeStream },
@@ -47,6 +48,14 @@ export default {
         data => (this.sqlTestData += JSON.stringify(data) + "\n"),
         error => (this.sqlTestData += "ERROR: " + JSON.stringify(error) + "\n")
       );
+    },
+    tryUserAdd(){
+      sendApiRequest(
+        SQL_USER_ADD,
+        {},
+        data => (this.sqlTestData += JSON.stringify(data) + "\n"),
+        error => (this.sqlTestData += "ERROR: " + JSON.stringify(error) + "\n")
+      )
     },
     onDecode(result) {
       this.result = result;
