@@ -3,7 +3,7 @@ if (typeof (PhusionPassenger) !== 'undefined') {
 }
 
 var fs = require("fs");
-window.onerror = function (message, source, lineno, colno, error) {
+process.onerror = function (message, source, lineno, colno, error) {
   fs.appendFile('err.log', message);
 }
 
