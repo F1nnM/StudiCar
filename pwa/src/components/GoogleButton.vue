@@ -7,7 +7,7 @@
       />
     </div>
     <p class="btn-text">
-      <b>Sign in with google</b>
+      <b>Mit Google anmelden</b>
     </p>
   </div>
 </template>
@@ -47,7 +47,7 @@ $google-blue: #4285f4;
 $button-active-blue: #1669f2;
 
 .google-btn {
-  width: 184px;
+  width: 200px;
   height: 42px;
   background-color: $google-blue;
   border-radius: 2px;
