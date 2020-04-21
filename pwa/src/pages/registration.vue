@@ -17,16 +17,16 @@
       <div class="q-pa-md">
         <q-form @submit="onSubmit" class="q-gutter-md">
           <q-input
-            hint="Bitte gib deinen Vornamen ein"
+            hint="Unter welcher Email können wir dich erreichen?"
             lazy-rules
-            :rules="[ val => val && val.length > 0 || 'Bitte gib deinen Namen ein, damit wir wisen, mit wem wir es zu tun haben.']"
-            v-model="username"
-            label="Vorname"
+            :rules="[ val => val && val.length > 0 || 'Deine Email ist ein Schlüssel fürs System...']"
+            v-model="email"
+            label="Email"
           />
 
           <q-input
             type="password"
-            v-model="pwd"
+            v-model="password"
             label="Passwort"
             hint="Gib ein sicheres Passwort ein"
             lazy-rules
@@ -158,9 +158,8 @@ import { Dialog } from 'quasar'
 export default {
   data(){
     return{
-      agbs: false,
-      username: '',
-      pwd: '',
+      email: null,
+      password: null,
       dialog: false,
       confirmDialog: false,
       step: 1
@@ -168,18 +167,19 @@ export default {
   },
 
   methods: {
-    onSubmit (force) {
-      if(!this.agbs && !force){
-        this.confirmDialog = true
+    onSubmit () {
+      let credentials = {
+        email: this.email,
+        password: this.password
       }
-      else {
-        alert('SUBMITTED');
-      }
-    },
-
-    viewAGBs(){
-      this.agbs = true
-      openURL('https://mi.com')
+      this.$store.dispatch('auth/register', credentials)
+        .then(user => {
+          this.$router.replace({ name: 'marketplace' }).catch(() => {})
+        })
+        .catch(error => {
+          this.$q.notify('Invalid Login!')
+          console.error(`Not signed in: ${error.message}`)
+        })
     }
   }
 }
