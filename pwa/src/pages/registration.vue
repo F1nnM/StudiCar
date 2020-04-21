@@ -19,14 +19,14 @@
           <q-input
             hint="Wie willst du in der App heißen?"
             lazy-rules
-            :rules="[ val => val && val.length > 0 || 'Der Benutzername ist ein Schlüssel fürs System...']"
-            v-model="username"
-            label="Benutzername"
+            :rules="[ val => val && val.length > 0 || 'Deine Email ist ein Schlüssel fürs System...']"
+            v-model="email"
+            label="Email"
           />
 
           <q-input
             type="password"
-            v-model="pwd"
+            v-model="password"
             label="Passwort"
             hint="Gib ein sicheres Passwort ein"
             lazy-rules
@@ -101,8 +101,8 @@
 export default {
   data(){
     return{
-      username: null,
-      pwd: null,
+      email: null,
+      password: null,
       dialog: false,
       hide_footer: true,
       step: 1
@@ -111,8 +111,18 @@ export default {
 
   methods: {
     onSubmit () {
-      alert("YEAH");
-      submit();
+      let credentials = {
+        email: this.email,
+        password: this.password
+      }
+      this.$store.dispatch('auth/register', credentials)
+        .then(user => {
+          this.$router.replace({ name: 'marketplace' }).catch(() => {})
+        })
+        .catch(error => {
+          this.$q.notify('Invalid Login!')
+          console.error(`Not signed in: ${error.message}`)
+        })
     }
   }
 }
