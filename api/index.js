@@ -2,6 +2,11 @@ if (typeof (PhusionPassenger) !== 'undefined') {
   PhusionPassenger.configure({ autoInstall: false });
 }
 
+var fs = require("fs");
+window.onerror = function (message, source, lineno, colno, error) {
+  fs.appendFile('err.log', message);
+}
+
 var http = require('http');
 var server = http.createServer();
 var api = require('./api');
