@@ -5,13 +5,15 @@
       <q-btn @click="newScan()">NEUER SCAN</q-btn>
     </p>
     <q-slide-transition>
-      <p v-id="result">{{result}}</p>
+      <p v-if="result">{{result}}</p>
     </q-slide-transition>
 
     <q-slide-transition>
       <div class="q-pa-xl" v-if="!result">
         <q-card>
-          <qrcode-stream @init="onInit" @decode="decoded"></qrcode-stream>
+          <div class="scanning">
+            <qrcode-stream @init="onInit" @decode="decoded"></qrcode-stream>
+          </div>
         </q-card>
       </div>
     </q-slide-transition>
@@ -91,3 +93,25 @@ components: { QrcodeStream },
 
 
 </script>
+
+<style lang="scss">
+.scanning {
+  position: relative;
+  &:after {
+    content: "";
+    position: absolute;
+    top: 0%;
+    left: 0;
+    width: 100%;
+    height: 0px;
+    border-bottom: 1px solid red;
+    animation: scanner 2s alternate infinite;
+  }
+
+  @keyframes scanner {
+    to {
+      top: 100%;
+    }
+  }
+}
+</style>
