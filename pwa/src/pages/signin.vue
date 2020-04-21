@@ -11,23 +11,25 @@
       <p>
         <a href="/#/auth/registrierung">Bist du noch nicht registriert?</a>
       </p>
-
+      <q-separator />
+      <GoogleSignInButton />
+      <br />
+      <span>oder verwende deine Email</span>
       <q-separator />
       <template>
         <div class="q-pa-md">
           <q-form @submit="onSubmit" class="q-gutter-md">
             <q-input
-              v-model="username"
-              type="text"
-              label="Benutzername"
-              hint="Bitte gib deinen Benutzernamen ein"
+              v-model="email"
+              label="Email"
+              hint="Bitte gib deine Email-Adresse ein"
               lazy-rules
-              :rules="[ val => val && val.length > 0 || 'Ohne Benutzername wird die Anmeldung schwierig...']"
+              :rules="[ val => val && val.length > 0 || 'Ohne Mail-Adresse wird die Anmeldung schwierig...']"
             />
 
             <q-input
               type="password"
-              v-model="pwd"
+              v-model="password"
               label="Passwort"
               hint="Bitte gib auch dein Passwort ein"
               lazy-rules
@@ -48,17 +50,31 @@
 </template>
 
 <script>
+import GoogleSignInButton from '../components/GoogleButton'
 export default {
+  components: {
+    GoogleSignInButton
+  },
   data () {
     return {
-      username: '',
-      pwd: ''
+      email: '',
+      password: ''
     }
   },
-
   methods: {
-    onSubmit(){
-      alert('SUBMITTED')
+    onSubmit() {
+      let credentials = {
+        email: this.email,
+        password: this.password
+      }
+      this.$store.dispatch('auth/signIn', credentials)
+        .then(user => {
+          this.$router.replace({ name: 'dashboard' }).catch(() => {})
+        })
+        .catch(error => {
+          this.$q.notify('Invalid Login!')
+          console.error(`Not signed in: ${error.message}`)
+        })
     }
   }
 }

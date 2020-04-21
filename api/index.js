@@ -2,6 +2,13 @@ if (typeof (PhusionPassenger) !== 'undefined') {
   PhusionPassenger.configure({ autoInstall: false });
 }
 
+var fs = require("fs");
+process.on('uncaughtException', function (err) {
+  console.log('Caught exception: ', err);
+  fs.appendFile('err.log', message);
+});
+
+
 var http = require('http');
 var server = http.createServer();
 var api = require('./api');
@@ -25,7 +32,6 @@ server.on('request', async (req, res) => {
       return;
 
     case "GET":
-
       if (!api.GET[urlParts.pathname]) {
         res.writeHead(404);
         res.end;
@@ -42,15 +48,12 @@ server.on('request', async (req, res) => {
       }
 
       await api.GET[urlParts.pathname](req, res, options);
-      res.end();
-
       break;
 
     case "POST":
-
-      if (!api.GET[urlParts.pathname]) {
+      if (!api.POST[urlParts.pathname]) {
         res.writeHead(404);
-        res.end;
+        res.end();
         break;
       }
 
@@ -63,9 +66,7 @@ server.on('request', async (req, res) => {
         if (buffer.length > 0)
           options = JSON.parse(buffer);
         await api.POST[urlParts.pathname](req, res, options);
-        res.end();
       })
-
       break;
   }
 
