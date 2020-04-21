@@ -1,9 +1,12 @@
 <template>
   <div class="q-pa-md">
-    <p class="text-h6">StudiCar Scan {{result}}</p>
-    <!-- <p ref="cam_has_camera">Kamera vorhanden</p>
-    <video muted playsinline ref="qr_video" style="height: 500px; width: 500px;"></video>
-    <div ref="cam_qr_result"></div>-->
+    <p class="text-h6">
+      StudiCar Scan
+      <q-btn @click="newScan()">NEUER SCAN</q-btn>
+    </p>
+    <q-slide-transition>
+      <p v-id="result">{{result}}</p>
+    </q-slide-transition>
 
     <q-slide-transition>
       <div class="q-pa-xl" v-if="!result">
@@ -12,8 +15,6 @@
         </q-card>
       </div>
     </q-slide-transition>
-
-    <qrcode-capture></qrcode-capture>
   </div>
 </template>
 
@@ -55,18 +56,18 @@ components: { QrcodeStream },
           } else if (error.name === 'StreamApiNotSupportedError') {
             this.error = "ERROR: Stream API is not supported in this browser"
           }
-          this.alert(error)
+          this.message(error)
         }
         
       },
       decoded(res){
         this.result = res
       },
-      alert (error) {
+      message (error) {
       this.$q.dialog({
         dark: true,
         title: 'Fehler',
-        message: error
+        message: '' + error
       }).onOk(() => {
         // console.log('OK')
       }).onCancel(() => {
@@ -74,6 +75,10 @@ components: { QrcodeStream },
       }).onDismiss(() => {
         // console.log('I am triggered on both OK and Cancel')
       })
+    },
+
+    newScan(){
+      this.result = ''
     }
       
     },

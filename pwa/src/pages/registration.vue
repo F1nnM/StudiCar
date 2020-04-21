@@ -34,9 +34,7 @@
           val => val !== null && val !== '' || 'Du musst deinen Account mit einem Passwort sichern.'
         ]"
           />
-          <div v-for="n in 2" :key="n">
-            <br />
-          </div>
+          <br />
 
           <q-dialog v-model="dialog">
             <q-card class="column">
@@ -101,18 +99,16 @@
 export default {
   data(){
     return{
-      username: null,
-      pwd: null,
+      username: '',
+      pwd: '',
       dialog: false,
-      hide_footer: true,
       step: 1
     }
   },
 
   methods: {
     onSubmit () {
-      alert("YEAH");
-      submit();
+      alert('SUBMITTED');
     }
   }
 }
