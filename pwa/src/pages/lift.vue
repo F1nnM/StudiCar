@@ -3,8 +3,8 @@
     <div style="position: fixed; top: 0; width: 100vw; z-index: 2900;">
       <div class="row">
         <q-toolbar class="col-10 bg-primary">
-          <q-btn flat dense clickable @click="go_back()" :label="'‹ ' +  lift.id" />
-          <q-toolbar-title>Title</q-toolbar-title>
+          <q-btn flat dense clickable @click="goBack()" :label="'‹ ' +  lift.id" />
+          <q-toolbar-title class="text-white">Title</q-toolbar-title>
           <q-btn flat round dense icon="search" />
         </q-toolbar>
         <q-toolbar class="col-2 bg-white text-primary">
@@ -43,7 +43,7 @@
               <div class="col-auto">
                 <q-btn color="grey-7" round flat icon="more_vert">
                   <q-menu cover auto-close>
-                    <q-btn flat clickable @click="view_car()">Modell online ansehen</q-btn>
+                    <q-btn flat clickable @click="viewCar()">Modell online ansehen</q-btn>
                   </q-menu>
                 </q-btn>
               </div>
@@ -97,12 +97,12 @@
       </div>
     </q-drawer>
 
-    <div class="q-pa-md bg-white" v-touch-swipe.mouse.right="go_back">
+    <div class="q-pa-md bg-white" v-touch-swipe.mouse.right="goBack">
       <div v-for="item in lift.messages" :key="item.timestamp">
         <q-chat-message
           class="custom-chat-label"
-          v-if="check_day_break(item) != ''"
-          :label="check_day_break(item)"
+          v-if="checkDayBreak(item) != ''"
+          :label="checkDayBreak(item)"
           style="margin-top: 40px;"
         />
         <q-chat-message
@@ -110,21 +110,21 @@
           :sent="item.sender == user"
           size="8"
           :text="item.content"
-          :stamp="format_date(item)"
-          :bg-color="get_color(item.sender)"
+          :stamp="formatDate(item)"
+          :bg-color="getColor(item.sender)"
         />
       </div>
     </div>
     <div class="row" style="z-index: 2900; position: fixed; bottom: 0; left: 0; width: 100vw;">
       <q-toolbar class="col-10 bg-grey-3">
-        <q-btn flat dense icon="call_split"></q-btn>
+        <q-btn flat dense icon="call_split" v-if="false"></q-btn>
         <q-toolbar-title>
           <template>
             <div style="max-width: 400px;">
-              <q-form @submit="send_message" class="q-gutter-md">
+              <q-form @submit="sendMessage" class="q-gutter-md">
                 <q-input
                   class="custom-input"
-                  v-model="text"
+                  v-model="messageText"
                   placeholder="Schreibe etwas..."
                   style="border-left: 1px solid black; padding-left: 10px;"
                 />
@@ -135,13 +135,14 @@
       </q-toolbar>
       <q-toolbar class="col-2 bg-white">
         <q-btn
-          @click="send_message"
+          @click="sendMessage()"
           icon="arrow_forward_ios"
           flat
-          :disabled="text == ''"
+          :disabled="!messageText"
           round
           dense
           class="q-mr-sm bg-green-10 text-white"
+          style="transition: all .1s"
         />
       </q-toolbar>
     </div>
@@ -167,7 +168,7 @@ export default {
   data(){
     return{
       lift_info: false,
-      text: '',
+      messageText: '',
       user: 61668646,
       lift: {
         id: 64165,
@@ -256,7 +257,7 @@ export default {
 
 
   methods: {
-    get_color(user){
+    getColor(user){
       if(user == this.user){ // Sent messages have special color
         return 'light-blue-2'
       }
@@ -280,7 +281,7 @@ export default {
       }
     },
 
-    check_day_break(item){ // when a parameter is given, return true or false. When no parameter is given, returns the text of the label
+    checkDayBreak(item){ // when a parameter is given, return true or false. When no parameter is given, returns the text of the label
       var pos = this.lift.messages.indexOf(item)
       
       var label = ''
@@ -315,36 +316,35 @@ export default {
       
     },
 
-    format_date(item){
+    formatDate(item){
       return date.formatDate(item.timestamp, 'DD.MM.YYYY - H:mm')
     },
 
-    send_message(){
+    sendMessage(){
       // check whether last message was from this user
-      var last_msg = this.lift.messages[this.lift.messages.length - 1]
-      if(last_msg.sender == this.user){
+      var lastMsg = this.lift.messages[this.lift.messages.length - 1]
+      if(lastMsg.sender == this.user){
         // yes, last message was from this user
-        last_msg.content.push(this.text)
+        lastMsg.content.push(this.text)
       }
       else{
-        var new_msg = {
+        var newMsg = {
           sender: this.user,
           timestamp: (new Date()).getTime(),
           content: ['' + this.text]
         }
-        this.lift.messages.push(new_msg)
-        this.text = ''
+        this.lift.messages.push(newMsg)
       }
-      
+      this.messageText = ''
     },
 
-    view_car(){
+    viewCar(){
       var car = this.lift.car
       var search = car.brand + '+' + car.model.replace(' ', '') + '+' + car.type + '+' + this.lift.car.color
       openURL('https://www.ecosia.org/images?q=' + search)
     },
 
-    go_back(){
+    goBack(){
       this.$emit('pagetrans_slide')
       this.chatOpen = false
       window.location.href = '/#/chats'

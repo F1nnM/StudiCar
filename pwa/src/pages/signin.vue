@@ -18,6 +18,7 @@
           <q-form @submit="onSubmit" class="q-gutter-md">
             <q-input
               v-model="username"
+              type="text"
               label="Benutzername"
               hint="Bitte gib deinen Benutzernamen ein"
               lazy-rules
@@ -34,7 +35,7 @@
           val => val !== null && val !== '' || 'Bitte gib dein richtiges Passwort ein.'
         ]"
             />
-            <q-separator spaced />
+            <br />
 
             <div>
               <q-btn label="Anmelden" type="submit" color="primary" />
@@ -50,23 +51,14 @@
 export default {
   data () {
     return {
-      contentStyle: {
-        backgroundColor: 'rgba(0,0,0,0.02)',
-        color: '#555'
-      },
+      username: '',
+      pwd: ''
+    }
+  },
 
-      contentActiveStyle: {
-        backgroundColor: '#eee',
-        color: 'black'
-      },
-
-      thumbStyle: {
-        right: '2px',
-        borderRadius: '5px',
-        backgroundColor: '#027be3',
-        width: '5px',
-        opacity: 0.75
-      }
+  methods: {
+    onSubmit(){
+      alert('SUBMITTED')
     }
   }
 }
