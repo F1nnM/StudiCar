@@ -97,9 +97,17 @@
       </div>
     </q-drawer>
 
-    <div class="q-pa-md bg-white" v-touch-swipe.mouse.right="goBack()">
-      <q-page-scroller reverse position="top" :scroll-offset="20" :offset="[0, 18]">
-        <q-btn fab icon="keyboard_arrow_down" color="accent" />
+    <div class="q-pa-md bg-white" v-touch-swipe.mouse.right="goBack">
+      <q-page-scroller
+        reverse
+        position="bottom-right"
+        :scroll-offset="1000"
+        :duration="50"
+        :offset="[10, 18]"
+      >
+        <div style="z-index: 9000;">
+          <q-btn flat class="rotate-90 text-h4">›</q-btn>
+        </div>
       </q-page-scroller>
       <div v-for="item in lift.messages" :key="item.timestamp">
         <q-chat-message
@@ -164,7 +172,7 @@ import { date } from 'quasar'
 
 export default {
   mounted(){
-     window.scrollTo(0,1000000)
+     setTimeout(() => window.scrollTo(0,1000000), 300)
   },
   data(){
     

@@ -1,5 +1,9 @@
 // app global css in SCSS form
 
+html {
+  scroll-behavior: smooth;
+}
+
 .rise-content {
   animation: rise 1s ease-out;
 
@@ -60,14 +64,26 @@
 
 .expand-enter-active,
 .collapse-leave-active {
-  transition: all 0.15s ease-out;
-  transform-origin: center bottom;
+  transition: all 0.1s;
+  transform-origin: center center;
 }
 
 .expand-enter,
 .collapse-leave-to {
+  transform: scaleY(0);
   opacity: 0;
-  transform: scaleY(0.2) scaleX(0.8) translateY(-5vh);
+}
+
+.expand-leave-active,
+.collapse-enter-active {
+  transition: all 0.1s;
+  transform-origin: center center;
+}
+
+.expand-leave-to,
+.collapse-enter {
+  transform: scaleY(1.4);
+  opacity: 0;
 }
 
 /* PLEASE NOTE:
