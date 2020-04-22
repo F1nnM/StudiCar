@@ -97,7 +97,10 @@
       </div>
     </q-drawer>
 
-    <div class="q-pa-md bg-white" v-touch-swipe.mouse.right="goBack">
+    <div class="q-pa-md bg-white" v-touch-swipe.mouse.right="goBack()">
+      <q-page-scroller reverse position="top" :scroll-offset="20" :offset="[0, 18]">
+        <q-btn fab icon="keyboard_arrow_down" color="accent" />
+      </q-page-scroller>
       <div v-for="item in lift.messages" :key="item.timestamp">
         <q-chat-message
           class="custom-chat-label"
@@ -116,11 +119,11 @@
       </div>
     </div>
     <div class="row" style="z-index: 2900; position: fixed; bottom: 0; left: 0; width: 100vw;">
-      <q-toolbar class="col-10 bg-grey-3">
+      <q-toolbar class="col-xs-10 col-md-11 bg-grey-3">
         <q-btn flat dense icon="call_split" v-if="false"></q-btn>
         <q-toolbar-title>
           <template>
-            <div style="max-width: 400px;">
+            <div>
               <q-form @submit="sendMessage" class="q-gutter-md">
                 <q-input
                   class="custom-input"
@@ -133,7 +136,7 @@
           </template>
         </q-toolbar-title>
       </q-toolbar>
-      <q-toolbar class="col-2 bg-white">
+      <q-toolbar class="col-xs-2 col-md-1 bg-white">
         <q-btn
           @click="sendMessage()"
           icon="arrow_forward_ios"
@@ -152,11 +155,6 @@
 <script>
 
 import {dom } from 'quasar'
-const { ready } = dom
-
-ready(function(){
-  window.scrollTo(0,1000000)
-})
 
 import { openURL } from 'quasar'
 
@@ -165,7 +163,11 @@ import { date } from 'quasar'
 
 
 export default {
+  mounted(){
+     window.scrollTo(0,1000000)
+  },
   data(){
+    
     return{
       lift_info: false,
       messageText: '',
