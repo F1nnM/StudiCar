@@ -23,11 +23,30 @@ module.exports = {
     '/profilePicture': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid'], res)) {
         let result = await runQuery("SELECT PICTURE FROM `USER` WHERE USER.FB_ID = ?", [options.fbid]);
-        console.log(result);
         res.setHeader('Content-Type', 'image/png');
         res.end(result.result[0].PICTURE, 'binary');
       }
-    }
+    },
+    '/getUserData': async (req, res, options) => {
+      if (!isOptionMissing(options, ['fbid'], res)) {
+        let result = (await runQuery("SELECT NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKE, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING FROM `USER` WHERE USER.FB_ID = ?", [options.fbid])).result[0]
+        let data = {
+          uid: options.fbid,
+          name: result.NAME,
+          gender: result.GENDER,
+          course: result.COURSE,
+          description: result.DESCRIPTION,
+          createdAt: result.CREATED_DATE,
+          prefs: {
+            smoke: result.PREF_SMOKE,
+            music: result.PREF_MUSIC,
+            talk: result.PREF_TALK,
+            talkMorning: result.PREF_TALK_MORNING
+          }
+        }
+        res.end(JSON.stringify(data));
+      }
+    },
 
   },
   'POST': {
@@ -37,39 +56,35 @@ module.exports = {
         res.end(JSON.stringify(result))
       }
     },
-    '/addUserIfNotExists': async (req, res, options) => {
+    '/createUserIfNotExisting': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid', 'name', 'mail'], res)) {
-        var jdenticon = require("jdenticon")
-        jdenticon.config = {
-          lightness: {
-            color: [0.31, 0.81],
-            grayscale: [0.26, 0.90]
-          },
-          saturation: {
-            color: 0.60,
-            grayscale: 0.00
-          },
-          backColor: "#ffffffff"
-        };
+        let users = await runQuery("SELECT ID FROM `USER` WHERE USER.FB_ID = ?", [options.fbid]);
+        if (users.length == 0) {
+          var jdenticon = require("jdenticon")
+          jdenticon.config = {
+            lightness: {
+              color: [0.31, 0.81],
+              grayscale: [0.26, 0.90]
+            },
+            saturation: {
+              color: 0.60,
+              grayscale: 0.00
+            },
+            backColor: "#ffffffff"
+          };
 
-        let size = 200
-        let png = jdenticon.toPng(options.name, size);
+          let size = 200
+          let png = jdenticon.toPng(options.name, size);
 
-        console.log(options)
-
-        let result = await runQuery(
-          "INSERT INTO `USER` (`ID`, `FB_ID`, `NAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKE`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`)" +
-          "VALUES (NULL, ?, ?, 'X', '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED')",
-          [options.fbid, options.name, png, options.mail]).catch(error => {
-            if (error.code == 'ER_DUP_ENTRY') {
-              res.end("existed")
-              console.log(error)
-            } else {
-              res.writeHead(500)
-              res.end(error.message)
-            }
-          });
-        res.end("added")
+          let result = await runQuery(
+            "INSERT INTO `USER` (`ID`, `FB_ID`, `NAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKE`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`)" +
+            "VALUES (NULL, ?, ?, 'X', '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED')",
+            [options.fbid, options.name, png, options.mail]).catch(error => {
+              throw error;
+            });
+          res.end("added")
+        }
+        res.end("existed")
       }
     }
   }

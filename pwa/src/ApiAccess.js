@@ -33,12 +33,17 @@ export const SQL_TEST_ADD = {
   method: "POST"
 }
 
-export const SQL_USER_ADD_IF_NOT_EXISTS = {
-  path: "/addUserIfNotExists",
+export const SQL_CREATE_USER_IF_NOT_EXISTING = {
+  path: "/createUserIfNotExisting",
   method: "POST"
 }
 
 export const GET_USER_PROFILE_PIC = {
   path: "/profilePicture",
+  method: "GET"
+}
+
+export const SQL_GET_USER_DATA = {
+  path: "/getUserData",
   method: "GET"
 }
