@@ -10,6 +10,7 @@
   "author": "Finn Melzer <studicar@mfinn.de>",
   "license": "ISC",
   "dependencies": {
+    "firebase-admin": "^8.10.0",
     "jdenticon": "^2.2.0",
     "mariadb": "^2.3.1"
   }

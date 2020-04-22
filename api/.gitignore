@@ -1,3 +1,4 @@
 dbConfig.js
 server.key
 server.pem
+firebaseAccountKey.json
