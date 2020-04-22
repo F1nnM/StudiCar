@@ -28,17 +28,26 @@ module.exports = {
         res.end(JSON.stringify(result))
       }
     },
-    '/addUser': async (req, res, options) => {
-      if (!isOptionMissing(options, ['fbid', 'name', 'gender', 'mail'], res)) {
+    '/addUserIfNotExists': async (req, res, options) => {
+      if (!isOptionMissing(options, ['fbid', 'name', 'mail'], res)) {
         var jdenticon = require("jdenticon")
         let size = 200
         let png = jdenticon.toPng(options.name, size);
 
+        //TODO check if exists
+
         let result = await runQuery(
           "INSERT INTO `USER` (`ID`, `FB_ID`, `NAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKE`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`)" +
-          "VALUES (NULL, ?, ?, ?, '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED')",
-          [options.fbid, options.name, options.gender, png, options.mail]);
-        res.end(JSON.stringify(result))
+          "VALUES (NULL, ?, ?, 'X', NULL, ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED')",
+          [options.fbid, options.name, png, options.mail]).catch(error => {
+            if (error.code == 'ER_DUP_ENTRY')
+              res.end("existed")
+            else {
+              res.writeHead(500)
+              res.end(error.message)
+            }
+          });
+        res.end("added")
       }
     }
   }

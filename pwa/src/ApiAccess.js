@@ -1,9 +1,9 @@
-export const basePath = process.env.DEV ? "http://localhost" :
+export const basePath = process.env.DEV ? "https://"+window.location.hostname :
   (window.location.hostname.startsWith("dev") ? "https://dev.api.studicar.mfinn.de" : "https://api.studicar.mfinn.de")
 
 export function sendApiRequest(action, options, successCallback, errorCallback) {
   if (!(action.path && action.method))
-    throw new Error("Invalid action supplied. Use predefined or make sure that it contains a path and a method.")
+    errorCallback(new Error("Invalid action supplied. Use predefined or make sure that it contains a path and a method."))
 
   var axios = require("axios");
 
@@ -33,7 +33,7 @@ export const SQL_TEST_ADD = {
   method: "POST"
 }
 
-export const SQL_USER_ADD = {
-  path: "/addUser",
+export const SQL_USER_ADD_IF_NOT_EXISTS = {
+  path: "/addUserIfNotExists",
   method: "POST"
 }
