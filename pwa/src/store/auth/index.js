@@ -45,10 +45,18 @@ export default {
     async register({ commit }, payload) {
       let email = payload.email
       let password = payload.password
+      let name = payload.name
 
       await Firebase.auth().createUserWithEmailAndPassword(email, password)
         .then(user => {
-          commit('SET_USER', user)
+          Firebase.auth().currentUser.updateProfile({
+            displayName: name
+          }).then(() => {
+            commit('SET_USER', Firebase.auth().currentUser)
+          })
+            .catch(error => {
+              throw error
+            })
         })
         .catch(error => {
           throw error
