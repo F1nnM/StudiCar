@@ -11,22 +11,6 @@ function isOptionMissing(data, needed, res) {
   });
 }
 
-var admin = require("firebase-admin");
-
-var serviceAccount = require("./firebaseAccountKey.json");
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
-
-function getUidFromSecretToken(idToken, callback) {
-  admin.auth().verifyIdToken(idToken)
-    .then(decodedToken => {
-      callback(decodedToken.uid);
-    })
-    .catch(err => { throw err })
-}
-
 module.exports = {
   'GET': {
     '/ping': (req, res, options) => {
@@ -72,9 +56,9 @@ module.exports = {
       }
     },
     '/createUserIfNotExisting': async (req, res, options) => {
-      if (!isOptionMissing(options, ['fbid', 'name', 'mail'], res)) {
-        let users = await runQuery("SELECT ID FROM `USER` WHERE USER.FB_ID = ?", [options.fbid]);
-        if (users.length == 0) {
+      if (!isOptionMissing(options, ['secretFbId', 'name', 'mail'], res)) {
+        let users = (await runQuery("SELECT ID FROM `USER` WHERE USER.FB_ID = ?", [options.secretFbId])).result[0];
+        if (!users) {
           var jdenticon = require("jdenticon")
           jdenticon.config = {
             lightness: {
@@ -91,10 +75,10 @@ module.exports = {
           let size = 200
           let png = jdenticon.toPng(options.name, size);
 
-          let result = await runQuery(
+          await runQuery(
             "INSERT INTO `USER` (`ID`, `FB_ID`, `NAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKE`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`)" +
             "VALUES (NULL, ?, ?, 'X', '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED')",
-            [options.fbid, options.name, png, options.mail]).catch(error => {
+            [options.secretFbId, options.name, png, options.mail]).catch(error => {
               throw error;
             });
           res.end("added")

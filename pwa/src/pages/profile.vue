@@ -6,11 +6,7 @@
       <br />
       <p>Hier siehst du alle wichtigen Infos zu deinem Profil.</p>
     </div>
-    <q-img
-      transition-show="slide-left"
-      :src="ppPath"
-      style="height: 200px; max-width: 200px;"
-    >
+    <q-img transition-show="slide-left" :src="ppPath" style="height: 200px; max-width: 200px;">
       <template v-slot:loading>
         <div class="absolute-full flex flex-center text-black">
           <q-inner-loading
@@ -74,7 +70,7 @@
 <script>
 import { date } from "quasar";
 import SignOutButton from "../components/SignOutButton";
-import { ApiBasePath, GET_USER_PROFILE_PIC } from '../ApiAccess'
+import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
 
 export default {
   components: { SignOutButton },
@@ -98,7 +94,7 @@ export default {
       }),
       distance: this.global.user.settings.liftMaxDistance,
       editDistance: false,
-      ppPath: ApiBasePath+GET_USER_PROFILE_PIC.path+'?fbid='+this.$store.getters['auth/user'].uid
+      ppPath: ''
     };
   },
 
@@ -106,6 +102,13 @@ export default {
     saveDistance() {
       this.global.user.settings.liftMaxDistance = this.distance;
     }
+  },
+  mounted() {
+    buildGetRequestUrl(
+      GET_USER_PROFILE_PIC,
+      { fbid: this.$store.getters["auth/user"].uid },
+      url => (this.ppPath = url)
+    );
   }
 };
 </script>
