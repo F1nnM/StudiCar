@@ -1,4 +1,4 @@
-export const basePath = process.env.DEV ? "https://"+window.location.hostname :
+export const ApiBasePath = process.env.DEV ? "https://"+window.location.hostname :
   (window.location.hostname.startsWith("dev") ? "https://dev.api.studicar.mfinn.de" : "https://api.studicar.mfinn.de")
 
 export function sendApiRequest(action, options, successCallback, errorCallback) {
@@ -8,11 +8,11 @@ export function sendApiRequest(action, options, successCallback, errorCallback) 
   var axios = require("axios");
 
   if (action.method === "GET") {
-    axios.get(basePath + action.path, { params: options })
+    axios.get(ApiBasePath + action.path, { params: options })
       .then(response => successCallback(response.data))
       .catch(errorCallback)
   } else if (action.method === "POST") {
-    axios.post(basePath + action.path, options)
+    axios.post(ApiBasePath + action.path, options)
       .then(response => successCallback(response.data))
       .catch(errorCallback)
   }
@@ -36,4 +36,9 @@ export const SQL_TEST_ADD = {
 export const SQL_USER_ADD_IF_NOT_EXISTS = {
   path: "/addUserIfNotExists",
   method: "POST"
+}
+
+export const GET_USER_PROFILE_PIC = {
+  path: "/profilePicture",
+  method: "GET"
 }

@@ -1,5 +1,6 @@
 import Firebase, { registerVersion } from 'firebase/app'
 import 'firebase/auth'
+import { SQL_USER_ADD_IF_NOT_EXISTS, sendApiRequest } from '../../ApiAccess'
 
 export default {
   namespaced: true,
@@ -53,7 +54,19 @@ export default {
             displayName: name
           })
             .then(_ => {
-              commit('SET_USER', Firebase.auth().currentUser)
+              let currentUser = Firebase.auth().currentUser;
+              sendApiRequest(
+                SQL_USER_ADD_IF_NOT_EXISTS,
+                { fbid: currentUser.uid, name: currentUser.displayName, mail: currentUser.email },
+                _ => {
+                  commit("SET_USER", currentUser);
+                  router.replace({ name: 'marketplace' }).catch(() => { })
+                  new Vue(app) /* eslint-disable-line no-new */
+                },
+                error => {
+                  dispatch('signOut');
+                }
+              );
             })
             .catch(error => {
               throw error

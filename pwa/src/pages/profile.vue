@@ -8,8 +8,8 @@
     </div>
     <q-img
       transition-show="slide-left"
-      src="~assets/sad.svg"
-      style="height: 200px; max-width: 50vw;"
+      :src="ppPath"
+      style="height: 200px; max-width: 200px;"
     >
       <template v-slot:loading>
         <div class="absolute-full flex flex-center text-black">
@@ -74,6 +74,7 @@
 <script>
 import { date } from "quasar";
 import SignOutButton from "../components/SignOutButton";
+import { ApiBasePath, GET_USER_PROFILE_PIC } from '../ApiAccess'
 
 export default {
   components: { SignOutButton },
@@ -96,7 +97,8 @@ export default {
         ]
       }),
       distance: this.global.user.settings.liftMaxDistance,
-      editDistance: false
+      editDistance: false,
+      ppPath: ApiBasePath+GET_USER_PROFILE_PIC.path+'?fbid='+this.$store.getters['auth/user'].uid
     };
   },
 
