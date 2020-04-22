@@ -22,11 +22,7 @@ export default {
       this.$firebase
         .auth()
         .signInWithPopup(provider)
-        .then(function(result) {
-          // This gives you a Google Access Token. You can use it to access the Google API.
-          var token = result.credential.accessToken;
-          this.$store.commit("auth/SET_USER", result.user);
-        })
+        .then(_=>_)
         .catch(function(error) {
           // Handle Errors here.
           var errorCode = error.code;

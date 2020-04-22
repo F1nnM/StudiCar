@@ -51,9 +51,10 @@ export default {
         .then(user => {
           Firebase.auth().currentUser.updateProfile({
             displayName: name
-          }).then(() => {
-            commit('SET_USER', Firebase.auth().currentUser)
           })
+            .then(_ => {
+              commit('SET_USER', Firebase.auth().currentUser)
+            })
             .catch(error => {
               throw error
             })

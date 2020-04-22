@@ -1,16 +1,21 @@
+var server;
+
 if (typeof (PhusionPassenger) !== 'undefined') {
   PhusionPassenger.configure({ autoInstall: false });
+  var http = require('http');
+  server = http.createServer();
+} else {
+  var https = require('https');
+  const fs = require('fs');
+
+  const options = {
+    key: fs.readFileSync('server.key'),
+    cert: fs.readFileSync('server.pem')
+  };
+
+  server = https.createServer(options);
 }
 
-var fs = require("fs");
-process.on('uncaughtException', function (err) {
-  console.log('Caught exception: ', err);
-  fs.appendFile('err.log', message);
-});
-
-
-var http = require('http');
-var server = http.createServer();
 var api = require('./api');
 server.on('request', async (req, res) => {
   //CORS -Stuff
@@ -75,5 +80,5 @@ server.on('request', async (req, res) => {
 if (typeof (PhusionPassenger) !== 'undefined') {
   server.listen('passenger');
 } else {
-  server.listen(80);
+  server.listen(443);
 }
