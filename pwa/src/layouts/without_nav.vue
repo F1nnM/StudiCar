@@ -58,12 +58,12 @@ export default {
         title: 'Home',
         caption: 'Die Startseite',
         icon: 'home',
-        link: '/'
+        link: '/#/'
         },{
         title: 'Impressum',
         caption: 'Wir stellen uns vor',
         icon: 'how_to_reg',
-        link: '/impressum'
+        link: '/#/impressum'
         }
         ]
       }
