@@ -3,7 +3,7 @@
     <div class="q-gutter-y-md" style="max-width: 600px">
       <div
         class="text-h5 custom-underline c-u-l c-u-2 c-u-md"
-      >{{global.systemInfo.greeting}}, {{global.user.name}}</div>
+      >{{global.systemInfo.greeting}}, {{$store.getters['auth/user'].displayName}}</div>
       <br />
       <p>
         Der Marktplatz ist so etwas wie das Schwarze Brett von StudiCar. Hier siehst du alle aktuellen Mitfahrgelegenheiten, aufsteigend nach Entfernung geordnet.
