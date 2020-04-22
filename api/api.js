@@ -59,7 +59,7 @@ module.exports = {
 
         let result = await runQuery(
           "INSERT INTO `USER` (`ID`, `FB_ID`, `NAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKE`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`)" +
-          "VALUES (NULL, ?, ?, 'X', NULL, ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED')",
+          "VALUES (NULL, ?, ?, 'X', '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED')",
           [options.fbid, options.name, png, options.mail]).catch(error => {
             if (error.code == 'ER_DUP_ENTRY') {
               res.end("existed")
