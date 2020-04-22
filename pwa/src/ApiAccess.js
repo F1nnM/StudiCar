@@ -1,4 +1,7 @@
-export const ApiBasePath = process.env.DEV ? "https://"+window.location.hostname :
+import Firebase from 'firebase/app'
+import 'firebase/auth'
+
+export const ApiBasePath = process.env.DEV ? "https://" + window.location.hostname :
   (window.location.hostname.startsWith("dev") ? "https://dev.api.studicar.mfinn.de" : "https://api.studicar.mfinn.de")
 
 export function sendApiRequest(action, options, successCallback, errorCallback) {
@@ -7,15 +10,37 @@ export function sendApiRequest(action, options, successCallback, errorCallback) 
 
   var axios = require("axios");
 
-  if (action.method === "GET") {
-    axios.get(ApiBasePath + action.path, { params: options })
-      .then(response => successCallback(response.data))
-      .catch(errorCallback)
-  } else if (action.method === "POST") {
-    axios.post(ApiBasePath + action.path, options)
-      .then(response => successCallback(response.data))
-      .catch(errorCallback)
-  }
+  Firebase.auth().currentUser.getIdToken(/* forceRefresh */ true)
+    .then(idToken_ => {
+      options.idtoken = idToken_
+      if (action.method === "GET") {
+        axios.get(ApiBasePath + action.path, { params: options })
+          .then(response => successCallback(response.data))
+          .catch(errorCallback)
+      } else if (action.method === "POST") {
+        axios.post(ApiBasePath + action.path, options)
+          .then(response => successCallback(response.data))
+          .catch(errorCallback)
+      }
+    })
+    .catch(error => {
+      throw error
+    });
+}
+
+export function buildGetRequestUrl(action, options, callback) {
+  Firebase.auth().currentUser.getIdToken(/* forceRefresh */ true)
+    .then(idToken_ => {
+      let url = ApiBasePath + action.path
+      url += "?idtoken=" + encodeURIComponent(idToken_)
+      Object.keys(options).forEach(key => {
+        url += "&" + encodeURIComponent(key) + "=" + encodeURIComponent(options[key])
+      })
+      callback(url);
+    })
+    .catch(error => {
+      throw error
+    });
 }
 
 export const PING = {

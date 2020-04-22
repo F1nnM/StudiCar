@@ -16,6 +16,14 @@ if (typeof (PhusionPassenger) !== 'undefined') {
   server = https.createServer(options);
 }
 
+var admin = require("firebase-admin");
+
+var serviceAccount = require("./firebaseAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
 var api = require('./api');
 server.on('request', async (req, res) => {
   //CORS -Stuff
@@ -52,9 +60,19 @@ server.on('request', async (req, res) => {
         })
       }
 
-      await api.GET[urlParts.pathname](req, res, options);
-      break;
+      if (!options.idtoken) {
+        res.writeHead(401);
+        res.end;
+        break;
+      }
+      admin.auth().verifyIdToken(options.idtoken)
+        .then( async decodedToken => {
+          options.secretFbId = decodedToken.uid;
+          await api.GET[urlParts.pathname](req, res, options);
+        })
+        .catch(err => { throw err })
 
+      break;
     case "POST":
       if (!api.POST[urlParts.pathname]) {
         res.writeHead(404);
@@ -70,7 +88,19 @@ server.on('request', async (req, res) => {
         let options = {};
         if (buffer.length > 0)
           options = JSON.parse(buffer);
-        await api.POST[urlParts.pathname](req, res, options);
+
+        if (!options.idtoken) {
+          res.writeHead(401);
+          res.end;
+          return;
+        }
+        admin.auth().verifyIdToken(options.idtoken)
+          .then( async decodedToken => {
+            options.secretFbId = decodedToken.uid;
+            await api.POST[urlParts.pathname](req, res, options);
+          })
+          .catch(err => { throw err })
+
       })
       break;
   }

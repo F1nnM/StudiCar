@@ -10,10 +10,10 @@ export default ({ app, router, Vue, store }) => {
       if (user.displayName)
         sendApiRequest(
           SQL_CREATE_USER_IF_NOT_EXISTING,
-          { fbid: user.uid, name: user.displayName, mail: user.email },
+          { name: user.displayName, mail: user.email },
           _ => sendApiRequest(
             SQL_GET_USER_DATA,
-            { fbid: user.uid },
+            {fbid: user.uid},
             data => {
               console.log(data)
               store.commit("auth/SET_USER", data);
