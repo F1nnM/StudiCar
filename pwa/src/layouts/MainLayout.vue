@@ -120,7 +120,7 @@ export default {
         title: 'Marktplatz',
         caption: 'Zur Übersicht',
         icon: 'home',
-        link: '/'
+        link: '/#/'
         },
         {
         title: 'Chats',
