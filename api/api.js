@@ -11,6 +11,22 @@ function isOptionMissing(data, needed, res) {
   });
 }
 
+var admin = require("firebase-admin");
+
+var serviceAccount = require("./firebaseAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+function getUidFromSecretToken(idToken, callback) {
+  admin.auth().verifyIdToken(idToken)
+    .then(decodedToken => {
+      callback(decodedToken.uid);
+    })
+    .catch(err => { throw err })
+}
+
 module.exports = {
   'GET': {
     '/ping': (req, res, options) => {
@@ -46,8 +62,7 @@ module.exports = {
         }
         res.end(JSON.stringify(data));
       }
-    },
-
+    }
   },
   'POST': {
     '/sqlTest': async (req, res, options) => {
