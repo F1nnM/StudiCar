@@ -57,15 +57,13 @@ export default {
   },
   methods: {
     onSubmit() {
-      this.$router.replace({ name: "marketplace" }).catch(() => {});
-      
       let credentials = {
         email: this.email,
         password: this.password
       }
       this.$store.dispatch('auth/signIn', credentials)
         .then(user => {
-          this.$router.replace({ name: 'dashboard' }).catch(() => {})
+          this.$router.replace({ name: 'marketplace' }).catch(() => {})
         })
         .catch(error => {
           this.$q.notify('Invalid Login!')
