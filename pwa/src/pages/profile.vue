@@ -154,17 +154,6 @@ export default {
       }
     }
   },
-
-  computed: {
-    isUploading () {
-      return this.uploading !== null
-    },
-
-    canUpload () {
-      return this.files !== null
-    }
-  },
-
   methods: {
     saveDistance() {
       this.global.user.settings.liftMaxDistance = this.distance;
