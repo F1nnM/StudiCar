@@ -125,6 +125,8 @@ export default {
       distance: this.global.user.settings.liftMaxDistance,
       editDistance: false,
       ppPath: "",
+      openUpload: false,
+      file: null,
       description: this.$store.getters["auth/user"].description,
       genderOptions: [
         "Weiblich",
