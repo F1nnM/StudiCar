@@ -9,7 +9,7 @@
         <q-icon name="delete_outline" />
       </template>
 
-      <q-item tag="a" href="/#/chats/lift" @click="this.pageTrans = 'slide'" v-ripple>
+      <q-item tag="a" href="/#/chats/lift" @click="pageTrans = 'slide'" v-ripple>
         <q-item-section avatar>
           <q-avatar>
             <img :src="lift.url ? lift.url : 'https://cdn.quasar.dev/img/avatar2.jpg'" />
@@ -81,12 +81,15 @@ export default {
 			liftClick(item){
 				this.$emit('pagetrans_zoom')
 				this.$emit('pagetrans_y', Math.round(item.pageY/window.innerHeight*100))
-				this.pageTrans = 'liftToChats'
+				try{
+					this.pageTrans = 'liftToChats'
+				}
+				catch(e){}
 				//alert()
 			},
 
 			long_tab({e}){
-				alert("LONG")
+				alert('LONG TAPPED')
 			},
 
 			generate_time_string(time){

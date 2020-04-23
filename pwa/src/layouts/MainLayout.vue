@@ -101,8 +101,6 @@ export default {
         }
         return this.pageTrans
       
-
-      
     }
   },
 
@@ -147,10 +145,10 @@ export default {
         link: '/#/view-user'
         },
         {
-        title: 'Willkommen',
-        caption: 'Wozu diese App da ist',
+        title: 'Zum Lift',
+        caption: 'In den Chat an sich rein',
         icon: 'accessible',
-        link: '/#/willkommen'
+        link: '/#/chats/lift'
         },
         {
         title: 'Mein Profil',

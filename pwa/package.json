@@ -24,6 +24,7 @@
     "install": "^0.13.0",
     "qrcode": "^1.4.4",
     "quasar": "^1.0.0",
+    "vue-image-compressor": "^1.0.3",
     "vue-qrcode": "^0.3.3",
     "vue-qrcode-reader": "^2.1.1"
   },
