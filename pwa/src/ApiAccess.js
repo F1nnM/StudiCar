@@ -72,3 +72,8 @@ export const SQL_GET_USER_DATA = {
   path: "/getUserData",
   method: "GET"
 }
+
+export const SQL_UPDATE_DESCRIPTION = {
+  path: "/updateDescription",
+  method: "POST"
+}

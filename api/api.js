@@ -85,6 +85,16 @@ module.exports = {
         }
         res.end("existed")
       }
-    }
+    },
+    '/updateDescription': async (req, res, options) => {
+      if (!isOptionMissing(options, ['secretFbId', 'description'], res)) {
+        await runQuery(
+          "UPDATE `USER` SET `DESCRIPTION` = ? WHERE `USER`.`FB_ID` = ?",
+          [options.description, options.secretFbId]).catch(error => {
+            throw error;
+          });
+        res.end();
+      }
+     }
   }
 }

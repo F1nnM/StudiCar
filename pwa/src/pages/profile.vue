@@ -24,8 +24,17 @@
         >Bild kann leider nicht geladen werden. Bitte Internetverbindung überprüfen.</div>
       </template>
     </q-img>
-
     <br />
+
+    <q-input
+      v-model="description"
+      filled
+      autogrow
+      stack-label
+      label="Beschreibung"
+    />
+    <q-btn color="white" text-color="black" label="Beschreibung speichern" @click="updateDescription()"/>
+
     <div style="padding: 20px;">
       <p>Dabei seit: {{since}}</p>
       <p>Mitfahrangebote gesamt: {{global.user.liftsAll}}</p>
@@ -70,7 +79,7 @@
 <script>
 import { date } from "quasar";
 import SignOutButton from "../components/SignOutButton";
-import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
+import { buildGetRequestUrl, GET_USER_PROFILE_PIC, sendApiRequest, SQL_GET_USER_DATA, SQL_UPDATE_DESCRIPTION } from "../ApiAccess";
 
 export default {
   components: { SignOutButton },
@@ -94,13 +103,19 @@ export default {
       }),
       distance: this.global.user.settings.liftMaxDistance,
       editDistance: false,
-      ppPath: ''
+      ppPath: '',
+      description: this.$store.getters['auth/user'].description
     };
   },
 
   methods: {
     saveDistance() {
       this.global.user.settings.liftMaxDistance = this.distance;
+    },
+    updateDescription() {
+      sendApiRequest(SQL_UPDATE_DESCRIPTION, {description: this.description},
+      _=>_,
+      error => alert(error))
     }
   },
   mounted() {
