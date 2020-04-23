@@ -77,3 +77,8 @@ export const SQL_UPDATE_DESCRIPTION = {
   path: "/updateDescription",
   method: "POST"
 }
+
+export const SQL_UPDATE_GENDER = {
+  path: "/updateGender",
+  method: "POST"
+}

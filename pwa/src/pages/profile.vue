@@ -34,6 +34,8 @@
       @click="updateDescription()"
     />
 
+    <q-select v-model="gender" :options="genderOptions" label="Standard" />
+
     <div style="padding: 20px;">
       <p>Dabei seit: {{since}}</p>
       <p>Mitfahrangebote gesamt: {{global.user.liftsAll}}</p>
@@ -78,39 +80,63 @@
 <script>
 import { date } from "quasar";
 import SignOutButton from "../components/SignOutButton";
-import {
-  buildGetRequestUrl,
-  GET_USER_PROFILE_PIC,
-  sendApiRequest,
-  SQL_GET_USER_DATA,
-  SQL_UPDATE_DESCRIPTION
-} from "../ApiAccess";
+import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
 
 export default {
   components: { SignOutButton },
   data() {
     return {
-      since: date.formatDate(this.$store.getters['auth/user'].createdAt, "MMMM YYYY", {
-        months: [
-          "Januar",
-          "Februar",
-          "März",
-          "April",
-          "Mai",
-          "Juni",
-          "Juli",
-          "August",
-          "September",
-          "Oktober",
-          "November",
-          "Dezember"
-        ]
-      }),
+      since: date.formatDate(
+        this.$store.getters["auth/user"].createdAt,
+        "MMMM YYYY",
+        {
+          months: [
+            "Januar",
+            "Februar",
+            "März",
+            "April",
+            "Mai",
+            "Juni",
+            "Juli",
+            "August",
+            "September",
+            "Oktober",
+            "November",
+            "Dezember"
+          ]
+        }
+      ),
       distance: this.global.user.settings.liftMaxDistance,
       editDistance: false,
       ppPath: "",
-      description: this.$store.getters["auth/user"].description
+      description: this.$store.getters["auth/user"].description,
+      genderOptions: [
+        "Weiblich",
+        "Männlich",
+        "Divers",
+        "Sonstiges / Will ich nicht sagen"
+      ]
     };
+  },
+  computed: {
+    gender: {
+      get() {
+        switch (this.$store.getters["auth/user"].gender) {
+          case "W":
+            return "Weiblich";
+          case "M":
+            return "Männlich";
+          case "D":
+            return "Divers";
+          case "X":
+          default:
+            return "Sonstiges / Will ich nicht sagen";
+        }
+      },
+      set(value) {
+        this.$store.dispatch("auth/updateGender", value);
+      }
+    }
   },
 
   methods: {
@@ -118,12 +144,7 @@ export default {
       this.global.user.settings.liftMaxDistance = this.distance;
     },
     updateDescription() {
-      sendApiRequest(
-        SQL_UPDATE_DESCRIPTION,
-        { description: this.description },
-        _ => _,
-        error => alert(error)
-      );
+      this.$store.dispatch("auth/updateDescription", this.description);
     }
   },
   mounted() {
