@@ -26,14 +26,13 @@
     </q-img>
     <br />
 
-    <q-input
-      v-model="description"
-      filled
-      autogrow
-      stack-label
-      label="Beschreibung"
+    <q-input v-model="description" filled autogrow stack-label label="Beschreibung" />
+    <q-btn
+      color="white"
+      text-color="black"
+      label="Beschreibung speichern"
+      @click="updateDescription()"
     />
-    <q-btn color="white" text-color="black" label="Beschreibung speichern" @click="updateDescription()"/>
 
     <div style="padding: 20px;">
       <p>Dabei seit: {{since}}</p>
@@ -79,13 +78,19 @@
 <script>
 import { date } from "quasar";
 import SignOutButton from "../components/SignOutButton";
-import { buildGetRequestUrl, GET_USER_PROFILE_PIC, sendApiRequest, SQL_GET_USER_DATA, SQL_UPDATE_DESCRIPTION } from "../ApiAccess";
+import {
+  buildGetRequestUrl,
+  GET_USER_PROFILE_PIC,
+  sendApiRequest,
+  SQL_GET_USER_DATA,
+  SQL_UPDATE_DESCRIPTION
+} from "../ApiAccess";
 
 export default {
   components: { SignOutButton },
   data() {
     return {
-      since: date.formatDate(this.global.user.createdAt, "MMMM YYYY", {
+      since: date.formatDate(this.$store.getters['auth/user'].createdAt, "MMMM YYYY", {
         months: [
           "Januar",
           "Februar",
@@ -103,8 +108,8 @@ export default {
       }),
       distance: this.global.user.settings.liftMaxDistance,
       editDistance: false,
-      ppPath: '',
-      description: this.$store.getters['auth/user'].description
+      ppPath: "",
+      description: this.$store.getters["auth/user"].description
     };
   },
 
@@ -113,16 +118,21 @@ export default {
       this.global.user.settings.liftMaxDistance = this.distance;
     },
     updateDescription() {
-      sendApiRequest(SQL_UPDATE_DESCRIPTION, {description: this.description},
-      _=>_,
-      error => alert(error))
+      sendApiRequest(
+        SQL_UPDATE_DESCRIPTION,
+        { description: this.description },
+        _ => _,
+        error => alert(error)
+      );
     }
   },
   mounted() {
     buildGetRequestUrl(
       GET_USER_PROFILE_PIC,
       { fbid: this.$store.getters["auth/user"].uid },
-      url => (this.ppPath = url)
+      url => {
+        this.ppPath = url;
+      }
     );
   }
 };
