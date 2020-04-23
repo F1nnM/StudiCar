@@ -82,3 +82,8 @@ export const SQL_UPDATE_GENDER = {
   path: "/updateGender",
   method: "POST"
 }
+
+export const SQL_UPDATE_PROFILE_PICTURE = {
+  path: "/updateProfilePicture",
+  method: "POST"
+}
