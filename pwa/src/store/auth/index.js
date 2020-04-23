@@ -1,6 +1,6 @@
 import Firebase from 'firebase/app'
 import 'firebase/auth'
-import { SQL_CREATE_USER_IF_NOT_EXISTING, sendApiRequest, SQL_GET_USER_DATA } from '../../ApiAccess'
+import { SQL_CREATE_USER_IF_NOT_EXISTING, sendApiRequest, SQL_GET_USER_DATA, SQL_UPDATE_DESCRIPTION, SQL_UPDATE_GENDER } from '../../ApiAccess'
 
 export default {
   namespaced: true,
@@ -26,6 +26,14 @@ export default {
 
     RESET_USER(state) {
       state.user = null
+    },
+
+    UPDATE_DESCRIPTION(state, payload) {
+      state.user.description = payload;
+    },
+
+    UPDATE_GENDER(state, payload) {
+      state.user.gender = payload;
     }
   },
 
@@ -84,6 +92,42 @@ export default {
         .then(() => {
           commit('RESET_USER')
         })
+    },
+
+    async updateDescription({ commit }, payload) {
+      sendApiRequest(
+        SQL_UPDATE_DESCRIPTION,
+        { description: payload },
+        _ => commit('UPDATE_DESCRIPTION', payload),
+        error => alert(error)
+      );
+    },
+
+    async updateGender({ commit }, payload) {
+      let gender = payload
+      if (!['M', 'W', 'D', 'X'].includes(gender))
+        switch (gender) {
+          case 'Männlich':
+            gender = 'M'
+            break;
+          case 'Weiblich':
+            gender = 'W'
+            break;
+          case 'Divers':
+            gender = 'D'
+            break;
+          case 'Sonstiges':
+            gender = 'X'
+            break;
+          default:
+            throw new Error("Can't parse gender '"+gender+"'!")
+        }
+      sendApiRequest(
+        SQL_UPDATE_GENDER,
+        { gender: gender },
+        _ => commit('UPDATE_GENDER', gender),
+        error => alert(error)
+      )
     }
   }
 }

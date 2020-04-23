@@ -95,6 +95,16 @@ module.exports = {
           });
         res.end();
       }
-     }
+    },
+    '/updateGender': async (req, res, options) => {
+      if (!isOptionMissing(options, ['secretFbId', 'gender'], res)) {
+        await runQuery(
+          "UPDATE `USER` SET `GENDER` = ? WHERE `USER`.`FB_ID` = ?",
+          [options.gender, options.secretFbId]).catch(error => {
+            throw error;
+          });
+        res.end();
+      }
+    }
   }
 }
