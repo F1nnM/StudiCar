@@ -1,13 +1,14 @@
 <template>
   <div class="q-pa-md">
     <div class="q-gutter-y-md" style="max-width: 600px">
-      <div class="text-h4">Dein Profil</div>
+      <div class="text-h4">Dein Profil {{file}}</div>
       <hr />
       <br />
       <p>Hier siehst du alle wichtigen Infos zu deinem Profil.</p>
     </div>
     <q-img
       transition-show="slide-left"
+      class="relative"
       :src="ppPath"
       style="height: 200px; max-width: 200px;"
     >
@@ -27,6 +28,9 @@
           class="absolute-full flex flex-center text-white"
         >Bild kann leider nicht geladen werden. Bitte Internetverbindung überprüfen.</div>
       </template>
+      <q-badge floating class="q-pa-none" style="background-color: transparent;">
+        <q-btn round color="black" icon="edit" @click="openUpload = true" />
+      </q-badge>
     </q-img>
 
     <br />
@@ -43,8 +47,19 @@
 
     <SignOutButton />
 
+    <q-dialog v-model="openUpload" full-width>
+      <q-card>
+        <q-card-section>
+          <div class="q-pa-md column items-start q-gutter-y-md">
+            <q-file @input="loadFile" accept="image/*" />
+            <div id="anchor"></div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
     <q-dialog v-model="editDistance" full-height full-width>
-      <q-card class="column full-height" style="width: 300px">
+      <q-card class="column full-height">
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">Entfernung einstellen</div>
           <q-space />
@@ -76,6 +91,8 @@ import { date } from "quasar";
 import SignOutButton from "../components/SignOutButton";
 import { ApiBasePath, GET_USER_PROFILE_PIC } from '../ApiAccess'
 
+import imageCompressor from 'vue-image-compressor'
+
 export default {
   components: { SignOutButton },
   data() {
@@ -98,14 +115,68 @@ export default {
       }),
       distance: this.global.user.settings.liftMaxDistance,
       editDistance: false,
-      ppPath: ApiBasePath+GET_USER_PROFILE_PIC.path+'?fbid='+this.$store.getters['auth/user'].uid
+      ppPath: ApiBasePath+GET_USER_PROFILE_PIC.path+'?fbid='+this.$store.getters['auth/user'].uid,
+      openUpload: false,
+      file: null
     };
+  },
+
+  computed: {
+    isUploading () {
+      return this.uploading !== null
+    },
+
+    canUpload () {
+      return this.files !== null
+    }
   },
 
   methods: {
     saveDistance() {
       this.global.user.settings.liftMaxDistance = this.distance;
+    },
+
+    loadFile(file){
+      const size = 300 // represents the height
+      const ratio = 1 // default ratio at profile pictures
+
+      const width = size * ratio
+      const fileName = file.name
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = event => {
+          const img = new Image()
+          img.src = event.target.result
+        
+          img.onload = () => {
+            
+            const elem = document.createElement('canvas')
+            elem.width = width;
+            elem.height = size;
+
+            const ctx = elem.getContext('2d');
+            if(img.width >= img.height){ // landscape or square: width has to be cropped
+              var scale = img.height / size
+              var indent  = (img.width - img.height) / scale // indent has to be half of the difference and negative, additionally divided by scale
+              ctx.drawImage(img, indent / -2, 0, width + indent, size)
+            }
+            else { // portrait
+              var scale = img.width / size
+              var indent  = (img.height - img.width) / scale // indent has to be half of the difference and negative, additionally divided by scale
+              ctx.drawImage(img, 0, indent / -2, width, size + indent)
+            }
+            
+            // input image is made square and scaled
+            
+            
+            console.log(elem.toDataURL())
+            console.log(elem)
+              },
+              reader.onerror = error => console.log(error);
+      };
     }
+
   }
+
 };
 </script>
