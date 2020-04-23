@@ -109,7 +109,7 @@ module.exports = {
     '/updateProfilePicture': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'imageData'], res)) {
         var i = new Image()
-        i.onload = function () {
+        i.onload = async function () {
           if (!(i.naturalHeight == 300 && i.naturalWidth == 300)) {
             res.writeHead(400)
             res.end("Wrong dimension")
