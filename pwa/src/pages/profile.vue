@@ -1,17 +1,12 @@
 <template>
   <div class="q-pa-md">
-    <div class="q-gutter-y-md" style="max-width: 600px">
+    <div class="q-gutter-y-md">
       <div class="text-h4">Dein Profil {{file}}</div>
       <hr />
       <br />
       <p>Hier siehst du alle wichtigen Infos zu deinem Profil.</p>
     </div>
-    <q-img
-      transition-show="slide-left"
-      class="relative"
-      :src="ppPath"
-      style="height: 200px; max-width: 200px;"
-    >
+    <q-img transition-show="slide-left" :src="ppPath" style="height: 200px; max-width: 200px;">
       <template v-slot:loading>
         <div class="absolute-full flex flex-center text-black">
           <q-inner-loading
@@ -32,8 +27,18 @@
         <q-btn round color="black" icon="edit" @click="openUpload = true" />
       </q-badge>
     </q-img>
-
     <br />
+
+    <q-input v-model="description" filled autogrow stack-label label="Beschreibung" />
+    <q-btn
+      color="white"
+      text-color="black"
+      label="Beschreibung speichern"
+      @click="updateDescription()"
+    />
+
+    <q-select v-model="gender" :options="genderOptions" label="Standard" />
+
     <div style="padding: 20px;">
       <p>Dabei seit: {{since}}</p>
       <p>Mitfahrangebote gesamt: {{global.user.liftsAll}}</p>
@@ -89,7 +94,7 @@
 <script>
 import { date } from "quasar";
 import SignOutButton from "../components/SignOutButton";
-import { ApiBasePath, GET_USER_PROFILE_PIC } from '../ApiAccess'
+import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
 
 import imageCompressor from 'vue-image-compressor'
 
@@ -97,28 +102,57 @@ export default {
   components: { SignOutButton },
   data() {
     return {
-      since: date.formatDate(this.global.user.createdAt, "MMMM YYYY", {
-        months: [
-          "Januar",
-          "Februar",
-          "März",
-          "April",
-          "Mai",
-          "Juni",
-          "Juli",
-          "August",
-          "September",
-          "Oktober",
-          "November",
-          "Dezember"
-        ]
-      }),
+      since: date.formatDate(
+        this.$store.getters["auth/user"].createdAt,
+        "MMMM YYYY",
+        {
+          months: [
+            "Januar",
+            "Februar",
+            "März",
+            "April",
+            "Mai",
+            "Juni",
+            "Juli",
+            "August",
+            "September",
+            "Oktober",
+            "November",
+            "Dezember"
+          ]
+        }
+      ),
       distance: this.global.user.settings.liftMaxDistance,
       editDistance: false,
-      ppPath: ApiBasePath+GET_USER_PROFILE_PIC.path+'?fbid='+this.$store.getters['auth/user'].uid,
-      openUpload: false,
-      file: null
+      ppPath: "",
+      description: this.$store.getters["auth/user"].description,
+      genderOptions: [
+        "Weiblich",
+        "Männlich",
+        "Divers",
+        "Sonstiges / Will ich nicht sagen"
+      ]
     };
+  },
+  computed: {
+    gender: {
+      get() {
+        switch (this.$store.getters["auth/user"].gender) {
+          case "W":
+            return "Weiblich";
+          case "M":
+            return "Männlich";
+          case "D":
+            return "Divers";
+          case "X":
+          default:
+            return "Sonstiges / Will ich nicht sagen";
+        }
+      },
+      set(value) {
+        this.$store.dispatch("auth/updateGender", value);
+      }
+    }
   },
 
   computed: {
@@ -174,8 +208,20 @@ export default {
               },
               reader.onerror = error => console.log(error);
       };
-    }
+    },
 
+    updateDescription() {
+      this.$store.dispatch("auth/updateDescription", this.description);
+    }
+  },
+  mounted() {
+    buildGetRequestUrl(
+      GET_USER_PROFILE_PIC,
+      { fbid: this.$store.getters["auth/user"].uid },
+      url => {
+        this.ppPath = url;
+      }
+    );
   }
 
 };

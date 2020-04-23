@@ -1,6 +1,5 @@
 <template>
   <div class="q-pa-md">
-    <p>{{idToken}}</p>
     <q-toggle v-model="show" />
     <qrGenerator value="Johannes" :show="show" />
   </div>
@@ -8,6 +7,7 @@
 
 <script>
 import qrGenerator from "components/qrGenerator";
+import { sendApiRequest, SQL_UPDATE_PROFILE_PICTURE } from '../ApiAccess';
 
 export default {
   components: {
@@ -15,23 +15,19 @@ export default {
   },
   data() {
     return {
-      show: false,
-      idToken: ''
+      show: false
     };
   },
   methods: {
-    
+    updateProfilePicture() {
+      sendApiRequest(SQL_UPDATE_PROFILE_PICTURE,
+      {imageData: /*base64-string goes here */ ""},
+      _ => alert("success"),
+      error => {throw error})
+    }
   },
   mounted () {
-      this.$firebase
-        .auth()
-        .currentUser.getIdToken(/* forceRefresh */ true)
-        .then(idToken_ => {
-          this.idToken = idToken_;
-        })
-        .catch(error => {
-          this.idToken = "ERROR: "+error;
-        });
+      
     }
 };
 </script>
