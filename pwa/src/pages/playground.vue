@@ -7,6 +7,7 @@
 
 <script>
 import qrGenerator from "components/qrGenerator";
+import { sendApiRequest, SQL_UPDATE_PROFILE_PICTURE } from '../ApiAccess';
 
 export default {
   components: {
@@ -18,7 +19,12 @@ export default {
     };
   },
   methods: {
-    
+    updateProfilePicture() {
+      sendApiRequest(SQL_UPDATE_PROFILE_PICTURE,
+      {imageData: /*base64-string goes here */ ""},
+      _ => alert("success"),
+      error => {throw error})
+    }
   },
   mounted () {
       

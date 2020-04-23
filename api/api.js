@@ -105,6 +105,26 @@ module.exports = {
           });
         res.end();
       }
+    },
+    '/updateProfilePicture': async (req, res, options) => {
+      if (!isOptionMissing(options, ['secretFbId', 'imageData'], res)) {
+        var i = new Image()
+        i.onload = function () {
+          if (!(i.naturalHeight == 300 && i.naturalWidth == 300)) {
+            res.writeHead(400)
+            res.end("Wrong dimension")
+            return
+          }
+          let blob = Buffer.from(options.imageData, "base64")
+          await runQuery(
+            "UPDATE `USER` SET `PICTURE` = ? WHERE `USER`.`FB_ID` = ?",
+            [blob, options.secretFbId]).catch(error => {
+              throw error;
+            });
+          res.end();
+        }
+        i.src = options.imageData
+      }
     }
   }
 }
