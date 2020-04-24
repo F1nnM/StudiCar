@@ -1,6 +1,6 @@
 var runQuery = require('./db');
 
-function isOptionMissing(data, needed, res) {
+function isOptionMissing (data, needed, res) {
   return needed.some(key => {
     if (typeof data[key] == "undefined") {
       res.writeHead(400);
@@ -29,7 +29,7 @@ module.exports = {
     },
     '/getUserData': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid'], res)) {
-        let result = (await runQuery("SELECT NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKE, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING FROM `USER` WHERE USER.FB_ID = ?", [options.fbid])).result[0]
+        let result = (await runQuery("SELECT NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKE, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `USER` WHERE USER.FB_ID = ?", [options.fbid])).result[0]
         let data = {
           uid: options.fbid,
           name: result.NAME,
@@ -42,6 +42,9 @@ module.exports = {
             music: result.PREF_MUSIC,
             talk: result.PREF_TALK,
             talkMorning: result.PREF_TALK_MORNING
+          },
+          settings: {
+            liftMaxDistance: result.LIFT_MAX_DISTANCE
           }
         }
         res.end(JSON.stringify(data));
@@ -104,6 +107,19 @@ module.exports = {
             throw error;
           });
         res.end();
+      }
+    },
+    '/updateLiftMaxDistance': async (req, res, options) => {
+      if (!isOptionMissing(options, ['secretFbId', 'liftMaxDistance'], res)) {
+        await runQuery(
+          "UPDATE `USER` SET `LIFT_MAX_DISTANCE` = ? WHERE `USER`.`FB_ID` = ?",
+          [options.liftMaxDistance, options.secretFbId]).catch(error => {
+            throw error;
+          });
+        res.end();
+      }
+      else {
+        console.log('Problem')
       }
     },
     '/updateProfilePicture': async (req, res, options) => {

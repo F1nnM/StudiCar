@@ -1,33 +1,39 @@
 <template>
   <div class="q-pa-md">
-    <q-toggle v-model="show" />
-    <qrGenerator value="Johannes" :show="show" />
+    <!-- <q-scroll-observer @scroll="scrollHandler" /> -->
+    <br />
+    <br />
+    <div
+      :class="'text-h' + titleSize + ' custom-underline c-u-l c-u-2 c-u-md'"
+      id="title"
+    >Name {{titleSize}}</div>
+    <br />
+
+    <p v-for="n in 20" :key="n">Lorem</p>
   </div>
 </template>
 
 <script>
-import qrGenerator from "components/qrGenerator";
-import { sendApiRequest, SQL_UPDATE_PROFILE_PICTURE } from '../ApiAccess';
+
+import { scroll } from 'quasar'
 
 export default {
   components: {
-    qrGenerator
+    
   },
   data() {
     return {
-      show: false
+      show: false,
+      titleSize: null
     };
   },
   methods: {
-    updateProfilePicture() {
-      sendApiRequest(SQL_UPDATE_PROFILE_PICTURE,
-      {imageData: /*base64-string goes here */ ""},
-      _ => alert("success"),
-      error => {throw error})
+    scrollHandler(info){
+      this.titleSize = info.position < 50 ? (Math.ceil(info.position / 10) + 1) : 5
     }
   },
   mounted () {
-      
+   
     }
 };
 </script>

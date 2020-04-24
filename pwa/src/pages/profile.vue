@@ -46,7 +46,7 @@
     </div>
 
     <p>
-      Entfernung: maximal {{distance}}km
+      Entfernung: maximal {{liftMaxDistance}}km
       <q-btn @click="editDistance = true" icon="edit" />
     </p>
 
@@ -68,7 +68,7 @@
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">Entfernung einstellen</div>
           <q-space />
-          <q-btn icon="close" @click="saveDistance()" flat round dense v-close-popup />
+          <q-btn icon="close" @click="updateDistance()" flat round dense v-close-popup />
         </q-card-section>
         <q-card-section>
           <p
@@ -76,13 +76,13 @@
           >Wie weit soll deine Mitfahrgelegenheit maximal von dir entfernt sein?</p>
 
           <q-slider
-            v-model="distance"
+            v-model="liftMaxDistance"
             :min="5"
             :max="40"
             :step="5"
             snap
             label-always
-            :label-value="distance+'km'"
+            :label-value="liftMaxDistance+'km'"
             color="primary"
           />
         </q-card-section>
@@ -95,6 +95,8 @@
 import { date } from "quasar";
 import SignOutButton from "../components/SignOutButton";
 import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
+
+import { sendApiRequest, SQL_UPDATE_PROFILE_PICTURE } from '../ApiAccess';
 
 import imageCompressor from 'vue-image-compressor'
 
@@ -122,7 +124,7 @@ export default {
           ]
         }
       ),
-      distance: this.global.user.settings.liftMaxDistance,
+      liftMaxDistance: this.$store.getters["auth/user"].settings.liftMaxDistance,
       editDistance: false,
       ppPath: "",
       openUpload: false,
@@ -157,8 +159,8 @@ export default {
     }
   },
   methods: {
-    saveDistance() {
-      this.global.user.settings.liftMaxDistance = this.distance;
+    updateDistance() {
+      this.$store.dispatch("auth/updateLiftMaxDistance", this.liftMaxDistance);
     },
 
     loadFile(file){
@@ -190,11 +192,13 @@ export default {
               var indent  = (img.height - img.width) / scale // indent has to be half of the difference and negative, additionally divided by scale
               ctx.drawImage(img, 0, indent / -2, width, size + indent)
             }
-            
+
+            var image_blob = elem.toBlob()
+            this.updateProfilePicture(image_blob)
             // input image is made square and scaled
             
             
-            console.log(elem.toDataURL())
+            console.log(elem.toBlob())
             console.log(elem)
               },
               reader.onerror = error => console.log(error);
@@ -203,6 +207,13 @@ export default {
 
     updateDescription() {
       this.$store.dispatch("auth/updateDescription", this.description);
+    },
+
+    updateProfilePicture(blob) {
+      sendApiRequest(SQL_UPDATE_PROFILE_PICTURE,
+      {imageData: blob},
+      _ => console.warn('success'),
+      error => {throw error})
     }
   },
   mounted() {

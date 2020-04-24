@@ -4,7 +4,7 @@ import 'firebase/auth'
 export const ApiBasePath = process.env.DEV ? "https://" + window.location.hostname :
   (window.location.hostname.startsWith("dev") ? "https://dev.api.studicar.mfinn.de" : "https://api.studicar.mfinn.de")
 
-export function sendApiRequest(action, options, successCallback, errorCallback) {
+export function sendApiRequest (action, options, successCallback, errorCallback) {
   if (!(action.path && action.method))
     errorCallback(new Error("Invalid action supplied. Use predefined or make sure that it contains a path and a method."))
 
@@ -28,7 +28,7 @@ export function sendApiRequest(action, options, successCallback, errorCallback) 
     });
 }
 
-export function buildGetRequestUrl(action, options, callback) {
+export function buildGetRequestUrl (action, options, callback) {
   Firebase.auth().currentUser.getIdToken(/* forceRefresh */ true)
     .then(idToken_ => {
       let url = ApiBasePath + action.path
@@ -80,6 +80,11 @@ export const SQL_UPDATE_DESCRIPTION = {
 
 export const SQL_UPDATE_GENDER = {
   path: "/updateGender",
+  method: "POST"
+}
+
+export const SQL_UPDATE_LIFT_MAX_DISTANCE = {
+  path: "/updateLiftMaxDistance",
   method: "POST"
 }
 

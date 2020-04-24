@@ -172,7 +172,10 @@ import { date } from 'quasar'
 
 export default {
   mounted(){
-     setTimeout(() => window.scrollTo(0,1000000), 300)
+     if(document.location.href.includes('lift')){
+       setTimeout(() => window.scrollTo(0,1000000), 300)
+     }
+     
   },
   data(){
     
