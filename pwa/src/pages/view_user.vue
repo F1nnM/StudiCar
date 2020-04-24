@@ -54,15 +54,15 @@
                             <div class="col-1">
                               <span class="text-red">●</span>
                             </div>
-                            <div class="col-11 q-pb-sm">{{preferences.talkativeness.red}}</div>
+                            <div class="col-11 q-pb-sm">{{prefsDocu.talkativeness.red}}</div>
                             <div class="col-1">
                               <span class="text-orange">●</span>
                             </div>
-                            <div class="col-11 q-pb-sm">{{preferences.talkativeness.yellow}}</div>
+                            <div class="col-11 q-pb-sm">{{prefsDocu.talkativeness.yellow}}</div>
                             <div class="col-1">
                               <span class="text-green">●</span>
                             </div>
-                            <div class="col-11">{{preferences.talkativeness.green}}</div>
+                            <div class="col-11">{{prefsDocu.talkativeness.green}}</div>
                           </div>
                         </q-tab-panel>
 
@@ -72,15 +72,15 @@
                             <div class="col-1">
                               <span class="text-red">●</span>
                             </div>
-                            <div class="col-11 q-pb-sm">{{preferences.talkAtMorning.red}}</div>
+                            <div class="col-11 q-pb-sm">{{prefsDocu.talkAtMorning.red}}</div>
                             <div class="col-1">
                               <span class="text-orange">●</span>
                             </div>
-                            <div class="col-11 q-pb-sm">{{preferences.talkAtMorning.yellow}}</div>
+                            <div class="col-11 q-pb-sm">{{prefsDocu.talkAtMorning.yellow}}</div>
                             <div class="col-1">
                               <span class="text-green">●</span>
                             </div>
-                            <div class="col-11">{{preferences.talkAtMorning.green}}</div>
+                            <div class="col-11">{{prefsDocu.talkAtMorning.green}}</div>
                           </div>
                         </q-tab-panel>
 
@@ -90,15 +90,15 @@
                             <div class="col-1">
                               <span class="text-red">●</span>
                             </div>
-                            <div class="col-11 q-pb-sm">{{preferences.smoking.red}}</div>
+                            <div class="col-11 q-pb-sm">{{prefsDocu.smoking.red}}</div>
                             <div class="col-1">
                               <span class="text-orange">●</span>
                             </div>
-                            <div class="col-11 q-pb-sm">{{preferences.smoking.yellow}}</div>
+                            <div class="col-11 q-pb-sm">{{prefsDocu.smoking.yellow}}</div>
                             <div class="col-1">
                               <span class="text-green">●</span>
                             </div>
-                            <div class="col-11">{{preferences.smoking.green}}</div>
+                            <div class="col-11">{{prefsDocu.smoking.green}}</div>
                           </div>
                         </q-tab-panel>
 
@@ -108,15 +108,15 @@
                             <div class="col-1">
                               <span class="text-red">●</span>
                             </div>
-                            <div class="col-11 q-pb-sm">{{preferences.music.red}}</div>
+                            <div class="col-11 q-pb-sm">{{prefsDocu.music.red}}</div>
                             <div class="col-1">
                               <span class="text-orange">●</span>
                             </div>
-                            <div class="col-11 q-pb-sm">{{preferences.music.yellow}}</div>
+                            <div class="col-11 q-pb-sm">{{prefsDocu.music.yellow}}</div>
                             <div class="col-1">
                               <span class="text-green">●</span>
                             </div>
-                            <div class="col-11">{{preferences.music.green}}</div>
+                            <div class="col-11">{{prefsDocu.music.green}}</div>
                           </div>
                         </q-tab-panel>
                       </q-tab-panels>
@@ -138,9 +138,7 @@
         <q-list class="shadow-2 rounded-borders" style="width: 100%;">
           <q-item>
             <q-item-section>
-              <p
-                class="text-h4 overflow q-pt-xs custom-underline c-u-2 c-u-md c-u-l"
-              >{{viewedUser.name}}</p>
+              <p class="text-h4 overflow q-pt-xs custom-underline c-u-2 c-u-md c-u-l">Loremname</p>
             </q-item-section>
           </q-item>
 
@@ -168,36 +166,42 @@
 import { date } from 'quasar'
 export default {
 
-
   data(){
+    
     return{
       prefInfo: false,
       prefInfoTab: 'talkativeness',
       splitterModel: 20,
-          splitter: 50,
-          viewedUser: {
-              name: 'Johannes',
-              createdAt: date.formatDate(Date.now(), 'MMMM YYYY'),
-              imageUrl: '~assets/loremimage.jpg',
-              bio: 'Bin der Johannes und freu mich auf die Fahrt. Dieser Text ist absichtlich lang gehalten, um die Darstellung von so extrem langen Texten zu sehen.',
-              lifts: {
-                  offered: 7,
-                  all: 19,
-                  average: 5
-              },
-              preferences: [{
-                  name: 'Redseligkeit', value: 3
-              },
-              {
-                  name: ' ...am Morgen', value: 2
-              },
-              {
-                  name: 'Rauchen', value: 1
-              },
-              {
-                  name: 'Musik', value: 3
-              }]
-          }
+      splitter: 50,
+      viewedUser: {
+          name: 'Johannes',
+          createdAt: date.formatDate(Date.now(), 'MMMM YYYY'),
+          imageUrl: '~assets/loremimage.jpg',
+          bio: 'Bin der Johannes und freu mich auf die Fahrt. Dieser Text ist absichtlich lang gehalten, um die Darstellung von so extrem langen Texten zu sehen.',
+          lifts: {
+              offered: 7,
+              all: 19,
+              average: 5
+          },
+          preferences: [{
+              name: 'Redseligkeit', value: 3
+          },
+          {
+              name: ' ...am Morgen', value: 2
+          },
+          {
+              name: 'Rauchen', value: 1
+          },
+          {
+              name: 'Musik', value: 3
+          }]
+      }
+    }
+  },
+
+  computed: {
+      prefsDocu: function(){
+        return this.$store.state.preferences
       }
     }
 }

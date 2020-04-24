@@ -11,9 +11,26 @@
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
 
-        <q-toolbar-title>
-          Eigenes Layout
-          <q-toggle v-model="show_footer" color="white" label="show footer" />
+        <q-toolbar-title class="row">
+          <!-- <div class="col-6 overflow-hidden-y relative-position">
+            <p class="q-ma-none">Eigenes Layout</p>
+            <div
+              :class="'absolute-left full-width bg-primary title-slide' + (scrolled ? ' show' : '')"
+            >NEUes Layout</div>
+          </div>-->
+
+          <div class="col-6 overflow-hidden-y" style="height: 40px;">
+            <transition name="title-up-trans">
+              <div v-show="!scrolled" class="q-ma-none q-my-auto">{{message}}</div>
+            </transition>
+            <transition name="title-down-trans">
+              <div v-show="scrolled" class="q-ma-none q-my-auto">Neues Layout</div>
+            </transition>
+          </div>
+
+          <div class="col-6">
+            <q-toggle v-model="scrolled" color="white" label="show footer" />
+          </div>
         </q-toolbar-title>
       </q-toolbar>
     </q-header>
@@ -28,6 +45,7 @@
     </q-drawer>
 
     <q-page-container>
+      <q-scroll-observer @scroll="scrollHandler" />
       <router-view />
     </q-page-container>
 
@@ -57,6 +75,8 @@
 
 <script>
 
+import { scroll } from 'quasar'
+
 export default {
   name: 'custom_layout',
 
@@ -64,13 +84,27 @@ export default {
     
   },
 
+  computed: {
+    message(){
+      return this.$store.state.message
+    }
+  },
+
+
   data () {
 
     return {
       leftDrawerOpen: false,
       show_footer: true,
+      scrolled: false,
       tab: 'home'
     }
+  },
+
+  methods: {
+    scrollHandler(info){
+      this.$store.commit('message', info.position)
     }
   }
+}
 </script>

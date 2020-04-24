@@ -86,6 +86,36 @@ html {
   opacity: 0;
 }
 
+.title-up-trans-enter-active,
+.title-up-trans-leave-active,
+.title-down-trans-enter-active,
+.title-down-trans-leave-active {
+  transition: all 0.15s;
+}
+
+.title-up-trans-enter,
+.title-up-trans-leave-to {
+  transform: translateY(-50%);
+  opacity: 0;
+}
+
+.title-down-trans-enter,
+.title-down-trans-leave-to {
+  transform: translateY(50%);
+  opacity: 0;
+}
+
+.title-slide {
+  transition: all 0.3s;
+  opacity: 0.5;
+  transform: translateY(100%);
+
+  &.show {
+    opacity: 1;
+    transform: translateY(0%);
+  }
+}
+
 /* PLEASE NOTE:
 
 It can be possible that the above css code is overwritten by soft coded style.

@@ -1,6 +1,6 @@
 import Firebase from 'firebase/app'
 import 'firebase/auth'
-import { SQL_CREATE_USER_IF_NOT_EXISTING, sendApiRequest, SQL_GET_USER_DATA, SQL_UPDATE_DESCRIPTION, SQL_UPDATE_GENDER } from '../../ApiAccess'
+import { SQL_CREATE_USER_IF_NOT_EXISTING, sendApiRequest, SQL_GET_USER_DATA, SQL_UPDATE_DESCRIPTION, SQL_UPDATE_GENDER, SQL_UPDATE_LIFT_MAX_DISTANCE } from '../../ApiAccess'
 
 export default {
   namespaced: true,
@@ -10,35 +10,39 @@ export default {
   },
 
   getters: {
-    user(state) {
+    user (state) {
       return state.user
     },
 
-    isAuthenticated(state) {
+    isAuthenticated (state) {
       return !!state.user
     }
   },
 
   mutations: {
-    SET_USER(state, payload) {
+    SET_USER (state, payload) {
       state.user = JSON.parse(JSON.stringify(payload))
     },
 
-    RESET_USER(state) {
+    RESET_USER (state) {
       state.user = null
     },
 
-    UPDATE_DESCRIPTION(state, payload) {
+    UPDATE_DESCRIPTION (state, payload) {
       state.user.description = payload;
     },
 
-    UPDATE_GENDER(state, payload) {
+    UPDATE_GENDER (state, payload) {
       state.user.gender = payload;
+    },
+
+    UPDATE_LIFT_MAX_DISTANCE (state, payload) {
+      state.user.settings.updateLiftMaxDistance = payload
     }
   },
 
   actions: {
-    async signIn({ commit }, payload) {
+    async signIn ({ commit }, payload) {
       let email = payload.email
       let password = payload.password
 
@@ -51,7 +55,7 @@ export default {
         })
     },
 
-    async register({ commit }, payload) {
+    async register ({ commit }, payload) {
       let email = payload.email
       let password = payload.password
       let name = payload.name
@@ -87,14 +91,14 @@ export default {
         })
     },
 
-    async signOut({ commit }) {
+    async signOut ({ commit }) {
       await Firebase.auth().signOut()
         .then(() => {
           commit('RESET_USER')
         })
     },
 
-    async updateDescription({ commit }, payload) {
+    async updateDescription ({ commit }, payload) {
       sendApiRequest(
         SQL_UPDATE_DESCRIPTION,
         { description: payload },
@@ -103,7 +107,7 @@ export default {
       );
     },
 
-    async updateGender({ commit }, payload) {
+    async updateGender ({ commit }, payload) {
       let gender = payload
       if (!['M', 'W', 'D', 'X'].includes(gender))
         switch (gender) {
@@ -120,7 +124,7 @@ export default {
             gender = 'X'
             break;
           default:
-            throw new Error("Can't parse gender '"+gender+"'!")
+            throw new Error("Can't parse gender '" + gender + "'!")
         }
       sendApiRequest(
         SQL_UPDATE_GENDER,
@@ -128,6 +132,15 @@ export default {
         _ => commit('UPDATE_GENDER', gender),
         error => alert(error)
       )
-    }
+    },
+
+    async updateLiftMaxDistance ({ commit }, payload) {
+      sendApiRequest(
+        SQL_UPDATE_LIFT_MAX_DISTANCE,
+        { liftMaxDistance: payload },
+        _ => commit('UPDATE_LIFT_MAX_DISTANCE', payload),
+        error => alert(error)
+      );
+    },
   }
 }
