@@ -72,7 +72,7 @@ module.exports = {
             backColor: "#ffffffff"
           };
 
-          let size = 200
+          let size = 300
           let png = jdenticon.toPng(options.name, size);
 
           await runQuery(
@@ -108,22 +108,21 @@ module.exports = {
     },
     '/updateProfilePicture': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'imageData'], res)) {
-        var i = new Image()
-        i.onload = async function () {
-          if (!(i.naturalHeight == 300 && i.naturalWidth == 300)) {
-            res.writeHead(400)
-            res.end("Wrong dimension")
-            return
-          }
-          let blob = Buffer.from(options.imageData, "base64")
-          await runQuery(
-            "UPDATE `USER` SET `PICTURE` = ? WHERE `USER`.`FB_ID` = ?",
-            [blob, options.secretFbId]).catch(error => {
-              throw error;
-            });
-          res.end();
+        console.log(options.imageData.substr(22).substr(0, 50))
+        console.log(options.imageData.substr(0,50))
+        var img = Buffer.from(options.imageData.substr(22), 'base64');
+        var dimensions = require('image-size')(img);
+        if (!(dimensions.width == 300 && dimensions.height == 300)) {
+          res.writeHead(400);
+          res.end("Image must be 300x300");
         }
-        i.src = options.imageData
+        let blob = Buffer.from(options.imageData, "base64")
+        await runQuery(
+          "UPDATE `USER` SET `PICTURE` = ? WHERE `USER`.`FB_ID` = ?",
+          [blob, options.secretFbId]).catch(error => {
+            throw error;
+          });
+        res.end();
       }
     }
   }
