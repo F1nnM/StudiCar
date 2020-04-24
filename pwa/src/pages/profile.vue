@@ -94,11 +94,8 @@
 <script>
 import { date } from "quasar";
 import SignOutButton from "../components/SignOutButton";
-import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
+import { buildGetRequestUrl, GET_USER_PROFILE_PIC, sendApiRequest, SQL_UPDATE_PROFILE_PICTURE } from "../ApiAccess";
 
-import { sendApiRequest, SQL_UPDATE_PROFILE_PICTURE } from '../ApiAccess';
-
-import imageCompressor from 'vue-image-compressor'
 
 export default {
   components: { SignOutButton },
@@ -163,47 +160,75 @@ export default {
       this.$store.dispatch("auth/updateLiftMaxDistance", this.liftMaxDistance);
     },
 
-    loadFile(file){
-      const size = 300 // represents the height
-      const ratio = 1 // default ratio at profile pictures
+    // loadFile(file) {
+    //   const size = 300; // represents the height
+    //   const ratio = 1; // default ratio at profile pictures
 
-      const width = size * ratio
-      const fileName = file.name
-      const reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.onload = event => {
-          const img = new Image()
-          img.src = event.target.result
-        
-          img.onload = () => {
-            
-            const elem = document.createElement('canvas')
-            elem.width = width;
-            elem.height = size;
+    //   const width = size * ratio;
+    //   const fileName = file.name;
+    //   const reader = new FileReader();
+    //   reader.onerror = error => console.log(error);
+    //   reader.onload = event => {
+    //     const img = new Image();
+    //     img.src = event.target.result;
 
-            const ctx = elem.getContext('2d');
-            if(img.width >= img.height){ // landscape or square: width has to be cropped
-              var scale = img.height / size
-              var indent  = (img.width - img.height) / scale // indent has to be half of the difference and negative, additionally divided by scale
-              ctx.drawImage(img, indent / -2, 0, width + indent, size)
-            }
-            else { // portrait
-              var scale = img.width / size
-              var indent  = (img.height - img.width) / scale // indent has to be half of the difference and negative, additionally divided by scale
-              ctx.drawImage(img, 0, indent / -2, width, size + indent)
-            }
+    //     img.onload = () => {
+    //       const elem = document.createElement("canvas");
+    //       elem.width = width;
+    //       elem.height = size;
 
-            var image_blob = elem.toBlob()
-            this.updateProfilePicture(image_blob)
-            // input image is made square and scaled
+    //       const ctx = elem.getContext("2d");
+    //       if (img.width >= img.height) {
+    //         // landscape or square: width has to be cropped
+    //         var scale = img.height / size;
+    //         var indent = (img.width - img.height) / scale; // indent has to be half of the difference and negative, additionally divided by scale
+    //         ctx.drawImage(img, indent / -2, 0, width + indent, size);
+    //       } else {
+    //         // portrait
+    //         var scale = img.width / size;
+    //         var indent = (img.height - img.width) / scale; // indent has to be half of the difference and negative, additionally divided by scale
+    //         ctx.drawImage(img, 0, indent / -2, width, size + indent);
+    //       }
+
+    //       // input image is made square and scaled
+    //       sendApiRequest(
+    //         SQL_UPDATE_PROFILE_PICTURE,
+    //         { imageData: elem.toDataURL() },
+    //         _ => {
+    //           this.ppPath = '';
+    //           buildGetRequestUrl(
+    //             GET_USER_PROFILE_PIC,
+    //             { fbid: this.$store.getters["auth/user"].uid },
+    //             url => {
+    //               this.ppPath = url;
+    //             }
+    //           )
+    //         },
+    //         error => {
+    //           throw error;
+    //         }
+    //         else { // portrait
+    //           var scale = img.width / size
+    //           var indent  = (img.height - img.width) / scale // indent has to be half of the difference and negative, additionally divided by scale
+    //           ctx.drawImage(img, 0, indent / -2, width, size + indent)
+    //         }
+
+    //         var image_blob = elem.toBlob()
+    //         this.updateProfilePicture(image_blob)
+    //         // input image is made square and scaled
             
             
-            console.log(elem.toBlob())
-            console.log(elem)
-              },
-              reader.onerror = error => console.log(error);
-      };
-    },
+    //         console.log(elem.toBlob())
+    //         console.log(elem)
+    //           },
+    //           reader.onerror = error => console.log(error);
+    //   };
+    //       );
+    //       this.openUpload = false;
+    //     }
+    //   }
+    //   reader.readAsDataURL(file);
+    // },
 
     updateDescription() {
       this.$store.dispatch("auth/updateDescription", this.description);
@@ -225,6 +250,5 @@ export default {
       }
     );
   }
-
 };
 </script>
