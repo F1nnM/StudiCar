@@ -11,14 +11,17 @@
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
 
-        <q-toolbar-title class="text-weight-light">
-          <div class="q-pt-xs">
+        <q-toolbar-title class="row">
+          <div class="text-weight-light q-pt-xs col-xs-10 col-md-11">
             <q-slide-transition :duration="300">
               <div v-show="!scrolled">StudiCar {{pageTrans}}</div>
             </q-slide-transition>
             <q-slide-transition :duration="150">
               <div v-show="scrolled" class>{{pageName}}</div>
             </q-slide-transition>
+          </div>
+          <div class="col-xs-2 col-md-1">
+            <q-btn icon="filter_center_focus" to="/scanner" />
           </div>
         </q-toolbar-title>
       </q-toolbar>
@@ -46,7 +49,11 @@
     <q-page-container>
       <div v-if="pageName">
         <q-scroll-observer @scroll="scrollHandler" />
-        <div class="text-h5 q-pl-md q-pt-md custom-underline c-u-l c-u-2 c-u-md">{{pageName}}</div>
+
+        <div class="text-h5 q-pl-md q-pt-md">
+          <span class="custom-underline c-u-l c-u-2 c-u-md" transition="slide-left">{{pageName}}</span>
+        </div>
+
         <br />
       </div>
 
@@ -61,7 +68,6 @@
     <q-footer elevated>
       <q-tabs
         shrink
-        stretch
         full-width
         no-caps
         no-ripple
@@ -70,7 +76,7 @@
         indicator-color="primary"
         v-model="tab"
         class="text-black bg-white"
-        align="justify"
+        align="center"
       >
         <q-route-tab icon="home" to="/" label="Marktplatz" />
         <q-route-tab icon="add_circle_outline" to="/chats/lift/add" label="Neue Fahrt" />
