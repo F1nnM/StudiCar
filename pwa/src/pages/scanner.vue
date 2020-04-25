@@ -1,20 +1,21 @@
 <template>
-  <div class="q-pa-md">
-    <p class="text-h6">
-      StudiCar Scan
-      <q-btn @click="newScan()">NEUER SCAN</q-btn>
-    </p>
+  <div>
     <q-slide-transition>
       <p v-if="result">{{result}}</p>
     </q-slide-transition>
 
     <q-slide-transition>
-      <div class="q-pa-xl" v-if="!result">
-        <q-card>
-          <div class="scanning">
-            <qrcode-stream @init="onInit" @decode="decoded"></qrcode-stream>
-          </div>
-        </q-card>
+      <div class="q-pa-none" v-if="!result">
+        <div class="scanning-border full-height full-width relative">
+          <qrcode-stream @init="onInit" @decode="decoded"></qrcode-stream>
+          <p
+            class="text-h6 text-uppercase text-weight-light text-white absolute-center"
+          >StudiCar Scan</p>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
     </q-slide-transition>
   </div>
@@ -27,6 +28,12 @@ import { QrcodeStream, QrcodeDropZone, QrcodeCapture } from 'vue-qrcode-reader'
 
 export default {
 components: { QrcodeStream },
+
+    mounted(){
+      this.$store.commit('setPageTrans', 'swipe-away')
+      this.$store.commit('setPage', '')
+      
+    },
 
     data(){
         return {
@@ -83,10 +90,6 @@ components: { QrcodeStream },
       this.result = ''
     }
       
-    },
-    ready(){
-        
-        
     }
 }
 
@@ -111,6 +114,40 @@ components: { QrcodeStream },
   @keyframes scanner {
     to {
       top: 100%;
+    }
+  }
+}
+
+.scanning-border {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  &:after {
+    content: "";
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: linear-gradient(to right, white, red);
+    animation: circle_border 2s infinite;
+  }
+
+  @keyframes circle_border {
+    0%,
+    100% {
+      top: 0%;
+      left: 0%;
+    }
+    25% {
+      left: 99%;
+      top: 0%;
+    }
+    50% {
+      top: 99%;
+      left: 99%;
+    }
+    75% {
+      top: 99%;
+      left: 0%;
     }
   }
 }

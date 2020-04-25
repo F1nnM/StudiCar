@@ -86,6 +86,24 @@ html {
   opacity: 0;
 }
 
+.swipe-away-leave-active {
+  transition: all 0.5s ease-out;
+  transform-origin: center top;
+}
+
+.swipe-away-active {
+  transform: translateY(-100vw);
+}
+
+.swipe-away-enter-active {
+  transition: all 0.2s ease-out;
+  transform-origin: center top;
+}
+
+.swipe-away-leave-to {
+  opacity: 0;
+}
+
 .title-up-trans-enter-active,
 .title-up-trans-leave-active,
 .title-down-trans-enter-active,
@@ -124,6 +142,10 @@ html {
       border-color: transparent;
     }
   }
+}
+
+.four-equal-children > * {
+  width: 25%;
 }
 
 /* PLEASE NOTE:
