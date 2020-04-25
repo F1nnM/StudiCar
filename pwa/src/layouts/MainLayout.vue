@@ -11,7 +11,16 @@
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
 
-        <q-toolbar-title>StudiCar {{pageTrans}}</q-toolbar-title>
+        <q-toolbar-title class="text-weight-light">
+          <div class="q-pt-xs">
+            <q-slide-transition :duration="300">
+              <div v-show="!scrolled">StudiCar {{pageTrans}}</div>
+            </q-slide-transition>
+            <q-slide-transition :duration="150">
+              <div v-show="scrolled" class>{{pageName}}</div>
+            </q-slide-transition>
+          </div>
+        </q-toolbar-title>
       </q-toolbar>
     </q-header>
 
@@ -35,10 +44,14 @@
       <div style="padding: 10px;">StudiCar v{{ $q.version }}</div>
     </q-drawer>
     <q-page-container>
-      <transition :name="getTrans()" mode="out-in">
+      <div v-if="pageName">
+        <q-scroll-observer @scroll="scrollHandler" />
+        <div class="text-h5 q-pl-md q-pt-md custom-underline c-u-l c-u-2 c-u-md">{{pageName}}</div>
+        <br />
+      </div>
+
+      <transition :name="pageTrans" mode="out-in">
         <router-view
-          @pagetrans_zoom="pageTrans='expand'"
-          @pagetrans_slide="pageTrans='collapse'"
           @pagetrans_y="pageTransY = $event"
           :style="'transform-origin: 20% ' + pageTransY + 'vh;'"
         />
@@ -70,6 +83,8 @@
 
 <script>
 
+import { scroll } from 'quasar'
+
 import EssentialLink from 'components/EssentialLink'
 
 
@@ -80,28 +95,27 @@ export default {
     EssentialLink
   },
 
+  computed: {
+    pageName(){
+      return this.$store.state.pageName
+    },
+
+    loc(){
+      return document.location.href
+    },
+
+    pageTrans(){
+      return this.$store.state.pageTrans
+    }
+  },
+
   methods:{
 
-    getTrans(){
-      var loc = document.location.href
-      
-        if(loc.includes('add')){ // chats/lift/add is being visited
-          this.pageTrans = 'slide-up'
-        }
-        else if(loc.includes('lift')) { // when not above is visited and this condition  is true, chats/lift is being visited
-          this.pageTrans = 'expand'
-        }
-        else if(loc.includes('chats')){
-          if(this.pageTrans == 'liftToChats'){ // only show a collapse transition if that value is set (would be if the 'back' btn of a lift has been clicked)
-            this.pageTrans = 'collapse'
-          }
-        }
-        else{
-          this.pageTrans = 'slide'
-        }
-        return this.pageTrans
-      
+    scrollHandler(info){
+      this.scrolled = info.position > 30
     }
+
+    
   },
 
 
@@ -110,6 +124,7 @@ export default {
     return {
       leftDrawerOpen: false,
       pageTransY: 15,
+      scrolled: false,
       tab: 'home',
       chats: 'Main',
       show: true,

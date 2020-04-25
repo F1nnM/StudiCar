@@ -138,7 +138,7 @@
         <q-list class="shadow-2 rounded-borders" style="width: 100%;">
           <q-item>
             <q-item-section>
-              <p class="text-h4 overflow q-pt-xs custom-underline c-u-2 c-u-md c-u-l">Loremname</p>
+              <p class="text-h5 overflow q-pt-xs custom-underline c-u-2 c-u-md c-u-l">Johannes</p>
             </q-item-section>
           </q-item>
 
@@ -203,6 +203,11 @@ export default {
       prefsDocu: function(){
         return this.$store.state.preferences
       }
+  },
+
+  mounted(){
+
+      this.$store.commit('setPage', '')
     }
 }
 </script>
