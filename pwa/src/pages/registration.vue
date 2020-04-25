@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-md">
-    <div class="q-gutter-y-md" style="max-width: 600px">
+    <div class="q-gutter-y-md">
       <div class="text-h4 q-mt-xl">Registrierung</div>
       <hr />
       <span>Bitte erstelle einen Account, damit wir dich in unser System aufnehmen können.</span>

@@ -1,14 +1,5 @@
 <template>
   <div class="q-pa-md">
-    <!-- <q-scroll-observer @scroll="scrollHandler" /> -->
-    <br />
-    <br />
-    <div
-      :class="'text-h' + titleSize + ' custom-underline c-u-l c-u-2 c-u-md'"
-      id="title"
-    >Name {{titleSize}}</div>
-    <br />
-
     <p v-for="n in 20" :key="n">Lorem</p>
   </div>
 </template>
@@ -33,7 +24,7 @@ export default {
     }
   },
   mounted () {
-   
-    }
+    this.$store.state.pageName = 'Spielwiese'
+  }
 };
 </script>

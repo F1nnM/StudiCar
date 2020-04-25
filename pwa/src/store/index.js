@@ -26,12 +26,17 @@ const store = new Vuex.Store({
   mutations: {
     setPageTrans (state, _trans) {
       state.pageTrans = _trans
+    },
+
+    setPage (state, payload) {
+      state.pageName = payload
     }
   },
   strict: process.env.DEV,
   state: {
     greeting: ((new Date).getHours() < 8 ? 'Guten Morgen' : ((new Date).getHours() > 18 ? 'Guten Abend' : 'Willkommen')),
     pageTrans: 'slide',
+    pageName: 'Willkommen', // needed for scroll-relative Header
     testValue: 10,
     scroll: 0,
     message: 'Hello',
