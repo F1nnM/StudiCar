@@ -12,20 +12,13 @@
         />
 
         <q-toolbar-title class="row">
-          <!-- <div class="col-6 overflow-hidden-y relative-position">
-            <p class="q-ma-none">Eigenes Layout</p>
-            <div
-              :class="'absolute-left full-width bg-primary title-slide' + (scrolled ? ' show' : '')"
-            >NEUes Layout</div>
-          </div>-->
-
-          <div class="col-6 overflow-hidden-y" style="height: 40px;">
-            <transition name="title-up-trans">
-              <div v-show="!scrolled" class="q-ma-none q-my-auto">{{message}}</div>
-            </transition>
-            <transition name="title-down-trans">
-              <div v-show="scrolled" class="q-ma-none q-my-auto">Neues Layout</div>
-            </transition>
+          <div class="col-6 q-pt-xs">
+            <q-slide-transition>
+              <div v-show="!scrolled">StudiCar</div>
+            </q-slide-transition>
+            <q-slide-transition>
+              <div v-show="scrolled" class>{{pageName}}</div>
+            </q-slide-transition>
           </div>
 
           <div class="col-6">
@@ -46,6 +39,8 @@
 
     <q-page-container>
       <q-scroll-observer @scroll="scrollHandler" />
+      <div class="text-h5 q-pl-md q-pt-md custom-underline c-u-l c-u-2 c-u-md">{{pageName}}</div>
+      <br />
       <router-view />
     </q-page-container>
 
@@ -87,9 +82,12 @@ export default {
   computed: {
     message(){
       return this.$store.state.message
+    },
+
+    pageName(){
+      return this.$store.state.pageName
     }
   },
-
 
   data () {
 
@@ -103,7 +101,7 @@ export default {
 
   methods: {
     scrollHandler(info){
-      this.$store.commit('message', info.position)
+      this.scrolled = info.position > 30
     }
   }
 }

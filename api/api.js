@@ -29,14 +29,18 @@ module.exports = {
     },
     '/getUserData': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid'], res)) {
-        let result = (await runQuery("SELECT NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKE, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `USER` WHERE USER.FB_ID = ?", [options.fbid])).result[0]
+        let result = (await runQuery("SELECT NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, LIFTS_OFFERED, LIFTS_ALL, PREF_SMOKE, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `USER` WHERE USER.FB_ID = ?", [options.fbid])).result[0]
         let data = {
           uid: options.fbid,
           name: result.NAME,
           gender: result.GENDER,
           course: result.COURSE,
           description: result.DESCRIPTION,
-          createdAt: result.CREATED_DATE,
+          stats: {
+            createdAt: result.CREATED_DATE,
+            liftsOffered: result.LIFTS_OFFERED,
+            liftsAll: result.LIFTS_ALL,
+          },
           prefs: {
             smoke: result.PREF_SMOKE,
             music: result.PREF_MUSIC,
@@ -125,7 +129,7 @@ module.exports = {
     '/updateProfilePicture': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'imageData'], res)) {
         console.log(options.imageData.substr(22).substr(0, 50))
-        console.log(options.imageData.substr(0,50))
+        console.log(options.imageData.substr(0, 50))
         var img = Buffer.from(options.imageData.substr(22), 'base64');
         var dimensions = require('image-size')(img);
         if (!(dimensions.width == 300 && dimensions.height == 300)) {

@@ -116,6 +116,16 @@ html {
   }
 }
 
+.border-confirm {
+  border: 1px solid green;
+  animation: border 0.5s ease-out forwards;
+  @keyframes border {
+    to {
+      border-color: transparent;
+    }
+  }
+}
+
 /* PLEASE NOTE:
 
 It can be possible that the above css code is overwritten by soft coded style.
