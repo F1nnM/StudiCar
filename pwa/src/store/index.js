@@ -28,8 +28,8 @@ const store = new Vuex.Store({
       state.pageTrans = _trans
     },
 
-    setPage (state, payload) {
-      state.pageName = payload
+    setPage (state, _pageName) {
+      state.pageName = _pageName
     }
   },
   strict: process.env.DEV,

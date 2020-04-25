@@ -1,7 +1,5 @@
 <template>
   <div class="q-pa-md">
-    <p class="text-h6 text-center bordered">Mitfahrgelegenheiten</p>
-    <hr />
     <q-list>
       <chat_item
         v-for="item in sortChats()"
@@ -27,6 +25,13 @@ export default {
   data(){
     return{
       
+    }
+  },
+
+  mounted(){
+    this.$store.commit('setPage', 'Mitfahrgelegenheiten')
+    if(this.$store.state.pageTrans != collapse){ // only when not coming from a lift, set pageTrans to slide
+      this.$store.commit('setPageTrans', 'slide')
     }
   },
 

@@ -1,9 +1,6 @@
 <template>
   <div class="q-pa-md">
     <div class="q-gutter-y-md">
-      <div class="text-h4">Dein Profil</div>
-      <hr />
-      <br />
       <p>Hier siehst du alle wichtigen Infos zu deinem Profil.</p>
     </div>
     <q-img transition-show="slide-left" :src="ppPath" style="height: 200px; max-width: 200px;">
@@ -352,7 +349,10 @@ export default {
       url => {
         this.ppPath = url;
       }
-    );
+    )
+
+    
+    this.$store.state.pageName = 'Profil'
   }
 };
 </script>

@@ -13,6 +13,11 @@ export default {
     return {
       
     }
+  },
+
+  mounted(){
+    this.$store.commit('setPage', '')
+    this.$store.commit('setPageTrans', 'slide-up')
   }
 }
 

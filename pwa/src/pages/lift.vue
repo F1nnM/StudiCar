@@ -174,6 +174,8 @@ export default {
   mounted(){
      if(document.location.href.includes('lift')){
        setTimeout(() => window.scrollTo(0,1000000), 300)
+       this.$store.commit('setPage', '')
+       this.$store.commit('setPageTrans', 'expand')
      }
      
   },
@@ -360,7 +362,9 @@ export default {
     goBack(){
       this.$emit('pagetrans_slide')
       this.chatOpen = false
+      this.$store.commit('setPageTrans', 'collapse')
       window.location.href = '/#/chats'
+      
     }
   }
 }
