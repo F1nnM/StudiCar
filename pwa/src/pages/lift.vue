@@ -120,13 +120,21 @@
           :name="item.sender == user ? '' : '' + item.sender"
           :sent="item.sender == user"
           size="8"
-          :text="item.content"
+          :text="item.audio ? [] : [item.content]"
           :stamp="formatDate(item)"
           :bg-color="getColor(item.sender)"
-        />
+        >
+          <audio v-if="item.audio" :src="item.audio" controls>Dein Browser unterstützt keine Audios.</audio>
+          <div>
+            <p>[Custom Controls]</p>
+          </div>
+        </q-chat-message>
       </div>
     </div>
-    <div class="row" style="z-index: 2900; position: fixed; bottom: 0; left: 0; width: 100vw;">
+    <div
+      class="row"
+      style="z-index: 2900; position: fixed; bottom: 0; left: 0; width: 100vw; border-radius: 50%;"
+    >
       <q-toolbar class="col-xs-10 col-md-11 bg-grey-3">
         <q-btn flat dense icon="call_split" v-if="false"></q-btn>
         <q-toolbar-title>
@@ -134,6 +142,7 @@
             <div>
               <q-form @submit="sendMessage" class="q-gutter-md">
                 <q-input
+                  type="text"
                   class="custom-input"
                   v-model="messageText"
                   placeholder="Schreibe etwas..."
@@ -145,11 +154,20 @@
         </q-toolbar-title>
       </q-toolbar>
       <q-toolbar class="col-xs-2 col-md-1 bg-white">
+        <div v-show="!messageText" style="width: 50px; height: 50px;">
+          <vue-record-audio
+            mode="hold"
+            @result="sendMessage"
+            @onContextMenu="false"
+            class="record-audio full-height full-width"
+          />
+        </div>
+
         <q-btn
           @click="sendMessage()"
           icon="arrow_forward_ios"
           flat
-          :disabled="!messageText"
+          v-show="messageText"
           round
           dense
           class="q-mr-sm bg-green-10 text-white"
@@ -177,6 +195,16 @@ export default {
        this.$store.commit('setPage', '')
        this.$store.commit('setPageTrans', 'expand')
      }
+
+    //  document.getElementById("recordButton").onmousedown = (event) => {
+    //    event.preventDefault()
+    //    this.recordAudio()
+    //  }
+
+    //  document.getElementById("recordButton").onmouseup = (event) => {
+    //    event.preventDefault()
+    //    this.sendAudio()
+    //  }
      
   },
   data(){
@@ -263,7 +291,8 @@ export default {
             {
                 sender: 65163163,
                 timestamp: 1586646489523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
+                content: [],
+                audio: 'blob:https://localhost:3000/15bec656-416e-499d-be04-282b03ad311c'
             }
         ]
       }
@@ -335,22 +364,43 @@ export default {
       return date.formatDate(item.timestamp, 'DD.MM.YYYY - H:mm')
     },
 
-    sendMessage(){
+    false(){
+      return false
+    },
+
+    preventDefault(e){
+      e.preventDefault()
+    },
+
+    sendMessage(data){
+      var blob
+      if(data){
+        try{
+          blob = window.URL.createObjectURL(data)
+        }
+        catch(e){
+          alert('Fehler beim Encoding: ' + e)
+        }
+      }
+      
       // check whether last message was from this user
       var lastMsg = this.lift.messages[this.lift.messages.length - 1]
-      if(lastMsg.sender == this.user){
+      if(lastMsg.sender == this.user && !data){
         // yes, last message was from this user
-        lastMsg.content.push(this.text)
+        lastMsg.content.push(this.messageText)
       }
       else{
         var newMsg = {
           sender: this.user,
           timestamp: (new Date()).getTime(),
-          content: ['' + this.text]
+          content: data? [] : [this.messageText],
+          audio: data ? blob : null
         }
         this.lift.messages.push(newMsg)
       }
       this.messageText = ''
+      debugger
+      setTimeout(() => window.scrollTo(0,1000000), 100)
     },
 
     viewCar(){

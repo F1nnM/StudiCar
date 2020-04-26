@@ -1,5 +1,11 @@
 <template>
   <div class="q-pa-md">
+    <vue-record-audio @result="onResult" />
+    <p>
+      Audio:
+      <audio controls :src="result"></audio>
+    </p>
+
     <p v-for="n in 20" :key="n">Lorem</p>
   </div>
 </template>
@@ -15,16 +21,20 @@ export default {
   data() {
     return {
       show: false,
-      titleSize: null
+      titleSize: null,
+      result: null
     };
   },
   methods: {
-    scrollHandler(info){
-      this.titleSize = info.position < 50 ? (Math.ceil(info.position / 10) + 1) : 5
+    onResult (data) {
+      
+      console.warn('The blob data:', data);
+      console.warn('Downloadable audio', window.URL.createObjectURL(data));
+      this.result = window.URL.createObjectURL(data)
     }
   },
   mounted () {
     this.$store.state.pageName = 'Spielwiese'
   }
-};
+}
 </script>
