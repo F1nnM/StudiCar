@@ -30,7 +30,7 @@ export default {
 
   mounted(){
     this.$store.commit('setPage', 'Mitfahrgelegenheiten')
-    if(this.$store.state.pageTrans != collapse){ // only when not coming from a lift, set pageTrans to slide
+    if(this.$store.state.pageTrans != 'collapse'){ // only when not coming from a lift, set pageTrans to slide
       this.$store.commit('setPageTrans', 'slide')
     }
   },

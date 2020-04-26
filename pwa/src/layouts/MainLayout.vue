@@ -148,18 +148,6 @@ export default {
         link: '/#/chats'
         },
         {
-        title: 'Anmeldung',
-        caption: 'Melde dich an',
-        icon: 'save',
-        link: '/#/auth/anmeldung'
-        },
-        {
-        title: 'Registrierung',
-        caption: 'Erstelle einen Account',
-        icon: 'edit',
-        link: '/#/auth/registrierung'
-        },
-        {
         title: 'Benutzer besuchen',
         caption: 'Profil eines anderen Benutzers ansehen',
         icon: 'accessibility_new',

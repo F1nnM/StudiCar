@@ -21,9 +21,7 @@
             </q-slide-transition>
           </div>
 
-          <div class="col-6">
-            <q-toggle v-model="scrolled" color="white" label="show footer" />
-          </div>
+          <div class="col-6"></div>
         </q-toolbar-title>
       </q-toolbar>
     </q-header>
