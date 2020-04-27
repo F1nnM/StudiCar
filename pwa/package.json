@@ -17,6 +17,7 @@
     "dev": "quasar dev -m pwa"
   },
   "dependencies": {
+    "@codekraft-studio/vue-record": "0.0.3",
     "@quasar/extras": "^1.0.0",
     "axios": "^0.18.1",
     "firebase": "^7.14.1",
