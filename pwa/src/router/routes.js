@@ -59,12 +59,12 @@ const routes = [{
   children: [{
     path: '',
     component: () =>
-      import('pages/playground.vue')
+      import('pages/playfield.vue')
   },
   {
     path: '/spielplatz',
     component: () =>
-      import('pages/playfield.vue')
+      import('pages/playground.vue')
   },
   {
     path: '/spielhölle',

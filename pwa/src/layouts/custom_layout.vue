@@ -16,28 +16,22 @@
             <q-toolbar-title class="row">
               <div class="col-6 q-pt-xs">
                 <q-slide-transition>
-                  <div v-show="!scrolled" class="text-weight-thin">StudiCar {{scannerLoaded}}</div>
+                  <div v-show="!scrolled" class="text-weight-thin">StudiCar</div>
                 </q-slide-transition>
                 <q-slide-transition>
                   <div v-show="scrolled" class="text-weight-thin">{{pageName}}</div>
                 </q-slide-transition>
               </div>
 
-              <div class="col-6">
-                <q-btn
-                  :icon="!scannerOpen ? 'filter_center_focus' : 'cancel_presentation'"
-                  @click="toggleScannerOpen"
-                />
-              </div>
+              <div class="col-6"></div>
             </q-toolbar-title>
           </q-toolbar>
         </div>
-        <qrScanner :open="scannerOpen" @result="gotResult" />
       </q-header>
     </q-slide-transition>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered content-class="bg-grey-1">
-      <q-btn to="/marktplatz">Zurück</q-btn>
+      <q-btn to="/">Marktplatz</q-btn>
       <q-toggle v-model="fullscreen" label="Vollbild" />
     </q-drawer>
 
@@ -49,7 +43,7 @@
     </q-page-container>
 
     <q-slide-transition>
-      <q-footer elevated v-show="!(fullscreen || scannerOpen)">
+      <q-footer elevated v-show="!(fullscreen)">
         <q-tabs
           stretch
           full-width
@@ -73,9 +67,6 @@
 
 <script>
 
-import qrScanner from 'components/qrScanner'
-
-//import { QrcodeStream, QrcodeDropZone, QrcodeCapture } from 'vue-qrcode-reader'
 
 import { scroll } from 'quasar'
 
@@ -83,12 +74,7 @@ import { scroll } from 'quasar'
 export default {
   components: { 
     
-    qrScanner
   },
-
-    mounted(){
-      this.$store.commit('setPage', '')
-    },
 
     computed: {
       pageName() {
@@ -98,57 +84,19 @@ export default {
 
     data(){
         return {
+            tab: 'spielwiese',
             code: '',
             video: [],
             result: '',
             fullscreen: false,
+            scrolled: false,
             leftDrawerOpen: false,
-            error: '',
-            scannerOpen: false,
-            scannerLoaded: false,
-            scannerHelp: false
+            error: ''
         }
     },
     methods: {
 
-      startScanning(promise){
-        onInit(promise).then
-      },
 
-
-        gotResult(e){
-          alert(e)
-        },
-
-        toggleScannerOpen(){
-          this.scannerOpen = !this.scannerOpen
-          if(!this.scannerOpen){
-            this.scannerLoaded = false
-          }
-        },
-        
-        async onInit (promise) {
-        try {
-          await promise
-          this.scannerLoaded = true
-        } catch (error) {
-          if (error.name === 'NotAllowedError') {
-            this.error = "ERROR: you need to grant camera access permisson"
-          } else if (error.name === 'NotFoundError') {
-            this.error = "ERROR: no camera on this device"
-          } else if (error.name === 'NotSupportedError') {
-            this.error = "ERROR: secure context required (HTTPS, localhost)"
-          } else if (error.name === 'NotReadableError') {
-            this.error = "ERROR: is the camera already in use?"
-          } else if (error.name === 'OverconstrainedError') {
-            this.error = "ERROR: installed cameras are not suitable"
-          } else if (error.name === 'StreamApiNotSupportedError') {
-            this.error = "ERROR: Stream API is not supported in this browser"
-          }
-          this.message(error)
-        }
-        
-      },
       decoded(res){
         this.result = res
       },

@@ -14,22 +14,16 @@
           <q-btn flat round dense icon="close" v-close-popup />
         </q-toolbar>
 
-        <q-card-section class="q-mb-xl text-center overflow-hidden-y">
-          <div
-            class="studicar-code"
-            :style="'transform: translateY(' + (this.show ? '0' : '-100') + '%);'"
-          >
-            <VueQrcode
-              :width="200"
-              :color="color"
-              errorCorrectionLevel="H"
-              :value="value"
-              primColor
-            />
+        <q-card-section class="text-center overflow-hidden-y">
+          <div :class="'studicar-code' + (show ? ' show' : '')">
+            <VueQrcode :width="200" :color="color" errorCorrectionLevel="H" :value="input" />
           </div>
         </q-card-section>
         <q-card-section class="q-pa-sm text-caption text-center">
-          <p>Über diesen Code kannst du Daten an andere Nutzer der App übertragen.</p>
+          <p>
+            Über diesen Code kannst du Daten an andere Nutzer der App übertragen. Dafür muss ein anderer StudiCar-Nutzer den Code
+            mit seinem Scanner scannen und er wird direkt auf den passenden Inhalt weitergeleitet.
+          </p>
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -47,7 +41,7 @@ export default {
         VueQrcode
     },
     props: {
-        value: {
+        input: {
             type: String,
             required: true
         },
@@ -71,9 +65,18 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
 .studicar-code {
-  transition: 0.2s ease-out;
-  transition-delay: 0.5s;
+  transform: translateY(150%);
+  transition-delay: 0.6s;
+  &.show {
+    animation: rise 0.6s forwards;
+
+    @keyframes rise {
+      to {
+        transform: translateY(0);
+      }
+    }
+  }
 }
 </style>
