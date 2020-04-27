@@ -24,8 +24,12 @@ export default {
 
   data(){
     return{
-      
+      chats: this.$store.state.chats
     }
+  },
+
+  computed: {
+
   },
 
   mounted(){
@@ -75,7 +79,7 @@ export default {
         return 0;
       }
 
-      return this.global.user.chats.sort(compare).reverse();
+      return this.chats.sort(compare).reverse();
     }
   },
 

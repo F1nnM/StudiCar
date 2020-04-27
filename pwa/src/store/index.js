@@ -65,7 +65,106 @@ const store = new Vuex.Store({
         yellow: 'Kommt auf die Musik an',
         green: 'Ich hör im Auto sehr gern Musik und bin auch offen für Neues'
       }
-    }
+    },
+    chats: [{
+      id: 1,
+      title: 'Lorem ipsum dolor',
+      time: 1586101000127,
+      last: {
+        user: 'Janet',
+        message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+      }
+    },
+    {
+      id: 3,
+      title: 'Zweites Lorem ipsum',
+      time: 1586201000127,
+      last: {
+        user: 'Janet',
+        message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+      }
+    },
+    {
+      id: 2,
+      title: 'Zweites Lorem ipsum',
+      time: 1586301000127,
+      last: {
+        user: 'Janet',
+        message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+      }
+    },
+    {
+      id: 4,
+      title: 'Zweites Lorem ipsum',
+      time: 1586400000127,
+      last: {
+        user: 'Janet',
+        message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+      }
+    },
+    {
+      id: 5,
+      title: 'Zweites Lorem ipsum',
+      time: 1586401000127,
+      last: {
+        user: 'Janet',
+        message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+      }
+    },
+    {
+      id: 5,
+      title: 'Zweites Lorem ipsum',
+      time: 1586501000127,
+      last: {
+        user: 'Janet',
+        message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+      }
+    },
+    {
+      id: 5,
+      title: 'Zweites Lorem ipsum',
+      time: 1586601000127,
+      last: {
+        user: 'Janet',
+        message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+      }
+    },
+    {
+      id: 5,
+      title: 'Zweites Lorem ipsum',
+      time: 1586701000127,
+      last: {
+        user: 'Janet',
+        message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+      }
+    },
+    {
+      id: 5,
+      title: 'Zweites Lorem ipsum',
+      time: 1000701000127,
+      last: {
+        user: 'Ältestes',
+        message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+      }
+    },
+    {
+      id: 5,
+      title: 'Zweites Lorem ipsum',
+      time: 1586701400127,
+      last: {
+        user: 'Neuestes',
+        message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+      }
+    },
+    {
+      id: 5,
+      title: 'Zweites Lorem ipsum',
+      time: 1586701300127,
+      last: {
+        user: 'Janet',
+        message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+      }
+    }]
   }
 })
 
