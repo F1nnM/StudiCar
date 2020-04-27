@@ -1,30 +1,41 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="leftDrawerOpen = !leftDrawerOpen"
-        />
+      <div>
+        <q-toolbar>
+          <q-btn
+            flat
+            dense
+            :disabled="scannerOpen"
+            round
+            icon="menu"
+            aria-label="Menu"
+            @click="leftDrawerOpen = !leftDrawerOpen"
+          />
 
-        <q-toolbar-title class="row">
-          <div class="text-weight-light q-pt-xs col-xs-10 col-md-11">
-            <q-slide-transition :duration="300">
-              <div v-show="!scrolled">StudiCar {{pageTrans}}</div>
-            </q-slide-transition>
-            <q-slide-transition :duration="150">
-              <div v-show="scrolled" class>{{pageName}}</div>
-            </q-slide-transition>
-          </div>
-          <div class="col-xs-2 col-md-1">
-            <q-btn icon="filter_center_focus" to="/scanner" />
-          </div>
-        </q-toolbar-title>
-      </q-toolbar>
+          <q-toolbar-title class="row">
+            <div class="text-weight-light q-pt-xs col-xs-10 col-md-11">
+              <q-slide-transition :duration="300">
+                <div
+                  v-show="!scrolled"
+                >{{!scannerOpen ? 'StudiCar ' + pageTrans : 'Scanvorgang läuft'}}</div>
+              </q-slide-transition>
+              <q-slide-transition :duration="150">
+                <div v-show="scrolled" class>{{pageName}}</div>
+              </q-slide-transition>
+            </div>
+            <div class="col-xs-2 col-md-1">
+              <q-btn
+                flat
+                dense
+                :icon="!scannerOpen ? 'filter_center_focus' : 'cancel_presentation'"
+                @click="toggleScannerOpen"
+              />
+            </div>
+          </q-toolbar-title>
+        </q-toolbar>
+      </div>
+      <qrScanner :open="scannerOpen" @result="gotScanResult" @help="toggleScannerOpen" />
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered content-class="bg-grey-1">
@@ -65,7 +76,7 @@
       </transition>
     </q-page-container>
 
-    <q-footer elevated>
+    <q-footer elevated v-show="!(scannerOpen)">
       <q-tabs
         shrink
         full-width
@@ -89,6 +100,8 @@
 
 <script>
 
+import qrScanner from 'components/qrScanner'
+
 import { scroll } from 'quasar'
 
 import EssentialLink from 'components/EssentialLink'
@@ -98,7 +111,8 @@ export default {
   name: 'MainLayout',
 
   components: {
-    EssentialLink
+    EssentialLink,
+    qrScanner
   },
 
   computed: {
@@ -118,7 +132,16 @@ export default {
   methods:{
 
     scrollHandler(info){
-      this.scrolled = info.position > 30
+      this.scrolled = !this.scannerOpen ? info.position > 30 : false
+    },
+
+    gotScanResult(e){
+      this.scannerOpen = false
+    },
+
+    
+    toggleScannerOpen(){
+      this.scannerOpen = !this.scannerOpen
     }
 
     
@@ -130,6 +153,7 @@ export default {
     return {
       leftDrawerOpen: false,
       pageTransY: 15,
+      scannerOpen: false,
       scrolled: false,
       tab: 'home',
       chats: 'Main',

@@ -2,9 +2,10 @@
   <div class="q-pa-md">
     <q-list>
       <chat_item
-        v-for="item in sortChats()"
+        v-for="(item) in chats"
         :key="item.time"
         :lift="item"
+        :firstItem="chats.indexOf(item) == 0"
         v-on:pagetrans_zoom="$emit('pagetrans_zoom')"
         v-on:pagetrans_slide="$emit('pagetrans_slide')"
         v-on:pagetrans_y="$emit('pagetrans_y', $event)"
@@ -29,7 +30,7 @@ export default {
   },
 
   computed: {
-
+    
   },
 
   mounted(){
@@ -79,7 +80,7 @@ export default {
         return 0;
       }
 
-      return this.chats.sort(compare).reverse();
+      return this.global.chats.sort(compare).reverse();
     }
   },
 

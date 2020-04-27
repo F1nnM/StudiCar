@@ -1,7 +1,7 @@
 <template>
   <div>
     <q-slide-item @click="liftClick" @left="onLeft" @right="onRight">
-      <q-separator inset="item" />
+      <q-separator inset="item" v-if="!firstItem" />
       <template v-slot:left>
         <q-icon name="delete_outline" backgroundColor="red" />
       </template>
@@ -9,7 +9,7 @@
         <q-icon name="delete_outline" />
       </template>
 
-      <q-item tag="a" href="/#/chats/lift" v-ripple>
+      <q-item tag="a" href="/#/chats/lift" v-ripple class="q-py-sm q-px-xs">
         <q-item-section avatar>
           <q-avatar>
             <img :src="lift.url ? lift.url : 'https://cdn.quasar.dev/img/avatar2.jpg'" />
@@ -62,7 +62,10 @@ export default {
 							required: true
 					}
 				}
-			}
+			},
+		firstItem: {
+			type: Number
+		}
     },
 
     methods: {
