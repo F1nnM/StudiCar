@@ -62,6 +62,21 @@ html {
   transform: translateY(90vh) scale(0.8);
 }
 
+.slide-full-enter-active,
+.slide-full-leave-active {
+  transition: all 0.3s;
+  transform-origin: left center;
+  perspective: 300px;
+}
+
+.slide-full-enter {
+  transform: rotateY(60deg);
+}
+
+.slide-full-leave-to {
+  transform: rotateY(60deg);
+}
+
 .expand-enter-active,
 .collapse-leave-active {
   transition: all 0.1s;
@@ -86,22 +101,16 @@ html {
   opacity: 0;
 }
 
+.swipe-away-enter-active,
 .swipe-away-leave-active {
-  transition: all 0.5s ease-out;
-  transform-origin: center top;
+  transition: all 0.5s;
+  transition-delay: 0.1s;
+  transform-origin: right top;
 }
 
-.swipe-away-active {
-  transform: translateY(-100vw);
-}
-
-.swipe-away-enter-active {
-  transition: all 0.2s ease-out;
-  transform-origin: center top;
-}
-
+.swipe-away-active,
 .swipe-away-leave-to {
-  opacity: 0;
+  transform: scale(0);
 }
 
 .record-audio {
@@ -161,6 +170,15 @@ html {
     to {
       border-color: transparent;
     }
+  }
+}
+
+.scanner-container {
+  transition: 0.35s;
+  max-height: 0vh;
+  &.open {
+    transition-duration: 0.5s;
+    max-height: 100vh;
   }
 }
 
@@ -239,5 +257,97 @@ In this case, take a look at MainLayout.vue first.
 
   &.c-u-xl:after {
     padding-bottom: 40px;
+  }
+}
+
+.scanning {
+  position: relative;
+  &:after {
+    content: "";
+    position: absolute;
+    top: 0%;
+    left: 0;
+    width: 100%;
+    height: 0px;
+    border-bottom: 1px solid red;
+    animation: scanner 2s alternate infinite;
+  }
+
+  @keyframes scanner {
+    to {
+      top: 100%;
+    }
+  }
+}
+
+.scanning-border {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  &:after {
+    content: "";
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: linear-gradient(to right, white, red);
+    animation: circle_border 2s infinite;
+  }
+
+  @keyframes circle_border {
+    0%,
+    100% {
+      top: 0%;
+      left: 0%;
+    }
+    25% {
+      left: 99%;
+      top: 0%;
+    }
+    50% {
+      top: 99%;
+      left: 99%;
+    }
+    75% {
+      top: 99%;
+      left: 0%;
+    }
+  }
+}
+
+.scanning-overlay {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+
+  & .overlay-inner {
+    position: absolute;
+    white-space: nowrap;
+    font-weight: 200;
+    font-size: 1.4em;
+    text-align: center;
+    padding-bottom: 0;
+    border-bottom: 1px solid white;
+    left: 50%;
+    bottom: 20%;
+    transform: translateX(-50%);
+    max-height: 50%;
+    width: 70%;
+    background-color: transparent;
+    color: white;
+    & > div {
+      position: relative;
+      &:after {
+        position: absolute;
+        content: "";
+        bottom: 0;
+        left: 0;
+        display: block;
+        width: 100%;
+        min-height: 40px;
+        border-right: 1px solid white;
+        border-left: 1px solid white;
+      }
+    }
   }
 }

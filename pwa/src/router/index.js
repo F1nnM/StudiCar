@@ -14,10 +14,10 @@ Vue.prototype.global = {
     createdAt: new Date(2020, 2).getTime(),
     liftsAll: 17,
     avgLifts: 5
-  }
+  },
+
+  pageTrans: ''
 }
-
-
 
 /*
  * If not building with SSR mode, you can

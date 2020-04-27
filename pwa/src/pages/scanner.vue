@@ -1,14 +1,15 @@
 <template>
   <div>
-    <q-slide-transition>
+    <q-slide-transition class="q-pa-md">
       <p v-if="result">{{result}}</p>
     </q-slide-transition>
 
     <q-slide-transition>
-      <div class="q-pa-none" v-if="!result">
-        <div class="scanning-border full-height full-width relative">
+      <div class="q-pa-xl" v-if="!result">
+        <div :class="built? 'scanning-border relative' : ''">
           <qrcode-stream @init="onInit" @decode="decoded"></qrcode-stream>
           <p
+            v-if="!result"
             class="text-h6 text-uppercase text-weight-light text-white absolute-center"
           >StudiCar Scan</p>
           <span></span>
@@ -32,7 +33,6 @@ components: { QrcodeStream },
     mounted(){
       this.$store.commit('setPageTrans', 'swipe-away')
       this.$store.commit('setPage', '')
-      
     },
 
     data(){
@@ -40,7 +40,8 @@ components: { QrcodeStream },
             code: '',
             video: [],
             result: '',
-            error: ''
+            error: '',
+            built: false
         }
     },
     methods: {
@@ -49,6 +50,7 @@ components: { QrcodeStream },
         },
 
         async onInit (promise) {
+          this.built = true
         try {
           await promise
         } catch (error) {
@@ -98,57 +100,4 @@ components: { QrcodeStream },
 </script>
 
 <style lang="scss">
-.scanning {
-  position: relative;
-  &:after {
-    content: "";
-    position: absolute;
-    top: 0%;
-    left: 0;
-    width: 100%;
-    height: 0px;
-    border-bottom: 1px solid red;
-    animation: scanner 2s alternate infinite;
-  }
-
-  @keyframes scanner {
-    to {
-      top: 100%;
-    }
-  }
-}
-
-.scanning-border {
-  position: relative;
-  height: 100%;
-  width: 100%;
-  &:after {
-    content: "";
-    position: absolute;
-    width: 5px;
-    height: 5px;
-    background: linear-gradient(to right, white, red);
-    animation: circle_border 2s infinite;
-  }
-
-  @keyframes circle_border {
-    0%,
-    100% {
-      top: 0%;
-      left: 0%;
-    }
-    25% {
-      left: 99%;
-      top: 0%;
-    }
-    50% {
-      top: 99%;
-      left: 99%;
-    }
-    75% {
-      top: 99%;
-      left: 0%;
-    }
-  }
-}
 </style>

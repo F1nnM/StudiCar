@@ -60,6 +60,16 @@ const routes = [{
     path: '',
     component: () =>
       import('pages/playground.vue')
+  },
+  {
+    path: '/spielplatz',
+    component: () =>
+      import('pages/playfield.vue')
+  },
+  {
+    path: '/spielhölle',
+    component: () =>
+      import('pages/casino.vue')
   }]
 },
 {

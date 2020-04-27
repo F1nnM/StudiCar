@@ -124,9 +124,15 @@
           :stamp="formatDate(item)"
           :bg-color="getColor(item.sender)"
         >
-          <audio v-if="item.audio" :src="item.audio" controls>Dein Browser unterstützt keine Audios.</audio>
-          <div>
-            <p>[Custom Controls]</p>
+          <div v-if="item.audio">
+            <audio
+              v-if="item.audio"
+              :src="makeBLOB(item.audio)"
+              controls
+            >Dein Browser unterstützt keine Audios.</audio>
+            <div>
+              <p>[Custom Controls]</p>
+            </div>
           </div>
         </q-chat-message>
       </div>
@@ -189,6 +195,10 @@ import { date } from 'quasar'
 
 
 export default {
+  computed: {
+    
+  },
+
   mounted(){
      if(document.location.href.includes('lift')){
        setTimeout(() => window.scrollTo(0,1000000), 300)
@@ -291,8 +301,7 @@ export default {
             {
                 sender: 65163163,
                 timestamp: 1586646489523,
-                content: [],
-                audio: 'blob:https://localhost:3000/15bec656-416e-499d-be04-282b03ad311c'
+                content: ['Kein Content'],
             }
         ]
       }
@@ -301,6 +310,19 @@ export default {
 
 
   methods: {
+    makeBLOB(data){
+      try{
+        alert(data)
+        return window.URL.createObjectURL(data)
+      }
+      catch(e){
+        console.error('---')
+        console.error('could not make BLOB')
+        console.error('---')
+        return null
+      }
+    },
+
     getColor(user){
       if(user == this.user){ // Sent messages have special color
         return 'light-blue-2'
@@ -314,7 +336,7 @@ export default {
         
         var obj = this.lift.users.find(o => o.uid == user)
         var pos = this.lift.users.indexOf(obj)
-        console.log(user + ': ' + pos)
+        //console.log(user + ': ' + pos)
         var color = 'black'
         try{
         color = colors[pos];
@@ -361,7 +383,9 @@ export default {
     },
 
     formatDate(item){
-      return date.formatDate(item.timestamp, 'DD.MM.YYYY - H:mm')
+      // var fullDate = date.formatDate(item.timestamp, 'DD.MM.YYYY - H:mm')
+      var normalDate = date.formatDate(item.timestamp, 'H:mm')
+      return normalDate
     },
 
     false(){
@@ -373,16 +397,11 @@ export default {
     },
 
     sendMessage(data){
-      var blob
-      if(data){
-        try{
-          blob = window.URL.createObjectURL(data)
-        }
-        catch(e){
-          alert('Fehler beim Encoding: ' + e)
-        }
-      }
-      
+      var json = JSON.stringify(data)
+      var blob = new Blob([json], {type: "application/json"})
+      console.log(blob)
+      console.log(JSON.stringify(blob))
+      debugger
       // check whether last message was from this user
       var lastMsg = this.lift.messages[this.lift.messages.length - 1]
       if(lastMsg.sender == this.user && !data){
@@ -394,7 +413,7 @@ export default {
           sender: this.user,
           timestamp: (new Date()).getTime(),
           content: data? [] : [this.messageText],
-          audio: data ? blob : null
+          audio: data // when no data, 
         }
         this.lift.messages.push(newMsg)
       }

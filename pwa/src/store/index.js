@@ -150,10 +150,10 @@ const store = new Vuex.Store({
     {
       id: 5,
       title: 'Zweites Lorem ipsum',
-      time: 1586701400127,
+      time: 1586701200127,
       last: {
-        user: 'Neuestes',
-        message: 'Hier könnte Ihre Werbung stehen, und das ist einfacher Platzhalter Text'
+        user: 'Nicht Janet',
+        message: 'Vorletzte Nachricht'
       }
     },
     {
