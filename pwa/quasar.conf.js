@@ -12,7 +12,8 @@ module.exports = function (ctx) {
       'auth',
       'axios',
       'firebase',
-      'boot'
+      'boot',
+      'vue_record'
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
