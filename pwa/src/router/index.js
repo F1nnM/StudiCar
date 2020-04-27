@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import VueRecord from '@codekraft-studio/vue-record'
 
 import routes from './routes'
 
@@ -9,9 +8,6 @@ import { date } from 'quasar'
 const { ready } = dom
 
 Vue.use(VueRouter)
-
-Vue.use(VueRecord)
-
 
 Vue.prototype.global = {
   user: {
