@@ -255,7 +255,6 @@ export default {
       const fileName = file.name;
       const reader = new FileReader();
       reader.onerror = error => console.log(error);
-      debugger
       reader.readAsDataURL(file);
       reader.onload = event => {
         const img = new Image();
