@@ -399,7 +399,6 @@ export default {
         this.lift.messages.push(newMsg)
       }
       this.messageText = ''
-      debugger
       setTimeout(() => window.scrollTo(0,1000000), 100)
     },
 
