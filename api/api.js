@@ -28,28 +28,32 @@ module.exports = {
       }
     },
     '/getUserData': async (req, res, options) => {
-      if (!isOptionMissing(options, ['fbid'], res)) {
-        let result = (await runQuery("SELECT NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, LIFTS_OFFERED, LIFTS_ALL, PREF_SMOKE, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `USER` WHERE USER.FB_ID = ?", [options.fbid])).result[0]
+      if (!isOptionMissing(options, ['fbid', 'secretFbId'], res)) {
+        let userData = (await runQuery("SELECT NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKE, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `USER` WHERE USER.FB_ID = ?", [options.fbid])).result[0]
         let data = {
           uid: options.fbid,
-          name: result.NAME,
-          gender: result.GENDER,
-          course: result.COURSE,
-          description: result.DESCRIPTION,
+          name: userData.NAME,
+          gender: userData.GENDER,
+          course: userData.COURSE,
+          description: userData.DESCRIPTION,
           stats: {
-            createdAt: result.CREATED_DATE,
-            liftsOffered: result.LIFTS_OFFERED,
-            liftsAll: result.LIFTS_ALL,
+            createdAt: userData.CREATED_DATE
           },
           prefs: {
-            smoke: result.PREF_SMOKE,
-            music: result.PREF_MUSIC,
-            talk: result.PREF_TALK,
-            talkMorning: result.PREF_TALK_MORNING
-          },
-          settings: {
-            liftMaxDistance: result.LIFT_MAX_DISTANCE
+            smoke: userData.PREF_SMOKE,
+            music: userData.PREF_MUSIC,
+            talk: userData.PREF_TALK,
+            talkMorning: userData.PREF_TALK_MORNING
           }
+        }
+        if (options.secretFbId = options.fbid) {
+          let liftCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS LIFT_COUNT FROM `LIFT_MAP` WHERE `USER_ID` = ? ", [options.fbid])).result[0].LIFT_COUNT
+          let driverCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS DRIVER_COUNT FROM `LIFT_MAP` WHERE `IS_DRIVER` = true AND `USER_ID` = ? ", [options.fbid])).result[0].DRIVER_COUNT
+          data.settings = {
+            liftMaxDistance: userData.LIFT_MAX_DISTANCE
+          }
+          data.stats.liftsOffered = liftCount
+          data.stats.driverCount = driverCount
         }
         res.end(JSON.stringify(data));
       }
