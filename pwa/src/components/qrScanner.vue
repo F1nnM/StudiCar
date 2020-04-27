@@ -109,3 +109,97 @@ name: 'qrScanner',
 	}
 }
 </script>
+
+<style lang="scss">
+.scanning {
+  position: relative;
+  &:after {
+    content: "";
+    position: absolute;
+    top: 0%;
+    left: 0;
+    width: 100%;
+    height: 0px;
+    border-bottom: 1px solid red;
+    animation: scanner 2s alternate infinite;
+  }
+
+  @keyframes scanner {
+    to {
+      top: 100%;
+    }
+  }
+}
+
+.scanning-border {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  &:after {
+    content: "";
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: linear-gradient(to right, white, red);
+    animation: circle_border 2s infinite;
+  }
+
+  @keyframes circle_border {
+    0%,
+    100% {
+      top: 0%;
+      left: 0%;
+    }
+    25% {
+      left: 99%;
+      top: 0%;
+    }
+    50% {
+      top: 99%;
+      left: 99%;
+    }
+    75% {
+      top: 99%;
+      left: 0%;
+    }
+  }
+}
+
+.scanning-overlay {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+
+  & .overlay-inner {
+    position: absolute;
+    white-space: nowrap;
+    font-weight: 200;
+    font-size: 1.4em;
+    text-align: center;
+    padding-bottom: 0;
+    border-bottom: 1px solid white;
+    left: 50%;
+    bottom: 20%;
+    transform: translateX(-50%);
+    max-height: 50%;
+    width: 70%;
+    background-color: transparent;
+    color: white;
+    & > div {
+      position: relative;
+      &:after {
+        position: absolute;
+        content: "";
+        bottom: 0;
+        left: 0;
+        display: block;
+        width: 100%;
+        min-height: 40px;
+        border-right: 1px solid white;
+        border-left: 1px solid white;
+      }
+    }
+  }
+}
+</style>

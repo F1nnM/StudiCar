@@ -401,7 +401,7 @@ export default {
       var blob = new Blob([json], {type: "application/json"})
       console.log(blob)
       console.log(JSON.stringify(blob))
-      debugger
+
       // check whether last message was from this user
       var lastMsg = this.lift.messages[this.lift.messages.length - 1]
       if(lastMsg.sender == this.user && !data){
