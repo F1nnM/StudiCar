@@ -12,7 +12,8 @@ export default {
   name: 'break_n',
   props: {
         value:{
-            type: String
+            type: Number,
+            required: true
         }
     }
   }

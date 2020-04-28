@@ -35,7 +35,12 @@
           </q-toolbar-title>
         </q-toolbar>
       </div>
-      <qrScanner :open="scannerOpen" @result="gotScanResult" @help="toggleScannerOpen" />
+      <qrScanner
+        :open="scannerOpen"
+        @result="gotScanResult"
+        @help="toggleScannerOpen"
+        @swipe="closeScanner"
+      />
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered content-class="bg-grey-1">
@@ -131,12 +136,24 @@ export default {
 
   methods:{
 
+    scannerSwiped(e){
+      alert(e)
+    },
+
     scrollHandler(info){
       this.scrolled = !this.scannerOpen ? info.position > 30 : false
     },
 
     gotScanResult(e){
       this.scannerOpen = false
+    },
+
+    closeScanner(e){
+      if(e.direction == 'up'){
+        this.scannerOpen = false
+        setTimeout(() => window.scrollTo(0,0), 300)
+      }
+      
     },
 
     
