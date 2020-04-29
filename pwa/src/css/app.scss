@@ -120,6 +120,16 @@ html {
   -ms-user-select: none; /* IE 10+ and Edge */
   user-select: none; /* Non-prefixed version, 
                   currently supported by Chrome and Opera */
+
+  height: 45px !important;
+  width: 45px !important;
+  transition: 0.2s;
+  transform-origin: 70% 70%;
+}
+
+.custom-input {
+  border-left: 1px solid black;
+  padding-left: 10px;
 }
 
 .icon-zoom-enter-active,
