@@ -97,7 +97,8 @@
       </div>
     </q-drawer>
 
-    <div class="q-pa-md bg-white" v-touch-swipe.mouse.right="goBack">
+    <div class="q-pa-md bg-white">
+      <!-- v-touch-swipe.mouse.right="goBack" -->
       <q-page-scroller
         reverse
         position="bottom-right"
@@ -141,31 +142,34 @@
       class="row"
       style="z-index: 2900; position: fixed; bottom: 0; left: 0; width: 100vw; border-radius: 50%;"
     >
+      <hr style="height: 1px;" class="full-width bg-accent q-ma-none" />
       <q-toolbar class="col-xs-10 col-md-11 bg-grey-3">
         <q-btn flat dense icon="call_split" v-if="false"></q-btn>
         <q-toolbar-title>
           <template>
             <div>
-              <q-form @submit="sendMessage" class="q-gutter-md">
+              <q-form @submit="sendMessage" class="q-gutter-md q-pa-none">
                 <q-input
                   type="text"
-                  class="custom-input"
+                  class="custom-input q-pa-none"
                   v-model="messageText"
                   placeholder="Schreibe etwas..."
-                  style="border-left: 1px solid black; padding-left: 10px;"
                 />
               </q-form>
             </div>
           </template>
         </q-toolbar-title>
       </q-toolbar>
-      <q-toolbar class="col-xs-2 col-md-1 bg-white">
-        <div v-show="!messageText" style="width: 50px; height: 50px;">
+      <q-toolbar class="col-xs-2 col-md-1 bg-white text-center">
+        <div class="full-height full-width q-py-sm">
           <vue-record-audio
+            :style="'transform: scale(' +  (recorderBig ? 2.4 : 1) + ')'"
+            v-show="!messageText"
             mode="hold"
             @result="sendMessage"
             @onContextMenu="false"
-            class="record-audio full-height full-width"
+            @stream="recorderBig = true"
+            class="record-audio"
           />
         </div>
 
@@ -220,6 +224,7 @@ export default {
   data(){
     
     return{
+      recorderBig: false,
       lift_info: false,
       messageText: '',
       user: 61668646,
@@ -312,7 +317,6 @@ export default {
   methods: {
     makeBLOB(data){
       try{
-        alert(data)
         return window.URL.createObjectURL(data)
       }
       catch(e){
@@ -321,6 +325,10 @@ export default {
         console.error('---')
         return null
       }
+    },
+
+    alert(){
+      alert('köb')
     },
 
     getColor(user){
@@ -397,6 +405,7 @@ export default {
     },
 
     sendMessage(data){
+      this.recorderBig = false
       var json = JSON.stringify(data)
       var blob = new Blob([json], {type: "application/json"})
       console.log(blob)
