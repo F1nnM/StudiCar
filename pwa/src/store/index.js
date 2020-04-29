@@ -36,6 +36,7 @@ const store = new Vuex.Store({
   state: {
     greeting: ((new Date).getHours() < 8 ? 'Guten Morgen' : ((new Date).getHours() > 18 ? 'Guten Abend' : 'Willkommen')),
     pageTrans: 'slide',
+    transer: 'slide',
     pageName: 'Willkommen', // needed for scroll-relative Header
     testValue: 10,
     scroll: 0,
@@ -44,7 +45,7 @@ const store = new Vuex.Store({
       usersAll: 226,
       about: {}
     },
-    preferences: {
+    preferences: { // legend for preferences, needed for info at registration profiles
       talkativeness: {
         red: 'Ich hab während der Fahrt gern meine Ruhe',
         yellow: 'Wenn ich gerade dazu in der Stimmung bin, unterhalte ich mich nebenher gern ein bisschen',

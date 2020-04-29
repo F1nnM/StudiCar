@@ -16,7 +16,10 @@
             <q-toolbar-title class="row">
               <div class="col-6 q-pt-xs">
                 <q-slide-transition>
-                  <div v-show="!scrolled" class="text-weight-thin">StudiCar</div>
+                  <div v-show="!scrolled" class="text-weight-thin">
+                    StudiCar
+                    <q-toggle v-model="transer" label="Transer" />
+                  </div>
                 </q-slide-transition>
                 <q-slide-transition>
                   <div v-show="scrolled" class="text-weight-thin">{{pageName}}</div>
@@ -37,7 +40,7 @@
 
     <q-page-container>
       <q-scroll-observer @scroll="scrollHandler" />
-      <transition name="slide-full">
+      <transition :name="pageTrans" mode="out-in">
         <router-view />
       </transition>
     </q-page-container>
@@ -79,6 +82,16 @@ export default {
     computed: {
       pageName() {
         return this.$store.state.pageName
+      },
+
+      pageTrans(){
+        var res
+        console.log(Date.now())
+        async() => {
+          res = !this.transer ? this.$global.transer : this.$store.state.transer
+        }
+        console.log(Date.now())
+        return res
       }
     },
 
@@ -87,6 +100,7 @@ export default {
             tab: 'spielwiese',
             code: '',
             video: [],
+            transer: false,
             result: '',
             fullscreen: false,
             scrolled: false,

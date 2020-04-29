@@ -11,6 +11,7 @@ module.exports = function (ctx) {
     boot: [
       'auth',
       'axios',
+      'globalVars.js',
       'firebase',
       'boot',
       'vue_record'

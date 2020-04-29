@@ -43,7 +43,13 @@
       />
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered content-class="bg-grey-1">
+    <q-drawer
+      :no-swipe-open="scannerOpen"
+      v-model="leftDrawerOpen"
+      show-if-above
+      bordered
+      content-class="bg-grey-1"
+    >
       <q-slide-transition>
         <div v-show="true">
           <!-- if set to leftDrawerOpen, each time you open the sidebar the image has an expand transition -->
@@ -159,6 +165,9 @@ export default {
     
     toggleScannerOpen(){
       this.scannerOpen = !this.scannerOpen
+      if(this.scannerOpen){
+        this.leftDrawerOpen = false
+      }
     }
 
     
