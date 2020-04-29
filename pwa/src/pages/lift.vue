@@ -341,7 +341,7 @@ export default {
         try{
         color = colors[pos];
         } catch(e){
-          console.warn('Fehler bei der Farbenabfrage für Benutzer' + user)
+          console.warn('Error at selecting color for user ' + user)
         }
         return color
       }

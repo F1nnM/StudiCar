@@ -161,6 +161,21 @@ name: 'qrScanner',
   }
 }
 
+.scanner-container {
+  visibility: hidden;
+  transition: 0.35s;
+  max-height: 0vh;
+  &.open {
+    visibility: visible;
+    transition-duration: 0.5s;
+    max-height: 100vh;
+  }
+}
+
+.four-equal-children > * {
+  width: 25%;
+}
+
 .scanning-overlay {
   position: relative;
   display: inline-block;

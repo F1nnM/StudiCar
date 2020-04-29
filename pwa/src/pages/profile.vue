@@ -44,18 +44,12 @@
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          <q-input dense v-model="newDescription" autofocus @keyup.enter="prompt = false" />
+          <q-input dense v-model="description" autofocus @keyup.enter="prompt = false" />
         </q-card-section>
 
         <q-card-actions align="right" class="text-primary">
           <q-btn flat label="Abbrechen" v-close-popup />
-          <q-btn
-            :disabled="!atLeastFiveWords"
-            @click="updateDescription"
-            flat
-            label="Speichern"
-            v-close-popup
-          />
+          <q-btn :disabled="!atLeastFiveWords" flat label="Speichern" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -137,7 +131,7 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="editDistance" full-height full-width>
+    <q-dialog v-model="editDistance" full-height full-width persistent>
       <q-card class="column full-height">
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">Entfernung einstellen</div>
@@ -206,7 +200,6 @@ export default {
       openUpload: false,
       file: null,
       fileBlob: null,
-      description: this.$store.getters["auth/user"].description,
       genderOptions: [
         "Männlich",
         "Weiblich",
@@ -231,6 +224,15 @@ export default {
       },
       set(value) {
         this.$store.dispatch("auth/updateGender", value);
+      }
+    },
+
+    description: {
+      get(){
+        return this.$store.getters["auth/user"].description
+      },
+      set(){
+        this.$store.dispatch("auth/updateDescription", this.description)
       }
     },
 
@@ -277,12 +279,12 @@ export default {
             var scale = img.width / size;
             var indent = (img.height - img.width) / scale; // indent has to be half of the difference and negative, additionally divided by scale
             ctx.drawImage(img, 0, indent / -2, width, size + indent);
-            try{
-              this.fileBlob = elem.toBlob()
-            }
-            catch(e){
-              alert('Die Konvertierung hat nicht funktioniert. E:' + e)
-            }
+          }
+          try{
+            this.fileBlob = elem.toBlob()
+          }
+          catch(e){
+            alert('Die Konvertierung hat nicht funktioniert. E:' + e)
           }
         }, reader.onerror = error => {
           alert(error)
@@ -329,10 +331,6 @@ export default {
     //   reader.readAsDataURL(file);
     },
 
-    updateDescription() {
-      this.$store.dispatch("auth/updateDescription", this.newDescription)
-      this.newDescription = ''
-    },
 
     updateProfilePicture(blob) {
       sendApiRequest(SQL_UPDATE_PROFILE_PICTURE,
