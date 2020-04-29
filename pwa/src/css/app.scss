@@ -173,19 +173,6 @@ html {
   }
 }
 
-.scanner-container {
-  transition: 0.35s;
-  max-height: 0vh;
-  &.open {
-    transition-duration: 0.5s;
-    max-height: 100vh;
-  }
-}
-
-.four-equal-children > * {
-  width: 25%;
-}
-
 /* PLEASE NOTE:
 
 It can be possible that the above css code is overwritten by soft coded style.

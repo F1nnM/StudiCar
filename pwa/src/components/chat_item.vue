@@ -64,7 +64,7 @@ export default {
 				}
 			},
 		firstItem: {
-			type: Number
+			type: Boolean
 		}
     },
 
@@ -117,7 +117,7 @@ export default {
 				return display_text
 
 				function diff(unit){
-					console.warn(date.getDateDiff(new Date(), time, unit))
+					//console.warn(date.getDateDiff(new Date(), time, unit))
 					return date.getDateDiff(new Date(), time, unit)
 				}
 
