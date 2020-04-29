@@ -9,16 +9,6 @@ const { ready } = dom
 
 Vue.use(VueRouter)
 
-Vue.prototype.global = {
-  user: {
-    createdAt: new Date(2020, 2).getTime(),
-    liftsAll: 17,
-    avgLifts: 5
-  },
-
-  pageTrans: ''
-}
-
 /*
  * If not building with SSR mode, you can
  * directly export the Router instantiation;
