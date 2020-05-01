@@ -142,12 +142,12 @@
             </q-item-section>
           </q-item>
 
-          <q-item-label header class="q-pt-xs">Fahrten</q-item-label>
+          <q-item-label header class="q-pt-xs text-uppercase">Fahrten</q-item-label>
           <q-item>angeboten: {{viewedUser.lifts.offered}}</q-item>
           <q-item>gesamt: {{viewedUser.lifts.all}}</q-item>
           <q-item>durchschnittlich: {{viewedUser.lifts.average}}/W</q-item>
 
-          <q-item-label header class="q-pt-xs">Dabei seit</q-item-label>
+          <q-item-label header class="q-pt-xs text-uppercase">Dabei seit</q-item-label>
           <q-item>{{viewedUser.createdAt}}</q-item>
         </q-list>
       </template>

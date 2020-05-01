@@ -29,11 +29,12 @@ export default {
     },
 
     UPDATE_DESCRIPTION (state, payload) {
-      state.user.description = payload;
+      state.user.description = payload
+      debugger
     },
 
     UPDATE_GENDER (state, payload) {
-      state.user.gender = payload;
+      state.user.gender = payload
     },
 
     UPDATE_LIFT_MAX_DISTANCE (state, payload) {
@@ -51,7 +52,7 @@ export default {
           commit('SET_USER', user)
         })
         .catch(error => {
-          throw error
+          alert('Bei der Anmeldung ist ein Problem aufgetreten: ' + error)
         })
     },
 
@@ -103,6 +104,15 @@ export default {
         SQL_UPDATE_DESCRIPTION,
         { description: payload },
         _ => commit('UPDATE_DESCRIPTION', payload),
+        error => alert(error)
+      );
+    },
+
+    async updatePrefs ({ commit }, payload) {
+      sendApiRequest(
+        SQL_UPDATE_PREFS,
+        { prefs: payload },
+        _ => commit('UPDATE_PREFS', payload),
         error => alert(error)
       );
     },

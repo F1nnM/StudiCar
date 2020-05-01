@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-dialog v-model="show">
+    <q-dialog v-model="show" persistent>
       <q-card>
         <q-toolbar>
           <q-avatar>
@@ -11,7 +11,7 @@
             <span class="text-weight-bold">StudiCar</span> Code
           </q-toolbar-title>
 
-          <q-btn flat round dense icon="close" v-close-popup />
+          <q-btn flat round dense icon="close" v-close-popup @click="$emit('close')" />
         </q-toolbar>
 
         <q-card-section class="text-center overflow-hidden-y">
