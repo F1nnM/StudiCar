@@ -92,3 +92,8 @@ export const SQL_UPDATE_PROFILE_PICTURE = {
   path: "/updateProfilePicture",
   method: "POST"
 }
+
+export const SQL_UPDATE_PREFS = {
+  path: "/updatePrefs",
+  method: "POST"
+}

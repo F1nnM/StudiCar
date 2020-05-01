@@ -54,15 +54,15 @@
                             <div class="col-1">
                               <span class="text-red">●</span>
                             </div>
-                            <div class="col-11 q-pb-sm">{{prefsDocu.talkativeness.red}}</div>
+                            <div class="col-11 q-pb-sm">{{prefsDocu.talk.red}}</div>
                             <div class="col-1">
                               <span class="text-orange">●</span>
                             </div>
-                            <div class="col-11 q-pb-sm">{{prefsDocu.talkativeness.yellow}}</div>
+                            <div class="col-11 q-pb-sm">{{prefsDocu.talk.yellow}}</div>
                             <div class="col-1">
                               <span class="text-green">●</span>
                             </div>
-                            <div class="col-11">{{prefsDocu.talkativeness.green}}</div>
+                            <div class="col-11">{{prefsDocu.talk.green}}</div>
                           </div>
                         </q-tab-panel>
 
@@ -72,15 +72,15 @@
                             <div class="col-1">
                               <span class="text-red">●</span>
                             </div>
-                            <div class="col-11 q-pb-sm">{{prefsDocu.talkAtMorning.red}}</div>
+                            <div class="col-11 q-pb-sm">{{prefsDocu.talkMorning.red}}</div>
                             <div class="col-1">
                               <span class="text-orange">●</span>
                             </div>
-                            <div class="col-11 q-pb-sm">{{prefsDocu.talkAtMorning.yellow}}</div>
+                            <div class="col-11 q-pb-sm">{{prefsDocu.talkMorning.yellow}}</div>
                             <div class="col-1">
                               <span class="text-green">●</span>
                             </div>
-                            <div class="col-11">{{prefsDocu.talkAtMorning.green}}</div>
+                            <div class="col-11">{{prefsDocu.talkMorning.green}}</div>
                           </div>
                         </q-tab-panel>
 
@@ -200,8 +200,8 @@ export default {
   },
 
   computed: {
-      prefsDocu: function(){
-        return this.$store.state.preferences
+      prefsDocu(){
+        return this.$store.state.prefDocu
       }
   },
 
