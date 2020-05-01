@@ -10,6 +10,7 @@
             @decode="decoded"
             v-touch-swipe.mouse="swiped"
           >
+            <div v-if="otherQR" class="fixed-center text-no-wrap text-h5 strobo">kein StudiCar Code</div>
             <div class="overlay-inner">
               <p>
                 <b>StudiCar</b> Code
@@ -60,7 +61,8 @@ name: 'qrScanner',
 
 	data(){
 		return {
-			result: '',
+      result: '',
+      otherQR: false,
 			error: '',
 			scannerLoaded: false,
 			scannerHelp: false
@@ -96,7 +98,15 @@ name: 'qrScanner',
 		},
 		
 		decoded(res){
-			this.$emit('result', res)
+      if(res.slice(-1).charCodeAt(0) % 9 == 0){
+        this.$emit('result', res)
+      }
+			else{
+        this.otherQR = true
+        setTimeout(() => {
+          this.otherQR = false
+        }, 2500)
+      }
     },
     
     swiped(info){
@@ -181,6 +191,17 @@ name: 'qrScanner',
   display: inline-block;
   width: 100%;
   height: 100%;
+
+  .strobo {
+    color: transparent;
+    animation: strobo 0.1s reverse infinite;
+
+    @keyframes strobo {
+      to {
+        color: red;
+      }
+    }
+  }
 
   & .overlay-inner {
     position: absolute;

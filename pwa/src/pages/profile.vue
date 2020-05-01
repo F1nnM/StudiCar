@@ -41,7 +41,8 @@
         </q-list>
       </template>
     </q-splitter>
-    <qrGen @close="shareProfileQR = false" :show="shareProfileQR" :input="user_fbid" />
+
+    <qrGen @close="shareProfileQR = false" :show="shareProfileQR" :input="secureInput" />
 
     <div class="q-py-md q-px-none">
       <q-tabs
@@ -524,7 +525,6 @@ export default {
       liftAverage: 5,
       newLiftMaxDistance: 0,
       username:  this.$store.getters['auth/user'].name.split(' ')[0],
-      user_fbid:  this.$store.getters['auth/user'].uid,
       adresses: this.$store.getters['auth/user'].adresses,
       cars: this.$store.getters['auth/user'].cars,
       carInfo: {
@@ -552,7 +552,8 @@ export default {
         "Weiblich",
         "Divers"
       ],
-      tab: 'data'
+			tab: 'data',
+			prefsDocu: this.$store.state.prefsDocu
     }
   },
   computed: {
@@ -566,7 +567,7 @@ export default {
           case "D":
             return "Divers"
           default:
-            return "Sonstiges / Will ich nicht sagen";
+            return "Will ich nicht sagen";
         }
       },
       set(value) {
@@ -601,7 +602,7 @@ export default {
 			}
 		},
 
-    atLeastFiveWords: function(){
+    atLeastFiveWords(){
       if(this.username == 'Bernd'){
         return true
       }
@@ -612,9 +613,16 @@ export default {
         return length > 5 ? true : (length >= 5) && lastItemIsWord // when more than 5 words, just return true
       }
 		},
-		
-		prefsDocu(){
-			return this.$store.state.prefsDocu
+
+		secureInput(){
+			let id = this.$store.getters['auth/user'].uid
+			var alphabet = "qwertzuiopasdfghjklyxcvbnm1234567890"
+      let letter
+			do{
+				letter = alphabet[Math.floor(Math.random() * alphabet.length)]
+			}
+			while(letter.charCodeAt(0) % 9 != 0) // 9 people working on the project
+			return id + letter
 		}
   },
   methods: {
@@ -686,15 +694,6 @@ export default {
         this.carInfo[key] = item[key]
       }
       this.carInfoOpen = true
-    },
-
-    updateDescription(){
-      this.$store.dispatch("auth/updateDescription", this.newDescription);
-      this.newDescription = ''
-    },
-
-    updatePrefs(){
-      this.$store.dispatch("auth/updatePrefs", this.prefs);
     },
 
     loadFile(file) {
