@@ -256,3 +256,64 @@ In this case, take a look at MainLayout.vue first.
     padding-bottom: 40px;
   }
 }
+
+.custom-overline {
+  position: relative;
+  &:after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-top: 1px solid black;
+    width: 50%;
+    padding-top: 2px;
+  }
+
+  &.c-o-l:after {
+    left: 0;
+    transform: translateX(5%);
+  }
+
+  &.c-o-m:after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  &.c-o-r:after {
+    right: 0;
+    transform: translateX(-5%);
+  }
+
+  &.c-o-2:after {
+    width: 50%;
+  }
+
+  &.c-o-4:after {
+    width: 25%;
+  }
+
+  &.c-o-8:after {
+    width: 80%;
+  }
+
+  &.c-o-xs:after {
+    padding-top: 1px;
+  }
+
+  &.c-o-sm:after {
+    padding-top: 4px;
+  }
+
+  &.c-o-md:after {
+    padding-top: 10px;
+  }
+
+  &.c-o-lg:after {
+    padding-top: 20px;
+  }
+
+  &.c-o-xl:after {
+    padding-top: 40px;
+  }
+}

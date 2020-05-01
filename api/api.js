@@ -40,7 +40,7 @@ module.exports = {
             createdAt: userData.CREATED_DATE
           },
           prefs: {
-            smoke: userData.PREF_SMOKE,
+            smoking: userData.PREF_SMOKE,
             music: userData.PREF_MUSIC,
             talk: userData.PREF_TALK,
             talkMorning: userData.PREF_TALK_MORNING
@@ -54,8 +54,33 @@ module.exports = {
           }
           data.stats.liftsOffered = liftCount
           data.stats.driverCount = driverCount
+          let adresses = await runQuery("SELECT POSTCODE, CITY, STREET, NUMBER FROM address INNER JOIN user ON address.USER_ID = user.ID WHERE user.FB_ID = ?", [options.fbid]);
+          data.adresses = []
+          adresses.result.forEach(item => {
+            let obj = {
+              postcode: item.POSTCODE,
+              city: item.CITY,
+              street: item.STREET,
+              number: item.NUMBER
+            }
+            data.adresses.push(obj)
+          })
+          let cars = await runQuery("SELECT BRAND, MODEL, TYPE, LICENSE_PLATE, SEATS, COLOR FROM car INNER JOIN user ON car.USER_ID = user.ID WHERE user.FB_ID = ?", [options.fbid]);
+          data.cars = []
+          cars.result.forEach(item => {
+            let obj = {
+              brand: item.BRAND,
+              model: item.MODEL,
+              type: item.TYPE,
+              plate: item.LICENSE_PLATE,
+              seats: item.SEATS,
+              color: item.COLOR
+            }
+            data.cars.push(obj)
+          })
         }
-        res.end(JSON.stringify(data));
+
+        res.end(JSON.stringify(data))
       }
     }
   },
