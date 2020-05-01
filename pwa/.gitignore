@@ -36,6 +36,9 @@ yarn-error.log*
 src/statics/app-logo-128x128.png
 src/statics/icons
 
+#exclude my own files
+/src/guides/
+
 server.pem
 server.key
 ca.pem

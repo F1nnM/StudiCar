@@ -1,6 +1,6 @@
 import Firebase from 'firebase/app'
 import 'firebase/auth'
-import { SQL_CREATE_USER_IF_NOT_EXISTING, sendApiRequest, SQL_GET_USER_DATA, SQL_UPDATE_DESCRIPTION, SQL_UPDATE_GENDER, SQL_UPDATE_LIFT_MAX_DISTANCE } from '../../ApiAccess'
+import { SQL_CREATE_USER_IF_NOT_EXISTING, sendApiRequest, SQL_GET_USER_DATA, SQL_UPDATE_DESCRIPTION, SQL_UPDATE_GENDER, SQL_UPDATE_LIFT_MAX_DISTANCE, SQL_UPDATE_PREFS } from '../../ApiAccess'
 
 export default {
   namespaced: true,
@@ -30,7 +30,6 @@ export default {
 
     UPDATE_DESCRIPTION (state, payload) {
       state.user.description = payload
-      debugger
     },
 
     UPDATE_GENDER (state, payload) {
@@ -38,7 +37,11 @@ export default {
     },
 
     UPDATE_LIFT_MAX_DISTANCE (state, payload) {
-      state.user.settings.updateLiftMaxDistance = payload
+      state.user.settings.liftMaxDistance = payload
+    },
+
+    UPDATE_PREFS (state, payload) {
+      state.user.prefs = payload
     }
   },
 

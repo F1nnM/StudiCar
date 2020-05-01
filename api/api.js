@@ -29,7 +29,7 @@ module.exports = {
     },
     '/getUserData': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid', 'secretFbId'], res)) {
-        let userData = (await runQuery("SELECT NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKE, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `USER` WHERE USER.FB_ID = ?", [options.fbid])).result[0]
+        let userData = (await runQuery("SELECT NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKING, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `USER` WHERE USER.FB_ID = ?", [options.fbid])).result[0]
         let data = {
           uid: options.fbid,
           name: userData.NAME,
@@ -40,7 +40,7 @@ module.exports = {
             createdAt: userData.CREATED_DATE
           },
           prefs: {
-            smoking: userData.PREF_SMOKE,
+            smoking: userData.PREF_SMOKING,
             music: userData.PREF_MUSIC,
             talk: userData.PREF_TALK,
             talkMorning: userData.PREF_TALK_MORNING
@@ -172,6 +172,19 @@ module.exports = {
             throw error;
           });
         res.end();
+      }
+    },
+    '/updatePrefs': async (req, res, options) => {
+      if (!isOptionMissing(options, ['secretFbId', 'prefs'], res)) {
+        await runQuery(
+          "UPDATE user SET PREF_TALK = ?, PREF_TALK_MORNING = ?, PREF_MUSIC = ?, PREF_SMOKING = ? WHERE FB_ID = ?;",
+          [options.prefs.talk, options.prefs.talkMorning, options.prefs.smoking, options.prefs.music, options.secretFbId]).catch(error => {
+            throw error;
+          });
+        res.end();
+      }
+      else {
+        console.log('Problem')
       }
     }
   }

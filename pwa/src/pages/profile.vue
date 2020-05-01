@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-splitter v-model="splitter">
+    <q-splitter :v-model="50">
       <template v-slot:before>
         <div class="q-px-md q-py-sm">
           <q-card>
@@ -74,13 +74,7 @@
             <div class="row q-pt-md">
               <p class="text-uppercase text-caption q-mb-none col-10">Kurzbeschreibung</p>
               <div class="col-2">
-                <q-btn
-                  size="sm"
-                  flat
-                  color="black"
-                  icon="edit"
-                  @click="openUpdateDescription = true"
-                />
+                <q-btn size="sm" flat color="black" icon="edit" @click="toggleEditDescription" />
               </div>
               <div class="q-pa-sm">{{description}}</div>
             </div>
@@ -93,7 +87,7 @@
                 <div class="text-uppercase text-caption q-mt-none q-mb-xs">
                   Präferenzen
                   <br />im Auto
-                  <q-btn size="sm" flat @click="prefInfo = !prefInfo" icon="edit" />
+                  <q-btn size="sm" flat @click="toggleEditPrefs" icon="edit" />
                 </div>
                 <div class="row">
                   <div class="col-9">Redseligkeit</div>
@@ -109,13 +103,13 @@
               <div class="col-6">
                 <div class="row">
                   <div class="col-12 text-uppercase text-right text-caption">
-                    maximale Entfernung:
+                    maximale Entfernung
                     <br />
                   </div>
 
                   <div class="col-12 text-h5 text-right">
-                    {{liftMaxDistance}}km
-                    <q-btn size="sm" flat @click="editDistance = true" icon="edit" />
+                    {{liftMaxDistance}} km
+                    <q-btn size="sm" flat @click="toggleEditLiftMaxDistance" icon="edit" />
                   </div>
                 </div>
               </div>
@@ -164,15 +158,25 @@
         </q-tab-panel>
       </q-tab-panels>
 
-      <q-dialog v-model="openUpdateDescription" persistent full-width>
+      <q-dialog v-model="editDescription" persistent full-width>
         <q-card>
           <q-card-section>
             <div class="text-h6">Kurzinfo</div>
-            <p class="text-caption">Beschreibe dich in wenigstens 5 Worten</p>
+            <p class="text-caption">
+              Beschreibe dich in wenigstens 5 Worten
+              <br />
+            </p>
           </q-card-section>
 
-          <q-card-section class="q-pt-none">
-            <q-input dense v-model="newDescription" autofocus @keyup.enter="prompt = false" />
+          <q-card-section class="q-pt-none row">
+            <q-input
+              class="col-10"
+              dense
+              v-model="newDescription"
+              autofocus
+              @keyup.enter="prompt = false"
+            />
+            <q-btn class="col-2" icon="clear" flat size="sm" @click="newDescription = ''" />
           </q-card-section>
 
           <q-card-actions align="right" class="text-primary">
@@ -181,20 +185,12 @@
               :disabled="!atLeastFiveWords"
               flat
               label="Speichern"
-              @click="updateDescription"
+              @click="toggleEditDescription"
               v-close-popup
             />
           </q-card-actions>
         </q-card>
       </q-dialog>
-      <!-- 
-    <q-input v-model="description" filled autogrow stack-label label="Beschreibung" />
-    <q-btn
-      color="white"
-      text-color="black"
-      label="Beschreibung speichern"
-      @click="updateDescription()"
-      />-->
 
       <q-dialog v-model="openUpload" full-width>
         <q-card>
@@ -251,29 +247,32 @@
 
       <q-dialog v-model="editDistance" full-height full-width persistent>
         <q-card class="column full-height">
-          <q-card-section class="row items-center q-pb-none">
+          <q-card-section class="q-pb-none">
             <div class="text-h6">Entfernung einstellen</div>
-            <q-space />
-            <q-btn icon="close" @click="updateDistance()" flat round dense v-close-popup />
           </q-card-section>
           <q-card-section>
             <p class="text-caption">
               Wie weit soll deine Mitfahrgelegenheit maximal von dir entfernt sein?
               <br />
-              <small>Bitte hab Verständnis, dass wir noch mit Luftlinien rechnen. Wir arbeiten an echten Routen.</small>
+              <small>Bitte hab Verständnis, dass wir noch mit Luftlinien rechnen. Echte Routen sollen aber bald kommen.</small>
             </p>
 
             <q-slider
-              v-model="liftMaxDistance"
+              v-model="newLiftMaxDistance"
               :min="5"
               :max="40"
               :step="5"
               snap
               label-always
-              :label-value="liftMaxDistance+'km'"
+              :label-value="newLiftMaxDistance+' km'"
               color="primary"
             />
+            <div style="min-height: 30vh;"></div>
           </q-card-section>
+          <q-card-actions align="right" class="text-primary">
+            <q-btn flat label="Abbrechen" v-close-popup />
+            <q-btn flat label="Speichern" @click="toggleEditLiftMaxDistance" v-close-popup />
+          </q-card-actions>
         </q-card>
       </q-dialog>
 
@@ -318,6 +317,172 @@
           </q-card-section>
         </q-card>
       </q-dialog>
+
+      <q-dialog v-model="editPrefs" position="bottom" class="q-gutter-sm q-pa-md">
+        <q-card class="q-pa-xs">
+          <q-splitter :v-model="20">
+            <template v-slot:before>
+              <q-tabs
+                v-model="editPrefsTab"
+                vertical
+                class="text-primary"
+                style="min-height: 50vh;"
+              >
+                <q-tab name="talk" icon="record_voice_over" />
+                <q-tab name="talkMorning" icon="alarm" />
+                <q-tab name="smoking" icon="smoking_rooms" />
+                <q-tab name="music" icon="music_note" />
+              </q-tabs>
+            </template>
+            <template v-slot:after>
+              <q-tab-panels
+                v-model="editPrefsTab"
+                swipeable
+                animated
+                vertical
+                transition-prev="jump-down"
+                transition-next="jump-up"
+              >
+                <q-tab-panel name="talk">
+                  <div class="text-h6 q-mb-md">Redseligkeit</div>
+                  <q-list>
+                    <q-item tag="label" v-ripple>
+                      <q-radio
+                        keep-color
+                        v-model="newPrefs.talk"
+                        val="RED"
+                        :label="prefsDocu.talk.red"
+                        color="red"
+                      />
+                    </q-item>
+                    <q-item tag="label" v-ripple>
+                      <q-radio
+                        keep-color
+                        v-model="newPrefs.talk"
+                        val="YELLOW"
+                        :label="prefsDocu.talk.yellow"
+                        color="orange"
+                      />
+                    </q-item>
+                    <q-item tag="label" v-ripple>
+                      <q-radio
+                        keep-color
+                        v-model="newPrefs.talk"
+                        val="GREEN"
+                        :label="prefsDocu.talk.green"
+                        color="green"
+                      />
+                    </q-item>
+                  </q-list>
+                </q-tab-panel>
+
+                <q-tab-panel name="talkMorning">
+                  <div class="text-h6 q-mb-md">...am Morgen</div>
+                  <q-list>
+                    <q-item tag="label" v-ripple>
+                      <q-radio
+                        keep-color
+                        v-model="newPrefs.talkMorning"
+                        val="RED"
+                        :label="prefsDocu.talkMorning.red"
+                        color="red"
+                      />
+                    </q-item>
+                    <q-item tag="label" v-ripple>
+                      <q-radio
+                        keep-color
+                        v-model="newPrefs.talkMorning"
+                        val="YELLOW"
+                        :label="prefsDocu.talkMorning.yellow"
+                        color="orange"
+                      />
+                    </q-item>
+                    <q-item tag="label" v-ripple>
+                      <q-radio
+                        keep-color
+                        v-model="newPrefs.talkMorning"
+                        val="GREEN"
+                        :label="prefsDocu.talkMorning.green"
+                        color="green"
+                      />
+                    </q-item>
+                  </q-list>
+                </q-tab-panel>
+
+                <q-tab-panel name="smoking">
+                  <div class="text-h6 q-mb-md">Rauchen im Auto</div>
+                  <q-list>
+                    <q-item tag="label" v-ripple>
+                      <q-radio
+                        keep-color
+                        v-model="newPrefs.smoking"
+                        val="RED"
+                        :label="prefsDocu.smoking.red"
+                        color="red"
+                      />
+                    </q-item>
+                    <q-item tag="label" v-ripple>
+                      <q-radio
+                        keep-color
+                        v-model="newPrefs.smoking"
+                        val="YELLOW"
+                        :label="prefsDocu.smoking.yellow"
+                        color="orange"
+                      />
+                    </q-item>
+                    <q-item tag="label" v-ripple>
+                      <q-radio
+                        keep-color
+                        v-model="newPrefs.smoking"
+                        val="GREEN"
+                        :label="prefsDocu.smoking.green"
+                        color="green"
+                      />
+                    </q-item>
+                  </q-list>
+                </q-tab-panel>
+
+                <q-tab-panel name="music">
+                  <div class="text-h6 q-mb-md">Musik im Auto</div>
+                  <q-list>
+                    <q-item tag="label" v-ripple>
+                      <q-radio
+                        keep-color
+                        v-model="newPrefs.music"
+                        val="RED"
+                        :label="prefsDocu.music.red"
+                        color="red"
+                      />
+                    </q-item>
+                    <q-item tag="label" v-ripple>
+                      <q-radio
+                        keep-color
+                        v-model="newPrefs.music"
+                        val="YELLOW"
+                        :label="prefsDocu.music.yellow"
+                        color="orange"
+                      />
+                    </q-item>
+                    <q-item tag="label" v-ripple>
+                      <q-radio
+                        keep-color
+                        v-model="newPrefs.music"
+                        val="GREEN"
+                        :label="prefsDocu.music.green"
+                        color="green"
+                      />
+                    </q-item>
+                  </q-list>
+                </q-tab-panel>
+              </q-tab-panels>
+            </template>
+          </q-splitter>
+          <q-card-actions align="right" class="text-primary">
+            <q-btn flat label="Abbrechen" v-close-popup />
+            <q-btn flat label="Speichern" @click="toggleEditPrefs" v-close-popup />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
     </div>
   </div>
 </template>
@@ -357,7 +522,7 @@ export default {
       liftsOffered: this.$store.getters["auth/user"].stats.liftsOffered,
       liftsAll: this.$store.getters["auth/user"].stats.liftsAll,
       liftAverage: 5,
-      liftMaxDistance: this.$store.getters["auth/user"].settings.liftMaxDistance,
+      newLiftMaxDistance: 0,
       username:  this.$store.getters['auth/user'].name.split(' ')[0],
       user_fbid:  this.$store.getters['auth/user'].uid,
       adresses: this.$store.getters['auth/user'].adresses,
@@ -371,45 +536,70 @@ export default {
         seats: ''
       },
       carInfoOpen: false,
-      editDistance: false,
+			editDistance: false,
+			editPrefs: false,
+			editPrefsTab: 'smoking',
+			newPrefs: null,
       shareProfileQR: false,
-      prefs: this.$store.getters["auth/user"].prefs,
-      splitter: 50, 
       ppPath: "",
-      openUpdateDescription: false,
-      description: this.$store.getters["auth/user"].description,
+      editDescription: false,
       newDescription: '',
       openUpload: false,
       file: null,
       fileBlob: null,
       genderOptions: [
-        "M",
-        "W",
-        "D"
+        "Männlich",
+        "Weiblich",
+        "Divers"
       ],
       tab: 'data'
-    };
+    }
   },
   computed: {
     gender: {
       get() {
-        // switch (this.$store.getters["auth/user"].gender) {
-        //   case "W":
-        //     return "Weiblich";
-        //   case "M":
-        //     return "Männlich";
-        //   case "D":
-        //     return "Divers";
-        //   case "X":
-        //   default:
-        //     return "Sonstiges / Will ich nicht sagen";
-        // }
-        return this.$store.getters["auth/user"].gender
+        switch (this.$store.getters["auth/user"].gender) {
+          case "W":
+            return "Weiblich"
+          case "M":
+            return "Männlich"
+          case "D":
+            return "Divers"
+          default:
+            return "Sonstiges / Will ich nicht sagen";
+        }
       },
       set(value) {
-        this.$store.dispatch("auth/updateGender", value);
+        this.$store.dispatch("auth/updateGender", value)
       }
     },
+
+    liftMaxDistance: {
+      get(){
+        return this.$store.getters["auth/user"].settings.liftMaxDistance
+      },
+      set(value){
+        this.$store.dispatch("auth/updateLiftMaxDistance", value);
+      }
+    },
+
+    description: {
+      get(){
+        return this.$store.getters["auth/user"].description
+      },
+      set(value){
+        this.$store.dispatch("auth/updateDescription", value);
+      }
+		},
+
+		prefs: {
+			get(){
+				return this.$store.getters["auth/user"].prefs
+			},
+			set(value){
+				this.$store.dispatch("auth/updatePrefs", value);
+			}
+		},
 
     atLeastFiveWords: function(){
       if(this.username == 'Bernd'){
@@ -421,10 +611,69 @@ export default {
         var lastItemIsWord = splitted[length - 1] != ''
         return length > 5 ? true : (length >= 5) && lastItemIsWord // when more than 5 words, just return true
       }
-      
-    }
+		},
+		
+		prefsDocu(){
+			return this.$store.state.prefsDocu
+		}
   },
   methods: {
+
+    toggleEditDescription(){
+      if(this.editDescription){ // already open
+        this.description = this.newDescription
+      }
+      else { // still closed
+         this.newDescription = this.description
+      }
+      this.editDescription = !this.editDescription
+    },
+
+    toggleEditLiftMaxDistance(){
+      if(this.editDistance){ // already open
+        this.liftMaxDistance = this.newLiftMaxDistance
+      }
+      else { // still closed
+         this.newLiftMaxDistance = this.liftMaxDistance
+      }
+      this.editDistance = !this.editDistance
+		},
+		
+		toggleEditPrefs(){
+			if(this.editPrefs){ // open, shall be closed, so prefs have to be converted and stores back to original var
+				// let newObj = this.newPrefs
+				// let obj = {
+				// 	smoking: getColor(newObj.smoking),
+				// 	smokingMorning: getColor(newObj.smokingMorning),
+				// 	smoking: getColor(newObj.smoking),
+				// 	music: getColor(newObj.music)
+				// }
+				// function getColor(val){
+				// 	return val == 1 ? 'RED' : val == 2 ? 'YELLOW' : 'GREEN' 
+				// }
+				// this.prefs = obj
+				
+				this.prefs = this.newPrefs
+      }
+			else { // still closed, shall be opened, so we have to copy (and first convert) prefs to another var
+				// let old = this.prefs
+				// let obj = {
+				// 	smoking: getValue(old.smoking),
+				// 	smokingMorning: getValue(old.smokingMorning),
+				// 	smoking: getValue(old.smoking),
+				// 	music: getValue(old.music)
+				// }
+				// function getValue(string){
+				// 	if(string == 'RED') return 1
+				// 	else if(string == 'YELLOW') return 2
+				// 	else return 3
+				// }
+				// this.newPrefs = obj
+				
+				this.newPrefs = this.prefs
+      }
+      this.editPrefs = !this.editPrefs
+    },
 
     betterPrefColor(color){
       if(color == 'GREEN') return 'green-8'
@@ -433,10 +682,8 @@ export default {
     },
 
     showCarInfo(item){
-      
       for(let key in item){
         this.carInfo[key] = item[key]
-        
       }
       this.carInfoOpen = true
     },
@@ -444,10 +691,6 @@ export default {
     updateDescription(){
       this.$store.dispatch("auth/updateDescription", this.newDescription);
       this.newDescription = ''
-    },
-
-    updateDistance() {
-      this.$store.dispatch("auth/updateLiftMaxDistance", this.liftMaxDistance);
     },
 
     updatePrefs(){

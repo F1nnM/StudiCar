@@ -45,13 +45,13 @@ const store = new Vuex.Store({
       usersAll: 226,
       about: {}
     },
-    preferences: { // legend for preferences, needed for info at registration profiles
-      talkativeness: {
+    prefsDocu: { // legend for preferences, needed for info at registration profiles
+      talk: {
         red: 'Ich hab während der Fahrt gern meine Ruhe',
         yellow: 'Wenn ich gerade dazu in der Stimmung bin, unterhalte ich mich nebenher gern ein bisschen',
         green: 'Unterhaltung mit meinen Mitfahrern ist mir sehr wichtig'
       },
-      talkAtMorning: {
+      talkMorning: {
         red: 'Am Morgen will ich am liebsten meine Ruhe haben',
         yellow: 'Das kommt auf meine Laune an',
         green: 'Ich unterhalte mich auch in der Früh gern mit den anderen'
