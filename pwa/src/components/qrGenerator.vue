@@ -54,6 +54,7 @@ export default {
             default: false
         }
     },
+
     data(){
         return{
             color: {
