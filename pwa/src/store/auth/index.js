@@ -1,6 +1,6 @@
 import Firebase from 'firebase/app'
 import 'firebase/auth'
-import { SQL_CREATE_USER_IF_NOT_EXISTING, sendApiRequest, SQL_GET_USER_DATA, SQL_UPDATE_DESCRIPTION, SQL_UPDATE_GENDER, SQL_UPDATE_LIFT_MAX_DISTANCE, SQL_UPDATE_PREFS } from '../../ApiAccess'
+import { SQL_CREATE_USER_IF_NOT_EXISTING, sendApiRequest, SQL_GET_USER_DATA, SQL_UPDATE_DESCRIPTION, SQL_UPDATE_GENDER, SQL_UPDATE_LIFT_MAX_DISTANCE, SQL_UPDATE_PREFS, SQL_ADD_ADDRESS, SQL_REMOVE_ADDRESS } from '../../ApiAccess'
 
 export default {
   namespaced: true,
@@ -42,6 +42,16 @@ export default {
 
     UPDATE_PREFS (state, payload) {
       state.user.prefs = payload
+    },
+
+    ADD_ADDRESS (state, payload) {
+      state.user.addresses.push(payload)
+    },
+
+    REMOVE_ADDRESS (state, payload) {
+      state.user.addresses = state.user.addresses.filter(item => {
+        return item.id != payload // filters the one with matching id
+      })
     }
   },
 
@@ -118,6 +128,24 @@ export default {
         _ => commit('UPDATE_PREFS', payload),
         error => alert(error)
       );
+    },
+
+    async addAddress ({ commit }, payload) {
+      sendApiRequest(
+        SQL_ADD_ADDRESS,
+        { address: payload.address, id: payload.id },
+        _ => commit('ADD_ADDRESS', payload.address),
+        error => alert(error)
+      )
+    },
+
+    async removeAddress ({ commit }, payload) {
+      sendApiRequest(
+        SQL_REMOVE_ADDRESS,
+        { id: payload },
+        _ => commit('REMOVE_ADDRESS', payload),
+        error => alert(error)
+      )
     },
 
     async updateGender ({ commit }, payload) {
