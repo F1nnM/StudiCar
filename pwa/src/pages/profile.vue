@@ -123,19 +123,57 @@
         <q-tab-panel name="reservoir">
           <div class="q-mt-sm q-pa-sm shadow-1">
             <div class="row">
-              <p class="text-uppercase text-caption q-mt-none q-mb-xs col-10">Meine Adressen</p>
-              <p class="col-2">
-                <q-btn size="sm" flat @click="editAdresses = !editAdresses" icon="edit" />
-              </p>
-              <q-list>
-                <q-item v-for="item in adresses" :key="item.id">
+              <p class="col-5 text-uppercase text-caption q-mt-none q-mb-xs">Meine Addressen</p>
+              <div class="col-5">
+                <q-btn
+                  flat
+                  v-show="editAddresses"
+                  @click="editNewAddress = true"
+                  dense
+                  icon="add"
+                  color="green"
+                />
+              </div>
+
+              <q-btn
+                class="col-2"
+                :size="editAddresses ? 'md' : 'sm'"
+                :color="editAddresses ? 'primary' : 'black'"
+                flat
+                style="transition: .1s"
+                @click="editAddresses = !editAddresses"
+                :icon="editAddresses ? 'done' : 'edit'"
+              />
+            </div>
+            <q-slide-transition>
+              <p
+                v-show="editAddresses"
+                dense
+                class="q-ma-none text-caption"
+              >Hinweis: Deine Aktionen werden sofort synchronisiert, der Haken blendet nur die Knöpfe aus.</p>
+            </q-slide-transition>
+            <q-list class="q-mt-sm">
+              <div class="row" v-for="item in addresses" :key="item.id">
+                <q-item class="col-10">
                   <q-item-section class="q-pl-md" style="border-left: 1px solid lightgray">
                     <q-item-label>{{item.street}} {{item.number}}</q-item-label>
                     <q-item-label caption>{{item.postcode}} {{item.city}}</q-item-label>
                   </q-item-section>
                 </q-item>
-              </q-list>
-            </div>
+                <div class="col-2">
+                  <q-slide-transition>
+                    <q-btn
+                      v-show="editAddresses"
+                      @click="removeAddress(item.id)"
+                      flat
+                      icon="remove_circle_outline"
+                      color="red"
+                      size="md"
+                    />
+                  </q-slide-transition>
+                </div>
+              </div>
+            </q-list>
           </div>
           <div class="q-mt-sm q-pa-sm shadow-1">
             <div class="row">
@@ -307,13 +345,11 @@
           >
             <div class="q-pa-lg row">
               <p class="text-uppercase text-caption col-7">Fahrzeugtyp</p>
-              <p class="text-uppercase col-5">{{capitalize(carInfo.type)}}</p>
-              <p class="text-uppercase text-caption col-7">Farbe</p>
-              <p class="text-uppercase col-5">{{carInfo.color}}</p>
+              <p class="col-5">{{carInfo.type}}</p>
               <p class="text-uppercase text-caption col-7">Sitze</p>
-              <p class="text-uppercase col-5">{{carInfo.seats}}</p>
+              <p class="col-5">{{carInfo.seats}}</p>
               <p class="text-uppercase text-caption col-7">Kennzeichen</p>
-              <p class="text-uppercase col-5">{{carInfo.plate}}</p>
+              <p class="col-5">{{carInfo.plate}}</p>
             </div>
           </q-card-section>
         </q-card>
@@ -484,6 +520,75 @@
           </q-card-actions>
         </q-card>
       </q-dialog>
+
+      <q-dialog v-model="editNewAddress" position="bottom" persistent>
+        <q-card>
+          <q-form @submit="addAddress" class="q-gutter-md">
+            <q-card-section class="text-h6 text-weight-light">Eine Addresse hinzufügen</q-card-section>
+
+            <q-card-section>
+              <div class="row">
+                <div class="col-7">
+                  <q-input
+                    v-model="newAddress.street"
+                    type="text"
+                    label="Straße"
+                    lazy-rules
+                    :rules="[ val => val && val.length > 0 || 'Bitte gib eine Straße ein']"
+                  />
+                </div>
+                <div class="col-5">
+                  <q-input
+                    type="number"
+                    v-model="newAddress.number"
+                    label="Hausnummer"
+                    lazy-rules
+                    :rules="[
+         
+          val => val > 0 && val < 1000 || 'Hausnummern können von 1 bis 999 gehen'
+        ]"
+                  />
+                </div>
+
+                <br />
+                <q-input
+                  class="col-5"
+                  v-model="newAddress.postcode"
+                  type="number"
+                  label="Postleitzahl"
+                  lazy-rules
+                  :rules="[ val => val && ('' + val).length == 5 || 'Fünf Stellen bitte']"
+                />
+
+                <q-input
+                  class="col-7"
+                  type="text"
+                  v-model="newAddress.city"
+                  label="Stadt"
+                  lazy-rules
+                  :rules="[
+          val => val !== null && val !== '' || 'Ohne Stadt können wir lange suchen...'
+        ]"
+                />
+              </div>
+            </q-card-section>
+            <q-card-section>
+              <p class="text-caption">
+                Falls du nochmal nachlesen willst:
+                <a
+                  href="https://mi.com"
+                  class="block"
+                >Info zu unserer Datenverarbeitung</a>
+              </p>
+            </q-card-section>
+
+            <q-card-actions align="right">
+              <q-btn flat label="Abbrechen" @click="editNewAddress = false" color="primary" />
+              <q-btn flat label="Hinzufügen" type="submit" color="primary" v-close-popup />
+            </q-card-actions>
+          </q-form>
+        </q-card>
+      </q-dialog>
     </div>
   </div>
 </template>
@@ -525,8 +630,6 @@ export default {
       liftAverage: 5,
       newLiftMaxDistance: 0,
       username:  this.$store.getters['auth/user'].name.split(' ')[0],
-      adresses: this.$store.getters['auth/user'].adresses,
-      cars: this.$store.getters['auth/user'].cars,
       carInfo: {
         brand: '',
         model: '',
@@ -540,6 +643,14 @@ export default {
 			editPrefs: false,
 			editPrefsTab: 'smoking',
 			newPrefs: null,
+			editAddresses: false,
+			editNewAddress: false,
+			newAddress: {
+				street: '',
+				number: '',
+				postcode: '',
+				city: ''
+			},
       shareProfileQR: false,
       ppPath: "",
       editDescription: false,
@@ -552,7 +663,7 @@ export default {
         "Weiblich",
         "Divers"
       ],
-			tab: 'data',
+			tab: 'reservoir',
 			prefsDocu: this.$store.state.prefsDocu
     }
   },
@@ -599,6 +710,18 @@ export default {
 			},
 			set(value){
 				this.$store.dispatch("auth/updatePrefs", value);
+			}
+		},
+
+		addresses: {
+			get(){
+				return this.$store.getters['auth/user'].addresses
+			}
+		},
+
+		cars: {
+			get(){
+				return this.$store.getters['auth/user'].cars
 			}
 		},
 
@@ -692,9 +815,26 @@ export default {
     showCarInfo(item){
       for(let key in item){
         this.carInfo[key] = item[key]
-      }
+			}
       this.carInfoOpen = true
-    },
+		},
+		
+		addAddress(){
+			this.$store.dispatch("auth/addAddress", {
+				id: this.$store.getters['auth/user'].id,
+				address: this.newAddress
+			})
+			this.newAddress = {
+				street: '',
+				number: '',
+				postcode: '',
+				city: ''
+			}
+		},
+
+		removeAddress(id){
+			this.$store.dispatch("auth/removeAddress", id)
+		},
 
     loadFile(file) {
       this.file = file
@@ -788,6 +928,7 @@ export default {
     },
 
     capitalize(string){
+			debugger
       return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase()
     }
   },

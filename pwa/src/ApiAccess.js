@@ -97,3 +97,13 @@ export const SQL_UPDATE_PREFS = {
   path: "/updatePrefs",
   method: "POST"
 }
+
+export const SQL_ADD_ADDRESS = {
+  path: "/addAddress",
+  method: "POST"
+}
+
+export const SQL_REMOVE_ADDRESS = {
+  path: "/removeAddress",
+  method: "POST"
+}

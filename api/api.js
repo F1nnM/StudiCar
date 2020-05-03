@@ -29,8 +29,9 @@ module.exports = {
     },
     '/getUserData': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid', 'secretFbId'], res)) {
-        let userData = (await runQuery("SELECT NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKING, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `USER` WHERE USER.FB_ID = ?", [options.fbid])).result[0]
+        let userData = (await runQuery("SELECT ID, NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKING, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `USER` WHERE USER.FB_ID = ?", [options.fbid])).result[0]
         let data = {
+          id: userData.ID,
           uid: options.fbid,
           name: userData.NAME,
           gender: userData.GENDER,
@@ -54,16 +55,17 @@ module.exports = {
           }
           data.stats.liftsOffered = liftCount
           data.stats.driverCount = driverCount
-          let adresses = await runQuery("SELECT POSTCODE, CITY, STREET, NUMBER FROM address INNER JOIN user ON address.USER_ID = user.ID WHERE user.FB_ID = ?", [options.fbid]);
-          data.adresses = []
-          adresses.result.forEach(item => {
+          let addresses = await runQuery("SELECT address.ID, POSTCODE, CITY, STREET, NUMBER FROM address INNER JOIN user ON address.USER_ID = user.ID WHERE user.FB_ID = ?", [options.fbid]);
+          data.addresses = []
+          addresses.result.forEach(item => {
             let obj = {
+              id: item.ID,
               postcode: item.POSTCODE,
               city: item.CITY,
               street: item.STREET,
               number: item.NUMBER
             }
-            data.adresses.push(obj)
+            data.addresses.push(obj)
           })
           let cars = await runQuery("SELECT BRAND, MODEL, TYPE, LICENSE_PLATE, SEATS, COLOR FROM car INNER JOIN user ON car.USER_ID = user.ID WHERE user.FB_ID = ?", [options.fbid]);
           data.cars = []
@@ -186,6 +188,34 @@ module.exports = {
       else {
         console.log('Problem')
       }
+    },
+    '/addAddress': async (req, res, options) => {
+      if (!isOptionMissing(options, ['secretFbId', 'address', 'id'], res)) {
+        await runQuery(
+          "INSERT INTO `address` (`ID`, `POSTCODE`, `CITY`, `NUMBER`, `STREET`, `USER_INDEX`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, '1', ?);",
+          [options.address.postcode, options.address.city, options.address.number, options.address.street, options.id]).catch(error => {
+            throw error;
+          });
+
+        res.end();
+      }
+      else {
+        console.log('Problem')
+      } // 
+    },
+    '/removeAddress': async (req, res, options) => {
+      if (!isOptionMissing(options, ['secretFbId', 'id'], res)) {
+        await runQuery(
+          "DELETE FROM `address` WHERE`address`.`ID` = ?",
+          [options.id]).catch(error => {
+            throw error;
+          });
+
+        res.end();
+      }
+      else {
+        console.log('Problem')
+      } // 
     }
   }
 }
