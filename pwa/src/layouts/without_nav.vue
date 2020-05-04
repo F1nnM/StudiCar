@@ -11,7 +11,7 @@
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
 
-        <q-toolbar-title>StudiCar Authentifizerung</q-toolbar-title>
+        <q-toolbar-title>StudiCar Authentifizierung</q-toolbar-title>
       </q-toolbar>
     </q-header>
 
