@@ -13,7 +13,7 @@
     <div>
       <q-form @submit="onSubmit" class="q-gutter-md">
         <q-input
-          hint="Unter welchem Namen sollen andere dich sehen? Empfehlung: Vorname"
+          hint="Gib einen Namen ein, unter dich andere kennen. Tipp: Dein Vorname eignet sich dafür ziemlich gut..."
           lazy-rules
           :rules="[ val => val && val.length > 0 || 'Du bist nicht niemand...']"
           v-model="name"
