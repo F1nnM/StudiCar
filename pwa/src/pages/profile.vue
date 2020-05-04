@@ -9,7 +9,7 @@
                 <template v-slot:error>
                   <div
                     class="absolute-full flex flex-center text-white"
-                  >Wir konnten dein Bild leider nicht laden. Sollte dieses Problem öfter auftreten, kontaktiere bitte das Team.</div>
+                  >Wir konnten dein Bild leider nicht laden. Bitte gehe online, um dein Profilbild zu sehen.</div>
                 </template>
               </q-img>
               <q-badge floating class="q-pa-none" style="background-color: transparent;">
@@ -71,7 +71,14 @@
           <div class="q-pa-sm shadow-1">
             <p class="text-uppercase text-caption q-mt-none q-mb-xs">Über Mich</p>
 
-            <q-select v-model="gender" :options="genderOptions" label="Geschlecht" behavior="menu" />
+            <q-select
+              v-model="gender"
+              transition-show="jump-up"
+              transition-hide="jump-up"
+              :options="genderOptions"
+              label="Geschlecht"
+              behavior="menu"
+            />
             <div class="row q-pt-md">
               <p class="text-uppercase text-caption q-mb-none col-10">Kurzbeschreibung</p>
               <div class="col-2">

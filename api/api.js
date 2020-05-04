@@ -17,19 +17,19 @@ module.exports = {
       res.end('pong');
     },
     '/sqlTest': async (req, res, options) => {
-      let result = await runQuery("SELECT * FROM `TEST`");
+      let result = await runQuery("SELECT * FROM `test`");
       res.end(JSON.stringify(result));
     },
     '/profilePicture': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid'], res)) {
-        let result = await runQuery("SELECT PICTURE FROM `USER` WHERE USER.FB_ID = ?", [options.fbid]);
+        let result = await runQuery("SELECT PICTURE FROM `user` WHERE user.FB_ID = ?", [options.fbid]);
         res.setHeader('Content-Type', 'image/png');
         res.end(result.result[0].PICTURE, 'binary');
       }
     },
     '/getUserData': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid', 'secretFbId'], res)) {
-        let userData = (await runQuery("SELECT ID, NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKING, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `USER` WHERE USER.FB_ID = ?", [options.fbid])).result[0]
+        let userData = (await runQuery("SELECT ID, NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKING, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `user` WHERE user.FB_ID = ?", [options.fbid])).result[0]
         let data = {
           id: userData.ID,
           uid: options.fbid,
@@ -89,13 +89,13 @@ module.exports = {
   'POST': {
     '/sqlTest': async (req, res, options) => {
       if (!isOptionMissing(options, ['data'], res)) {
-        let result = await runQuery("INSERT INTO `TEST` (`ID`, `data`) VALUES (NULL, ?)", [options.data]);
+        let result = await runQuery("INSERT INTO `test` (`ID`, `data`) VALUES (NULL, ?)", [options.data]);
         res.end(JSON.stringify(result))
       }
     },
     '/createUserIfNotExisting': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'name', 'mail'], res)) {
-        let users = (await runQuery("SELECT ID FROM `USER` WHERE USER.FB_ID = ?", [options.secretFbId])).result[0];
+        let users = (await runQuery("SELECT ID FROM `user` WHERE user.FB_ID = ?", [options.secretFbId])).result[0];
         if (!users) {
           var jdenticon = require("jdenticon")
           jdenticon.config = {
@@ -114,7 +114,7 @@ module.exports = {
           let png = jdenticon.toPng(options.name, size);
 
           await runQuery(
-            "INSERT INTO `USER` (`ID`, `FB_ID`, `NAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKING`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`)" +
+            "INSERT INTO `user` (`ID`, `FB_ID`, `NAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKING`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`)" +
             "VALUES (NULL, ?, ?, 'X', '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED')",
             [options.secretFbId, options.name, png, options.mail]).catch(error => {
               throw error;
@@ -127,7 +127,7 @@ module.exports = {
     '/updateDescription': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'description'], res)) {
         await runQuery(
-          "UPDATE `USER` SET `DESCRIPTION` = ? WHERE `USER`.`FB_ID` = ?",
+          "UPDATE `user` SET `DESCRIPTION` = ? WHERE `user`.`FB_ID` = ?",
           [options.description, options.secretFbId]).catch(error => {
             throw error;
           });
@@ -137,7 +137,7 @@ module.exports = {
     '/updateGender': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'gender'], res)) {
         await runQuery(
-          "UPDATE `USER` SET `GENDER` = ? WHERE `USER`.`FB_ID` = ?",
+          "UPDATE `user` SET `GENDER` = ? WHERE `user`.`FB_ID` = ?",
           [options.gender, options.secretFbId]).catch(error => {
             throw error;
           });
@@ -147,7 +147,7 @@ module.exports = {
     '/updateLiftMaxDistance': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'liftMaxDistance'], res)) {
         await runQuery(
-          "UPDATE `USER` SET `LIFT_MAX_DISTANCE` = ? WHERE `USER`.`FB_ID` = ?",
+          "UPDATE `user` SET `LIFT_MAX_DISTANCE` = ? WHERE `user`.`FB_ID` = ?",
           [options.liftMaxDistance, options.secretFbId]).catch(error => {
             throw error;
           });
@@ -169,7 +169,7 @@ module.exports = {
         }
         let blob = Buffer.from(options.imageData, "base64")
         await runQuery(
-          "UPDATE `USER` SET `PICTURE` = ? WHERE `USER`.`FB_ID` = ?",
+          "UPDATE `user` SET `PICTURE` = ? WHERE `user`.`FB_ID` = ?",
           [blob, options.secretFbId]).catch(error => {
             throw error;
           });
