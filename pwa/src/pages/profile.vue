@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-splitter :v-model="50">
+    <q-splitter :value="50">
       <template v-slot:before>
         <div class="q-px-md q-py-sm">
           <q-card>
@@ -357,7 +357,7 @@
 
       <q-dialog v-model="editPrefs" position="bottom" class="q-gutter-sm q-pa-md">
         <q-card class="q-pa-xs">
-          <q-splitter :v-model="20">
+          <q-splitter :value="20">
             <template v-slot:before>
               <q-tabs
                 v-model="editPrefsTab"
