@@ -107,3 +107,18 @@ export const SQL_REMOVE_ADDRESS = {
   path: "/removeAddress",
   method: "POST"
 }
+
+export const GET_CAR_MODELS = {
+  path: "/getCarModels",
+  method: "GET"
+}
+
+export const SQL_ADD_CAR = {
+  path: "/addCar",
+  method: "POST"
+}
+
+export const SQL_REMOVE_CAR = {
+  path: "/removeCar",
+  method: "POST"
+}

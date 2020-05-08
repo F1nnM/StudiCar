@@ -1,4 +1,24 @@
-var runQuery = require('./db');
+var runQuery = require('./db')
+var carModels = require('./carModels')
+
+function updateModels (req, res) {
+  var cars = carModels.all()
+  for (let brand in cars) {
+    for (let type in cars[brand]) {
+      cars[brand][type].forEach(async function (model) {
+        let exists = (await runQuery("SELECT * FROM car_models WHERE BRAND = ? AND MODEL = ? AND TYPE = ?;", [brand, model, type])).result.length
+        if (exists) {
+          console.log('Model already exists: ' + brand + ' ' + model + ' (' + type + ')')
+        }
+        else {
+          await runQuery("INSERT INTO `car_models` (`ID`, `BRAND`, `MODEL`, `TYPE`, `PICTURE`, `OFFICIAL`) VALUES (NULL, ?, ?, ?, NULL, '1');", [brand, model, type])
+
+          console.log('Model has been inserted: ' + brand + ' ' + model + ' (' + brand + ')')
+        }
+      })
+    }
+  }
+}
 
 function isOptionMissing (data, needed, res) {
   return needed.some(key => {
@@ -9,6 +29,11 @@ function isOptionMissing (data, needed, res) {
     }
     return false;
   });
+}
+
+async function getUserId (fb_id) {
+  let result = await runQuery("SELECT ID FROM user WHERE FB_ID = ?", [fb_id]).result[0]
+  return result.ID
 }
 
 module.exports = {
@@ -67,10 +92,12 @@ module.exports = {
             }
             data.addresses.push(obj)
           })
-          let cars = await runQuery("SELECT BRAND, MODEL, TYPE, LICENSE_PLATE, SEATS, COLOR FROM car INNER JOIN user ON car.USER_ID = user.ID WHERE user.FB_ID = ?", [options.fbid]);
+          let cars = await runQuery("SELECT car.MODEL_ID, car.ID, BRAND, MODEL, TYPE, LICENSE_PLATE, SEATS, COLOR, YEAR, PICTURE FROM car_models JOIN car ON car.MODEL_ID = car_models.ID WHERE car.USER_ID = ?", [data.id]);
           data.cars = []
           cars.result.forEach(item => {
             let obj = {
+              modelId: item.MODEL_ID,
+              carId: item.ID,
               brand: item.BRAND,
               model: item.MODEL,
               type: item.TYPE,
@@ -83,6 +110,36 @@ module.exports = {
         }
 
         res.end(JSON.stringify(data))
+      }
+    },
+    '/getCarModels': async (req, res, options) => {
+      if (!isOptionMissing(options, [], res)) {
+        let result = await runQuery("SELECT BRAND, MODEL, TYPE FROM car_models WHERE OFFICIAL = TRUE", []);
+        let cars = result.result
+        let carsObj = {}
+
+        cars.forEach(item => {
+          if (!carsObj[item.BRAND]) { // when brand not initialized, then do it
+            carsObj[item.BRAND] = {}
+            carsObj[item.BRAND][item.TYPE] = []
+            // console.log('ARRAY AND OBJECT CREATED')
+            // console.log(carsObj[item.BRAND])
+          }
+          if (!carsObj[item.BRAND][item.TYPE]) { // and when type array not initialized, then do that
+            carsObj[item.BRAND][item.TYPE] = []
+            // console.log('ARRAY CREATED')
+          }
+          if (!(carsObj[item.BRAND][item.TYPE].indexOf(item) > -1)) { // usually not, but models must not exist twice in array
+            carsObj[item.BRAND][item.TYPE].push(item.MODEL)
+          }
+          //console.log(carsObj[item.BRAND][item.TYPE])
+        })
+        // console.log(carsObj)
+        let colors = carModels.allColors()
+        res.end(JSON.stringify({
+          cars: carsObj,
+          colors: colors
+        }))
       }
     }
   },
@@ -154,7 +211,7 @@ module.exports = {
         res.end();
       }
       else {
-        console.log('Problem')
+        console.log('Problem liftMaxDistance')
       }
     },
     '/updateProfilePicture': async (req, res, options) => {
@@ -186,7 +243,7 @@ module.exports = {
         res.end();
       }
       else {
-        console.log('Problem')
+        console.log('Problem updatePrefs')
       }
     },
     '/addAddress': async (req, res, options) => {
@@ -204,6 +261,34 @@ module.exports = {
       } // 
     },
     '/removeAddress': async (req, res, options) => {
+      if (!isOptionMissing(options, ['secretFbId', 'id'], res)) {
+        await runQuery(
+          "DELETE FROM `address` WHERE`address`.`ID` = ?",
+          [options.id]).catch(error => {
+            throw error;
+          });
+
+        res.end();
+      }
+      else {
+        console.log('Problem')
+      } // 
+    },
+    '/addCar': async (req, res, options) => {
+      if (!isOptionMissing(options, ['secretFbId', 'car', 'id'], res)) {
+        await runQuery(
+          "INSERT INTO `car` (`ID`, `BRAND`, `MODEL`, `COLOR`, `STREET`, `USER_INDEX`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, '1', ?);",
+          [options.address.postcode, options.address.city, options.address.number, options.address.street, options.id]).catch(error => {
+            throw error;
+          });
+
+        res.end();
+      }
+      else {
+        console.log('Problem')
+      } // 
+    },
+    '/removeCar': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'id'], res)) {
         await runQuery(
           "DELETE FROM `address` WHERE`address`.`ID` = ?",

@@ -1,6 +1,6 @@
 import Firebase from 'firebase/app'
 import 'firebase/auth'
-import { SQL_CREATE_USER_IF_NOT_EXISTING, sendApiRequest, SQL_GET_USER_DATA, SQL_UPDATE_DESCRIPTION, SQL_UPDATE_GENDER, SQL_UPDATE_LIFT_MAX_DISTANCE, SQL_UPDATE_PREFS, SQL_ADD_ADDRESS, SQL_REMOVE_ADDRESS } from '../../ApiAccess'
+import { SQL_CREATE_USER_IF_NOT_EXISTING, sendApiRequest, SQL_GET_USER_DATA, SQL_UPDATE_DESCRIPTION, SQL_UPDATE_GENDER, SQL_UPDATE_LIFT_MAX_DISTANCE, SQL_UPDATE_PREFS, SQL_ADD_ADDRESS, SQL_REMOVE_ADDRESS, SQL_ADD_CAR, SQL_REMOVE_CAR } from '../../ApiAccess'
 
 export default {
   namespaced: true,
@@ -52,7 +52,17 @@ export default {
       state.user.addresses = state.user.addresses.filter(item => {
         return item.id != payload // filters the one with matching id
       })
-    }
+    },
+
+    ADD_CAR (state, payload) {
+      state.user.cars.push(payload)
+    },
+
+    REMOVE_CAR (state, payload) {
+      state.user.cars = state.user.cars.filter(item => {
+        return item.id != payload // filters the one with matching id
+      })
+    },
   },
 
   actions: {
@@ -148,6 +158,24 @@ export default {
       )
     },
 
+    async addCar ({ commit }, payload) {
+      sendApiRequest(
+        SQL_ADD_CAR,
+        { car: payload },
+        _ => commit('REMOVE_CAR', payload),
+        error => alert(error)
+      )
+    },
+
+    async removeCar ({ commit }, payload) {
+      sendApiRequest(
+        SQL_REMOVE_CAR,
+        { address: payload.address, id: payload.id },
+        _ => commit('ADD_ADDRESS', payload.address),
+        error => alert(error)
+      )
+    },
+
     async updateGender ({ commit }, payload) {
       let gender = payload
       if (!['M', 'W', 'D', 'X'].includes(gender))
@@ -182,6 +210,6 @@ export default {
         _ => commit('UPDATE_LIFT_MAX_DISTANCE', payload),
         error => alert(error)
       );
-    },
+    }
   }
 }
