@@ -82,7 +82,7 @@
             <div class="row q-pt-md">
               <p class="text-uppercase text-caption q-mb-none col-10">Kurzbeschreibung</p>
               <div class="col-2">
-                <q-btn size="sm" flat color="black" icon="edit" @click="toggleEditDescription" />
+                <q-btn size="sm" flat color="black" icon="edit" @click="toggleOpenEditDescription" />
               </div>
               <div class="q-pa-sm">{{description}}</div>
             </div>
@@ -95,7 +95,7 @@
                 <div class="text-uppercase text-caption q-mt-none q-mb-xs">
                   Präferenzen
                   <br />im Auto
-                  <q-btn size="sm" flat @click="toggleEditPrefs" icon="edit" />
+                  <q-btn size="sm" flat @click="toggleOpenEditPrefs" icon="edit" />
                 </div>
                 <div class="row">
                   <div class="col-9">Redseligkeit</div>
@@ -134,8 +134,8 @@
               <div class="col-5">
                 <q-btn
                   flat
-                  v-show="editAddresses"
-                  @click="editNewAddress = true"
+                  v-show="openEditAddresses"
+                  @click="openNewAddress = true"
                   dense
                   icon="add"
                   color="green"
@@ -144,17 +144,17 @@
 
               <q-btn
                 class="col-2"
-                :size="editAddresses ? 'md' : 'sm'"
-                :color="editAddresses ? 'primary' : 'black'"
+                :size="openEditAddresses ? 'md' : 'sm'"
+                :color="openEditAddresses ? 'primary' : 'black'"
                 flat
                 style="transition: .1s"
-                @click="editAddresses = !editAddresses"
-                :icon="editAddresses ? 'done' : 'edit'"
+                @click="openEditAddresses = !openEditAddresses"
+                :icon="openEditAddresses ? 'done' : 'edit'"
               />
             </div>
             <q-slide-transition>
               <p
-                v-show="editAddresses"
+                v-show="openEditAddresses"
                 dense
                 class="q-ma-none text-caption"
               >Hinweis: Deine Aktionen werden sofort synchronisiert, der Haken blendet nur die Knöpfe aus.</p>
@@ -170,7 +170,7 @@
                 <div class="col-2">
                   <q-slide-transition>
                     <q-btn
-                      v-show="editAddresses"
+                      v-show="openEditAddresses"
                       @click="removeAddress(item.id)"
                       flat
                       icon="remove_circle_outline"
@@ -186,7 +186,7 @@
             <div class="row">
               <p class="text-uppercase text-caption q-mt-none q-mb-xs col-10">Meine Fahrzeuge</p>
               <p class="col-2">
-                <q-btn size="sm" flat @click="editCars = !editCars" icon="edit" />
+                <q-btn size="sm" flat @click="openAddCar = !openAddCar" icon="edit" />
               </p>
               <q-card class="col-6 q-pa-xs no-shadow" v-for="item in cars" :key="item.plate">
                 <q-img src="~assets/app-logo.svg" style="height: 15vh;">
@@ -204,7 +204,7 @@
         </q-tab-panel>
       </q-tab-panels>
 
-      <q-dialog v-model="editDescription" persistent full-width>
+      <q-dialog v-model="openEditDescription" persistent full-width>
         <q-card>
           <q-card-section>
             <div class="text-h6">Kurzinfo</div>
@@ -231,7 +231,7 @@
               :disabled="!atLeastFiveWords"
               flat
               label="Speichern"
-              @click="toggleEditDescription"
+              @click="toggleOpenEditDescription"
               v-close-popup
             />
           </q-card-actions>
@@ -356,18 +356,20 @@
               <p class="text-uppercase text-caption col-7">Sitze</p>
               <p class="col-5">{{carInfo.seats}}</p>
               <p class="text-uppercase text-caption col-7">Kennzeichen</p>
-              <p class="col-5">{{carInfo.plate}}</p>
+              <p class="col-5">{{carInfo.licensePlate}}</p>
+              <p class="text-uppercase text-caption col-7">Baujahr</p>
+              <p class="col-5">{{carInfo.year}}</p>
             </div>
           </q-card-section>
         </q-card>
       </q-dialog>
 
-      <q-dialog v-model="editPrefs" position="bottom" class="q-gutter-sm q-pa-md">
+      <q-dialog v-model="openEditPrefs" position="bottom" class="q-pa-md">
         <q-card class="q-pa-xs">
           <q-splitter :value="20">
             <template v-slot:before>
               <q-tabs
-                v-model="editPrefsTab"
+                v-model="openEditPrefsTab"
                 vertical
                 class="text-primary"
                 style="min-height: 50vh;"
@@ -380,7 +382,7 @@
             </template>
             <template v-slot:after>
               <q-tab-panels
-                v-model="editPrefsTab"
+                v-model="openEditPrefsTab"
                 swipeable
                 animated
                 vertical
@@ -523,12 +525,12 @@
           </q-splitter>
           <q-card-actions align="right" class="text-primary">
             <q-btn flat label="Abbrechen" v-close-popup />
-            <q-btn flat label="Speichern" @click="toggleEditPrefs" v-close-popup />
+            <q-btn flat label="Speichern" @click="toggleOpenEditPrefs" v-close-popup />
           </q-card-actions>
         </q-card>
       </q-dialog>
 
-      <q-dialog v-model="editNewAddress" position="bottom" persistent>
+      <q-dialog v-model="openNewAddress" position="bottom" persistent>
         <q-card>
           <q-form @submit="addAddress" class="q-gutter-md">
             <q-card-section class="text-h6 text-weight-light">Eine Addresse hinzufügen</q-card-section>
@@ -590,10 +592,240 @@
             </q-card-section>
 
             <q-card-actions align="right">
-              <q-btn flat label="Abbrechen" @click="editNewAddress = false" color="primary" />
+              <q-btn flat label="Abbrechen" @click="openNewAddress = false" color="primary" />
               <q-btn flat label="Hinzufügen" type="submit" color="primary" v-close-popup />
             </q-card-actions>
           </q-form>
+        </q-card>
+      </q-dialog>
+
+      <q-dialog v-model="openAddCar" full-height full-width position="bottom" persistent>
+        <q-card>
+          <q-card-section class="row items-center text-h6 text-weight-light">
+            Ein neues Fahrzeug hinzufügen
+            <q-space />
+            <q-btn icon="close" flat round dense v-close-popup />
+          </q-card-section>
+
+          <q-card-section class="overflow-auto">
+            <q-stepper v-model="openNewCarTab" ref="stepper" color="primary" animated swipeable>
+              <q-step :name="1" title="Marke" icon="home" :done="openNewCarTab > 1">
+                <q-select
+                  v-model="newCar.brand"
+                  label="Marke auswählen"
+                  hint="Von welcher Marke ist dein Auto?"
+                  :options="newCarOptions.cars ? Object.keys(newCarOptions.cars) : []"
+                  behavior="menu"
+                  @input="$refs.stepper.next()"
+                />
+                <p
+                  class="text-caption q-mt-md q-mb-none"
+                >Wenn deine Marke nicht dabei ist, schreib uns bitte umgehend.</p>
+              </q-step>
+
+              <q-step :name="2" title="Typ" icon="rv_hookup" :done="openNewCarTab > 2">
+                <q-select
+                  v-model="newCar.type"
+                  :label="newCar.brand ? 'Typ auswählen' : 'Wähle zuerst eine Marke aus'"
+                  hint="Versuche, dein Auto einzuordnen"
+                  :options="newCar.brand ? Object.keys(newCarOptions.cars[newCar.brand]) : []"
+                  behavior="menu"
+                  @input="$refs.stepper.next()"
+                />
+              </q-step>
+
+              <q-step :name="3" title="Modell" icon="rv_hookup" :done="openNewCarTab > 3">
+                <q-select
+                  v-model="newCar.model"
+                  :label="(newCar.brand && newCar.type) ? 'Modell auswählen' : 'Wähle zuerst Marke und Typ aus'"
+                  hint="Und welches Modell?"
+                  :options="(newCar.brand && newCar.type) ? newCarOptions.cars[newCar.brand][newCar.type] : []"
+                  behavior="menu"
+                  @input="$refs.stepper.next()"
+                />
+                <p
+                  class="text-caption q-mt-md q-mb-none"
+                >Wenn dein Modell nicht dabei ist, nimm bitte ein ähnliches und und schreib uns das fehlende Modell.</p>
+              </q-step>
+
+              <q-step :name="4" title="Farbe" icon="brush" :done="openNewCarTab > 4">
+                <p class="text-caption">Wähle zuerst den Farbton und dann die Farbe</p>
+                <q-splitter
+                  :value="50"
+                  :style="'border-left: 1px solid ' + (newCar.color ? newCarOptions[newCar.colorTone][newCar.color] : 'white')"
+                >
+                  <template v-slot:before>
+                    <q-list
+                      style="max-height: 40vh;"
+                      separator
+                      class="full-height overflow-auto q-pr-sm"
+                    >
+                      <q-item
+                        v-for="item in Object.keys(newCarOptions.colors)"
+                        :key="item"
+                        clickable
+                        v-ripple
+                        class="bg-white text-black q-ma-none"
+                        :active="newCar.colorTone ? newCar.colorTone == item : false"
+                        @click="newCar.colorTone = item"
+                      >
+                        <!-- <q-item-section avatar>
+                            <q-icon name="inbox" />
+                        </q-item-section>-->
+
+                        <q-item-section>{{capitalize(item)}}</q-item-section>
+                      </q-item>
+                    </q-list>
+                  </template>
+
+                  <template v-slot:after>
+                    <div v-if="newCar.colorTone">
+                      <q-list style="max-height: 40vh;" class="full-height overflow-auto">
+                        <q-item
+                          v-for="item in Object.keys(newCarOptions.colors[newCar.colorTone])"
+                          :key="item"
+                          clickable
+                          @click="newCar.color = item"
+                          v-ripple
+                          :class="'bg-' + newCarOptions.colors[newCar.colorTone][item] + ' text-' + (newCarOptions[0] == newCar.colorTone ? 'primary' : 'black')"
+                        >
+                          <!-- <q-item-section avatar>
+                            <q-icon name="inbox" />
+                          </q-item-section>-->
+
+                          <q-item-section>{{capitalize(item)}}</q-item-section>
+                        </q-item>
+                      </q-list>
+                    </div>
+                    <div v-else class="flex flex-center">
+                      <p class="text-caption">Bitte wähle einen Farbton aus</p>
+                    </div>
+                  </template>
+                </q-splitter>
+              </q-step>
+
+              <q-step :name="5" title="Baujahr" icon="query_builder" :done="openNewCarTab > 5">
+                <q-select
+                  v-model="newCar.year"
+                  label="Baujahr auswählen"
+                  hint="In welchem Jahr wurde dein Auto gebaut?"
+                  :options="possibleBuildYears"
+                  behavior="menu"
+                  @input="$refs.stepper.next()"
+                />
+              </q-step>
+
+              <q-step :name="6" title="Nummernschild" icon="money" :done="openNewCarTab > 6">
+                <q-input
+                  type="text"
+                  placeholder="A-bC-202"
+                  v-model="newCar.licensePlate"
+                  label="Nummernschild"
+                  hint="Das können Nutzer nur dann sehen, wenn sie mit dir mitfahren."
+                />
+                <q-slide-transition>
+                  <p
+                    class="text-negative q-mt-md"
+                    v-show="!checkValidNumberPlate()"
+                  >Noch keine gültige Eingabe</p>
+                </q-slide-transition>
+              </q-step>
+
+              <q-step :name="7" title="Sitze" icon="supervisor_account" :done="openNewCarTab > 7">
+                <q-select
+                  @input="$refs.stepper.next()"
+                  v-model="newCar.seats"
+                  label="Freie Plätze"
+                  :options="[1,2,3,4]"
+                  hint="Wie viele Leute kannst du normalerweise noch mitnehmen?"
+                />
+                <p
+                  class="text-caption q-mt-lg"
+                >Wir werden dich vor jeder Fahrt fragen, ob es dabei bleibt.</p>
+              </q-step>
+
+              <template v-slot:navigation>
+                <q-stepper-navigation>
+                  <q-btn
+                    @click="if(openNewCarTab < 7) { $refs.stepper.next() } else { openAddCarConfirm = true}"
+                    color="primary"
+                    :label="openNewCarTab == 7 ? 'Hinzufügen' : 'Weiter'"
+                  />
+                  <q-btn
+                    v-if="openNewCarTab > 1"
+                    flat
+                    color="primary"
+                    @click="$refs.stepper.previous()"
+                    label="Zurück"
+                    class="q-ml-sm"
+                  />
+                </q-stepper-navigation>
+              </template>
+            </q-stepper>
+          </q-card-section>
+          <!-- <q-card-section>
+            <p class="text-caption">
+              Falls du nochmal nachlesen willst:
+              <a
+                href="https://mi.com"
+                class="block"
+              >Info zu unserer Datenverarbeitung</a>
+            </p>
+            
+          </q-card-section>-->
+        </q-card>
+      </q-dialog>
+
+      <q-dialog
+        full-width
+        full-height
+        v-model="openAddCarConfirm"
+        persistent
+        transition-show="slide-up"
+        transition-hide="scale"
+      >
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">Überprüfe deine Angaben</div>
+            <p class="text-caption">
+              Bitte stelle sicher, dass deine Angaben korrekt und vollständig sind.
+              Unser Team überprüft außerdem jedes neue Modell in unserer Datenbank. Bei Verdacht auf Spam blockieren wir im Zweifelsfall den jeweiligen Benutzer.
+              <br />Allen anderen aber danken wir, dass sie uns helfen, unsere Datenbank zu erweitern.
+              <br />Überflieg am besten noch kurz unsere
+              <a href="https://mi.com">Datenverarbeitung</a>.
+            </p>
+          </q-card-section>
+
+          <q-card-section class="row">
+            <div class="col-7 text-h5">{{newCar.brand}}</div>
+            <div class="col-5 text-h6 text-weight-light">{{newCar.model}}</div>
+          </q-card-section>
+
+          <q-card-section>
+            <hr
+              :class="'bg-' + (newCar.color ? newCarOptions[newCar.colorTone][newCar.color] : 'black')"
+            />
+
+            <div class="q-pa-lg row">
+              <p class="text-uppercase text-caption col-7">Fahrzeugtyp</p>
+              <p class="col-5">{{newCar.type}}</p>
+
+              <p class="text-uppercase text-caption col-7">Sitze</p>
+              <p class="col-5">{{newCar.seats}}</p>
+
+              <p class="text-uppercase text-caption col-7" v-if="checkValidNumberPlate">Kennzeichen</p>
+              <p class="col-5" v-if="checkValidNumberPlate">{{newCar.licensePlate}}</p>
+
+              <div v-else class="col-12 text-negative">Dein Kennzeichen ist nicht gültig.</div>
+              <p class="text-uppercase text-caption col-7">Baujahr</p>
+              <p class="col-5">{{newCar.year}}</p>
+            </div>
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn flat label="Bearbeiten" @click="openAddCarConfirm = false" v-close-popup />
+            <q-btn color="primary" label="Auto hinzufügen" @click="addCar()" v-close-popup />
+          </q-card-actions>
         </q-card>
       </q-dialog>
     </div>
@@ -603,8 +835,10 @@
 <script>
 import { date } from "quasar";
 import SignOutButton from "../components/SignOutButton";
-import { buildGetRequestUrl, GET_USER_PROFILE_PIC, sendApiRequest, SQL_UPDATE_PROFILE_PICTURE } from "../ApiAccess";
+import { buildGetRequestUrl, GET_USER_PROFILE_PIC, sendApiRequest, SQL_UPDATE_PROFILE_PICTURE, GET_CAR_MODELS } from "../ApiAccess";
 import qrGen from '../components/qrGenerator'
+
+
 
 export default {
   components: { SignOutButton,
@@ -643,15 +877,20 @@ export default {
         type: '',
         color: '',
         licensePlate: '',
-        seats: ''
+        seats: 3
       },
       carInfoOpen: false,
 			editDistance: false,
-			editPrefs: false,
-			editPrefsTab: 'smoking',
-			newPrefs: null,
-			editAddresses: false,
-			editNewAddress: false,
+			openEditPrefs: false,
+			openEditPrefsTab: 'talk',
+			newPrefs: {
+        talk: '',
+        talkMorning: '',
+        smoking: '',
+        music: ''
+      },
+			openEditAddresses: false,
+			openNewAddress: false,
 			newAddress: {
 				street: '',
 				number: '',
@@ -660,8 +899,36 @@ export default {
 			},
       shareProfileQR: false,
       ppPath: "",
-      editDescription: false,
+      openEditDescription: false,
       newDescription: '',
+      openAddCar: false,
+      openAddCarConfirm: false,
+      newCar: {
+        brand: '',
+        type: '',
+        model: '',
+        color: '',
+        colorTone: '',
+        year: 'XXXX',
+        seats: 0,
+        licensePlate: ''
+      },
+      newCarOptions: {
+        cars: { // meanwhile just example values, will be overwritten when fetched data from server
+          Audi: {
+            Kombi: []
+          },
+          Mercedes: {
+            Kombi: []
+          }
+        },
+        colors: {
+          rottöne: {
+            rot: 'red'
+          }
+        }
+      },
+      openNewCarTab: 1,
       openUpload: false,
       file: null,
       fileBlob: null,
@@ -670,8 +937,8 @@ export default {
         "Weiblich",
         "Divers"
       ],
-			tab: 'reservoir',
-			prefsDocu: this.$store.state.prefsDocu
+      tab: 'reservoir',
+      prefsDocu: this.$store.state.prefsDocu
     }
   },
   computed: {
@@ -685,7 +952,7 @@ export default {
           case "D":
             return "Divers"
           default:
-            return "Will ich nicht sagen";
+            return "Ein Fehler ist aufgetreten";
         }
       },
       set(value) {
@@ -718,8 +985,8 @@ export default {
 			set(value){
 				this.$store.dispatch("auth/updatePrefs", value);
 			}
-		},
-
+    },
+    
 		addresses: {
 			get(){
 				return this.$store.getters['auth/user'].addresses
@@ -753,18 +1020,31 @@ export default {
 			}
 			while(letter.charCodeAt(0) % 9 != 0) // 9 people working on the project
 			return id + letter
-		}
+    },
+    
+    getNewCarColorOptions(){
+      return this.newCarOptions.colors.map(color => '<div style="border: 1px solid black; border-width: 1px 0;" class="text-transparent bg-' + color.toLowerCase() + '">.</div>')
+    },
+
+    possibleBuildYears(){
+      var reverse = true
+      let years = []
+      for(var i=1940; i<=(new Date).getFullYear(); i++){
+        years.push(i)
+      }
+      return reverse ? years.reverse() : years
+    }
   },
   methods: {
 
-    toggleEditDescription(){
-      if(this.editDescription){ // already open
+    toggleOpenEditDescription(){
+      if(this.openEditDescription){ // already open
         this.description = this.newDescription
       }
       else { // still closed
          this.newDescription = this.description
       }
-      this.editDescription = !this.editDescription
+      this.openEditDescription = !this.openEditDescription
     },
 
     toggleEditLiftMaxDistance(){
@@ -777,40 +1057,16 @@ export default {
       this.editDistance = !this.editDistance
 		},
 		
-		toggleEditPrefs(){
-			if(this.editPrefs){ // open, shall be closed, so prefs have to be converted and stores back to original var
-				// let newObj = this.newPrefs
-				// let obj = {
-				// 	smoking: getColor(newObj.smoking),
-				// 	smokingMorning: getColor(newObj.smokingMorning),
-				// 	smoking: getColor(newObj.smoking),
-				// 	music: getColor(newObj.music)
-				// }
-				// function getColor(val){
-				// 	return val == 1 ? 'RED' : val == 2 ? 'YELLOW' : 'GREEN' 
-				// }
-				// this.prefs = obj
+		toggleOpenEditPrefs(){
+			if(this.openEditPrefs){ // open, shall be closed, so prefs have to be converted and stores back to original var
 				
 				this.prefs = this.newPrefs
       }
 			else { // still closed, shall be opened, so we have to copy (and first convert) prefs to another var
-				// let old = this.prefs
-				// let obj = {
-				// 	smoking: getValue(old.smoking),
-				// 	smokingMorning: getValue(old.smokingMorning),
-				// 	smoking: getValue(old.smoking),
-				// 	music: getValue(old.music)
-				// }
-				// function getValue(string){
-				// 	if(string == 'RED') return 1
-				// 	else if(string == 'YELLOW') return 2
-				// 	else return 3
-				// }
-				// this.newPrefs = obj
-				
+			
 				this.newPrefs = this.prefs
       }
-      this.editPrefs = !this.editPrefs
+      this.openEditPrefs = !this.openEditPrefs
     },
 
     betterPrefColor(color){
@@ -841,7 +1097,24 @@ export default {
 
 		removeAddress(id){
 			this.$store.dispatch("auth/removeAddress", id)
-		},
+    },
+    
+    addCar(){
+      this.$store.dispatch("auth/addCar", {
+				id: this.$store.getters['auth/user'].id,
+				car: this.newCar
+			})
+			this.newCar = {
+        brand: '',
+        model: '',
+        color: '',
+        colorTone: ''
+			}
+    },
+
+    removeCar(id){
+			this.$store.dispatch("auth/removeCar", id)
+    },
 
     loadFile(file) {
       this.file = file
@@ -935,8 +1208,65 @@ export default {
     },
 
     capitalize(string){
-			debugger
       return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase()
+    },
+
+    checkValidNumberPlate(){
+      this.newCar.licensePlate = this.newCar.licensePlate.toUpperCase()
+      var alphabet = 'qwertzuiopasdfghjklyxcvbnm'
+      var plate = this.newCar.licensePlate.toLowerCase()
+      // plate.split('').forEach(char => {
+      //   let index = alphabet.indexOf(char.toLowerCase()) > -1 // when > -1, it's a letter
+      //   if(index > -1){
+      //     plate[index] = char.toUpperCase()
+      //   }
+      // })
+      let splits = plate.split('-')
+      var threeParts = () => {
+        splits.forEach(string => {
+          if(!string) return false
+        })
+        return true
+      }
+      try{
+        let correctSplits = splits.length == 3
+        let correctCityLength = splits[0].length > 0 && splits[0].length < 4
+        let correctNameLength = splits[1].length > 0 && splits[1].length < 3
+        
+        let cityLetters = () => {
+          splits[0].forEach(char => {
+            if(alphabet.indexOf(char) == -1) return false
+          })
+          return true
+        }
+        let nameLetters = () => {
+          splits[1].forEach(char => {
+            if(alphabet.indexOf(char) == -1) return false
+          })
+          return true
+        }
+        let correctNumberLength = () => {
+          try{
+            var number = parseInt(splits[2])
+            return number > 0 && number < 10000
+          }
+          catch(e){
+            alert('Error at license plate checking occurred: ' + e)
+          }
+          return false
+        }
+
+        if(threeParts && correctSplits && cityLetters && correctCityLength && nameLetters && correctNameLength && correctNumberLength){
+          return true
+        }
+        else {
+          return false
+        }
+      }
+      catch(e){ // all the arrays which cause an error
+        return false
+      }
+        
     }
   },
   mounted() {
@@ -947,8 +1277,14 @@ export default {
         this.ppPath = url;
       }
     )
-
     
+    sendApiRequest(GET_CAR_MODELS,
+    {},
+    data => {
+      this.newCarOptions = data
+      },
+    error => {throw error})
+
     this.$store.state.pageName = 'Profil'
   }
 };
