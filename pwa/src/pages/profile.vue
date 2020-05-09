@@ -170,7 +170,7 @@
                 class="q-ma-none text-caption"
               >Hinweis: Deine Aktionen werden sofort synchronisiert, der Haken blendet nur die Knöpfe aus.</p>
             </q-slide-transition>
-            <q-list class="q-mt-sm">
+            <q-list>
               <div class="row" v-for="item in addresses" :key="item.id">
                 <q-item class="col-10">
                   <q-item-section class="q-pl-md" style="border-left: 1px solid lightgray">
@@ -195,11 +195,47 @@
           </div>
           <div class="q-mt-sm q-pa-sm shadow-1">
             <div class="row">
-              <p class="text-uppercase text-caption q-mt-none q-mb-xs col-10">Meine Fahrzeuge</p>
+              <p class="text-uppercase text-caption q-mt-none q-mb-xs col-5">Meine Fahrzeuge</p>
+              <div class="col-5">
+                <q-btn
+                  flat
+                  v-show="openEditCars"
+                  @click="openAddCar = true"
+                  dense
+                  icon="add"
+                  color="green"
+                />
+              </div>
               <p class="col-2">
-                <q-btn size="sm" flat @click="openAddCar = !openAddCar" icon="edit" />
+                <q-btn size="sm" flat @click="openEditCars = !openEditCars" icon="edit" />
               </p>
-              <q-card class="col-6 q-pa-xs no-shadow" v-for="item in cars" :key="item.licensePlate">
+              <q-slide-transition>
+                <p v-show="openEditCars" dense class="q-ma-none text-caption">
+                  Hinweis: Deine Aktionen werden sofort synchronisiert, der Haken blendet nur die Knöpfe aus.
+                  <br />
+                </p>
+              </q-slide-transition>
+              <q-card
+                class="col-6 q-pa-xs no-shadow relative"
+                v-for="item in cars"
+                :key="item.licensePlate"
+              >
+                <q-slide-transition>
+                  <div
+                    class="bg-white absolute z-fullscreen"
+                    style="top: 0; right: 0; border-bottom-left-radius: 5px;"
+                    v-show="openEditCars"
+                  >
+                    <q-btn
+                      @click="removeCar(item.carId)"
+                      flat
+                      dense
+                      icon="remove_circle_outline"
+                      color="red"
+                      size="md"
+                    />
+                  </div>
+                </q-slide-transition>
                 <q-img src="~assets/app-logo.svg" style="height: 15vh;">
                   <div class="absolute-bottom">
                     <div class="text-h6">{{item.brand}}</div>
@@ -602,7 +638,14 @@
 
             <q-card-actions align="right">
               <q-btn flat label="Abbrechen" @click="openNewAddress = false" color="primary" />
-              <q-btn flat label="Hinzufügen" type="submit" color="primary" v-close-popup />
+              <q-btn
+                flat
+                label="Hinzufügen"
+                :disable="!newAddressFilled"
+                type="submit"
+                color="primary"
+                v-close-popup
+              />
             </q-card-actions>
           </q-form>
         </q-card>
@@ -748,7 +791,7 @@
                   @input="$refs.stepper.next()"
                   v-model="newCar.seats"
                   label="Freie Plätze"
-                  :options="[1,2,3,4]"
+                  :options="[1,2,3,4,5,6,7]"
                   hint="Wie viele Leute kannst du normalerweise noch mitnehmen?"
                 />
                 <p
@@ -794,7 +837,7 @@
         full-height
         persistent
         transition-show="slide-up"
-        transition-hide="scale"
+        transition-hide="slide-up"
       >
         <q-card>
           <q-card-section>
@@ -836,10 +879,12 @@
               <p class="text-uppercase text-caption col-7">Sitze</p>
               <p class="col-5">{{newCar.seats}}</p>
 
-              <p class="text-uppercase text-caption col-7" v-if="checkValidNumberPlate">Kennzeichen</p>
-              <p class="col-5" v-if="checkValidNumberPlate">{{newCar.licensePlate}}</p>
+              <p class="text-uppercase text-caption col-7">Kennzeichen</p>
 
-              <div v-else class="col-12 text-negative">Dein Kennzeichen ist nicht gültig.</div>
+              <p
+                :class="'col-5' + (checkValidNumberPlate() ? ' text-negative' : '')"
+              >{{newCar.licensePlate}}</p>
+
               <p class="text-uppercase text-caption col-7">Baujahr</p>
               <p class="col-5">{{newCar.year}}</p>
             </div>
@@ -847,7 +892,13 @@
 
           <q-card-actions align="right">
             <q-btn flat label="Bearbeiten" @click="openAddCarConfirm = false" v-close-popup />
-            <q-btn color="primary" label="Auto hinzufügen" @click="addCar()" v-close-popup />
+            <q-btn
+              color="primary"
+              label="Auto hinzufügen"
+              :disabled="!(newCarFilled && checkValidNumberPlate())"
+              @click="addCar()"
+              v-close-popup
+            />
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -924,6 +975,7 @@ export default {
       ppPath: "",
       openEditDescription: false,
       newDescription: '',
+      openEditCars: false,
       openAddCar: false,
       openAddCarConfirm: false,
       newCar: {
@@ -1056,6 +1108,21 @@ export default {
         years.push(i)
       }
       return reverse ? years.reverse() : years
+    },
+
+    newAddressFilled(){
+      for(let key in this.newAddress){
+        if(!this.newAddress[key]) return false
+      }
+      return true
+    },
+
+    newCarFilled(){
+      for(let key in this.newCar){
+        if(!this.newCar[key]) return false
+      }
+      return true
+        
     }
   },
   methods: {
@@ -1123,14 +1190,17 @@ export default {
     },
     
     async addCar(){
-      console.log(this.newCar)
+      //console.log(this.newCar)
+      
       await this.$store.dispatch("auth/addCar", {
         id: this.$store.getters['auth/user'].id,
 				car: this.newCar
 			})
-			// for(let key in this.newCar){
-      //   this.newCar[key] = key != 'seats' ? '' : 3; // original state, 3 seats look better than 0, it's the default value when selecting the seats.
-      // }
+			for(let key in this.newCar){
+        this.newCar[key] = key != 'seats' ? '' : 3; // original state, 3 seats look better than 0, it's the default value when selecting the seats.
+      }
+      this.openAddCar = false
+      this.openAddCarConfirm = false
     },
 
     removeCar(id){
@@ -1232,62 +1302,67 @@ export default {
       return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase()
     },
 
+    
     checkValidNumberPlate(){
-      this.newCar.licensePlate = this.newCar.licensePlate.toUpperCase()
-      var alphabet = 'qwertzuiopasdfghjklyxcvbnm'
-      var plate = this.newCar.licensePlate.toLowerCase()
-      // plate.split('').forEach(char => {
-      //   let index = alphabet.indexOf(char.toLowerCase()) > -1 // when > -1, it's a letter
-      //   if(index > -1){
-      //     plate[index] = char.toUpperCase()
-      //   }
-      // })
-      let splits = plate.split('-')
-      var threeParts = () => {
-        splits.forEach(string => {
-          if(!string) return false
-        })
+      // only for development: 
+      let alwaysOk = true
+      
+
+      // real logic:
+      if(alwaysOk){
         return true
       }
-      try{
-        let correctSplits = splits.length == 3
-        let correctCityLength = splits[0].length > 0 && splits[0].length < 4
-        let correctNameLength = splits[1].length > 0 && splits[1].length < 3
+      else {
+        this.newCar.licensePlate = this.newCar.licensePlate.toUpperCase()
+        var alphabet = 'qwertzuiopasdfghjklyxcvbnm'
+        var plate = this.newCar.licensePlate.toLowerCase()
         
-        let cityLetters = () => {
-          splits[0].forEach(char => {
-            if(alphabet.indexOf(char) == -1) return false
+        let splits = plate.split('-')
+        var threeParts = () => {
+          splits.forEach(string => {
+            if(!string) return false
           })
           return true
         }
-        let nameLetters = () => {
-          splits[1].forEach(char => {
-            if(alphabet.indexOf(char) == -1) return false
-          })
-          return true
-        }
-        let correctNumberLength = () => {
-          try{
-            var number = parseInt(splits[2])
-            return number > 0 && number < 10000
+        try{
+          let correctSplits = splits.length == 3
+          let correctCityLength = splits[0].length > 0 && splits[0].length < 4
+          let correctNameLength = splits[1].length > 0 && splits[1].length < 3
+          
+          let cityLetters = () => {
+            splits[0].forEach(char => {
+              if(alphabet.indexOf(char) == -1) return false
+            })
+            return true
           }
-          catch(e){
-            alert('Error at license plate checking occurred: ' + e)
+          let nameLetters = () => {
+            splits[1].forEach(char => {
+              if(alphabet.indexOf(char) == -1) return false
+            })
+            return true
           }
-          return false
-        }
+          let correctNumberLength = () => {
+            try{
+              var number = parseInt(splits[2])
+              return number > 0 && number < 10000
+            }
+            catch(e){
+              alert('Error at license plate checking occurred: ' + e)
+            }
+            return false
+          }
 
-        if(threeParts && correctSplits && cityLetters && correctCityLength && nameLetters && correctNameLength && correctNumberLength){
-          return true
+          if(threeParts && correctSplits && cityLetters && correctCityLength && nameLetters && correctNameLength && correctNumberLength){
+            return true
+          }
+          else {
+            return false
+          }
         }
-        else {
+        catch(e){ // all the arrays which cause an error
           return false
         }
       }
-      catch(e){ // all the arrays which cause an error
-        return false
-      }
-        
     }
   },
   mounted() {

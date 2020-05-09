@@ -60,7 +60,8 @@ export default {
 
     REMOVE_CAR (state, payload) {
       state.user.cars = state.user.cars.filter(item => {
-        return item.id != payload // filters the one with matching id
+        debugger
+        return item.carId != payload // filters the one with matching id
       })
     },
   },
@@ -170,8 +171,8 @@ export default {
     async removeCar ({ commit }, payload) {
       sendApiRequest(
         SQL_REMOVE_CAR,
-        { address: payload.address, id: payload.id },
-        _ => commit('ADD_ADDRESS', payload.address),
+        { id: payload },
+        _ => commit('REMOVE_CAR', payload),
         error => alert(error)
       )
     },

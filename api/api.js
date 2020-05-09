@@ -25,6 +25,7 @@ function isOptionMissing (data, needed, res) {
     if (typeof data[key] == "undefined") {
       res.writeHead(400);
       res.end("No field '" + key + "' supplied!");
+      console.log('Error occurred: missing property "' + key + '" at ' + data)
       return true;
     }
     return false;
@@ -212,9 +213,6 @@ module.exports = {
           });
         res.end();
       }
-      else {
-        console.log('Problem liftMaxDistance')
-      }
     },
     '/updateProfilePicture': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'imageData'], res)) {
@@ -244,9 +242,6 @@ module.exports = {
           });
         res.end();
       }
-      else {
-        console.log('Problem updatePrefs')
-      }
     },
     '/addAddress': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'address', 'id'], res)) {
@@ -258,9 +253,6 @@ module.exports = {
 
         res.end();
       }
-      else {
-        console.log('Problem')
-      } // 
     },
     '/removeAddress': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'id'], res)) {
@@ -272,9 +264,6 @@ module.exports = {
 
         res.end();
       }
-      else {
-        console.log('Problem')
-      } // 
     },
     '/addCar': async (req, res, options) => {
       if (!isOptionMissing(options, ['car', 'id'], res)) {
@@ -307,23 +296,18 @@ module.exports = {
 
         res.end();
       }
-      else {
-        console.log('Problem')
-      } // 
     },
     '/removeCar': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId', 'id'], res)) {
+      if (!isOptionMissing(options, ['id'], res)) {
         await runQuery(
-          "DELETE FROM `address` WHERE`address`.`ID` = ?",
+          "DELETE FROM `car` WHERE `car`.`ID` = ?",
           [options.id]).catch(error => {
             throw error;
           });
 
+
         res.end();
       }
-      else {
-        console.log('Problem')
-      } // 
     }
   }
 }
