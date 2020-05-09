@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-dialog v-model="show" persistent>
+    <q-dialog v-model="show" persistent transition-show="fade" transition-hide="fade">
       <q-card>
         <q-toolbar>
           <q-avatar>

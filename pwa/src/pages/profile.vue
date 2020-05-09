@@ -18,9 +18,20 @@
             </div>
 
             <q-card-section class="row">
-              <p
+              <div
                 class="col-8 text-h5 text-weight-light text-left q-mt-none q-mb-xs custom-overline c-o-1 c-o-l c-o-sm"
-              >{{username}}</p>
+              >
+                {{username}}
+                <q-btn dense icon="settings" flat size="sm">
+                  <q-menu transition-show="jump-down" transition-hide="jump-up">
+                    <q-list>
+                      <q-item clickable disable>
+                        <q-item-section>Mein Passwort ändern</q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-menu>
+                </q-btn>
+              </div>
               <p class="col-4">
                 <q-btn icon="select_all" @click="shareProfileQR = true" flat />
               </p>
@@ -188,7 +199,7 @@
               <p class="col-2">
                 <q-btn size="sm" flat @click="openAddCar = !openAddCar" icon="edit" />
               </p>
-              <q-card class="col-6 q-pa-xs no-shadow" v-for="item in cars" :key="item.plate">
+              <q-card class="col-6 q-pa-xs no-shadow" v-for="item in cars" :key="item.licensePlate">
                 <q-img src="~assets/app-logo.svg" style="height: 15vh;">
                   <div class="absolute-bottom">
                     <div class="text-h6">{{item.brand}}</div>
@@ -346,10 +357,8 @@
               </div>
             </div>
           </q-card-section>
-          <q-card-section
-            class="q-pt-sm"
-            :style="'border-top: 1px solid ' + carInfo.color.toLowerCase()"
-          >
+          <hr :class="'q-ma-none bg-' + carInfo.color" style="height: 2px;" />
+          <q-card-section class="q-pt-sm">
             <div class="q-pa-lg row">
               <p class="text-uppercase text-caption col-7">Fahrzeugtyp</p>
               <p class="col-5">{{carInfo.type}}</p>
@@ -650,10 +659,7 @@
 
               <q-step :name="4" title="Farbe" icon="brush" :done="openNewCarTab > 4">
                 <p class="text-caption">Wähle zuerst den Farbton und dann die Farbe</p>
-                <q-splitter
-                  :value="50"
-                  :style="'border-left: 1px solid ' + (newCar.color ? newCarOptions[newCar.colorTone][newCar.color] : 'white')"
-                >
+                <q-splitter :value="50">
                   <template v-slot:before>
                     <q-list
                       style="max-height: 40vh;"
@@ -697,11 +703,17 @@
                         </q-item>
                       </q-list>
                     </div>
+
                     <div v-else class="flex flex-center">
                       <p class="text-caption">Bitte wähle einen Farbton aus</p>
                     </div>
                   </template>
                 </q-splitter>
+                <p
+                  v-if="newCar.colorTone && newCar.color"
+                  :class="'q-ma-none q-pa-none bg-' + newCarOptions.colors[newCar.colorTone][newCar.color]"
+                  style="height: 2px;"
+                ></p>
               </q-step>
 
               <q-step :name="5" title="Baujahr" icon="query_builder" :done="openNewCarTab > 5">
@@ -777,9 +789,9 @@
       </q-dialog>
 
       <q-dialog
+        v-model="openAddCarConfirm"
         full-width
         full-height
-        v-model="openAddCarConfirm"
         persistent
         transition-show="slide-up"
         transition-hide="scale"
@@ -787,13 +799,23 @@
         <q-card>
           <q-card-section>
             <div class="text-h6">Überprüfe deine Angaben</div>
-            <p class="text-caption">
-              Bitte stelle sicher, dass deine Angaben korrekt und vollständig sind.
-              Unser Team überprüft außerdem jedes neue Modell in unserer Datenbank. Bei Verdacht auf Spam blockieren wir im Zweifelsfall den jeweiligen Benutzer.
-              <br />Allen anderen aber danken wir, dass sie uns helfen, unsere Datenbank zu erweitern.
-              <br />Überflieg am besten noch kurz unsere
-              <a href="https://mi.com">Datenverarbeitung</a>.
-            </p>
+            <q-expansion-item
+              expand-separator
+              icon="error_outline"
+              label="Wichtige Hinweise"
+              caption="Bitte lies sie dir durch, wenn du sie noch nicht kennst"
+            >
+              <p class="text-caption">
+                Bitte stelle sicher, dass deine Angaben korrekt und vollständig sind.
+                Unser Team überprüft außerdem jedes neue Modell in unserer Datenbank. Bei Verdacht auf Spam blockieren wir im Zweifelsfall den jeweiligen Benutzer.
+                <br />Allen anderen aber danken wir, dass sie uns helfen, unsere Datenbank zu erweitern.
+                <br />
+                <br />Und falls noch nicht geschehen: Überflieg am besten noch kurz unsere
+                <a
+                  href="https://mi.com"
+                >Datenverarbeitung</a>.
+              </p>
+            </q-expansion-item>
           </q-card-section>
 
           <q-card-section class="row">
@@ -803,7 +825,8 @@
 
           <q-card-section>
             <hr
-              :class="'bg-' + (newCar.color ? newCarOptions[newCar.colorTone][newCar.color] : 'black')"
+              style="height: 2px;"
+              :class="'bg-' + (newCar.color && newCar.colorTone ? newCarOptions.colors[newCar.colorTone][newCar.color] : 'black')"
             />
 
             <div class="q-pa-lg row">
@@ -877,7 +900,7 @@ export default {
         type: '',
         color: '',
         licensePlate: '',
-        seats: 3
+        seats: 0
       },
       carInfoOpen: false,
 			editDistance: false,
@@ -910,7 +933,7 @@ export default {
         color: '',
         colorTone: '',
         year: 'XXXX',
-        seats: 0,
+        seats: 3,
         licensePlate: ''
       },
       newCarOptions: {
@@ -1099,17 +1122,15 @@ export default {
 			this.$store.dispatch("auth/removeAddress", id)
     },
     
-    addCar(){
-      this.$store.dispatch("auth/addCar", {
-				id: this.$store.getters['auth/user'].id,
+    async addCar(){
+      console.log(this.newCar)
+      await this.$store.dispatch("auth/addCar", {
+        id: this.$store.getters['auth/user'].id,
 				car: this.newCar
 			})
-			this.newCar = {
-        brand: '',
-        model: '',
-        color: '',
-        colorTone: ''
-			}
+			// for(let key in this.newCar){
+      //   this.newCar[key] = key != 'seats' ? '' : 3; // original state, 3 seats look better than 0, it's the default value when selecting the seats.
+      // }
     },
 
     removeCar(id){

@@ -161,8 +161,8 @@ export default {
     async addCar ({ commit }, payload) {
       sendApiRequest(
         SQL_ADD_CAR,
-        { car: payload },
-        _ => commit('REMOVE_CAR', payload),
+        { id: payload.id, car: payload.car },
+        _ => commit('ADD_CAR', payload),
         error => alert(error)
       )
     },

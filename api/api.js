@@ -101,11 +101,13 @@ module.exports = {
               brand: item.BRAND,
               model: item.MODEL,
               type: item.TYPE,
-              plate: item.LICENSE_PLATE,
+              licensePlate: item.LICENSE_PLATE,
+              year: item.YEAR,
               seats: item.SEATS,
-              color: item.COLOR
+              color: carModels.allColors()[item.COLOR.split(':')[0]][item.COLOR.split(':')[1]] /* I apologize for not-clean-code, but this was the easiest way */
             }
             data.cars.push(obj)
+            //console.log(obj)
           })
         }
 
@@ -275,12 +277,33 @@ module.exports = {
       } // 
     },
     '/addCar': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId', 'car', 'id'], res)) {
-        await runQuery(
-          "INSERT INTO `car` (`ID`, `BRAND`, `MODEL`, `COLOR`, `STREET`, `USER_INDEX`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, '1', ?);",
-          [options.address.postcode, options.address.city, options.address.number, options.address.street, options.id]).catch(error => {
-            throw error;
-          });
+      if (!isOptionMissing(options, ['car', 'id'], res)) {
+        let result = await runQuery("SELECT car_models.ID FROM car_models WHERE BRAND = ? AND TYPE = ? AND MODEL = ?",
+          [options.car.brand, options.car.type, options.car.model]).catch(error => {
+            throw error
+          })
+        var modelExists = result.result.length > 0
+        if (!modelExists) {
+          await runQuery("INSERT INTO `car_models` (`ID`, `BRAND`, `TYPE`, `MODEL`, `PICTURE`, `OFFICIAL`) VALUES (NULL, ?, ?, ?, NULL, '0');",
+            [options.car.brand, options.car.type, options.car.model]).catch(error => {
+              throw error
+            })
+          let result = await runQuery("SELECT car_models.ID FROM car_models WHERE BRAND = ? AND TYPE = ? AND MODEL = ?",
+            [options.car.brand, options.car.type, options.car.model]).catch(error => {
+              throw error
+            })
+          //console.log('model has been inserted')
+        }
+        // now result contains for safe ID of the (if necessary just inserted) model
+
+        var modelId = result.result[0].ID
+
+        let carData = options.car
+
+        await runQuery("INSERT INTO `car` (`ID`, `LICENSE_PLATE`, `SEATS`, `COLOR`, `YEAR`, `MODEL_ID`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, ?)",
+          [carData.licensePlate, carData.seats, carData.colorTone + ':' + carData.color, carData.year, modelId, options.id]).catch(error => {
+            throw error
+          })
 
         res.end();
       }
