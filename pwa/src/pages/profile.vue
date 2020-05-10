@@ -920,7 +920,7 @@ export default {
 
   data() {
     return {
-      since: date.formatDate(
+      since: date.formatDate( // user statistics, cannot directly be changed by user
         this.$store.getters["auth/user"].stats.createdAt,
         "MMMM YYYY",
         {
@@ -942,10 +942,43 @@ export default {
       ),
       liftsOffered: this.$store.getters["auth/user"].stats.liftsOffered,
       liftsAll: this.$store.getters["auth/user"].stats.liftsAll,
-      liftAverage: 5,
-      newLiftMaxDistance: 0,
       username:  this.$store.getters['auth/user'].name.split(' ')[0],
-      carInfo: {
+      liftAverage: 5,
+      newLiftMaxDistance: 0, // basic profile settings
+      editDistance: false,
+      genderOptions: [
+        "Männlich",
+        "Weiblich",
+        "Divers"
+      ],
+      openEditDescription: false,
+      newDescription: '',
+      ppPath: "",
+      shareProfileQR: false,
+      openUpload: false,
+      file: null,
+      fileBlob: null,
+
+			openEditPrefs: false, // prefs settings
+			openEditPrefsTab: 'talk',
+			newPrefs: {
+        talk: '',
+        talkMorning: '',
+        smoking: '',
+        music: ''
+      },
+      prefsDocu: this.$store.state.prefsDocu,
+      
+			openEditAddresses: false, // addresses settings
+			openNewAddress: false,
+			newAddress: {
+				street: '',
+				number: '',
+				postcode: '',
+				city: ''
+      },
+
+      carInfo: { // cars settings
         brand: '',
         model: '',
         type: '',
@@ -954,30 +987,6 @@ export default {
         seats: 0
       },
       carInfoOpen: false,
-			editDistance: false,
-			openEditPrefs: false,
-			openEditPrefsTab: 'talk',
-			newPrefs: {
-        talk: '',
-        talkMorning: '',
-        smoking: '',
-        music: ''
-      },
-			openEditAddresses: false,
-			openNewAddress: false,
-			newAddress: {
-				street: '',
-				number: '',
-				postcode: '',
-				city: ''
-			},
-      shareProfileQR: false,
-      ppPath: "",
-      openEditDescription: false,
-      newDescription: '',
-      openEditCars: false,
-      openAddCar: false,
-      openAddCarConfirm: false,
       newCar: {
         brand: '',
         type: '',
@@ -1004,16 +1013,11 @@ export default {
         }
       },
       openNewCarTab: 1,
-      openUpload: false,
-      file: null,
-      fileBlob: null,
-      genderOptions: [
-        "Männlich",
-        "Weiblich",
-        "Divers"
-      ],
-      tab: 'reservoir',
-      prefsDocu: this.$store.state.prefsDocu
+      openEditCars: false,
+      openAddCar: false,
+      openAddCarConfirm: false,
+      
+      tab: 'reservoir', // vue models which doesn't belong to specific function
     }
   },
   computed: {
@@ -1313,10 +1317,8 @@ export default {
         return true
       }
       else {
-        this.newCar.licensePlate = this.newCar.licensePlate.toUpperCase()
-        var alphabet = 'qwertzuiopasdfghjklyxcvbnm'
-        var plate = this.newCar.licensePlate.toLowerCase()
-        
+        // Unicode Table: BIG letters: 65-90, small letters: 97-122
+
         let splits = plate.split('-')
         var threeParts = () => {
           splits.forEach(string => {
@@ -1329,30 +1331,26 @@ export default {
           let correctCityLength = splits[0].length > 0 && splits[0].length < 4
           let correctNameLength = splits[1].length > 0 && splits[1].length < 3
           
-          let cityLetters = () => {
-            splits[0].forEach(char => {
-              if(alphabet.indexOf(char) == -1) return false
+          let cityAndNameInLetters = () => {
+            (splits[0] + splits[1]).forEach(char, index => {
+              let code = charCodeAt(index)
+              let isLetter = ((code >= 65 && code <= 90) || (code >= 97 && code <= 122))
+              if(!isLetter) return false
             })
             return true
           }
-          let nameLetters = () => {
-            splits[1].forEach(char => {
-              if(alphabet.indexOf(char) == -1) return false
-            })
-            return true
-          }
+          
           let correctNumberLength = () => {
             try{
               var number = parseInt(splits[2])
               return number > 0 && number < 10000
             }
             catch(e){
-              alert('Error at license plate checking occurred: ' + e)
+              return false // maybe letters given
             }
-            return false
           }
 
-          if(threeParts && correctSplits && cityLetters && correctCityLength && nameLetters && correctNameLength && correctNumberLength){
+          if(threeParts && correctSplits && correctCityLength && correctNameLength && cityAndNameInLetters && correctNumberLength){
             return true
           }
           else {
