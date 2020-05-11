@@ -277,7 +277,7 @@ module.exports = {
             [options.car.brand, options.car.type, options.car.model]).catch(error => {
               throw error
             })
-          let result = await runQuery("SELECT car_models.ID FROM car_models WHERE BRAND = ? AND TYPE = ? AND MODEL = ?",
+          result = await runQuery("SELECT car_models.ID FROM car_models WHERE BRAND = ? AND TYPE = ? AND MODEL = ?",
             [options.car.brand, options.car.type, options.car.model]).catch(error => {
               throw error
             })
