@@ -18,7 +18,13 @@ export default {
           id: 1,
           driver: {
             fbid: "QTs2vuk6O0RHjr8uDyLBwb9DZ5G3",
-            name: "Finn"
+            name: "Finn",
+            prefs: {
+              talk: "GREEN",
+              talkMorning: "RED",
+              smoking: "RED",
+              music: "YELLOW"
+            }
           },
           day_pattern: null,
           next_drive: [new Date(), new Date()],
@@ -32,7 +38,13 @@ export default {
           id: 2,
           driver: {
             fbid: "QTs2vuk6O0RHjr8uDyLBwb9DZ5G3",
-            name: "Finn"
+            name: "Finn",
+            prefs: {
+              talk: "GREEN",
+              talkMorning: "RED",
+              smoking: "RED",
+              music: "YELLOW"
+            }
           },
           day_pattern: null,
           next_drive: [new Date("2-2-2020"), new Date()],
@@ -46,7 +58,13 @@ export default {
           id: 3,
           driver: {
             fbid: "QTs2vuk6O0RHjr8uDyLBwb9DZ5G3",
-            name: "Finn"
+            name: "Finn",
+            prefs: {
+              talk: "GREEN",
+              talkMorning: "RED",
+              smoking: "RED",
+              music: "YELLOW"
+            }
           },
           day_pattern: {
             Montag: [true, true],

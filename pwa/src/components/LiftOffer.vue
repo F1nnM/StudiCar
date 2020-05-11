@@ -11,7 +11,7 @@
           <q-icon id="seats" name="airline_seat_recline_normal" />
         </div>
       </div>
-      <div v-if="lift.day_pattern" class="row">
+      <div v-if="lift.day_pattern" class="row q-pt-sm">
         <div
           v-for="(values, day) in lift.day_pattern"
           :key="day"
@@ -26,13 +26,13 @@
           <q-icon name="close" v-else />
         </div>
       </div>
-      <div v-else-if="date_single_drive[0]==date_single_drive[1]" class="row">
+      <div v-else-if="date_single_drive[0]==date_single_drive[1]" class="row q-pt-sm">
         <div class="drive_indicator drive_indicator_2">
           <q-icon name="unfold_more" />
         </div>
         <span class="vertical_middle">{{date_single_drive[0]}}</span>
       </div>
-      <div v-else class="row">
+      <div v-else class="row q-pt-sm">
         <div class="drive_indicator drive_indicator_1" v-if="date_single_drive[0]">
           <q-icon name="arrow_upward" />
         </div>
@@ -41,6 +41,16 @@
           <q-icon name="arrow_downward" />
         </div>
         <span class="vertical_middle" v-if="date_single_drive[1]">{{date_single_drive[1]}}</span>
+      </div>
+      <div class="row q-pt-sm">
+        <div class="col-4">Redseligkeit</div>
+        <div :class="'col-2 text-' + betterPrefColor(lift.driver.prefs.talk)">●</div>
+        <div class="col-4">... am Morgen</div>
+        <div :class="'col-2 text-' + betterPrefColor(lift.driver.prefs.talkMorning)">●</div>
+        <div class="col-4">Rauchen</div>
+        <div :class="'col-2 text-' + betterPrefColor(lift.driver.prefs.smoking)">●</div>
+        <div class="col-4">Musik</div>
+        <div :class="'col-2 text-' + betterPrefColor(lift.driver.prefs.music)">●</div>
       </div>
       <div class="row self-end">
         <span>
@@ -72,6 +82,13 @@ export default {
         this.lift.next_drive[1] ? date.formatDate(this.lift.next_drive[1], 'DD. MM. YY') : null
       ]
     }
+  },
+  methods:{
+    betterPrefColor(color){
+      if(color == 'GREEN') return 'green-8'
+      else if(color == 'YELLOW') return 'orange'
+      else return color.toLowerCase()
+    }
   }
 }
 </script>
@@ -84,6 +101,7 @@ export default {
   position: relative;
   background-image: url("~assets/loremmap.png");
   background-size: cover;
+  background-position: center;
 }
 #mapImg {
   position: absolute;
