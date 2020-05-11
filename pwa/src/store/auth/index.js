@@ -60,7 +60,6 @@ export default {
 
     REMOVE_CAR (state, payload) {
       state.user.cars = state.user.cars.filter(item => {
-        debugger
         return item.carId != payload // filters the one with matching id
       })
     },
