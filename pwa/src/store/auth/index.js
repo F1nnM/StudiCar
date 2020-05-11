@@ -71,9 +71,6 @@ export default {
       let password = payload.password
 
       await Firebase.auth().signInWithEmailAndPassword(email, password)
-        .then(user => {
-          commit('SET_USER', user)
-        })
         .catch(error => {
           alert('Bei der Anmeldung ist ein Problem aufgetreten: ' + error)
         })
@@ -96,7 +93,7 @@ export default {
                 { name: currentUser.displayName, mail: currentUser.email },
                 _ => sendApiRequest(SQL_GET_USER_DATA, { fbid: currentUser.uid },
                   data => {
-                    commit("SET_USER", currentUser);
+                    commit("SET_USER", data);
                     router.replace({ name: 'marketplace' }).catch(() => { })
                     new Vue(app) /* eslint-disable-line no-new */
                   },
