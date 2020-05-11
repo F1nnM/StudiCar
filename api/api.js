@@ -74,8 +74,8 @@ module.exports = {
           }
         }
         if (options.secretFbId = options.fbid) {
-          let liftCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS LIFT_COUNT FROM `LIFT_MAP` WHERE `USER_ID` = ? ", [options.fbid])).result[0].LIFT_COUNT
-          let driverCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS DRIVER_COUNT FROM `LIFT_MAP` WHERE `IS_DRIVER` = true AND `USER_ID` = ? ", [options.fbid])).result[0].DRIVER_COUNT
+          let liftCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS LIFT_COUNT FROM `lift_map` WHERE `USER_ID` = ? ", [options.fbid])).result[0].LIFT_COUNT
+          let driverCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS DRIVER_COUNT FROM `lift_map` WHERE `IS_DRIVER` = true AND `USER_ID` = ? ", [options.fbid])).result[0].DRIVER_COUNT
           data.settings = {
             liftMaxDistance: userData.LIFT_MAX_DISTANCE
           }
