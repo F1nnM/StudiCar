@@ -236,7 +236,7 @@ module.exports = {
     '/updatePrefs': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'prefs'], res)) {
         await runQuery(
-          "UPDATE user SET PREF_TALK = ?, PREF_TALK_MORNING = ?, PREF_MUSIC = ?, PREF_SMOKING = ? WHERE FB_ID = ?;",
+          "UPDATE user SET PREF_TALK = ?, PREF_TALK_MORNING = ?, PREF_SMOKING = ?, PREF_MUSIC = ?,  WHERE FB_ID = ?;",
           [options.prefs.talk, options.prefs.talkMorning, options.prefs.smoking, options.prefs.music, options.secretFbId]).catch(error => {
             throw error;
           });
@@ -266,19 +266,21 @@ module.exports = {
       }
     },
     '/addCar': async (req, res, options) => {
-      if (!isOptionMissing(options, ['car', 'id'], res)) {
+      if (!isOptionMissing(options, ['data'], res)) {
+        let car = options.data.car
+        let id = options.data.id
         let result = await runQuery("SELECT car_models.ID FROM car_models WHERE BRAND = ? AND TYPE = ? AND MODEL = ?",
-          [options.car.brand, options.car.type, options.car.model]).catch(error => {
+          [car.brand, car.type, car.model]).catch(error => {
             throw error
           })
         var modelExists = result.result.length > 0
         if (!modelExists) {
           await runQuery("INSERT INTO `car_models` (`ID`, `BRAND`, `TYPE`, `MODEL`, `PICTURE`, `OFFICIAL`) VALUES (NULL, ?, ?, ?, NULL, '0');",
-            [options.car.brand, options.car.type, options.car.model]).catch(error => {
+            [car.brand, car.type, car.model]).catch(error => {
               throw error
             })
           result = await runQuery("SELECT car_models.ID FROM car_models WHERE BRAND = ? AND TYPE = ? AND MODEL = ?",
-            [options.car.brand, options.car.type, options.car.model]).catch(error => {
+            [car.brand, car.type, car.model]).catch(error => {
               throw error
             })
           //console.log('model has been inserted')
@@ -287,10 +289,9 @@ module.exports = {
 
         var modelId = result.result[0].ID
 
-        let carData = options.car
 
         await runQuery("INSERT INTO `car` (`ID`, `LICENSE_PLATE`, `SEATS`, `COLOR`, `YEAR`, `MODEL_ID`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, ?)",
-          [carData.licensePlate, carData.seats, carData.colorTone + ':' + carData.color, carData.year, modelId, options.id]).catch(error => {
+          [car.licensePlate, car.seats, (car.colorTone + ':' + car.color), car.year, modelId, id]).catch(error => {
             throw error
           })
 

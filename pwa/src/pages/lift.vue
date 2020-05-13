@@ -205,7 +205,7 @@ export default {
 
   mounted(){
      if(document.location.href.includes('lift')){
-       setTimeout(() => window.scrollTo(0,1000000), 300)
+       setTimeout(() => window.scrollTo(0,1000000), 200)
        this.$store.commit('setPage', '')
        this.$store.commit('setPageTrans', 'expand')
      }
