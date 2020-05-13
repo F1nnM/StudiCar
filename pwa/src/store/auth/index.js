@@ -16,6 +16,11 @@ export default {
 
     isAuthenticated (state) {
       return !!state.user
+    },
+
+    signinLoading (state) {
+      //debugger
+      return state.signinLoading
     }
   },
 
@@ -63,6 +68,12 @@ export default {
         return item.carId != payload // filters the one with matching id
       })
     },
+
+    SET_SIGNIN_LOADING (state, payload) {
+
+      state.signinLoading = payload
+      //debugger
+    }
   },
 
   actions: {

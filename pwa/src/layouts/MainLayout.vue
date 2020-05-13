@@ -102,7 +102,7 @@
       >
         <q-route-tab icon="home" to="/" label="Marktplatz" />
         <q-route-tab icon="add_circle_outline" to="/chats/lift/add" label="Neue Fahrt" />
-        <q-route-tab icon="directions_car" to="/hallo" label="Chats" />
+        <q-route-tab icon="directions_car" to="/chats" label="Chats" />
         <q-route-tab icon="account_box" to="/profil" label="Profil" />
       </q-tabs>
     </q-footer>
