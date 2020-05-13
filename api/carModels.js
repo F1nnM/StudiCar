@@ -90,27 +90,58 @@ var colors = {
 
 var models = {
 	Alfa_Romeo: {
-
+		Kompaktwagen: [
+			'Giulietta'
+		],
+		Kombi: [
+			'Quadrifoglio', 'Limousine'
+		],
+		SUV: [
+			'Quadrifoglio', 'Stelvio', 'Tonale Concept'
+		],
+		Sportwagen: [
+			'Giulia GTA'
+		]
 	},
 	Audi: {
 		Kompaktwagen: [
 			'A1', 'A2'
 		],
 		Kombi: [
-			'A4', 'A6'
+			'A3', 'A4', 'A6', 'e-tron'
 		],
 		Limousine: [
-			'A5', 'A7', 'A4', 'A3'
+			'A3', 'A4', 'A5', 'A6', 'A7', 'A8'
 		],
 		Cabrio: [
-			'A3', 'A5', 'TT Roadster', 'TTS Roadster', 'TTRS Roadster'
+			'A3', 'S3', 'A5', 'TT Roadster', 'TTS Roadster', 'TTRS Roadster'
 		],
 		SUV: [
-			'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'SQ3', 'SQ4', 'SQ5', 'SQ7', 'RSQ3', 'RSQ5'
+			'Q2', 'SQ2', 'Q3', 'RSQ3', 'Q4', 'Q5', 'SQ5', 'Q6', 'Q7', 'SQ7', 'Q8', 'SQ8', 'RSQ8', 'SQ3', 'SQ4', 'SQ5', 'SQ7', 'RSQ3', 'RSQ5'
+		],
+		Sportwagen: [
+			'TT', 'TTS', 'TTRS', 'RS3', 'RS4', 'RS5', 'RS6', 'RS7', 'R8'
 		]
 	},
-	BMW: {
+	Arlows: {
 
+	},
+	BMW: {
+		Kompaktwagen: [
+			'1er'
+		],
+		Kombi: [
+			'2er Active', '5er'
+		],
+		Limousine: [
+			'2er', '3er', '4er', '5er', '6er', '7er', '8er'
+		],
+		SUV: [
+			'X1', 'X2', 'X2 M', 'X3', 'X3 M', 'X4', 'X4 M', 'X5', 'X5 M', 'X6', 'X6 M', 'X7', 'X7 M'
+		],
+		Sportwagen: [
+			'1er M', '2er M', '3er M', '4er M', '5er M', '7er M', '8er M', 'Z4', 'Z4 M'
+		]
 	},
 	Chevrolet: {
 
@@ -134,7 +165,21 @@ var models = {
 
 	},
 	Fiat: {
-
+		Kompaktwagen: [
+			'500'
+		],
+		Kombi: [
+			'500L'
+		],
+		Limousine: [
+			'Tipo'
+		],
+		Cabrio: [
+			'500'
+		],
+		SUV: [
+			'Panda'
+		]
 	},
 	Ford: {
 
@@ -158,7 +203,21 @@ var models = {
 
 	},
 	Kia: {
-
+		Kompaktwagen: [
+			'Picanto'
+		],
+		Kombi: [
+			'Seat'
+		],
+		Limousine: [
+			'Stinger'
+		],
+		Cabrio: [
+			'Stinger'
+		],
+		SUV: [
+			'Stonic'
+		]
 	},
 	Lada: {
 
@@ -176,26 +235,46 @@ var models = {
 
 	},
 	Mazda: {
-
+		Kompaktwagen: [
+			'Mazda 2'
+		],
+		Kombi: [
+			'Mazda 3'
+		],
+		Limousine: [
+			'Mazda 6'
+		],
+		Cabrio: [
+			'MX5'
+		],
+		SUV: [
+			'CX5'
+		],
+		Transporter: [
+			'E-Serie'
+		]
 	},
 	Mercedes: {
 		Kompaktwagen: [
-			'A-Klasse'
+			'A-Klasse', 'B-Klasse', 'GLA', 'CLA'
 		],
 		Kombi: [
-			'B-Klasse'
+			'B-Klasse', 'CLA', 'C-Klasse T', 'E-Klasse T'
 		],
 		Limousine: [
-			'S-Klasse'
+			'A-Klasse', 'C-Klasse', 'E-Klasse', 'S-Klasse', 'Maybach'
 		],
 		Cabrio: [
-			'SL'
+			'SL', 'SLC', 'C-Klasse', 'E-Klasse', 'GT'
 		],
 		SUV: [
-			'GLS'
+			'GLA', 'GLB', 'GLC', 'GLE', 'GLS', 'G-Klasse Geländewagen'
 		],
 		Transporter: [
 			'V-Klasse'
+		],
+		Sportwagen: [
+			'A-Klasse', 'C-Klasse', 'E-Klasse', 'S-Klasse', 'G-Klasse', 'GT'
 		]
 	},
 	MG: {
@@ -211,16 +290,61 @@ var models = {
 
 	},
 	Opel: {
-
+		Kompaktwagen: [
+			'Corsa', 'Adam', 'Karl'
+		],
+		Kombi: [
+			'Astra', 'Insignia'
+		],
+		SUV: [
+			'Crossland', 'Grandland', 'Mokka'
+		],
+		Sportwagen: [
+			'Astra', 'Insignia'
+		],
+		Transporter: [
+			'Movano'
+		]
 	},
 	Peugeot: {
-
+		Kompaktwagen: [
+			'108', '208'
+		],
+		Kombi: [
+			'308', '508',
+		],
+		SUV: [
+			'2008'
+		],
+		Sportwagen: [
+			'308 GTI', ''
+		]
 	},
 	Porsche: {
 
 	},
 	Renault: {
+		Kompaktwagen: [
+			'Twingo'
+		],
+		Kombi: [
+			'Clio'
+		],
+		Limousine: [
+			'Talisman'
+		],
+		Cabrio: [
+			'Captur'
+		],
+		SUV: [
+			'Koleos'
+		],
+		Sportwagen: [
 
+		],
+		Transporter: [
+			'Trafik'
+		]
 	},
 	Ruf: {
 
@@ -232,10 +356,26 @@ var models = {
 
 	},
 	Skoda: {
-
+		Kompaktwagen: [
+			'City Go', 'Fabia'
+		],
+		Kombi: [
+			'Octavia'
+		],
+		Limousine: [
+			'Superb'
+		],
+		SUV: [
+			'Karoq'
+		]
 	},
 	Smart: {
-
+		Kompaktwagen: [
+			'ForTwo'
+		],
+		Kombi: [
+			'ForFour'
+		]
 	},
 	Suzuki: {
 
@@ -244,7 +384,24 @@ var models = {
 
 	},
 	Toyota: {
-
+		Kompaktwagen: [
+			'Aygo', 'Yaris'
+		],
+		Kombi: [
+			'Prius'
+		],
+		Limousine: [
+			'Corolla', 'Camry'
+		],
+		Cabrio: [
+			'Corolla', 'Aygo'
+		],
+		SUV: [
+			'Rav4', 'Land Cruiser', 'Hilux'
+		],
+		Transporter: [
+			'Proace'
+		]
 	},
 	Trabant: {
 

@@ -695,9 +695,9 @@
                   behavior="menu"
                   @input="$refs.stepper.next()"
                 />
-                <p
+                <!-- <p
                   class="text-caption q-mt-md q-mb-none"
-                >Wenn dein Modell nicht dabei ist, nimm bitte ein ähnliches und und schreib uns das fehlende Modell.</p>
+                >Wenn dein Modell nicht dabei ist, nimm bitte ein ähnliches und und schreib uns das fehlende Modell.</p>-->
               </q-step>
 
               <q-step :name="4" title="Farbe" icon="brush" :done="openNewCarTab > 4">
@@ -895,7 +895,7 @@
             <q-btn
               color="primary"
               label="Auto hinzufügen"
-              :disabled="!(newCarFilled && checkValidNumberPlate())"
+              :disabled=" false/* !(newCarFilled && checkValidNumberPlate()) */ "
               @click="addCar()"
               v-close-popup
             />
@@ -1195,16 +1195,24 @@ export default {
     
     async addCar(){
       //console.log(this.newCar)
+      let car = this.newCar
+      let id = this.$store.getters['auth/user'].id
       
       await this.$store.dispatch("auth/addCar", {
-        id: this.$store.getters['auth/user'].id,
-				car: this.newCar
-			})
-			for(let key in this.newCar){
-        this.newCar[key] = key != 'seats' ? '' : 3; // original state, 3 seats look better than 0, it's the default value when selecting the seats.
-      }
-      this.openAddCar = false
-      this.openAddCarConfirm = false
+        id: id,
+        car: car
+      })
+
+        for(let key in this.newCar){
+          this.newCar[key] = key != 'seats' ? '' : 3; // original state, 3 seats look better than 0, it's the default value when selecting the seats.
+        }
+        this.openAddCar = false
+        this.openAddCarConfirm = false
+      
+      
+      
+      
+			
     },
 
     removeCar(id){

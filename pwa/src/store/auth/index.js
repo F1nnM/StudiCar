@@ -16,6 +16,11 @@ export default {
 
     isAuthenticated (state) {
       return !!state.user
+    },
+
+    signinLoading (state) {
+      //debugger
+      return state.signinLoading
     }
   },
 
@@ -55,7 +60,7 @@ export default {
     },
 
     ADD_CAR (state, payload) {
-      state.user.cars.push(payload)
+      state.user.cars.push(payload.car)
     },
 
     REMOVE_CAR (state, payload) {
@@ -63,6 +68,12 @@ export default {
         return item.carId != payload // filters the one with matching id
       })
     },
+
+    SET_SIGNIN_LOADING (state, payload) {
+
+      state.signinLoading = payload
+      //debugger
+    }
   },
 
   actions: {
@@ -156,9 +167,10 @@ export default {
     },
 
     async addCar ({ commit }, payload) {
+      debugger
       sendApiRequest(
         SQL_ADD_CAR,
-        { id: payload.id, car: payload.car },
+        { data: payload },
         _ => commit('ADD_CAR', payload),
         error => alert(error)
       )
