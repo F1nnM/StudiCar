@@ -290,7 +290,7 @@ module.exports = {
         let carData = options.car
 
         await runQuery("INSERT INTO `car` (`ID`, `LICENSE_PLATE`, `SEATS`, `COLOR`, `YEAR`, `MODEL_ID`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, ?)",
-          [carData.licensePlate, carData.seats, carData.colorTone + ':' + carData.color, carData.year, modelId, options.id]).catch(error => {
+          [carData.licensePlate, carData.seats, (carData.colorTone + ':' + carData.color), carData.year, modelId, options.id]).catch(error => {
             throw error
           })
 
