@@ -8,6 +8,7 @@
           round
           icon="menu"
           aria-label="Menu"
+          disabled
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
 
@@ -18,7 +19,7 @@
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered content-class="bg-grey-1">
       <q-img contain src="~assets/app-logo.svg" style="height: 140px; background-color: white;" />
 
-      <q-list style="border-top: 1px solid black;">
+      <q-list>
         <q-item-label header class="text-grey-8">
           Navigation
           <br />

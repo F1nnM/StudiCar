@@ -60,7 +60,7 @@ export default {
     },
 
     ADD_CAR (state, payload) {
-      state.user.cars.push(payload)
+      state.user.cars.push(payload.car)
     },
 
     REMOVE_CAR (state, payload) {
@@ -170,9 +170,10 @@ export default {
     },
 
     async addCar ({ commit }, payload) {
+      debugger
       sendApiRequest(
         SQL_ADD_CAR,
-        { id: payload.id, car: payload.car },
+        { data: payload },
         _ => commit('ADD_CAR', payload),
         error => alert(error)
       )

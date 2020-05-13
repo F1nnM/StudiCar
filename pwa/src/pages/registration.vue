@@ -1,8 +1,7 @@
 <template>
   <div class="q-pa-md">
     <div class="q-gutter-y-md">
-      <div class="text-h4 q-mt-xl">Registrierung</div>
-      <hr />
+      <div class="text-h4 q-mt-xl custom-underline c-u-l c-u-2 c-u-md q-mb-xl">Registrierung</div>
       <span>Bitte erstelle einen Account, damit wir dich in unser System aufnehmen können.</span>
       <br />
       <p>
