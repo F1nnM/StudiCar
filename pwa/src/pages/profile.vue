@@ -1194,25 +1194,19 @@ export default {
     },
     
     async addCar(){
-      //console.log(this.newCar)
-      let car = this.newCar
       let id = this.$store.getters['auth/user'].id
       
       await this.$store.dispatch("auth/addCar", {
         id: id,
-        car: car
+        car: this.newCar
       })
 
-        for(let key in this.newCar){
-          this.newCar[key] = key != 'seats' ? '' : 3; // original state, 3 seats look better than 0, it's the default value when selecting the seats.
-        }
-        this.openAddCar = false
-        this.openAddCarConfirm = false
+      for(let key in this.newCar){
+        this.newCar[key] = key != 'seats' ? '' : 3; // original state, 3 seats look better than 0, it's the default value when selecting the seats.
+      }
+      this.openAddCar = false
+      this.openAddCarConfirm = false
       
-      
-      
-      
-			
     },
 
     removeCar(id){

@@ -167,10 +167,9 @@ export default {
     },
 
     async addCar ({ commit }, payload) {
-      debugger
       sendApiRequest(
         SQL_ADD_CAR,
-        { data: payload },
+        { ...payload },
         _ => commit('ADD_CAR', payload),
         error => alert(error)
       )
