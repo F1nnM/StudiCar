@@ -99,7 +99,8 @@ name: 'qrScanner',
 		
 		decoded(res){
       if(res.slice(-1).charCodeAt(0) % 9 == 0){
-        this.$emit('result', res)
+        var code = res.slice(0, -1)
+        this.$emit('result', code)
       }
 			else{
         this.otherQR = true

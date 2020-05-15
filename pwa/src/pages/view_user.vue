@@ -4,9 +4,9 @@
       <template v-slot:before>
         <div class="q-px-md q-py-sm">
           <q-card>
-            <q-img src="~assets/loremimage.jpg" class="other-user-image">
-              <template v-slot:loading>
-                <div class="text-subtitle1 text-white">Bild wird geladen...</div>
+            <q-img spinner-color="primary" :src="viewedUser.imageUrl" class="other-user-image">
+              <template v-slot:loading class="text-center relative">
+                <div class="absolute-center">Bild wird geladen...</div>
               </template>
               <template v-slot:error>
                 <div
@@ -124,11 +124,18 @@
                   </q-splitter>
                 </q-card>
               </q-dialog>
-              <div v-for="item in viewedUser.preferences" :key="item.name" class="full-width">
-                <span class="inline-block" style="width: 90%;">{{item.name}}</span>
-                <span
-                  :style="'color: ' + (item.value == 3 ? 'green' : item.value == 2 ? 'orange' : 'red')"
-                >●</span>
+
+              <div class="row full-width">
+                <div class="col-10" v-show="!prefInfo">
+                  <div v-for="item in viewedUser.preferences" :key="item.name">{{item.name}}</div>
+                </div>
+                <div class="col-2">
+                  <div
+                    v-for="item in viewedUser.preferences"
+                    :key="item.name"
+                    :class="'text-' + (item.value == 'YELLOW' ? 'ORANGE' : item.value).toLowerCase()"
+                  >●</div>
+                </div>
               </div>
             </q-card-section>
           </q-card>
@@ -136,16 +143,20 @@
       </template>
       <template v-slot:after>
         <q-list class="shadow-2 rounded-borders" style="width: 100%;">
+          <br />
+          <br />
           <q-item>
             <q-item-section>
-              <p class="text-h5 overflow q-pt-xs custom-underline c-u-2 c-u-md c-u-l">Johannes</p>
+              <p
+                class="text-h5 overflow q-pt-xs custom-underline c-u-2 c-u-md c-u-l"
+              >{{viewedUser.name}}</p>
             </q-item-section>
           </q-item>
 
           <q-item-label header class="q-pt-xs text-uppercase">Fahrten</q-item-label>
           <q-item>angeboten: {{viewedUser.lifts.offered}}</q-item>
           <q-item>gesamt: {{viewedUser.lifts.all}}</q-item>
-          <q-item>durchschnittlich: {{viewedUser.lifts.average}}/W</q-item>
+          <!-- <q-item>durchschnittlich: {{viewedUser.lifts.average}}/W</q-item> -->
 
           <q-item-label header class="q-pt-xs text-uppercase">Dabei seit</q-item-label>
           <q-item>{{viewedUser.createdAt}}</q-item>
@@ -164,12 +175,14 @@
 <script>
 
 import { date } from 'quasar'
+import { sendApiRequest, SQL_GET_USER_DATA, GET_USER_PROFILE_PIC, buildGetRequestUrl } from "../ApiAccess";
 export default {
 
   data(){
     
     return{
       prefInfo: false,
+      loaded: false,
       prefInfoTab: 'talkativeness',
       splitterModel: 20,
       splitter: 50,
@@ -184,16 +197,16 @@ export default {
               average: 5
           },
           preferences: [{
-              name: 'Redseligkeit', value: 3
+              name: 'Redseligkeit', value: 'GREEN'
           },
           {
-              name: ' ...am Morgen', value: 2
+              name: ' ...am Morgen', value: 'YELLOW'
           },
           {
-              name: 'Rauchen', value: 1
+              name: 'Rauchen', value: 'RED'
           },
           {
-              name: 'Musik', value: 3
+              name: 'Musik', value: 'YELLOW'
           }]
       }
     }
@@ -201,13 +214,61 @@ export default {
 
   computed: {
       prefsDocu(){
-        return this.$store.state.prefDocu
+        return this.$store.state.prefsDocu
       }
   },
 
   mounted(){
 
-      this.$store.commit('setPage', '')
+    let loc = document.location.href
+    let otherFbId = loc.split('?')[1]
+
+    let imageUrl
+    buildGetRequestUrl(
+      GET_USER_PROFILE_PIC,
+      { fbid: otherFbId },
+      url => {
+        imageUrl = url
+      }
+    )
+    
+
+    sendApiRequest(SQL_GET_USER_DATA,
+    {
+      fbid: otherFbId,
+      secretFbId: 'lorem'
+    },
+    data => {
+      this.viewedUser = {
+        name: data.name.split(' ')[0],
+        createdAt: date.formatDate(data.stats.createdAt, 'MMMM YYYY'),
+        bio: data.description,
+        lifts: {
+            offered: data.stats.liftsOffered,
+            all: data.stats.driverCount,
+            average: 5
+        },
+        imageUrl: imageUrl,
+        preferences: [{
+            name: 'Redseligkeit', value: data.prefs.talk
+        },
+        {
+            name: ' ...am Morgen', value: data.prefs.talkMorning
+        },
+        {
+            name: 'Rauchen', value: data.prefs.smoking
+        },
+        {
+            name: 'Musik', value: data.prefs.music
+        }]
+      }
+      this.loaded = true
+    },
+    error => {throw error})
+
+    
+
+    this.$store.commit('setPage', '')
     }
 }
 </script>

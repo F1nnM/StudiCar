@@ -56,6 +56,9 @@ module.exports = {
     '/getUserData': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid', 'secretFbId'], res)) {
         let userData = (await runQuery("SELECT ID, NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKING, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `user` WHERE user.FB_ID = ?", [options.fbid])).result[0]
+        let liftCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS LIFT_COUNT FROM `lift_map` WHERE `USER_ID` = ? ", [options.fbid])).result[0].LIFT_COUNT
+        let driverCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS DRIVER_COUNT FROM `lift_map` WHERE `IS_DRIVER` = true AND `USER_ID` = ? ", [options.fbid])).result[0].DRIVER_COUNT
+
         let data = {
           id: userData.ID,
           uid: options.fbid,
@@ -64,7 +67,9 @@ module.exports = {
           course: userData.COURSE,
           description: userData.DESCRIPTION,
           stats: {
-            createdAt: userData.CREATED_DATE
+            createdAt: userData.CREATED_DATE,
+            liftsOffered: liftCount,
+            driverCount: driverCount
           },
           prefs: {
             smoking: userData.PREF_SMOKING,
@@ -74,15 +79,12 @@ module.exports = {
           }
         }
         if (options.secretFbId = options.fbid) {
-          let liftCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS LIFT_COUNT FROM `lift_map` WHERE `USER_ID` = ? ", [options.fbid])).result[0].LIFT_COUNT
-          let driverCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS DRIVER_COUNT FROM `lift_map` WHERE `IS_DRIVER` = true AND `USER_ID` = ? ", [options.fbid])).result[0].DRIVER_COUNT
+
+          let addresses = await runQuery("SELECT address.ID, POSTCODE, CITY, STREET, NUMBER FROM address INNER JOIN user ON address.USER_ID = user.ID WHERE user.FB_ID = ?", [options.fbid]);
+          data.addresses = []
           data.settings = {
             liftMaxDistance: userData.LIFT_MAX_DISTANCE
           }
-          data.stats.liftsOffered = liftCount
-          data.stats.driverCount = driverCount
-          let addresses = await runQuery("SELECT address.ID, POSTCODE, CITY, STREET, NUMBER FROM address INNER JOIN user ON address.USER_ID = user.ID WHERE user.FB_ID = ?", [options.fbid]);
-          data.addresses = []
           addresses.result.forEach(item => {
             let obj = {
               id: item.ID,
