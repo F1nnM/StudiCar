@@ -152,6 +152,7 @@ export default {
 
     gotScanResult(e){
       this.scannerOpen = false
+      window.location.href = '#/view-user?' + e + '">{{lift.driver.name}}'
     },
 
     closeScanner(e){
