@@ -238,7 +238,7 @@ module.exports = {
     '/updatePrefs': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'prefs'], res)) {
         await runQuery(
-          "UPDATE user SET PREF_TALK = ?, PREF_TALK_MORNING = ?, PREF_SMOKING = ?, PREF_MUSIC = ?,  WHERE FB_ID = ?;",
+          "UPDATE user SET PREF_TALK = ?, PREF_TALK_MORNING = ?, PREF_SMOKING = ?, PREF_MUSIC = ? WHERE FB_ID = ?;",
           [options.prefs.talk, options.prefs.talkMorning, options.prefs.smoking, options.prefs.music, options.secretFbId]).catch(error => {
             throw error;
           });
@@ -252,6 +252,8 @@ module.exports = {
           [options.address.postcode, options.address.city, options.address.number, options.address.street, options.id]).catch(error => {
             throw error;
           });
+        // let result = await runQuery("SELECT ID FROM address WHERE USER_ID = ? ORDER BY ID DESC", [options.id])
+        // result = result.result[0]
 
         res.end();
       }
@@ -269,8 +271,10 @@ module.exports = {
     },
     '/addCar': async (req, res, options) => {
       if (!isOptionMissing(options, ['data'], res)) {
+
         let car = options.data.car
         let id = options.data.id
+
         let result = await runQuery("SELECT car_models.ID FROM car_models WHERE BRAND = ? AND TYPE = ? AND MODEL = ?",
           [car.brand, car.type, car.model]).catch(error => {
             throw error
