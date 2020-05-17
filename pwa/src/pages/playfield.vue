@@ -1,7 +1,6 @@
 <template>
   <div class="q-pa-md">
-    <q-toggle v-model="code" label="Code" />
-    <qrGenerator :show="code" input="wG3cG4M7NFMJzJYcreFjLrJC9Q23" />
+    <extHR color="red" size="xl" borderRadius="50%" />
 
     <p v-for="n in 20" :key="n">Lorem</p>
   </div>
@@ -9,13 +8,13 @@
 
 <script>
 
-import qrGenerator from 'components/qrGenerator'
 
 import { scroll } from 'quasar'
+import extHR from 'components/extended_hr'
 
 export default {
   components: {
-    qrGenerator
+    extHR
   },
   data() {
     return {

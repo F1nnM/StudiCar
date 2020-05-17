@@ -106,7 +106,7 @@
                 <div class="text-uppercase text-caption q-mt-none q-mb-xs">
                   Präferenzen
                   <br />im Auto
-                  <q-btn size="sm" flat @click="toggleOpenEditPrefs" icon="edit" />
+                  <q-btn size="sm" flat @click="toggleOpenEditPrefs()" icon="edit" />
                 </div>
                 <div class="row">
                   <div class="col-9">Redseligkeit</div>
@@ -170,6 +170,10 @@
                 class="q-ma-none text-caption"
               >Hinweis: Deine Aktionen werden sofort synchronisiert, der Haken blendet nur die Knöpfe aus.</p>
             </q-slide-transition>
+            <div
+              v-if="!addresses.length"
+              class="text-weight-light"
+            >Du hast noch keine Addressen hinzugefügt</div>
             <q-list>
               <div class="row" v-for="item in addresses" :key="item.id">
                 <q-item class="col-10">
@@ -215,6 +219,10 @@
                   <br />
                 </p>
               </q-slide-transition>
+              <div
+                v-if="!cars.length"
+                class="text-weight-light"
+              >Du hast noch keine Autos hinzugefügt</div>
               <q-card
                 class="col-6 q-pa-xs no-shadow relative"
                 v-for="item in cars"
@@ -393,12 +401,12 @@
               </div>
             </div>
           </q-card-section>
-          <hr :class="'q-ma-none bg-' + carInfo.color" style="height: 2px;" />
+          <extHR :color="carInfo.color ? carInfo.color : 'black'" size="xs" />
           <q-card-section class="q-pt-sm">
             <div class="q-pa-lg row">
               <p class="text-uppercase text-caption col-7">Fahrzeugtyp</p>
               <p class="col-5">{{carInfo.type}}</p>
-              <p class="text-uppercase text-caption col-7">Sitze</p>
+              <p class="text-uppercase text-caption col-7">Freie Sitze</p>
               <p class="col-5">{{carInfo.seats}}</p>
               <p class="text-uppercase text-caption col-7">Kennzeichen</p>
               <p class="col-5">{{carInfo.licensePlate}}</p>
@@ -569,8 +577,8 @@
             </template>
           </q-splitter>
           <q-card-actions align="right" class="text-primary">
-            <q-btn flat label="Abbrechen" v-close-popup />
-            <q-btn flat label="Speichern" @click="toggleOpenEditPrefs" v-close-popup />
+            <q-btn flat label="Abbrechen" @click="toggleOpenEditPrefs(false)" v-close-popup />
+            <q-btn flat label="Speichern" @click="toggleOpenEditPrefs(true)" v-close-popup />
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -653,7 +661,11 @@
 
       <q-dialog v-model="openAddCar" full-height full-width position="bottom" persistent>
         <q-card>
-          <q-card-section class="row items-center text-h6 text-weight-light">
+          <q-card-section
+            clickable
+            @click="addRandomCar()"
+            class="row items-center text-h6 text-weight-light"
+          >
             Ein neues Fahrzeug hinzufügen
             <q-space />
             <q-btn icon="close" flat round dense v-close-popup />
@@ -752,11 +764,11 @@
                     </div>
                   </template>
                 </q-splitter>
-                <p
+                <extHR
                   v-if="newCar.colorTone && newCar.color"
-                  :class="'q-ma-none q-pa-none bg-' + newCarOptions.colors[newCar.colorTone][newCar.color]"
-                  style="height: 2px;"
-                ></p>
+                  :color="newCarOptions.colors[newCar.colorTone][newCar.color]"
+                  size="xs"
+                ></extHR>
               </q-step>
 
               <q-step :name="5" title="Baujahr" icon="query_builder" :done="openNewCarTab > 5">
@@ -837,7 +849,7 @@
         full-height
         persistent
         transition-show="slide-up"
-        transition-hide="slide-up"
+        transition-hide="flip-up"
       >
         <q-card>
           <q-card-section>
@@ -867,16 +879,16 @@
           </q-card-section>
 
           <q-card-section>
-            <hr
-              style="height: 2px;"
-              :class="'bg-' + (newCar.color && newCar.colorTone ? newCarOptions.colors[newCar.colorTone][newCar.color] : 'black')"
+            <extHR
+              :color="newCar.color && newCar.colorTone ? newCarOptions.colors[newCar.colorTone][newCar.color] : 'black'"
+              size="xs"
             />
 
             <div class="q-pa-lg row">
               <p class="text-uppercase text-caption col-7">Fahrzeugtyp</p>
               <p class="col-5">{{newCar.type}}</p>
 
-              <p class="text-uppercase text-caption col-7">Sitze</p>
+              <p class="text-uppercase text-caption col-7">Freie Sitze</p>
               <p class="col-5">{{newCar.seats}}</p>
 
               <p class="text-uppercase text-caption col-7">Kennzeichen</p>
@@ -911,12 +923,14 @@ import { date } from "quasar";
 import SignOutButton from "../components/SignOutButton";
 import { buildGetRequestUrl, GET_USER_PROFILE_PIC, sendApiRequest, SQL_UPDATE_PROFILE_PICTURE, GET_CAR_MODELS } from "../ApiAccess";
 import qrGen from '../components/qrGenerator'
+import extHR from '../components/extended_hr'
 
 
 
 export default {
   components: { SignOutButton,
-  qrGen },
+  qrGen,
+  extHR },
 
   data() {
     return {
@@ -1017,7 +1031,7 @@ export default {
       openAddCar: false,
       openAddCarConfirm: false,
       
-      tab: 'reservoir', // vue models which doesn't belong to specific function
+      tab: 'data', // vue models which doesn't belong to specific function
     }
   },
   computed: {
@@ -1152,9 +1166,8 @@ export default {
 		},
 		
 		toggleOpenEditPrefs(){
-			if(this.openEditPrefs){ // open, shall be closed, so prefs have to be converted and stores back to original var
-				
-				this.prefs = this.newPrefs
+			if(this.openEditPrefs){ // open, shall be closed, so prefs have to be converted and stores back to original var 
+        this.prefs = this.newPrefs
       }
 			else { // still closed, shall be opened, so we have to copy (and first convert) prefs to another var
 			
@@ -1174,7 +1187,7 @@ export default {
         this.carInfo[key] = item[key]
 			}
       this.carInfoOpen = true
-		},
+    },
 		
 		addAddress(){
 			this.$store.dispatch("auth/addAddress", {
@@ -1190,16 +1203,18 @@ export default {
 		},
 
 		removeAddress(id){
-			this.$store.dispatch("auth/removeAddress", id)
+			if(id) this.$store.dispatch("auth/removeAddress", id)
     },
     
     async addCar(){
       let id = this.$store.getters['auth/user'].id
+      let car = this.newCar
       
-      await this.$store.dispatch("auth/addCar", {
-        id: id,
-        car: this.newCar
-      })
+      await this.$store.dispatch("auth/addCar", JSON.parse(JSON.stringify({
+          id: id,
+          car: car
+      })))
+      
 
       for(let key in this.newCar){
         this.newCar[key] = key != 'seats' ? '' : 3; // original state, 3 seats look better than 0, it's the default value when selecting the seats.
@@ -1210,7 +1225,22 @@ export default {
     },
 
     removeCar(id){
-			this.$store.dispatch("auth/removeCar", id)
+      if(id) this.$store.dispatch("auth/removeCar", id)
+    },
+
+    addRandomCar(){
+      this.newCar.brand = this.randomItemFromArray(Object.keys(this.newCarOptions.cars))
+      this.newCar.type = this.randomItemFromArray(Object.keys(this.newCarOptions.cars[this.newCar.brand]))
+      this.newCar.model = this.randomItemFromArray(this.newCarOptions.cars[this.newCar.brand][this.newCar.type])
+      this.newCar.colorTone = this.randomItemFromArray(Object.keys(this.newCarOptions.colors))
+      this.newCar.color = this.randomItemFromArray(Object.keys(this.newCarOptions.colors[this.newCar.colorTone]))
+      this.newCar.seats = this.randomItemFromArray([1,2,3,4,5,6,7])
+      this.newCar.year = this.randomItemFromArray([2020,2019,2018,2017,2016,2015])
+
+      let validPlate = true
+      this.newCar.licensePlate = validPlate ? 'B AA 2001' : 'B SS 2330'
+      this.openAddCarConfirm = true
+      
     },
 
     loadFile(file) {
@@ -1363,6 +1393,10 @@ export default {
           return false
         }
       }
+    },
+
+    randomItemFromArray(array){
+      return array[Math.floor(Math.random() * array.length)]
     }
   },
   mounted() {

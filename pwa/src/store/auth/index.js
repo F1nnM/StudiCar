@@ -169,8 +169,12 @@ export default {
     async addCar ({ commit }, payload) {
       sendApiRequest(
         SQL_ADD_CAR,
-        { ...payload },
-        _ => commit('ADD_CAR', payload),
+        { data: payload },
+        id => {
+          payload.id = id
+
+          commit('ADD_CAR', payload)
+        },
         error => alert(error)
       )
     },
