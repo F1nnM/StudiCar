@@ -167,7 +167,10 @@
     <q-separator />
     <div class="full-width q-pa-md">
       <p>ÜBER MICH</p>
-      <div class="padding">{{viewedUser.bio}}</div>
+      <div class="padding">
+        <div v-if="viewedUser.bio">{{viewedUser.bio}}</div>
+        <div v-else class="text-weight-light">Noch keine Beschreibung hinterlegt</div>
+      </div>
     </div>
   </div>
 </template>

@@ -50,16 +50,12 @@
       bordered
       content-class="bg-grey-1"
     >
-      <q-slide-transition>
-        <div v-show="true">
-          <!-- if set to leftDrawerOpen, each time you open the sidebar the image has an expand transition -->
-          <q-img
-            contain
-            src="~assets/app-logo.svg"
-            style="height: 140px; background-color: white;"
-          />
+      <q-img v-if="true" :src="randomImage" style="height: 60vh;">
+        <div class="row absolute-top q-pa-md z-fullscreen">
+          <div class="text-h4 col-11 text-weight-light">{{greeting}}</div>
+          <q-icon class="block col-1" :name="greetingIcon" />
         </div>
-      </q-slide-transition>
+      </q-img>
 
       <hr style="margin: 0; background-color: black;" />
       <q-list>
@@ -127,6 +123,46 @@ export default {
   },
 
   computed: {
+    username(){
+      return this.$store.getters['auth/user'].name.split(' ')[0]
+    },
+
+    greeting(){
+      return this.$store.state.greeting
+    },
+
+    randomImage(){
+      var morning = ['morning_boat.jpg', 'morning_forest.jpg']
+      var day = ['sun_over_water.jpg', 'sunny_sky.jpg']
+      var night = ['moon_over_water.jpg', 'night_moon_only.jpg', 'night_wolf.jpg']
+
+      var path = '~assets/'
+
+      switch(this.greeting){
+        case 'Guten Morgen':
+          return path + this.randomArrayItem(morning)
+          break
+          case 'Guten Abend':
+            return path + this.randomArrayItem(night)
+            break
+            default:
+              return path + this.randomArrayItem(day)
+      }
+    },
+
+    greetingIcon(){
+      switch(this.greeting){
+        case 'Guten Abend':
+          return 'nights_stay'
+          break
+          case 'Guten Morgen': 
+          return 'wb_sunny'
+          break
+          default:
+            return 'brightness_7'
+      }
+    },
+
     pageName(){
       return this.$store.state.pageName
     },
@@ -169,6 +205,10 @@ export default {
       if(this.scannerOpen){
         this.leftDrawerOpen = false
       }
+    },
+
+    randomArrayItem(array){
+      return array[Math.floor(Math.random() * array.length)]
     }
 
     
@@ -191,36 +231,6 @@ export default {
         caption: 'Zur Übersicht',
         icon: 'home',
         link: '/#/'
-        },
-        {
-        title: 'Chats',
-        caption: 'Meine Mitfahrgelenheiten',
-        icon: 'directions_car',
-        link: '/#/chats'
-        },
-        {
-        title: 'Benutzer besuchen',
-        caption: 'Profil eines anderen Benutzers ansehen',
-        icon: 'accessibility_new',
-        link: '/#/view-user'
-        },
-        {
-        title: 'Zum Lift',
-        caption: 'In den Chat an sich rein',
-        icon: 'accessible',
-        link: '/#/chats/lift'
-        },
-        {
-        title: 'Mein Profil',
-        caption: 'Meine Nutzerdaten und Statistiken',
-        icon: 'account_box',
-        link: '/#/profil'
-        },
-        {
-        title: 'Scanner',
-        caption: 'Einen StudiCar Code scannen',
-        icon: 'filter_center_focus',
-        link: '/#/scanner'
         },
         {
         title: 'Spielwiese',

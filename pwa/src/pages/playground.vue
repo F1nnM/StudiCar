@@ -1,6 +1,48 @@
 <template>
   <div class="q-pa-md">
-    <p v-for="n in 20" :key="n">Lorem</p>
+    <q-resize-observer :debounce="0"></q-resize-observer>
+    <q-scroll-observer @scroll="scrollHandler" />
+
+    <p v-for="n in 30" :key="n">Lorem</p>
+
+    <q-slider v-model="splitterModel" :min="0" :max="100" />
+
+    <!-- <q-splitter
+      horizontal
+      id="photos"
+      v-model="splitterModel"
+      :limits="[0, 100]"
+      :style="splitterStyle"
+      before-class="overflow-hidden"
+      after-class="overflow-hidden"
+      disable
+    >
+      <template v-slot:before>
+        <img :src="imageUrl" :height="height" class="absolute-top-left" />
+      </template>
+
+      <template v-slot:after>
+        <img
+          :src="imageUrl"
+          :style="'filter: grayscale(' + grayscale + '%)'"
+          :height="height"
+          class="absolute-bottom-left"
+        />
+      </template>
+    </q-splitter>-->
+
+    <div class="row">
+      <q-img
+        class="col-3"
+        :src="imageUrl"
+        responsive
+        id="example"
+        :style="'transition: .2s; filter: grayscale(' + scrollGrayscale + '%)'"
+      />
+      <div class="col-9">Lorem</div>
+    </div>
+
+    <p v-for="m in 30" :key="m">Lorem</p>
   </div>
 </template>
 
@@ -12,11 +54,65 @@ export default {
   },
   data() {
     return {
-      
+      height: 200,
+      splitterModel: 50,
+      splitter: 50,
+      grayscale: 100,
+      imageUrl: 'https://cdn.quasar.dev/img/parallax1.jpg',
+      topIn: 0,
+      bottom: 0,
+      heightEl: 0,
+      scrollGrayscale: 0
     };
   },
+
+  computed: {
+    splitterStyle () {
+      return {
+        width: '600px',//Math.min(1000, 0.66 * this.height) + 'px',
+        height: this.height + 'px'
+      }
+    }
+  },
+  
   methods: {
-    
+    scrollHandlerSplitter(e){
+      let distance = document.getElementById("photos").getBoundingClientRect()
+      let heightEl = distance.bottom - distance.top
+      let topIn = distance.top > 0
+      let bottomIn = distance.bottom < window.innerHeight
+      let top = distance.top
+      let bottom = distance.bottom
+
+      if(topIn && bottomIn){
+        // stay
+      }
+      else if(topIn && !bottomIn){
+        this.splitterModel = bottom + heightEl
+      }
+      else if(bottomIn && !topIn){
+        this.splitterModel = top + heightEl
+      }
+    },
+
+    scrollHandler(e){
+      var trigger = 200
+
+      let distance = document.getElementById("example").getBoundingClientRect()
+      let topIn = distance.top > trigger
+      let bottomIn = distance.bottom < (window.innerHeight - trigger)
+      if(topIn && bottomIn){
+        this.scrollGrayscale = 0
+      }
+      else {
+        this.scrollGrayscale = 100
+      }
+    },
+
+    onResize ({ height }) {
+      this.height = height
+      this.splitter = '' + splitterModel
+    }
   },
   mounted () {
     
