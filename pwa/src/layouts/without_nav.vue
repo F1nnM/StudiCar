@@ -2,49 +2,14 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          disabled
-          @click="leftDrawerOpen = !leftDrawerOpen"
-        />
-
         <q-toolbar-title>StudiCar Authentifizierung</q-toolbar-title>
       </q-toolbar>
     </q-header>
-
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered content-class="bg-grey-1">
-      <q-img contain src="~assets/app-logo.svg" style="height: 140px; background-color: white;" />
-
-      <q-list>
-        <q-item-label header class="text-grey-8">
-          Navigation
-          <br />
-          <br />
-          <small>[während Authentifizierung eingeschränkt]</small>
-        </q-item-label>
-        <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link" />
-      </q-list>
-      <div style="padding: 10px;">StudiCar v{{ $q.version }}</div>
-    </q-drawer>
-
-    <q-dialog persistent :value="signinLoading">
-      <q-card>
-        <q-card-section class="row items-center q-pb-none">
-          <div class="text-h6">Anmeldung</div>
-        </q-card-section>
-
-        <q-card-section>Du wirst angemeldet, bitte hab einen Moment Geduld</q-card-section>
-        <q-card-section>
-          <q-linear-progress indeterminate color="primary" />
-        </q-card-section>
-      </q-card>
-    </q-dialog>
-    <q-page-container>
-      <router-view />
+    <q-page-container >
+      <div class="overlay" :class="$store.getters['auth/signinLoaded']?'transparent':''">
+        <q-circular-progress indeterminate size="50px" class="q-ma-md center" />
+      </div>
+      <router-view v-if="$store.getters['auth/signinLoaded']"/>
     </q-page-container>
   </q-layout>
 </template>
@@ -53,53 +18,30 @@
 
 import EssentialLink from 'components/EssentialLink'
 
-
 export default {
-  name: 'without_nav',
-
-  components: {
-    EssentialLink
-  },
-
-  computed: {
-    signinLoading: {
-			get(){
-				return this.$store.getters['auth/signinLoading']
-      },
-      
-      set(value){
-        this.$store.dispatch("auth/SET_SIGNIN_LOADING", value)
-      }
-		},
-  },
-
-  data () {
-
-    return {
-      leftDrawerOpen: false,
-      
-      essentialLinks: [
-        // {
-        // title: 'Home',
-        // caption: 'Die Startseite',
-        // icon: 'home',
-        // link: '/#/'
-        // },{
-        // title: 'Impressum',
-        // caption: 'Wir stellen uns vor',
-        // icon: 'how_to_reg',
-        // link: '/#/impressum'
-        // }
-        ]
-      }
-    },
-    mounted(){
-      this.signinLoading = false
-    }
+  name: 'without_nav'
 }
-
-  
 </script>
 
 <style scoped>
+.center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: white;
+  transition-duration: 1s;
+  z-index: 999;
+}
+.transparent {
+  opacity: 0;
+  visibility: hidden;
+}
 </style>

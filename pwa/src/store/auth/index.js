@@ -6,7 +6,8 @@ export default {
   namespaced: true,
 
   state: {
-    user: {}
+    user: {},
+    signinLoaded: false
   },
 
   getters: {
@@ -18,9 +19,8 @@ export default {
       return !!state.user
     },
 
-    signinLoading (state) {
-      //debugger
-      return state.signinLoading
+    signinLoaded (state) {
+      return state.signinLoaded
     }
   },
 
@@ -69,10 +69,8 @@ export default {
       })
     },
 
-    SET_SIGNIN_LOADING (state, payload) {
-
-      state.signinLoading = payload
-      //debugger
+    SET_SIGNIN_LOADED (state) {
+      state.signinLoaded = true
     }
   },
 
