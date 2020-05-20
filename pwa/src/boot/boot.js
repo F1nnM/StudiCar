@@ -3,12 +3,10 @@ import Firebase from 'firebase/app'
 import 'firebase/auth'
 import { sendApiRequest, SQL_CREATE_USER_IF_NOT_EXISTING, SQL_GET_USER_DATA } from '../ApiAccess'
 
-export default ({ app, router, Vue, store }) => {
+export default ({ router, store }) => {
   // Register the Firebase authentication listener
   Firebase.auth().onAuthStateChanged(user => {
     if (user) {
-      if (user.displayName)
-        store.commit("auth/SET_SIGNIN_LOADING", true)
       sendApiRequest(
         SQL_CREATE_USER_IF_NOT_EXISTING,
         { name: user.displayName, mail: user.email },
@@ -16,22 +14,24 @@ export default ({ app, router, Vue, store }) => {
           SQL_GET_USER_DATA,
           { fbid: user.uid },
           data => {
-            console.log(data)
-            store.commit("auth/SET_USER", data);
-            store.commit("auth/SET_SIGNIN_LOADING", false)
+            store.commit("auth/SET_USER", data)
             router.replace({ name: 'marketplace' }).catch(() => { })
-            new Vue(app) /* eslint-disable-line no-new */
+            store.commit("auth/SET_SIGNIN_LOADED")
           },
           error => {
             store.dispatch('auth/signOut')
+            store.commit("auth/SET_SIGNIN_LOADED")
           }),
-        error => store.dispatch('auth/signOut')
+        error => {
+          store.dispatch('auth/signOut')
+          store.commit("auth/SET_SIGNIN_LOADED")
+        }
       );
     } else {
       // Signed out. Let Vuex know.
       store.commit('auth/RESET_USER')
+      store.commit("auth/SET_SIGNIN_LOADED")
       router.replace({ name: 'signIn' }).catch(() => { })
-      new Vue(app) /* eslint-disable-line no-new */
     }
   })
 }
