@@ -119,3 +119,11 @@
         padding-top: 40px;
     }
 }
+
+.border-right {
+    border-right: 1px solid black;
+
+    &.border-right-green {
+        border-color: green;
+    }
+}
