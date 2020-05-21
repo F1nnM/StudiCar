@@ -85,7 +85,6 @@
 
     <q-footer elevated v-show="!(scannerOpen)">
       <q-tabs
-        shrink
         full-width
         no-caps
         no-ripple
