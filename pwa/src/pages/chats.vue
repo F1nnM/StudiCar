@@ -2,10 +2,10 @@
   <div class="q-pa-md">
     <q-list>
       <chat_item
-        v-for="(item) in chats"
+        v-for="(item, index) in chats"
         :key="item.time"
         :lift="item"
-        :firstItem="chats.indexOf(item) == 0"
+        :firstItem="index == 0"
         v-on:pagetrans_zoom="$emit('pagetrans_zoom')"
         v-on:pagetrans_slide="$emit('pagetrans_slide')"
         v-on:pagetrans_y="$emit('pagetrans_y', $event)"

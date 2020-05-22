@@ -20,7 +20,6 @@
         >
           <q-select
             v-model="sort"
-            clearable
             options-selected-class="border-right border-right-green"
             rounded
             transition-show="jump-up"
@@ -35,11 +34,15 @@
             <template v-slot:prepend>
               <q-icon name="sort" />
             </template>
-            <!-- <template v-if="sort" v-slot:append>
-              <q-icon name="cancel" @click.stop="sort = ''" class="cursor-pointer" />
-            </template>-->
+            <template v-if="sort" v-slot:append>
+              <q-icon name="cancel" @click.stop="sortValue = null" class="cursor-pointer" />
+            </template>
             <template v-slot:option="scope">
-              <q-item v-bind="scope.itemProps" v-on="scope.itemEvents">
+              <q-item
+                v-bind="scope.itemProps"
+                v-on="scope.itemEvents"
+                :disable="scope.opt.disabled"
+              >
                 <q-item-section avatar>
                   <q-icon :name="scope.opt.icon" />
                 </q-item-section>
@@ -53,7 +56,6 @@
           <br />
           <q-select
             v-model="filter"
-            clearable
             rounded
             transition-show="jump-up"
             transition-hide="jump-down"
@@ -68,11 +70,18 @@
             <template v-slot:prepend>
               <q-icon name="filter_list" />
             </template>
+            <template v-if="filter.length" v-slot:append>
+              <q-icon name="cancel" @click.stop="filterValue = []" class="cursor-pointer" />
+            </template>
             <!-- <template v-if="filter" v-slot:append>
               <q-icon name="cancel" @click.stop="filter = []" class="cursor-pointer" />
             </template>-->
             <template v-slot:option="scope">
-              <q-item v-bind="scope.itemProps" v-on="scope.itemEvents">
+              <q-item
+                v-bind="scope.itemProps"
+                v-on="scope.itemEvents"
+                :disable="scope.opt.disabled"
+              >
                 <q-item-section avatar>
                   <q-badge v-show="filter.includes(scope.opt.value)" label="!" class="text-red" />
                   <q-icon :name="scope.opt.icon" />
@@ -91,6 +100,16 @@
 
       <!-- <p>Der Marktplatz ist so etwas wie das Schwarze Brett von StudiCar. Hier siehst du alle aktuellen Mitfahrgelegenheiten, aufsteigend nach Entfernung geordnet.</p> -->
       <LiftOffer v-for="lift in getLifts" :key="lift.index" v-bind:lift="lift">{{lift.city}}</LiftOffer>
+      <div
+        class="text-caption"
+        v-show="!(getLifts.length || filter.length)"
+      >Anscheinend gibt es für dich gerade keine Angebote. Schau einfach später nochmal vorbei.</div>
+      <!-- above case for neither lifts nor filter applied -->
+      <div
+        class="text-caption"
+        v-show="!getLifts.length && filter.length"
+      >Anscheinend gibt es keine Angebote, die deinen Filterkriterien entsprechen.</div>
+      <!-- above case for lifts all not matching selected filter settings -->
     </div>
   </div>
 </template>
@@ -103,7 +122,7 @@ export default {
     return {
       showAllLifts: true,
       openEditSort: false,
-      sort: '',
+      sort: null,
       sortOptions: [{
         label: 'niedrigste Entfernung',
         caption: 'Sortiert aufsteigend nach Luftlinie',
@@ -117,23 +136,25 @@ export default {
         icon: 'airline_seat_recline_normal'
       },
       {
-        label: 'Ähnlichkeit der Präferenzen',
-        caption: 'Die Präferenzen werden gleich gewertet',
+        label: 'Toleranz',
+        caption: 'Sortiert nach Präferenzen, alle gleichwertig',
         value: 'prefs',
         icon: 'insert_emoticon'
       },
       {
-        label: 'Geringste Zeit zu meiner Vorlesung',
-        caption: 'Möglichst geringe Wartezeit bis Beginn',
+        label: 'Geringste Zeit zum Unterricht',
+        caption: 'Möglichst geringe Wartezeit bis Beginn der Veranstaltung',
         value: 'time',
-        icon: 'timer'
+        icon: 'timer',
+        disabled: true
       }],
       filter: [],
       filterOptions: [{
         label: 'Nur noch nicht angefragte Angebote',
-        caption: 'Nur Fahrten anzeigen, die du noch nicht angefragt hast',
+        caption: 'Nur Fahrten anzeigen, bei denen du noch nicht um Mitnahme gebeten hast',
         value: 'notAsked',
-        icon: 'device_unknown'
+        icon: 'device_unknown',
+        disabled: true
       },
       {
         label: 'Meine Präferenzen streng berücksichtigen',
@@ -144,7 +165,8 @@ export default {
       {
         label: 'Nur reine ' + (this.$store.getters['auth/user'].gender == 'M' ? 'Jungs' : 'Mädchen') + '-Autos',
         value: 'gender',
-        icon: 'wc'
+        icon: 'wc',
+        disabled: true
       }],
       lifts: [
         {
@@ -154,16 +176,16 @@ export default {
             name: "Finn",
             prefs: {
               talk: "GREEN",
-              talkMorning: "RED",
-              smoking: "RED",
-              music: "YELLOW"
+              talkMorning: "GREEN",
+              smoking: "GREEN",
+              music: "GREEN"
             }
           },
           day_pattern: null,
           next_drive: [new Date(), new Date()],
           postcode: 70182,
           city: "Stuttgart",
-          distance: 20,
+          distance: 35,
           seats_offered: 4,
           seats_occupied: 2
         },
@@ -173,17 +195,17 @@ export default {
             fbid: "QTs2vuk6O0RHjr8uDyLBwb9DZ5G3",
             name: "Finn",
             prefs: {
-              talk: "GREEN",
+              talk: "RED",
               talkMorning: "RED",
               smoking: "RED",
-              music: "YELLOW"
+              music: "RED"
             }
           },
           day_pattern: null,
           next_drive: [new Date("2-2-2020"), new Date()],
           postcode: 70182,
           city: "Stuttgart",
-          distance: 20,
+          distance: 30,
           seats_offered: 3,
           seats_occupied: 1
         },
@@ -193,9 +215,9 @@ export default {
             fbid: "QTs2vuk6O0RHjr8uDyLBwb9DZ5G3",
             name: "Finn",
             prefs: {
-              talk: "GREEN",
-              talkMorning: "RED",
-              smoking: "RED",
+              talk: "YELLOW",
+              talkMorning: "YELLOW",
+              smoking: "YELLOW",
               music: "YELLOW"
             }
           },
@@ -215,6 +237,26 @@ export default {
           seats_offered: 2,
           seats_occupied: 0
         },
+        {
+          id: 4, // this offer always has preferences of visiting user, perfect for testing prefs filter
+          driver: {
+            fbid: "wG3cG4M7NFMJzJYcreFjLrJC9Q23",
+            name: "Bernd",
+            prefs: {
+              talk: this.$store.getters["auth/user"].prefs.talk,
+              talkMorning: this.$store.getters["auth/user"].prefs.talkMorning,
+              smoking: this.$store.getters["auth/user"].prefs.smoking,
+              music: this.$store.getters["auth/user"].prefs.music
+            }
+          },
+          day_pattern: null,
+          next_drive: [new Date("2-2-2020"), new Date()],
+          postcode: 86653,
+          city: "Daiting",
+          distance: 15,
+          seats_offered: 3,
+          seats_occupied: 1
+        }
       ]
     };
   },
@@ -226,10 +268,32 @@ export default {
       return greeting + ', ' + name
     },
 
+    filterValue: {
+      set(value){
+        this.filter = value // just to execute more commands when setting filter
+        if(!value.length){
+          this.openEditSort = false
+        }
+      }
+    },
+
+    sortValue: {
+      set(value){
+        this.sort = value // just to execute more commands when setting filter
+        if(!value){
+          this.openEditSort = false
+        }
+      }
+    },
+
     getLifts(){
       var lifts = this.lifts
-      if(this.filter){
+      
+      // filter code
+      if(this.filter.length){
+        
         this.filter.forEach(item => {
+          item = item.value
         switch(item){
           case 'notAsked':
             lifts.filter(lift => {
@@ -244,20 +308,77 @@ export default {
           case 'prefs':
             var userPrefs = this.$store.getters["auth/user"].prefs
             lifts = lifts.filter(lift => {
-              var prefValues = Object.keys(lift.prefs)
-              debugger
+              var prefValues = Object.keys(lift.driver.prefs)
               var atLeastOneDifferent = prefValues.some(pref => {
                 
-                if(userPrefs[pref] != lift.prefs[pref]) return true
+                if(userPrefs[pref] != lift.driver.prefs[pref]) return true
               })
+              
               return !atLeastOneDifferent // when at least one different, remove that element
             })
+            
             break 
           }
         })
       }
       
       // here comes the sorting code
+
+      if(this.sort){
+        switch(this.sort.value){
+          case 'distance':
+            lifts.sort((a, b) => {
+              return a.distance - b.distance
+            })
+          break
+          case 'seats':
+            lifts.sort((a, b) => {
+              return a.seats_occupied - b.seats_occupied
+            })
+          break
+          case 'prefs':
+            var prefScores = []
+            var userPrefs = this.$store.getters["auth/user"].prefs
+            lifts.forEach(lift => {
+              let liftScore = 0
+              Object.keys(lift.driver.prefs).forEach(prefName => {
+                // get the prefs by themself
+                let liftPref = lift.driver.prefs[prefName]
+                let userPref = userPrefs[prefName]
+
+                // convert it to calculatable value
+                liftPref = liftPref == 'GREEN' ? 3 : liftPref == 'YELLOW' ? 2 : 1
+
+                //userPref = userPref == 'GREEN' ? 3 : userPref == 'YELLOW' ? 2 : 1
+                
+
+                liftScore += liftPref // - userPref) // the better pref of the lift related to pref of user, the better the score
+                
+                // AT MOMENT NOT USED: when user's Pref higher than liftPref, it is negative and so the average result of all pref comparisons in this lift is worse
+
+              })
+
+              prefScores.push(liftScore) // when saving like this, the index of the value is the same as the lift id, because outer loop goes through lifts
+
+
+            })
+
+            // now we have an array containing our stores, and have to sort our lifts depending on the score they got
+            
+            lifts.sort((a, b) => {
+              // here we get a and b as lift to be compared. The ids are the indices of prefArray
+
+              return prefScores[a.id - 1] - prefScores[b.id - 1]
+            })
+            lifts.reverse()
+            
+          break
+          case 'time':
+            // API not implemented yet
+          break
+        }
+      }
+      
 
       return lifts
     }
