@@ -112,6 +112,20 @@ module.exports = {
             data.cars.push(obj)
             //console.log(obj)
           })
+
+          let school_addresses = await runQuery("SELECT * FROM school_address", []) // apoologize for not doing extra API method
+          data.school_addresses = []
+          school_addresses.result.forEach(item => {
+            let obj = {
+              id: item.ID,
+              postcode: item.POSTCODE,
+              city: item.CITY,
+              number: item.NUMBER,
+              street: item.STREET,
+              nickname: item.NICKNAME
+            }
+            data.school_addresses.push(obj)
+          })
         }
 
         res.end(JSON.stringify(data))
