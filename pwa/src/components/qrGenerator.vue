@@ -3,21 +3,23 @@
     <q-dialog v-model="show" persistent transition-show="fade" transition-hide="fade">
       <q-card>
         <q-toolbar>
-          <q-avatar>
+          <!-- <q-avatar>
             <img src="~assets/app-icon.svg" />
-          </q-avatar>
+          </q-avatar>-->
 
           <q-toolbar-title>
-            <span class="text-weight-bold">StudiCar</span> Code
+            <span class="text-primary">Studi</span>Car Code
           </q-toolbar-title>
 
           <q-btn flat round dense icon="close" v-close-popup @click="$emit('close')" />
         </q-toolbar>
 
-        <q-card-section class="text-center overflow-hidden-y">
-          <div :class="'studicar-code' + (show ? ' show' : '')">
+        <q-card-section class="text-center overflow-hidden-y q-pa-none q-ma-md">
+          <div :class="'relative studicar-code' + (show ? ' show' : '')">
             <VueQrcode :width="200" :color="color" errorCorrectionLevel="H" :value="input" />
+            <q-img src="~assets/app-icon.svg" class="absolute-center qrcode-image" />
           </div>
+          <extHR color="primary" size="xs" class="z-top" />
         </q-card-section>
         <q-card-section class="q-pa-sm text-caption text-center">
           <p>
@@ -33,12 +35,13 @@
 <script>
 
 import VueQrcode from 'vue-qrcode' // docs: https://github.com/rx-ts/vue/tree/master/packages/vue-qrcode
+import extHR from 'components/extended_hr'
 import { colors } from 'quasar'
 
 export default {
     name: 'qrGenerator',
     components: {
-        VueQrcode
+        VueQrcode, extHR
     },
     props: {
         input: {
@@ -69,9 +72,11 @@ export default {
 <style lang="scss">
 .studicar-code {
   transform: translateY(150%);
-  transition-delay: 0.6s;
+  transition-delay: 0.8s;
+  transition-timing-function: cubic-bezier(0, 1, 0.42, 0.99);
+  overflow-y: hidden;
   &.show {
-    animation: rise 0.6s forwards;
+    animation: rise 0.6s forwards ease-out;
 
     @keyframes rise {
       to {
@@ -79,5 +84,11 @@ export default {
       }
     }
   }
+}
+
+.qrcode-image {
+  width: 50px;
+  height: 50px;
+  background: white;
 }
 </style>

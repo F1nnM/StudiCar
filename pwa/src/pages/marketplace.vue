@@ -122,7 +122,7 @@ export default {
     return {
       showAllLifts: true,
       openEditSort: false,
-      sort: {value: 'distance'}, //default sorting order
+      sort: {value: 'distance', label: 'niedrigste Entfernung'}, //default sorting order
       sortOptions: [{
         label: 'niedrigste Entfernung',
         caption: 'Sortiert aufsteigend nach Luftlinie',
