@@ -1044,6 +1044,8 @@ export default {
             return "Männlich"
           case "D":
             return "Divers"
+          case "X":
+            return "Keine Angabe"
           default:
             return "Ein Fehler ist aufgetreten";
         }
