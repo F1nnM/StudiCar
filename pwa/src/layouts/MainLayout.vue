@@ -135,7 +135,7 @@ export default {
       var day = ['sun_over_water.jpg', 'sunny_sky.jpg']
       var night = ['moon_over_water.jpg', 'night_moon_only.jpg', 'night_wolf.jpg']
 
-      var path = '~assets/'
+      var path = './assets/drawer_images/'
 
       switch(this.greeting){
         case 'Guten Morgen':

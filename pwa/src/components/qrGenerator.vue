@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-dialog v-model="show" persistent transition-show="fade" transition-hide="fade">
+    <q-dialog v-model="show" persistent transition-show="slide-up" transition-hide="jump-down">
       <q-card>
         <q-toolbar>
           <!-- <q-avatar>
@@ -11,7 +11,7 @@
             <span class="text-primary">Studi</span>Car Code
           </q-toolbar-title>
 
-          <q-btn flat round dense icon="close" v-close-popup @click="$emit('close')" />
+          <q-btn flat round dense icon="close" v-close-popup @click="close()" />
         </q-toolbar>
 
         <q-card-section class="text-center overflow-hidden-y q-pa-none q-ma-md">
@@ -65,6 +65,14 @@ export default {
                 light: '#FFFFFFFF'
             }
         }
+    },
+
+    methods: {
+      close(){
+        
+        this.$emit('close')
+       
+      }
     }
 }
 </script>
@@ -76,7 +84,7 @@ export default {
   transition-timing-function: cubic-bezier(0, 1, 0.42, 0.99);
   overflow-y: hidden;
   &.show {
-    animation: rise 0.6s forwards ease-out;
+    animation: rise 0.4s forwards ease-out;
 
     @keyframes rise {
       to {

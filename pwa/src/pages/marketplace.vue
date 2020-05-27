@@ -163,7 +163,7 @@ export default {
         icon: 'face'
       },
       {
-        label: 'Nur reine ' + (this.$store.getters['auth/user'].gender == 'M' ? 'Jungs' : 'Mädchen') + '-Autos',
+        label: 'Nur reine ' + onlyThisGender + '-Autos',
         value: 'gender',
         icon: 'wc',
         disabled: true
@@ -282,6 +282,26 @@ export default {
         this.sort = value // just to execute more commands when setting filter
         if(!value){
           this.openEditSort = false
+        }
+      }
+    },
+
+    onlyThisGender:{
+      get(){
+        switch(this.$store.getters['auth/user'].gender){
+          case 'M':
+            return 'Jungs'
+          break
+          case 'W':
+            return 'Mädchen'
+          break
+          case 'D':
+            return 'Diversen'
+          case 'X':
+            return 'nicht-definierten'
+          break
+          default:
+            return 'Fehler'
         }
       }
     },

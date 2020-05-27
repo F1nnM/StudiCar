@@ -21,8 +21,11 @@
         </div>
         <q-linear-progress indeterminate rounded color="primary" class="q-mt-sm" />
       </div>
-      <div class="fixed-bottom overflow-hidden-y q-mb-lg q-mx-xl text-center">
-        <div class="branding-rise">Mit freundlicher Unterstützung von</div>
+      <div class="fixed-bottom overflow-hidden-y q-mb-lg q-mx-lg text-center">
+        <div class="branding-rise">
+          Mit freundlicher Unterstützung des
+          ADAC e.V.
+        </div>
       </div>
       <router-view v-if="$store.getters['auth/signinLoaded']" />
     </q-page-container>

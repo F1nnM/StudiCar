@@ -86,7 +86,7 @@
         </q-list>
         <q-stepper-navigation>
           <q-btn flat @click="step--" color="primary" label="Eins Zurück" class="q-ml-sm" />
-          <q-btn @click="step ++" color="primary" label="Weiter" />
+          <q-btn @click="step ++" color="primary" :disable="!lift.car" label="Weiter" />
         </q-stepper-navigation>
       </q-step>
 
