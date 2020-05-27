@@ -16,10 +16,7 @@
             <q-toolbar-title class="row">
               <div class="col-6 q-pt-xs">
                 <q-slide-transition>
-                  <div v-show="!scrolled" class="text-weight-thin">
-                    StudiCar
-                    <q-toggle v-model="transer" label="Transer" />
-                  </div>
+                  <div v-show="!scrolled" class="text-weight-thin">StudiCar</div>
                 </q-slide-transition>
                 <q-slide-transition>
                   <div v-show="scrolled" class="text-weight-thin">{{pageName}}</div>

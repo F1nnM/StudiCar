@@ -35,7 +35,7 @@
               <q-icon name="sort" />
             </template>
             <template v-if="sort" v-slot:append>
-              <q-icon name="cancel" @click.stop="sortValue = null" class="cursor-pointer" />
+              <q-icon name="cancel" @click.stop="sort = null" class="cursor-pointer" />
             </template>
             <template v-slot:option="scope">
               <q-item
@@ -71,7 +71,7 @@
               <q-icon name="filter_list" />
             </template>
             <template v-if="filter.length" v-slot:append>
-              <q-icon name="cancel" @click.stop="filterValue = []" class="cursor-pointer" />
+              <q-icon name="cancel" @click.stop="filter = []" class="cursor-pointer" />
             </template>
             <!-- <template v-if="filter" v-slot:append>
               <q-icon name="cancel" @click.stop="filter = []" class="cursor-pointer" />
@@ -83,7 +83,6 @@
                 :disable="scope.opt.disabled"
               >
                 <q-item-section avatar>
-                  <q-badge v-show="filter.includes(scope.opt.value)" label="!" class="text-red" />
                   <q-icon :name="scope.opt.icon" />
                 </q-item-section>
                 <q-item-section>
@@ -161,13 +160,9 @@ export default {
         caption: 'Nur Fahrten mit absolut denselben (!) Präferenzen werden angezeigt.',
         value: 'prefs',
         icon: 'face'
-      },
-      {
-        label: 'Nur reine ' + onlyThisGender + '-Autos',
-        value: 'gender',
-        icon: 'wc',
-        disabled: true
-      }],
+      }
+      // here an additional option will be generated in mounted() since we didn't make it to access computeds in here
+      ],
       lifts: [
         {
           id: 1,
@@ -267,44 +262,7 @@ export default {
       var name = this.$store.getters['auth/user'].name.split(' ')[0]
       return greeting + ', ' + name
     },
-
-    filterValue: {
-      set(value){
-        this.filter = value // just to execute more commands when setting filter
-        if(!value.length){
-          this.openEditSort = false
-        }
-      }
-    },
-
-    sortValue: {
-      set(value){
-        this.sort = value // just to execute more commands when setting filter
-        if(!value){
-          this.openEditSort = false
-        }
-      }
-    },
-
-    onlyThisGender:{
-      get(){
-        switch(this.$store.getters['auth/user'].gender){
-          case 'M':
-            return 'Jungs'
-          break
-          case 'W':
-            return 'Mädchen'
-          break
-          case 'D':
-            return 'Diversen'
-          case 'X':
-            return 'nicht-definierten'
-          break
-          default:
-            return 'Fehler'
-        }
-      }
-    },
+    
 
     getLifts(){
       var lifts = this.lifts
@@ -405,12 +363,37 @@ export default {
   },
 
   methods: {
-    
+    genderName(){
+      switch(this.$store.getters['auth/user'].gender){
+        case 'M':
+          return 'Jungs'
+        break
+        case 'W':
+          return 'Mädchen'
+        break
+        case 'D':
+          return 'Diversen'
+        case 'X':
+          return 'noch nicht eingestellt'
+        break
+        default:
+          return 'Fehlermenschen'
+      }
+    }
   },
 
   mounted () {
+
     this.$store.commit('setPage', this.title)
     this.$store.commit('setPageTrans', 'slide')
+
+    this.filterOptions.push({
+      label: 'Nur reine ' + this.genderName() + '-Autos',
+      value: 'gender',
+      caption: 'Nur Autos anzeigen, bei denen nur ' + this.genderName() + ' mitfahren',
+      icon: 'wc',
+      disabled: true // genderCarsAvaiable ? this.$store.getters['auth/user'].gender == 'X'
+    })
   }
 };
 </script>

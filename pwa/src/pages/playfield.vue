@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-md">
-    <extHR color="red" size="xl" borderRadius="50%" />
+    <drawerImage timeText="Willkommen" />
 
     <p v-for="n in 20" :key="n">Lorem</p>
   </div>
@@ -10,11 +10,11 @@
 
 
 import { scroll } from 'quasar'
-import extHR from 'components/extended_hr'
+import drawerImage from 'components/drawerWelcomeImage'
 
 export default {
   components: {
-    extHR
+    drawerImage
   },
   data() {
     return {
@@ -24,8 +24,9 @@ export default {
       result: null
     };
   },
-  methods: {
+  computed: {
     
+
   },
 
   mounted(){
