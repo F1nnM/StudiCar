@@ -4,7 +4,10 @@
     <div class="col column q-pa-sm">
       <div class="row">
         <div class="col">
-          <span>{{lift.city}} ({{lift.distance}}km entfernt)</span>
+          <span>
+            {{lift.city}}
+            <small>({{lift.distance}}km entfernt)</small>
+          </span>
         </div>
         <div class="col-auto">
           <span>{{lift.seats_occupied}} / {{lift.seats_offered}}</span>

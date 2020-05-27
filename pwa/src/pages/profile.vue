@@ -28,6 +28,7 @@
                       <q-item clickable disable>
                         <q-item-section>Mein Passwort ändern</q-item-section>
                       </q-item>
+                      <SignOutButton />
                     </q-list>
                   </q-menu>
                 </q-btn>
@@ -135,13 +136,12 @@
             </div>
           </div>
           <br />
-          <SignOutButton />
         </q-tab-panel>
 
         <q-tab-panel name="reservoir">
           <div class="q-mt-sm q-pa-sm shadow-1">
             <div class="row">
-              <p class="col-5 text-uppercase text-caption q-mt-none q-mb-xs">Meine Addressen</p>
+              <p class="col-5 text-uppercase text-caption q-mt-none q-mb-xs">Meine Adressen</p>
               <div class="col-5">
                 <q-btn
                   flat
@@ -173,7 +173,7 @@
             <div
               v-if="!addresses.length"
               class="text-weight-light"
-            >Du hast noch keine Addressen hinzugefügt</div>
+            >Du hast noch keine Adressen hinzugefügt</div>
             <q-list>
               <div class="row" v-for="item in addresses" :key="item.id">
                 <q-item class="col-10">
@@ -419,21 +419,25 @@
 
       <q-dialog v-model="openEditPrefs" position="bottom" class="q-pa-md">
         <q-card class="q-pa-xs">
+          <q-btn
+            icon="close"
+            flat
+            class="z-top absolute-top-right q-pr-md q-pt-md"
+            round
+            dense
+            v-close-popup
+            @click="toggleOpenEditPrefs(true)"
+          />
           <q-splitter :value="20">
-            <template v-slot:before>
-              <q-tabs
-                v-model="openEditPrefsTab"
-                vertical
-                class="text-primary"
-                style="min-height: 50vh;"
-              >
+            <template v-slot:before class="full-height">
+              <q-tabs v-model="openEditPrefsTab" vertical class="text-primary">
                 <q-tab name="talk" icon="record_voice_over" />
                 <q-tab name="talkMorning" icon="alarm" />
                 <q-tab name="smoking" icon="smoking_rooms" />
                 <q-tab name="music" icon="music_note" />
               </q-tabs>
             </template>
-            <template v-slot:after>
+            <template v-slot:after style="height: 300px;">
               <q-tab-panels
                 v-model="openEditPrefsTab"
                 swipeable
@@ -441,6 +445,7 @@
                 vertical
                 transition-prev="jump-down"
                 transition-next="jump-up"
+                style="height: 400px;"
               >
                 <q-tab-panel name="talk">
                   <div class="text-h6 q-mb-md">Redseligkeit</div>
@@ -576,10 +581,11 @@
               </q-tab-panels>
             </template>
           </q-splitter>
-          <q-card-actions align="right" class="text-primary">
+          <!-- <q-card-actions align="right" class="text-primary">
             <q-btn flat label="Abbrechen" @click="toggleOpenEditPrefs(false)" v-close-popup />
             <q-btn flat label="Speichern" @click="toggleOpenEditPrefs(true)" v-close-popup />
-          </q-card-actions>
+             have commented it, only had ominous, very strange troubles with it 
+          </q-card-actions>-->
         </q-card>
       </q-dialog>
 
@@ -1165,14 +1171,34 @@ export default {
       this.editDistance = !this.editDistance
 		},
 		
-		toggleOpenEditPrefs(){
-			if(this.openEditPrefs){ // open, shall be closed, so prefs have to be converted and stores back to original var 
-        this.prefs = this.newPrefs
+		toggleOpenEditPrefs(save){
+     
+      if(this.openEditPrefs){ // open, shall be closed, so prefs have to be converted and stored back to original var (only when save)
+        if(save){
+          this.prefs = this.newPrefs // just to minimize traffic, prefs are only stored when clicking on save
+          this.newPrefs = {
+            talk: '',
+            talkMorning: '',
+            smoking: '',
+            music: ''
+          }
+        }
+        else {
+          this.newPrefs = { // just to make sure
+            talk: '',
+            talkMorning: '',
+            smoking: '',
+            music: ''
+          }
+        }
       }
 			else { // still closed, shall be opened, so we have to copy (and first convert) prefs to another var
-			
-				this.newPrefs = this.prefs
+         
+        this.newPrefs = this.prefs
+        
       }
+      
+
       this.openEditPrefs = !this.openEditPrefs
     },
 
