@@ -26,9 +26,31 @@
                   <q-menu transition-show="jump-down" transition-hide="jump-up">
                     <q-list>
                       <q-item clickable disable>
-                        <q-item-section>Mein Passwort ändern</q-item-section>
+                        <q-item-section>
+                          <q-btn>Mein Passwort ändern</q-btn>
+                        </q-item-section>
                       </q-item>
-                      <SignOutButton />
+                      <q-item>
+                        <q-item-section>
+                          <SignOutButton class="q-ma-sm full-width" />
+                        </q-item-section>
+                      </q-item>
+                      <q-item>
+                        <q-item-section>
+                          <q-item-label>
+                            <q-toggle v-model="dataSaver" label="Datennutzung reduzieren">
+                              <q-icon size="sm" name="info">
+                                <q-tooltip
+                                  content-class="text-white bg-black"
+                                  anchor="top middle"
+                                  self="bottom middle"
+                                  :offset="[10, 10]"
+                                >Lädt keine großen Bilder, beschränkt sich auf die notwendigen Funktionen der App</q-tooltip>
+                              </q-icon>
+                            </q-toggle>
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
                     </q-list>
                   </q-menu>
                 </q-btn>
@@ -1098,7 +1120,16 @@ export default {
 			get(){
 				return this.$store.getters['auth/user'].cars
 			}
-		},
+    },
+    
+    dataSaver: {
+      get(){
+        return this.$store.getters['auth/user'].dataSaver
+      },
+      set(value){
+        this.$store.dispatch("auth/updateDataSaver", value);
+      }
+    },
 
     atLeastFiveWords(){
       if(this.username == 'Bernd'){

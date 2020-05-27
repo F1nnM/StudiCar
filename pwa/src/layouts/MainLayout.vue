@@ -49,14 +49,9 @@
       show-if-above
       bordered
       content-class="bg-grey-1"
+      class="drawer-no-border"
     >
-      <q-img v-if="true" :src="randomImage" style="height: 60vh;">
-        <div class="row absolute-top q-pa-md z-fullscreen">
-          <div class="text-h4 col-11 text-weight-light">{{greeting}}</div>
-          <q-icon class="block col-1" :name="greetingIcon" />
-        </div>
-      </q-img>
-
+      <drawerImage :timeText="greeting" />
       <hr style="margin: 0; background-color: black;" />
       <q-list>
         <q-item-label header class="text-grey-8">Navigation</q-item-label>
@@ -89,6 +84,7 @@
         no-caps
         no-ripple
         dense
+        shrink
         active-color="primary"
         indicator-color="primary"
         v-model="tab"
@@ -111,6 +107,7 @@ import qrScanner from 'components/qrScanner'
 import { scroll } from 'quasar'
 
 import EssentialLink from 'components/EssentialLink'
+import drawerImage from 'components/drawerWelcomeImage'
 
 
 export default {
@@ -118,48 +115,13 @@ export default {
 
   components: {
     EssentialLink,
-    qrScanner
+    qrScanner,
+    drawerImage
   },
 
   computed: {
     username(){
       return this.$store.getters['auth/user'].name.split(' ')[0]
-    },
-
-    greeting(){
-      return this.$store.state.greeting
-    },
-
-    randomImage(){
-      var morning = ['morning_boat.jpg', 'morning_forest.jpg']
-      var day = ['sun_over_water.jpg', 'sunny_sky.jpg']
-      var night = ['moon_over_water.jpg', 'night_moon_only.jpg', 'night_wolf.jpg']
-
-      var path = './assets/drawer_images/'
-
-      switch(this.greeting){
-        case 'Guten Morgen':
-          return path + this.randomArrayItem(morning)
-          break
-          case 'Guten Abend':
-            return path + this.randomArrayItem(night)
-            break
-            default:
-              return path + this.randomArrayItem(day)
-      }
-    },
-
-    greetingIcon(){
-      switch(this.greeting){
-        case 'Guten Abend':
-          return 'nights_stay'
-          break
-          case 'Guten Morgen': 
-          return 'wb_sunny'
-          break
-          default:
-            return 'brightness_7'
-      }
     },
 
     pageName(){
@@ -217,6 +179,7 @@ export default {
   data () {
 
     return {
+      greeting: this.$store.state.greeting,
       leftDrawerOpen: false,
       pageTransY: 15,
       scannerOpen: false,
