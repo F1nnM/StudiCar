@@ -28,43 +28,43 @@ export default {
 	computed: {
 		randomImage(){
 
-		if(this.$store.getters["auth/user"].dataSaver){
+			if(this.$store.getters["auth/user"].dataSaver){
+				switch(this.timeText){
+					case 'Guten Morgen':
+					img = 'morning/sunrise'
+					break
+					case 'Willkommen':
+						img = 'day/sun'
+					break
+					case 'Guten Abend':
+						img = 'day/moon'
+					break
+					default:
+						error = true
+							
+				}
+				if(error){
+					return require('../assets/sad.svg')
+				}
+				return require('../assets/drawer_images/' + img + '.svg')
+			}
+
+			var morningMax = 9
+			var dayMax = 15
+			var eveningMax = 14 // currently hard coded, could be optimized by automatically all files from dir
+			var error = false
+
+			var img
+
 			switch(this.timeText){
 				case 'Guten Morgen':
-				img = 'morning/sunrise'
+				img = 'morning/m' + Math.floor(Math.random() * morningMax)
 				break
 				case 'Willkommen':
-					img = 'day/sun'
+					img = 'day/d' + Math.floor(Math.random() * dayMax)
 				break
 				case 'Guten Abend':
-					img = 'day/moon'
-				break
-				default:
-					error = true
-						
-			}
-			if(error){
-				return require('../assets/sad.svg')
-			}
-			return require('../assets/drawer_images/' + img + '.svg')
-		}
-
-		var morningMax = 9
-		var dayMax = 15
-		var eveningMax = 14
-		var error = false
-
-		var img
-
-		switch(this.timeText){
-				case 'Guten Morgen':
-				img = 'morning/' + Math.floor(Math.random() * morningMax)
-				break
-				case 'Willkommen':
-					img = 'day/' + Math.floor(Math.random() * dayMax)
-				break
-				case 'Guten Abend':
-					img = 'evening/' + Math.floor(Math.random() * eveningMax)
+					img = 'evening/e' + Math.floor(Math.random() * eveningMax)
 				break
 				default:
 					error = true
@@ -85,17 +85,17 @@ export default {
 
 		greetingIcon(){
 			switch(this.timeText){
-					case 'Guten Abend':
-					return 'nights_stay'
-					break
-					case 'Willkommen':
-					return 'report_problem'
-					break
-					case 'Guten Morgen': 
-					return 'wb_sunny'
-					break
-					default:
-					return 'brightness_7'
+				case 'Guten Abend':
+				return 'nights_stay'
+				break
+				case 'Willkommen':
+				return 'brightness_7'
+				break
+				case 'Guten Morgen': 
+				return 'wb_sunny'
+				break
+				default:
+				return 'report_problem'
 			}
 		},
 

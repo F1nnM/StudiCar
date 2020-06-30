@@ -57,7 +57,7 @@ module.exports = function (ctx) {
 
       // Quasar plugins
       plugins: [
-        'Dialog'
+        
       ]
     },
 
@@ -103,7 +103,7 @@ module.exports = function (ctx) {
 
     // animations: 'all', // --- includes all animations
     // https://quasar.dev/options/animations
-    animations: [],
+    animations: 'all', // default setting was animations: []
 
     // https://quasar.dev/quasar-cli/developing-ssr/configuring-ssr
     ssr: {

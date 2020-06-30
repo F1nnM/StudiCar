@@ -59,7 +59,9 @@
       </q-list>
       <div style="padding: 10px;">StudiCar v{{ $q.version }}</div>
     </q-drawer>
+
     <q-page-container>
+      <LoadingScreen />
       <div v-if="pageName">
         <q-scroll-observer @scroll="scrollHandler" />
 
@@ -108,6 +110,7 @@ import { scroll } from 'quasar'
 
 import EssentialLink from 'components/EssentialLink'
 import drawerImage from 'components/drawerWelcomeImage'
+import LoadingScreen from 'components/LoadingScreen'
 
 
 export default {
@@ -116,7 +119,8 @@ export default {
   components: {
     EssentialLink,
     qrScanner,
-    drawerImage
+    drawerImage,
+    LoadingScreen
   },
 
   computed: {

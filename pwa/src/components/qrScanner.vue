@@ -36,7 +36,9 @@
           <q-card-section class="q-pa-md">
             Der StudiCar Code kann benutzt werden, um Fahrtangebote zu teilen oder
             andere Benutzerprofile anzusehen. Um einen Code zu erzeugen, geh einfach in deinem Profil auf eine deiner Fahrten und tipp auf
-            das kleine Code-Symbol. Diesen Code kann dann ein anderer StudiCar Benutzer fahren und sieht direkt den geteilten Inhalt.
+            das kleine Code-Symbol. Diesen Code kann dann ein anderer StudiCar Benutzer scannen und sieht direkt den geteilten Inhalt.
+            <br />
+            Du musst den Code übrigens nicht besonders genau platzieren. Es reicht, wenn er vollständig im Bild und gut zu sehen ist.
           </q-card-section>
         </q-card>
       </q-dialog>

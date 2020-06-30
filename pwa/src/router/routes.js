@@ -46,9 +46,9 @@ const routes = [{
         import('pages/view_user.vue')
     },
     {
-      path: '/scanner',
+      path: '/contact',
       component: () =>
-        import('pages/scanner.vue')
+        import('pages/contact.vue')
     }
   ]
 },
@@ -75,7 +75,7 @@ const routes = [{
 {
   path: '/auth',
   component: () =>
-    import('layouts/without_nav.vue'),
+    import('layouts/MainLayout.vue'),
   children: [{
     path: '/auth/anmeldung',
     name: 'signIn',

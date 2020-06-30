@@ -35,7 +35,7 @@
                           <SignOutButton class="q-ma-sm full-width" />
                         </q-item-section>
                       </q-item>
-                      <q-item>
+                      <q-item clickable disable>
                         <q-item-section>
                           <q-item-label>
                             <q-toggle v-model="dataSaver" label="Datennutzung reduzieren">
@@ -710,38 +710,39 @@
                   behavior="menu"
                   @input="$refs.stepper.next()"
                 />
-                <p
-                  class="text-caption q-mt-md q-mb-none"
-                >Wenn deine Marke nicht dabei ist, schreib uns bitte umgehend.</p>
+                <p class="text-caption q-mt-md q-mb-none">
+                  Wenn deine Marke nicht dabei ist,
+                  <a href="#/contact">schreib uns</a> bitte umgehend.
+                </p>
               </q-step>
 
-              <q-step :name="2" title="Typ" icon="rv_hookup" :done="openNewCarTab > 2">
-                <q-select
-                  v-model="newCar.type"
-                  :label="newCar.brand ? 'Typ auswählen' : 'Wähle zuerst eine Marke aus'"
-                  hint="Versuche, dein Auto einzuordnen"
-                  :options="newCar.brand ? Object.keys(newCarOptions.cars[newCar.brand]) : []"
-                  behavior="menu"
-                  @input="$refs.stepper.next()"
-                />
-              </q-step>
-
-              <q-step :name="3" title="Modell" icon="rv_hookup" :done="openNewCarTab > 3">
+              <q-step :name="2" title="Modell" icon="rv_hookup" :done="openNewCarTab > 2">
                 <q-select
                   v-model="newCar.model"
-                  :label="(newCar.brand && newCar.type) ? 'Modell auswählen' : 'Wähle zuerst Marke und Typ aus'"
+                  :label="newCar.brand ? 'Modell auswählen' : 'Wähle zuerst deine Marke aus'"
                   hint="Und welches Modell?"
-                  :options="(newCar.brand && newCar.type) ? newCarOptions.cars[newCar.brand][newCar.type] : []"
+                  :options="newCar.brand ? newCarOptions.cars[newCar.brand] : []"
                   behavior="menu"
                   @input="$refs.stepper.next()"
                 />
-                <!-- <p
-                  class="text-caption q-mt-md q-mb-none"
-                >Wenn dein Modell nicht dabei ist, nimm bitte ein ähnliches und und schreib uns das fehlende Modell.</p>-->
+                <p class="text-caption q-mt-md q-mb-none">
+                  Wenn dein Modell nicht dabei ist,
+                  <a href="#/contact">schreib uns</a> bitte das fehlende Modell.
+                </p>
+              </q-step>
+              <q-step :name="3" title="Typ" icon="rv_hookup" :done="openNewCarTab > 3">
+                <q-select
+                  v-model="newCar.type"
+                  label="Typ auswählen"
+                  hint="Versuche, dein Auto einzuordnen"
+                  :options="['Kompaktwagen','Kombi','Limousine','Cabrio','SUV','Sportwagen','Transporter']"
+                  behavior="menu"
+                  @input="$refs.stepper.next()"
+                />
               </q-step>
 
               <q-step :name="4" title="Farbe" icon="brush" :done="openNewCarTab > 4">
-                <p class="text-caption">Wähle zuerst den Farbton und dann die Farbe</p>
+                <div class="text-caption">Wähle zuerst den Farbton und dann die Farbe</div>
                 <q-splitter :value="50">
                   <template v-slot:before>
                     <q-list
@@ -758,10 +759,6 @@
                         :active="newCar.colorTone ? newCar.colorTone == item : false"
                         @click="newCar.colorTone = item"
                       >
-                        <!-- <q-item-section avatar>
-                            <q-icon name="inbox" />
-                        </q-item-section>-->
-
                         <q-item-section>{{capitalize(item)}}</q-item-section>
                       </q-item>
                     </q-list>
@@ -787,9 +784,10 @@
                       </q-list>
                     </div>
 
-                    <div v-else class="flex flex-center">
-                      <p class="text-caption">Bitte wähle einen Farbton aus</p>
-                    </div>
+                    <div
+                      v-else
+                      class="q-mt-xl full-width text-center text-caption"
+                    >Bitte wähle einen Farbton aus</div>
                   </template>
                 </q-splitter>
                 <extHR
@@ -813,7 +811,7 @@
               <q-step :name="6" title="Nummernschild" icon="money" :done="openNewCarTab > 6">
                 <q-input
                   type="text"
-                  placeholder="A-bC-202"
+                  placeholder="HDH DH 2020"
                   v-model="newCar.licensePlate"
                   label="Nummernschild"
                   hint="Das können Nutzer nur dann sehen, wenn sie mit dir mitfahren."
@@ -821,7 +819,7 @@
                 <q-slide-transition>
                   <p
                     class="text-negative q-mt-md"
-                    v-show="!checkValidNumberPlate()"
+                    v-show="!validNumberPlate()"
                   >Noch keine gültige Eingabe</p>
                 </q-slide-transition>
               </q-step>
@@ -904,6 +902,10 @@
           <q-card-section class="row">
             <div class="col-7 text-h5">{{newCar.brand}}</div>
             <div class="col-5 text-h6 text-weight-light">{{newCar.model}}</div>
+            <p
+              v-show="newCar.brand ? (newCarOptions.cars[newCar.brand].indexOf(newCar.model) == -1) : false"
+              class="text-red"
+            >Anscheinend hast du deine Marke geändert, ohne das Modell anzupassen. Bitte korrigiere deine Eingaben.</p>
           </q-card-section>
 
           <q-card-section>
@@ -921,9 +923,12 @@
 
               <p class="text-uppercase text-caption col-7">Kennzeichen</p>
 
+              <p class="col-5">{{newCar.licensePlate}}</p>
+
               <p
-                :class="'col-5' + (checkValidNumberPlate() ? ' text-negative' : '')"
-              >{{newCar.licensePlate}}</p>
+                v-show="!validNumberPlate()"
+                class="text-negative col-12"
+              >Das angegebene Kennzeichen hat eine ungültige Syntax.</p>
 
               <p class="text-uppercase text-caption col-7">Baujahr</p>
               <p class="col-5">{{newCar.year}}</p>
@@ -935,7 +940,7 @@
             <q-btn
               color="primary"
               label="Auto hinzufügen"
-              :disabled=" false/* !(newCarFilled && checkValidNumberPlate()) */ "
+              :disabled="false"
               @click="addCar()"
               v-close-popup
             />
@@ -1059,7 +1064,7 @@ export default {
       openAddCar: false,
       openAddCarConfirm: false,
       
-      tab: 'data', // vue models which doesn't belong to specific function
+      tab: 'reservoir', // vue models which doesn't belong to specific function
     }
   },
   computed: {
@@ -1297,7 +1302,7 @@ export default {
       this.newCar.year = this.randomItemFromArray([2020,2019,2018,2017,2016,2015])
 
       let validPlate = true
-      this.newCar.licensePlate = validPlate ? 'B AA 2001' : 'B SS 2330'
+      this.newCar.licensePlate = validPlate ? 'HDH DH 2020' : 'B SS 2330'
       this.openAddCarConfirm = true
       
     },
@@ -1338,7 +1343,7 @@ export default {
             this.fileBlob = elem.toBlob()
           }
           catch(e){
-            alert('Die Konvertierung hat nicht funktioniert. E:' + e)
+            alert('Die Konvertierung zum BLOB hat nicht funktioniert. E:' + e)
           }
         }, reader.onerror = error => {
           alert(error)
@@ -1397,65 +1402,15 @@ export default {
       return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase()
     },
 
-    
-    checkValidNumberPlate(){
-      // only for development: 
-      let alwaysOk = true
-      
-
-      // real logic:
-      if(alwaysOk){
-        return true
-      }
-      else {
-        // Unicode Table: BIG letters: 65-90, small letters: 97-122
-
-        let splits = plate.split('-')
-        var threeParts = () => {
-          splits.forEach(string => {
-            if(!string) return false
-          })
-          return true
-        }
-        try{
-          let correctSplits = splits.length == 3
-          let correctCityLength = splits[0].length > 0 && splits[0].length < 4
-          let correctNameLength = splits[1].length > 0 && splits[1].length < 3
-          
-          let cityAndNameInLetters = () => {
-            (splits[0] + splits[1]).forEach(char, index => {
-              let code = charCodeAt(index)
-              let isLetter = ((code >= 65 && code <= 90) || (code >= 97 && code <= 122))
-              if(!isLetter) return false
-            })
-            return true
-          }
-          
-          let correctNumberLength = () => {
-            try{
-              var number = parseInt(splits[2])
-              return number > 0 && number < 10000
-            }
-            catch(e){
-              return false // maybe letters given
-            }
-          }
-
-          if(threeParts && correctSplits && correctCityLength && correctNameLength && cityAndNameInLetters && correctNumberLength){
-            return true
-          }
-          else {
-            return false
-          }
-        }
-        catch(e){ // all the arrays which cause an error
-          return false
-        }
-      }
-    },
-
     randomItemFromArray(array){
       return array[Math.floor(Math.random() * array.length)]
+    },
+
+    validNumberPlate(){
+      this.newCar.licensePlate = this.newCar.licensePlate.toUpperCase()
+      var pattern = /[A-Z]{1,3} [A-Z]{1,2} \d{1,4}$/gm
+      var match = this.newCar.licensePlate.match(pattern)
+      return match
     }
   },
   mounted() {
