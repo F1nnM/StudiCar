@@ -133,26 +133,25 @@ module.exports = {
     },
     '/getCarModels': async (req, res, options) => {
       if (!isOptionMissing(options, [], res)) {
-        let result = await runQuery("SELECT BRAND, MODEL, TYPE FROM car_models WHERE OFFICIAL = TRUE", []);
+        let result = await runQuery("SELECT BRAND, MODEL FROM car_models", []);
         let cars = result.result
         let carsObj = {}
 
         cars.forEach(item => {
           if (!carsObj[item.BRAND]) { // when brand not initialized, then do it
-            carsObj[item.BRAND] = {}
-            carsObj[item.BRAND][item.TYPE] = []
+            carsObj[item.BRAND] = []
             // console.log('ARRAY AND OBJECT CREATED')
             // console.log(carsObj[item.BRAND])
           }
-          if (!carsObj[item.BRAND][item.TYPE]) { // and when type array not initialized, then do that
-            carsObj[item.BRAND][item.TYPE] = []
-            // console.log('ARRAY CREATED')
+          if (carsObj[item.BRAND].indexOf(item.MODEL) == -1) { // models should not exist twice in array
+            carsObj[item.BRAND].push(item.MODEL)
           }
-          if (!(carsObj[item.BRAND][item.TYPE].indexOf(item) > -1)) { // usually not, but models must not exist twice in array
-            carsObj[item.BRAND][item.TYPE].push(item.MODEL)
-          }
-          //console.log(carsObj[item.BRAND][item.TYPE])
+          //console.log(carsObj[item.BRAND]
         })
+        //console.log(carsObj)
+
+        // structure of cars now should look like: {'Mercedes': ['C-Klasse', 'A-Klasse'], 'Audi': []}
+
         // console.log(carsObj)
         let colors = carModels.allColors()
         res.end(JSON.stringify({
@@ -289,29 +288,31 @@ module.exports = {
         let car = options.data.car
         let id = options.data.id
 
-        let result = await runQuery("SELECT car_models.ID FROM car_models WHERE BRAND = ? AND TYPE = ? AND MODEL = ?",
-          [car.brand, car.type, car.model]).catch(error => {
-            throw error
-          })
-        var modelExists = result.result.length > 0
-        if (!modelExists) {
-          await runQuery("INSERT INTO `car_models` (`ID`, `BRAND`, `TYPE`, `MODEL`, `PICTURE`, `OFFICIAL`) VALUES (NULL, ?, ?, ?, NULL, '0');",
-            [car.brand, car.type, car.model]).catch(error => {
-              throw error
-            })
-          result = await runQuery("SELECT car_models.ID FROM car_models WHERE BRAND = ? AND TYPE = ? AND MODEL = ?",
-            [car.brand, car.type, car.model]).catch(error => {
-              throw error
-            })
-          //console.log('model has been inserted')
-        }
+        // let result = await runQuery("SELECT car_models.ID FROM car_models WHERE BRAND = ? AND TYPE = ? AND MODEL = ?",
+        //   [car.brand, car.type, car.model]).catch(error => {
+        //     throw error
+        //   })
+        // var modelExists = result.result.length > 0
+        // if (!modelExists) {
+        //   await runQuery("INSERT INTO `car_models` (`ID`, `BRAND`, `TYPE`, `MODEL`, `PICTURE`, `OFFICIAL`) VALUES (NULL, ?, ?, ?, NULL, '0');",
+        //     [car.brand, car.type, car.model]).catch(error => {
+        //       throw error
+        //     })
+          
+        //   //console.log('model has been inserted')
+        // }
         // now result contains for safe ID of the (if necessary just inserted) model
+
+        result = await runQuery("SELECT car_models.ID FROM car_models WHERE BRAND = ? AND MODEL = ?",
+            [car.brand, car.model]).catch(error => {
+              throw error
+            })
 
         var modelId = result.result[0].ID
 
 
-        await runQuery("INSERT INTO `car` (`ID`, `LICENSE_PLATE`, `SEATS`, `COLOR`, `YEAR`, `MODEL_ID`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, ?)",
-          [car.licensePlate, car.seats, (car.colorTone + ':' + car.color), car.year, modelId, id]).catch(error => {
+        await runQuery("INSERT INTO `car` (`ID`, `LICENSE_PLATE`, `SEATS`, `TYPE`, `COLOR`, `YEAR`, `MODEL_ID`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)",
+          [car.licensePlate, car.seats, car.type, (car.colorTone + ':' + car.color), car.year, modelId, id]).catch(error => {
             throw error
           })
 

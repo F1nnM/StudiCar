@@ -42,7 +42,7 @@
             <q-radio v-model="lift.destinationAddress" :val="address.id" />
             <q-item-section avatar>
               <q-avatar rounded>
-                <img class="shadow-3 q-ma-none" src="~assets/school_images/1.jpg" />
+                <img class="shadow-3 q-ma-none" :src="getImagePath(address.id)" />
               </q-avatar>
             </q-item-section>
 
@@ -188,6 +188,10 @@ export default {
     getExactAddresses(){
       if(this.lift.destination == 'school'){
         return this.$store.getters["auth/user"].school_addresses
+        
+        // a[0].imagePath = require(pathBegin + 'HDH_cube.jpg')
+        // a[1].imagePath = require(pathBegin + 'HDH_old.jpg')
+        // a[2].imagePath = require(pathBegin + 'WIB_ext.jpg')
       }
       else if(this.lift.destination == 'home'){
         let a = this.$store.getters["auth/user"].addresses
@@ -196,11 +200,27 @@ export default {
       }
       return null
     }
+
+    
   },
 
   methods: {
     addLift(){
       
+    },
+
+    getImagePath(id){
+      let pathBegin = '../assets/school_images/'
+      switch(id){
+        case 1: return require('../assets/school_images/HDH_cube_resized.jpg')
+        break
+        case 2: return require('../assets/school_images/HDH_old_resized.jpg')
+        break
+        case 3: return require('../assets/school_images/WIB_ext_resized.jpg')
+        break
+        
+        default: return require('../assets/sad.svg')
+      }
     }
   },
 

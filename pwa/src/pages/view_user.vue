@@ -264,7 +264,7 @@ export default {
     sendApiRequest(SQL_GET_USER_DATA,
     {
       fbid: otherFbId,
-      secretFbId: 'lorem'
+      secretFbId: 'lorem' // I hope nobody will ever have this secretFbId, cause then our server is gonna crash
     },
     data => {
       this.viewedUser = {
