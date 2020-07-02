@@ -152,7 +152,20 @@ module.exports = {
       if (!isOptionMissing(options, ['secretFbId'], res)) {
         let allMessages = await runQuery("SELECT * FROM message WHERE ", [options.data]);
       }
-    }
+    },
+    '/getLegal': async (req, res, options) => {
+      if (!isOptionMissing(options, [], res)) {
+        var fs = require('fs')
+        fs.readFile('legal/small.txt', [], (err, data) => {
+          if (err) {
+            console.log(err)
+            res.end(false)
+          }
+          console.log('success')
+          res.end(data)
+        })
+      }
+    },
   },
   'POST': {
     '/sqlTest': async (req, res, options) => {

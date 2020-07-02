@@ -58,7 +58,7 @@
       <div class="row self-end">
         <span>
           Angeboten von
-          <a v-bind:href="'#/view-user?'+lift.driver.fbid">{{lift.driver.name}}</a>
+          <a v-bind:href="'#/benutzerinfo?'+lift.driver.fbid">{{lift.driver.name}}</a>
         </span>
       </div>
     </div>

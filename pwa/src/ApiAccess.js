@@ -49,6 +49,11 @@ export const PING = {
   method: "GET"
 }
 
+export const GET_LEGAL = {
+  path: "/getLegal",
+  method: "GET"
+}
+
 export const SQL_TEST_READ = {
   path: "/sqlTest",
   method: "GET"

@@ -4,10 +4,10 @@
     <q-card v-show="uploading == -1">
       <q-card-section>
         <p>
-          <q-icon name="error_outline" size="md" color="negative" />Beim Upload ist ein Fehler aufgetreten. Wenn das Problem öfter auftritt,
+          <q-icon name="error_outline" size="md" color="negative" />Beim Upload ist ein Fehler aufgetreten. Wenn das Problem öfter auftritt, dann
           <a
             href="#/contact"
-          >kontaktiere uns</a> bitte.
+          >schreib uns</a> bitte.
         </p>
       </q-card-section>
     </q-card>
@@ -271,7 +271,7 @@
               </div>
 
               <div class="col-2 text-right text-overline q-pt-md">14:38</div>
-              <div class="col-10 q-pt-md">
+              <div class="col-10 q-pt-md" v-if="!lift.stops">
                 <q-expansion-item expand-separator v-model="overviewExpanded">
                   <template v-slot:header>
                     <small>
