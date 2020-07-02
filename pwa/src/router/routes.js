@@ -41,7 +41,7 @@ const routes = [{
         import('pages/settings.vue')
     },
     {
-      path: '/view-user',
+      path: '/benutzerinfo',
       component: () =>
         import('pages/view_user.vue')
     },
@@ -49,6 +49,11 @@ const routes = [{
       path: '/contact',
       component: () =>
         import('pages/contact.vue')
+    },
+    {
+      path: '/rechtliches',
+      component: () =>
+        import('pages/legal.vue')
     }
   ]
 },

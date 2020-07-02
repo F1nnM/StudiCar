@@ -153,7 +153,7 @@ export default {
 
     gotScanResult(e){
       this.scannerOpen = false
-      window.location.href = '#/view-user?' + e + '">{{lift.driver.name}}'
+      window.location.href = '#/benutzerinfo?' + e + '">{{lift.driver.name}}'
     },
 
     closeScanner(e){
@@ -203,6 +203,12 @@ export default {
         caption: 'Endlich wieder Kind sein',
         icon: 'toys',
         link: '/#/spielwiese'
+        },
+        {
+        title: 'Rechtliches',
+        caption: 'Muss auch sein',
+        icon: 'policy',
+        link: '/#/rechtliches'
         }
         ]
       }
