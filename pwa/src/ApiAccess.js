@@ -123,3 +123,8 @@ export const SQL_REMOVE_CAR = {
   path: "/removeCar",
   method: "POST"
 }
+
+export const SQL_ADD_LIFT = {
+  path: "/addLift",
+  method: "POST"
+}

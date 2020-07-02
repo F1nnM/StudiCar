@@ -1,7 +1,5 @@
 <template>
   <div class="q-pa-md">
-    <drawerImage timeText="Willkommen" />
-
     <p v-for="n in 20" :key="n">Lorem</p>
   </div>
 </template>
@@ -10,11 +8,11 @@
 
 
 import { scroll } from 'quasar'
-import drawerImage from 'components/drawerWelcomeImage'
+
 
 export default {
   components: {
-    drawerImage
+    
   },
   data() {
     return {

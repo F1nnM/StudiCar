@@ -33,7 +33,7 @@ function isOptionMissing (data, needed, res) {
 }
 
 async function getUserId (fb_id) {
-  let result = await runQuery("SELECT ID FROM user WHERE FB_ID = ?", [fb_id]).result[0]
+  let result = await runQuery("SELECT ID FROM users WHERE FB_ID = ?", [fb_id]).result[0]
   return result.ID
 }
 
@@ -48,14 +48,14 @@ module.exports = {
     },
     '/profilePicture': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid'], res)) {
-        let result = await runQuery("SELECT PICTURE FROM `user` WHERE user.FB_ID = ?", [options.fbid]);
+        let result = await runQuery("SELECT PICTURE FROM `users` WHERE users.FB_ID = ?", [options.fbid]);
         res.setHeader('Content-Type', 'image/png');
         res.end(result.result[0].PICTURE, 'binary');
       }
     },
     '/getUserData': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid', 'secretFbId'], res)) {
-        let userData = (await runQuery("SELECT ID, NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKING, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `user` WHERE user.FB_ID = ?", [options.fbid])).result[0]
+        let userData = (await runQuery("SELECT ID, NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKING, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `users` WHERE users.FB_ID = ?", [options.fbid])).result[0]
         let liftCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS LIFT_COUNT FROM `lift_map` WHERE `USER_ID` = ? ", [options.fbid])).result[0].LIFT_COUNT
         let driverCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS DRIVER_COUNT FROM `lift_map` WHERE `IS_DRIVER` = true AND `USER_ID` = ? ", [options.fbid])).result[0].DRIVER_COUNT
 
@@ -80,7 +80,7 @@ module.exports = {
         }
         if (options.secretFbId = options.fbid) {
 
-          let addresses = await runQuery("SELECT address.ID, POSTCODE, CITY, STREET, NUMBER FROM address INNER JOIN user ON address.USER_ID = user.ID WHERE user.FB_ID = ?", [options.fbid]);
+          let addresses = await runQuery("SELECT adresses.ID, adresses.NICKNAME, POSTCODE, CITY, STREET, NUMBER FROM adresses INNER JOIN users ON adresses.USER_ID = users.ID WHERE users.FB_ID = ? UNION SELECT adresses.ID, adresses.NICKNAME, POSTCODE, CITY, STREET, NUMBER FROM adresses WHERE adresses.ID < 4", [options.fbid]);
           data.addresses = []
           data.settings = {
             liftMaxDistance: userData.LIFT_MAX_DISTANCE
@@ -88,6 +88,7 @@ module.exports = {
           addresses.result.forEach(item => {
             let obj = {
               id: item.ID,
+              nickname: item.NICKNAME,
               postcode: item.POSTCODE,
               city: item.CITY,
               street: item.STREET,
@@ -113,19 +114,6 @@ module.exports = {
             //console.log(obj)
           })
 
-          let school_addresses = await runQuery("SELECT * FROM school_address", []) // apoologize for not doing extra API method
-          data.school_addresses = []
-          school_addresses.result.forEach(item => {
-            let obj = {
-              id: item.ID,
-              postcode: item.POSTCODE,
-              city: item.CITY,
-              number: item.NUMBER,
-              street: item.STREET,
-              nickname: item.NICKNAME
-            }
-            data.school_addresses.push(obj)
-          })
         }
 
         res.end(JSON.stringify(data))
@@ -159,6 +147,11 @@ module.exports = {
           colors: colors
         }))
       }
+    },
+    '/getMessages': async (req, res, options) => {
+      if (!isOptionMissing(options, ['secretFbId'], res)) {
+        let allMessages = await runQuery("SELECT * FROM message WHERE ", [options.data]);
+      }
     }
   },
   'POST': {
@@ -170,7 +163,7 @@ module.exports = {
     },
     '/createUserIfNotExisting': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'name', 'mail'], res)) {
-        let users = (await runQuery("SELECT ID FROM `user` WHERE user.FB_ID = ?", [options.secretFbId])).result[0];
+        let users = (await runQuery("SELECT ID FROM `users` WHERE users.FB_ID = ?", [options.secretFbId])).result[0];
         if (!users) {
           var jdenticon = require("jdenticon")
           jdenticon.config = {
@@ -189,7 +182,7 @@ module.exports = {
           let png = jdenticon.toPng(options.name, size);
 
           await runQuery(
-            "INSERT INTO `user` (`ID`, `FB_ID`, `NAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKING`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`)" +
+            "INSERT INTO `users` (`ID`, `FB_ID`, `NAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKING`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`)" +
             "VALUES (NULL, ?, ?, 'X', '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED')",
             [options.secretFbId, options.name, png, options.mail]).catch(error => {
               throw error;
@@ -202,7 +195,7 @@ module.exports = {
     '/updateDescription': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'description'], res)) {
         await runQuery(
-          "UPDATE `user` SET `DESCRIPTION` = ? WHERE `user`.`FB_ID` = ?",
+          "UPDATE `users` SET `DESCRIPTION` = ? WHERE `users`.`FB_ID` = ?",
           [options.description, options.secretFbId]).catch(error => {
             throw error;
           });
@@ -212,7 +205,7 @@ module.exports = {
     '/updateGender': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'gender'], res)) {
         await runQuery(
-          "UPDATE `user` SET `GENDER` = ? WHERE `user`.`FB_ID` = ?",
+          "UPDATE `users` SET `GENDER` = ? WHERE `users`.`FB_ID` = ?",
           [options.gender, options.secretFbId]).catch(error => {
             throw error;
           });
@@ -222,7 +215,7 @@ module.exports = {
     '/updateLiftMaxDistance': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'liftMaxDistance'], res)) {
         await runQuery(
-          "UPDATE `user` SET `LIFT_MAX_DISTANCE` = ? WHERE `user`.`FB_ID` = ?",
+          "UPDATE `users` SET `LIFT_MAX_DISTANCE` = ? WHERE `users`.`FB_ID` = ?",
           [options.liftMaxDistance, options.secretFbId]).catch(error => {
             throw error;
           });
@@ -241,7 +234,7 @@ module.exports = {
         }
         let blob = Buffer.from(options.imageData, "base64")
         await runQuery(
-          "UPDATE `user` SET `PICTURE` = ? WHERE `user`.`FB_ID` = ?",
+          "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?",
           [blob, options.secretFbId]).catch(error => {
             throw error;
           });
@@ -251,7 +244,7 @@ module.exports = {
     '/updatePrefs': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'prefs'], res)) {
         await runQuery(
-          "UPDATE user SET PREF_TALK = ?, PREF_TALK_MORNING = ?, PREF_SMOKING = ?, PREF_MUSIC = ? WHERE FB_ID = ?;",
+          "UPDATE users SET PREF_TALK = ?, PREF_TALK_MORNING = ?, PREF_SMOKING = ?, PREF_MUSIC = ? WHERE FB_ID = ?;",
           [options.prefs.talk, options.prefs.talkMorning, options.prefs.smoking, options.prefs.music, options.secretFbId]).catch(error => {
             throw error;
           });
@@ -259,10 +252,10 @@ module.exports = {
       }
     },
     '/addAddress': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId', 'address', 'id'], res)) {
+      if (!isOptionMissing(options, ['secretFbId', 'adresses', 'id'], res)) {
         await runQuery(
-          "INSERT INTO `address` (`ID`, `POSTCODE`, `CITY`, `NUMBER`, `STREET`, `USER_INDEX`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, '1', ?);",
-          [options.address.postcode, options.address.city, options.address.number, options.address.street, options.id]).catch(error => {
+          "INSERT INTO `address` (`ID`, `NICKNAME`, `POSTCODE`, `CITY`, `NUMBER`, `STREET`, `USER_INDEX`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, '1', ?);",
+          [options.address.nickname, options.address.postcode, options.address.city, options.address.number, options.address.street, options.id]).catch(error => {
             throw error;
           });
         // let result = await runQuery("SELECT ID FROM address WHERE USER_ID = ? ORDER BY ID DESC", [options.id])
@@ -274,7 +267,7 @@ module.exports = {
     '/removeAddress': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'id'], res)) {
         await runQuery(
-          "DELETE FROM `address` WHERE`address`.`ID` = ?",
+          "DELETE FROM `adresses` WHERE `adresses`.`ID` = ?",
           [options.id]).catch(error => {
             throw error;
           });
@@ -287,21 +280,6 @@ module.exports = {
 
         let car = options.data.car
         let id = options.data.id
-
-        // let result = await runQuery("SELECT car_models.ID FROM car_models WHERE BRAND = ? AND TYPE = ? AND MODEL = ?",
-        //   [car.brand, car.type, car.model]).catch(error => {
-        //     throw error
-        //   })
-        // var modelExists = result.result.length > 0
-        // if (!modelExists) {
-        //   await runQuery("INSERT INTO `car_models` (`ID`, `BRAND`, `TYPE`, `MODEL`, `PICTURE`, `OFFICIAL`) VALUES (NULL, ?, ?, ?, NULL, '0');",
-        //     [car.brand, car.type, car.model]).catch(error => {
-        //       throw error
-        //     })
-          
-        //   //console.log('model has been inserted')
-        // }
-        // now result contains for safe ID of the (if necessary just inserted) model
 
         result = await runQuery("SELECT car_models.ID FROM car_models WHERE BRAND = ? AND MODEL = ?",
             [car.brand, car.model]).catch(error => {
@@ -325,8 +303,22 @@ module.exports = {
           "DELETE FROM `car` WHERE `car`.`ID` = ?",
           [options.id]).catch(error => {
             throw error;
-          });
+          })
 
+        res.end();
+      }
+    },
+    '/addLift': async (req, res, options) => {
+      if (!isOptionMissing(options, ['secretFbId', 'lift'], res)) {
+        var lift = options.lift
+        var userId = options.id
+
+        await runQuery(
+          "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `DRIVER_ID`) VALUES (current_timestamp(), ?, ?, ?)",
+          [lift.seats, lift.carId, userId]).catch(error => {
+            throw error;
+          })
+        
 
         res.end();
       }

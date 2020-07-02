@@ -49,9 +49,9 @@ export default {
 				return require('../assets/drawer_images/' + img + '.svg')
 			}
 
-			var morningMax = 9
-			var dayMax = 15
-			var eveningMax = 14 // currently hard coded, could be optimized by automatically all files from dir
+			var morningMax = 8
+			var dayMax = 14
+			var eveningMax = 13 // currently hard coded, could be optimized by automatically all files from dir
 			var error = false
 
 			var img

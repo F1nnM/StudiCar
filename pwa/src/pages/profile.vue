@@ -199,10 +199,24 @@
             <q-list>
               <div class="row" v-for="item in addresses" :key="item.id">
                 <q-item class="col-10">
-                  <q-item-section class="q-pl-md" style="border-left: 1px solid lightgray">
-                    <q-item-label>{{item.street}} {{item.number}}</q-item-label>
-                    <q-item-label caption>{{item.postcode}} {{item.city}}</q-item-label>
-                  </q-item-section>
+                  <div class="row">
+                    <q-item-section
+                      avatar
+                      class="q-pl-md col-5"
+                      style="border-left: 1px solid lightgray"
+                    >
+                      <p class="text-overline text-weight-light">{{item.nickname}}</p>
+                    </q-item-section>
+                    <q-item-section class="q-pl-md col-7 overflow-hidden">
+                      <q-item-label>{{item.street}} {{item.number}}</q-item-label>
+                      <q-item-label caption>
+                        {{item.postcode}}
+                        <span
+                          style="display: inline-block; max-width: 70%;"
+                        >{{item.city}}</span>
+                      </q-item-label>
+                    </q-item-section>
+                  </div>
                 </q-item>
                 <div class="col-2">
                   <q-slide-transition>
@@ -614,12 +628,13 @@
       <q-dialog v-model="openNewAddress" position="bottom" persistent>
         <q-card>
           <q-form @submit="addAddress" class="q-gutter-md">
-            <q-card-section class="text-h6 text-weight-light">Eine Addresse hinzufügen</q-card-section>
+            <q-card-section class="text-h6 text-weight-light">Eine Adresse hinzufügen</q-card-section>
 
             <q-card-section>
               <div class="row">
                 <div class="col-7">
                   <q-input
+                    required
                     v-model="newAddress.street"
                     type="text"
                     label="Straße"
@@ -629,6 +644,7 @@
                 </div>
                 <div class="col-5">
                   <q-input
+                    required
                     type="number"
                     v-model="newAddress.number"
                     label="Hausnummer"
@@ -642,6 +658,7 @@
 
                 <br />
                 <q-input
+                  required
                   class="col-5"
                   v-model="newAddress.postcode"
                   type="number"
@@ -651,14 +668,26 @@
                 />
 
                 <q-input
+                  required
                   class="col-7"
                   type="text"
                   v-model="newAddress.city"
-                  label="Stadt"
+                  label="Ort"
                   lazy-rules
                   :rules="[
           val => val !== null && val !== '' || 'Ohne Stadt können wir lange suchen...'
         ]"
+                />
+                <q-input
+                  class="col-12"
+                  type="text"
+                  v-model="newAddress.nickname"
+                  label="Beschreibung"
+                  lazy-rules
+                  :rules="[
+          val => val.length <= 10 || 'Maximal 10 Zeichen'
+        ]"
+                  hint="Optional, wird groß vor der Adresse angezeigt."
                 />
               </div>
             </q-card-section>
@@ -888,13 +917,11 @@
             >
               <p class="text-caption">
                 Bitte stelle sicher, dass deine Angaben korrekt und vollständig sind.
-                Unser Team überprüft außerdem jedes neue Modell in unserer Datenbank. Bei Verdacht auf Spam blockieren wir im Zweifelsfall den jeweiligen Benutzer.
-                <br />Allen anderen aber danken wir, dass sie uns helfen, unsere Datenbank zu erweitern.
                 <br />
-                <br />Und falls noch nicht geschehen: Überflieg am besten noch kurz unsere
+                <br />Und falls noch nicht geschehen: Schau dir bitte noch unsere
                 <a
                   href="https://mi.com"
-                >Datenverarbeitung</a>.
+                >Datenverarbeitung</a> an.
               </p>
             </q-expansion-item>
           </q-card-section>
@@ -1019,6 +1046,7 @@ export default {
 			openEditAddresses: false, // addresses settings
 			openNewAddress: false,
 			newAddress: {
+        nickname: '',
 				street: '',
 				number: '',
 				postcode: '',
@@ -1117,7 +1145,9 @@ export default {
     
 		addresses: {
 			get(){
-				return this.$store.getters['auth/user'].addresses
+				return this.$store.getters['auth/user'].addresses.filter(item => {
+          return item.id > 3 // filter only private adresses, IDs 1 to 3 are reserved for schools
+        })
 			}
 		},
 
@@ -1174,7 +1204,7 @@ export default {
 
     newAddressFilled(){
       for(let key in this.newAddress){
-        if(!this.newAddress[key]) return false
+        if(!this.newAddress[key] && key != 'nickname') return false // only nickname can be blank
       }
       return true
     },
@@ -1259,6 +1289,7 @@ export default {
 				address: this.newAddress
 			})
 			this.newAddress = {
+        nickname: '',
 				street: '',
 				number: '',
 				postcode: '',
@@ -1275,8 +1306,8 @@ export default {
       let car = this.newCar
       
       await this.$store.dispatch("auth/addCar", JSON.parse(JSON.stringify({
-          id: id,
-          car: car
+        id: id,
+        car: car
       })))
       
 
