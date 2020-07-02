@@ -6,26 +6,29 @@
         :key="item.time"
         :lift="item"
         :firstItem="index == 0"
-        v-on:pagetrans_zoom="$emit('pagetrans_zoom')"
-        v-on:pagetrans_slide="$emit('pagetrans_slide')"
-        v-on:pagetrans_y="$emit('pagetrans_y', $event)"
+        @openLift="openTheLift"
       />
     </q-list>
+    <LiftPopup @close="liftOpen = false" :open="liftOpen" :liftProp="liftToBeShown" />
   </div>
 </template>
 
 <script>
 
 import chat_item from 'components/chat_item'
+import LiftPopup from 'components/LiftPopup'
 
 export default {
   components: {
-    chat_item
+    chat_item,
+    LiftPopup
   },
 
   data(){
     return{
-      chats: this.$store.state.chats
+      chats: this.$store.state.chats,
+      liftOpen: false,
+      liftToBeShown: null
     }
   },
 
@@ -51,6 +54,11 @@ export default {
       //alert("SWIPED RIGHT")
       
       this.finalize(reset)
+    },
+
+    openTheLift(event){
+      this.liftOpen = true
+      this.liftToBeShown = event
     },
 
     pagetrans_zoom(){

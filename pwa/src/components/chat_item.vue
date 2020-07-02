@@ -9,7 +9,7 @@
         <q-icon name="delete_outline" />
       </template>
 
-      <q-item tag="a" href="/#/chats/lift" v-ripple class="q-py-sm q-px-xs">
+      <q-item clickable @click="$emit('openLift', lift)" class="q-py-sm q-px-xs">
         <q-item-section avatar>
           <q-avatar>
             <img :src="lift.url ? lift.url : 'https://cdn.quasar.dev/img/avatar2.jpg'" />
