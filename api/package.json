@@ -8,5 +8,12 @@
     "start": "node index.js"
   },
   "author": "Finn Melzer <studicar@mfinn.de>",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "firebase-admin": "^8.10.0",
+    "image-size": "^0.8.3",
+    "jdenticon": "^2.2.0",
+    "mariadb": "^2.3.1",
+    "showdown": "^1.9.1"
+  }
 }

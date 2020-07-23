@@ -1,0 +1,129 @@
+.custom-underline {
+    position: relative;
+    &:after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-bottom: 1px solid black;
+        width: 50%;
+        padding-bottom: 2px;
+    }
+
+    &.c-u-l:after {
+        left: 0;
+        transform: translateX(5%);
+    }
+
+    &.c-u-m:after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    &.c-u-r:after {
+        right: 0;
+        transform: translateX(-5%);
+    }
+
+    &.c-u-2:after {
+        width: 50%;
+    }
+
+    &.c-u-4:after {
+        width: 25%;
+    }
+
+    &.c-u-8:after {
+        width: 80%;
+    }
+
+    &.c-u-xs:after {
+        padding-bottom: 1px;
+    }
+
+    &.c-u-sm:after {
+        padding-bottom: 4px;
+    }
+
+    &.c-u-md:after {
+        padding-bottom: 10px;
+    }
+
+    &.c-u-lg:after {
+        padding-bottom: 20px;
+    }
+
+    &.c-u-xl:after {
+        padding-bottom: 40px;
+    }
+}
+
+.custom-overline {
+    position: relative;
+    &:after {
+        content: "";
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-top: 1px solid black;
+        width: 50%;
+        padding-top: 2px;
+    }
+
+    &.c-o-l:after {
+        left: 0;
+        transform: translateX(5%);
+    }
+
+    &.c-o-m:after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    &.c-o-r:after {
+        right: 0;
+        transform: translateX(-5%);
+    }
+
+    &.c-o-2:after {
+        width: 50%;
+    }
+
+    &.c-o-4:after {
+        width: 25%;
+    }
+
+    &.c-o-8:after {
+        width: 80%;
+    }
+
+    &.c-o-xs:after {
+        padding-top: 1px;
+    }
+
+    &.c-o-sm:after {
+        padding-top: 4px;
+    }
+
+    &.c-o-md:after {
+        padding-top: 10px;
+    }
+
+    &.c-o-lg:after {
+        padding-top: 20px;
+    }
+
+    &.c-o-xl:after {
+        padding-top: 40px;
+    }
+}
+
+.border-right {
+    border-right: 1px solid black;
+
+    &.border-right-green {
+        border-color: green;
+    }
+}

@@ -1,18 +1,27 @@
 // Configuration for your app
 // https://quasar.dev/quasar-cli/quasar-conf-js
 
+const fs = require('fs')
+
 module.exports = function (ctx) {
   return {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://quasar.dev/quasar-cli/cli-documentation/boot-files
     boot: [
-      'axios'
+      'auth',
+      'axios',
+      'globalVars.js',
+      'firebase',
+      'boot',
+      'vue_record'
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
     css: [
-      'app.scss'
+      'app.scss',
+      'transitions.scss',
+      'fontStyling.scss'
     ],
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
@@ -47,7 +56,9 @@ module.exports = function (ctx) {
       directives: [],
 
       // Quasar plugins
-      plugins: []
+      plugins: [
+        
+      ]
     },
 
     // https://quasar.dev/quasar-cli/cli-documentation/supporting-ie
@@ -82,14 +93,17 @@ module.exports = function (ctx) {
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
     devServer: {
-      https: false,
+      https: true,
       port: 3000,
-      open: true // opens browser window automatically
+      open: true, // opens browser window automatically
+      key: fs.readFileSync('server.key'),
+      cert: fs.readFileSync('server.pem'),
+      ca: fs.readFileSync('ca.pem'),
     },
 
     // animations: 'all', // --- includes all animations
     // https://quasar.dev/options/animations
-    animations: 'all',
+    animations: 'all', // default setting was animations: []
 
     // https://quasar.dev/quasar-cli/developing-ssr/configuring-ssr
     ssr: {
@@ -103,11 +117,11 @@ module.exports = function (ctx) {
       manifest: {
         name: 'StudiCar',
         short_name: 'StudiCar',
-        description: 'Green.Cheap.Social.',
+        description: 'Green.Cheap.Social',
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#ffffff',
-        theme_color: '#027be3',
+        theme_color: '#02a200', // blue color: 027be3
         icons: [
           {
             src: 'statics/icons/icon-128x128.png',
@@ -141,7 +155,7 @@ module.exports = function (ctx) {
     // Full list of options: https://quasar.dev/quasar-cli/developing-cordova-apps/configuring-cordova
     cordova: {
       // noIosLegacyBuildFlag: true, // uncomment only if you know what you are doing
-      id: 'org.cordova.quasar.app'
+      id: ''
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/developing-capacitor-apps/configuring-capacitor

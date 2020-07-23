@@ -3,6 +3,10 @@ import VueRouter from 'vue-router'
 
 import routes from './routes'
 
+import { dom } from 'quasar'
+import { date } from 'quasar'
+const { ready } = dom
+
 Vue.use(VueRouter)
 
 /*
