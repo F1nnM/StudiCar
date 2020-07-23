@@ -1,5 +1,6 @@
 var runQuery = require('./db')
 var carModels = require('./carModels')
+var showdown = require('showdown')
 
 function updateModels (req, res) {
   var cars = carModels.all()
@@ -79,12 +80,12 @@ module.exports = {
           }
         }
         if (options.secretFbId = options.fbid) {
-
-          let addresses = await runQuery("SELECT adresses.ID, adresses.NICKNAME, POSTCODE, CITY, STREET, NUMBER FROM adresses INNER JOIN users ON adresses.USER_ID = users.ID WHERE users.FB_ID = ? UNION SELECT adresses.ID, adresses.NICKNAME, POSTCODE, CITY, STREET, NUMBER FROM adresses WHERE adresses.ID < 4", [options.fbid]);
-          data.addresses = []
           data.settings = {
             liftMaxDistance: userData.LIFT_MAX_DISTANCE
           }
+          let addresses = await runQuery("SELECT adresses.ID, adresses.NICKNAME, POSTCODE, CITY, STREET, NUMBER FROM adresses INNER JOIN users ON adresses.USER_ID = users.ID WHERE users.FB_ID = ? UNION SELECT adresses.ID, adresses.NICKNAME, POSTCODE, CITY, STREET, NUMBER FROM adresses WHERE adresses.ID < 4", [options.fbid]);
+          data.addresses = []
+          
           addresses.result.forEach(item => {
             let obj = {
               id: item.ID,
@@ -113,6 +114,40 @@ module.exports = {
             data.cars.push(obj)
             //console.log(obj)
           })
+          let allMessages = await runQuery("SELECT messages.ID, messages.CONTENT, messages.AUDIO, messages.PICTURE, FROM_USER_ID, lift_map.LIFT_ID, users.NAME, messages.TIMESTAMP, start_adress.NICKNAME AS START_NICK, dest_adress.NICKNAME AS DEST_NICK FROM messages JOIN lift_map ON lift_map.LIFT_ID = messages.LIFT_ID JOIN users ON FROM_USER_ID = users.ID JOIN lift ON lift.ID = messages.LIFT_ID JOIN adresses AS start_adress ON start_adress.ID = lift.START JOIN adresses AS dest_adress ON dest_adress.ID = lift.DESTINATION WHERE lift_map.USER_ID = ? AND lift_map.PENDING = 0 ORDER BY messages.TIMESTAMP DESC;",
+            [userData.ID])
+          var liftMessages = {}
+          allMessages.result.forEach(item => {
+            if (!liftMessages[item.LIFT_ID]) {
+              liftMessages[item.LIFT_ID] = [] // making object if not existing
+            }
+            var content = '', type = 0
+            if (item.AUDIO) {
+              content = item.AUDIO
+              type = 2
+            }
+            else if (item.PICTURE) {
+              content = item.PICTURE
+              type = 3
+            }
+            else {
+              content = item.CONTENT
+              type = 1
+            }
+            let obj = {
+              messageID: item.ID,
+              nameOfUser: item.NAME.split(' ')[0], // we take just the first name
+              userId: item.FROM_USER_ID,
+              content: content,
+              type: type, // for docs see above
+              liftId: item.LIFT_ID,
+              start: item.START_NICK,
+              destination: item.DEST_NICK,
+              timestamp: item.TIMESTAMP
+            }
+            liftMessages[item.LIFT_ID].push(obj)
+          })
+          data.messages = liftMessages
 
         }
 
@@ -149,21 +184,62 @@ module.exports = {
       }
     },
     '/getMessages': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId'], res)) {
-        let allMessages = await runQuery("SELECT * FROM message WHERE ", [options.data]);
+      if (!isOptionMissing(options, ['fbid'], res)) {
+        let id = options.id
+        let allMessages = await runQuery("SELECT * FROM lift_map JOIN messages ON lift_map.LIFT_ID = messages.LIFT_ID WHERE USER_ID = ? AND PENDING = 0", [id])
+        res.end(JSON.stringify(allMessages))
       }
     },
     '/getLegal': async (req, res, options) => {
       if (!isOptionMissing(options, [], res)) {
         var fs = require('fs')
-        fs.readFile('legal/small.txt', [], (err, data) => {
+        fs.readFile('legal/legal.md', [], (err, data) => {
           if (err) {
             console.log(err)
+          }
+          var rawMD = data + ''
+          var converter = new showdown.Converter()
+          try {
+            var html = converter.makeHtml(rawMD)
+            res.end(html)
+          }
+          catch (e) {
             res.end(false)
           }
-          console.log('success')
-          res.end(data)
         })
+      }
+    },
+    '/getLiftInfo': async (req, res, options) => {
+      if (!isOptionMissing(options, ['id'], res)) {
+        var liftId = options.id
+        let carInfo = await runQuery("SELECT car_models.BRAND, car_models.MODEL, car.COLOR, car.TYPE, car.LICENSE_PLATE, lift.OFFERED_SEATS FROM lift JOIN car ON lift.CAR_ID = car.ID JOIN car_models ON car_models.ID = car.MODEL_ID WHERE lift.ID = ?;", [liftId])
+        carInfo = carInfo.result[0]
+        var car = {
+          brand: carInfo.BRAND,
+          model: carInfo.MODEL,
+          color: carModels.allColors()[carInfo.COLOR.split(':')[0]][carInfo.COLOR.split(':')[1]],
+          type: carInfo.TYPE,
+          licensePlate: carInfo.LICENSE_PLATE,
+        }
+        let usersInfo = await runQuery("SELECT users.ID, users.NAME, users.PREF_TALK, users.PREF_TALK_MORNING, users.PREF_SMOKING, users.PREF_MUSIC FROM users JOIN lift_map ON lift_map.USER_ID = users.ID WHERE lift_map.PENDING = 0 AND lift_map.IS_DRIVER = 0 AND lift_map.LIFT_ID = ?", [liftId])
+        usersInfo = usersInfo.result
+        var passengers = []
+        usersInfo.forEach(item => {
+          passengers.push({
+            userId: item.ID,
+            nameOfUser: item.NAME.split(' ')[0], // as always only take the first name
+            talk: item.PREF_TALK,
+            talkMorning: item.PREF_TALK_MORNING,
+            smoking: item.PREF_SMOKING,
+            music: item.PREF_MUSIC
+          })
+        })
+        
+        res.end(JSON.stringify({
+          car: car,
+          passengers: passengers,
+          seats: carInfo.OFFERED_SEATS
+        }))
       }
     },
   },
@@ -327,13 +403,83 @@ module.exports = {
         var userId = options.id
 
         await runQuery(
-          "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `DRIVER_ID`) VALUES (current_timestamp(), ?, ?, ?)",
-          [lift.seats, lift.carId, userId]).catch(error => {
+          "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `DRIVER_ID`, `START`, `DESTINATION`) VALUES (current_timestamp(), ?, ?, ?, ?, ?)",
+          [lift.seats, lift.carId, userId, lift.startAddressId, lift.destinationAddressId]).catch(error => {
+            throw error;
+          })
+        let insertedResult = await runQuery(
+          "SELECT MAX(ID) FROM `lift`",
+          []).catch(error => {
+            throw error;
+          })
+        let newLiftId = insertedResult.result[0]['MAX(ID)']
+        await runQuery(
+          "INSERT INTO `lift_map` VALUES (?, ?, 1, 1)",
+          [newLiftId, userId]).catch(error => {
             throw error;
           })
         
 
         res.end();
+      }
+    },
+    '/sendMessage': async (req, res, options) => {
+      if (!isOptionMissing(options, ['id', 'message'], res)) {
+        var message = options.message
+        var id = options.id
+        switch (message.type) {
+          case 1: // text
+            await runQuery("INSERT INTO `messages` (`CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (?, ?, ?, current_timestamp())",
+              [message.content, id, message.liftId]).catch(error => {
+              throw error
+              })
+            break
+          case 2: // audio blob
+            var blob = await (await fetch(dataURI)).blob();
+            await runQuery("INSERT INTO `messages` (`AUDIO`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (?, ?, ?, current_timestamp())",
+              [blob, id, message.liftId]).catch(error => {
+              throw error
+              })
+            break
+          case 3: // image blob
+            var blob = await (await fetch(dataURI)).blob(); 
+            await runQuery("INSERT INTO `messages` (`PICTURE`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (?, ?, ?, current_timestamp())",
+              [message.content, id, message.liftId]).catch(error => {
+              throw error
+              })
+            break
+        }
+        function dataURItoBlob(dataURI) {
+          // convert base64 to raw binary data held in a string
+          // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+          var byteString = atob(dataURI.split(',')[1]);
+
+          // separate out the mime component
+          var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
+
+          // write the bytes of the string to an ArrayBuffer
+          var ab = new ArrayBuffer(byteString.length);
+
+          // create a view into the buffer
+          var ia = new Uint8Array(ab);
+
+          // set the bytes of the buffer to the correct values
+          for (var i = 0; i < byteString.length; i++) {
+              ia[i] = byteString.charCodeAt(i);
+          }
+
+          // write the ArrayBuffer to a blob, and you're done
+          var blob = new Blob([ab], {type: mimeString});
+          return blob;
+
+        }
+        let result = await runQuery("SELECT MAX(ID) FROM `messages`",
+              []).catch(error => {
+              throw error
+              })
+        var id = result.result[0]['MAX(ID)'] + ''
+        console.log(typeof id)
+        res.end(id)
       }
     }
   }

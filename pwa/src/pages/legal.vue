@@ -1,7 +1,7 @@
 <template>
   <div class="q-ma-md">
     <q-btn @click="getContent" label="reload" icon="reload" />
-    <div>{{legalText}}</div>
+
     <div class="q-mt-xl">
       <div v-show="downloading == 1">
         <q-card-section>
@@ -28,18 +28,19 @@
         </q-card-section>
       </q-card>
     </div>
+    <div id="anchor">
+      <!-- here goes the content after downloading -->
+    </div>
   </div>
 </template>
 
 <script>
 import { sendApiRequest, GET_LEGAL } from "../ApiAccess";
-import showdown from '../js/showdownjs/src/converter.js'
 
 export default {
   name: 'Contact',
   mounted(){
 			this.$store.state.pageName = 'Rechtliches'
-			this.converter = new showdown.Converter()
 			this.getContent()
   },
   data(){
@@ -52,23 +53,15 @@ export default {
 	},
 	methods: {
 		getContent(){
-			
-				 this.started = true
+			this.started = true
 			this.downloading = 1
-      sendApiRequest(GET_LEGAL, {}, data => {
-				if(!data) alert('notiing')
-				this.makeHTMLFromMD(data)
+      sendApiRequest(GET_LEGAL, {}, html => {
+        if(!html) alert('notiing')
+        document.getElementById('anchor').innerHTML = html
+        this.downloading = 2
 			}, err => {
 				this.downloading = -1
 			})
-		},
-		makeHTMLFromMD(md){
-			var converter = this.showdown().makeHtml(md)
-		
-			debugger
-			
-				this.downloading = 2
-			
 		}
 	}
 	

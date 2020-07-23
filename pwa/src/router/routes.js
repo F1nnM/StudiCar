@@ -80,7 +80,7 @@ const routes = [{
 {
   path: '/auth',
   component: () =>
-    import('layouts/MainLayout.vue'),
+    import('layouts/without_nav.vue'),
   children: [{
     path: '/auth/anmeldung',
     name: 'signIn',

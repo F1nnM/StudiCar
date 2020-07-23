@@ -90,7 +90,7 @@
             Du hast noch keine Adressen hinterlegt, aus denen du auswählen könntest.
           </p>
           <q-item tag="label" v-for="address in getExactStartingPoints" :key="address.id">
-            <q-radio v-model="lift.startingPoint" :val="address.id" />
+            <q-radio v-model="lift.startAddressId" :val="address.id" />
             <q-item-section v-show="getImagePath(address.id)" avatar>
               <q-avatar rounded>
                 <img class="shadow-3 q-ma-none" :src="getImagePath(address.id)" />
@@ -110,7 +110,7 @@
         </q-list>
         <q-stepper-navigation>
           <q-btn flat @click="step--" color="primary" label="Eins zurück" class="q-ml-sm" />
-          <q-btn @click="step++" :disable="!lift.startingPoint" color="primary" label="Weiter" />
+          <q-btn @click="step++" :disable="!lift.startAddressId" color="primary" label="Weiter" />
         </q-stepper-navigation>
       </q-step>
 
@@ -229,10 +229,10 @@
             <div class="row overview">
               <div class="col-6">
                 <p class="text-subtitle1 q-mb-sm">
-                  {{getDataFromAddressId(lift.startingPoint).nickname}}
+                  {{getDataFromAddressId(lift.startAddressId).nickname}}
                   <span
                     class="text-caption q-ml-sm"
-                  >{{getDataFromAddressId(lift.startingPoint).city}}</span>
+                  >{{getDataFromAddressId(lift.startAddressId).city}}</span>
                 </p>
               </div>
               <div class="col-6 text-right">
@@ -315,7 +315,7 @@ export default {
       lift: {
         destination: 'school', // default set to school, user selects first home/school, then exact address
         destinationAddressId: 0,
-        startingPoint: 0,
+        startAddressId: 0,
         carId: null,
 				seats: 0, // just to avoid error when rendering slider
 				stops: [
@@ -402,8 +402,11 @@ export default {
       }
       return null
     }
+  },
 
-    
+  mounted() {
+    this.$store.commit('setPage', '')
+    this.$store.commit('setPageTrans', 'slide-up')
   },
 
   methods: {
@@ -497,11 +500,6 @@ export default {
 		getStopTime(stamp){
 			return date.formatDate(stamp, 'H:mm')
 		}
-  },
-
-  mounted() {
-    this.$store.commit('setPage', '')
-    this.$store.commit('setPageTrans', 'slide-up')
   }
 }
 

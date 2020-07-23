@@ -1,30 +1,44 @@
-<template>
-  <q-layout view="hHh lpR fFf">
+<template v-show="open">
+  <div>
     <div class="q-ma-none q-pa-none">
+      <!-- <span v-if="isLayoutOpen"></span> -->
       <q-dialog
         v-model="open"
         persistent
-        :maximized="true"
+        maximized
         transition-show="slide-up"
         transition-hide="slide-down"
+        @show="scrollDown()"
       >
-        <q-card class="bg-white text-white q-pa-none">
-          <q-header elevated class="bg-primary text-white">
-            <div class="row full-height">
-              <div class="col-9 bg-primary">
-                <q-toolbar class="text-white">
+        <q-layout
+          view="lhh LpR lff"
+          class="bg-white q-pa-none"
+        >
+          <q-header
+            reveal
+            elevated
+            class="bg-primary text-white"
+          >
+            <div class="row">
+              <div class="col-8 bg-primary row items-center">
+                <q-toolbar>
                   <q-toolbar-title>
-                    Title
-                    <q-space />
-                    <q-btn flat round dense icon="search" />
+                    Würzburg -> Ansbach
+                    <q-btn
+                      flat
+                      round
+                      dense
+                      icon="search"
+                    />
                   </q-toolbar-title>
                 </q-toolbar>
               </div>
-              <div class="col-3 bg-white text-primary">
-                <q-toolbar class="q-px-none">
-                  <q-toolbar-title class="q-pl-xs">
+
+              <div class="col-4 bg-white text-primary">
+                <q-toolbar>
+                  <q-toolbar-title>
                     <q-btn
-                      @click="openliftInfo = !openliftInfo"
+                      @click="openLiftInfo = true"
                       icon="info"
                       flat
                       v-ripple
@@ -32,172 +46,291 @@
                       dense
                       class="q-mr-sm"
                     />
-                    <q-btn v-ripple icon="close" flat round dense @click="$emit('close')" />
+                    <q-btn
+                      v-ripple
+                      icon="close"
+                      flat
+                      round
+                      dense
+                      @click="$emit('close')"
+                    />
                   </q-toolbar-title>
                 </q-toolbar>
               </div>
             </div>
           </q-header>
           <q-drawer
-            v-model="openliftInfo"
+            v-model="openLiftInfo"
             :width="300"
             :breakpoint="500"
             overlay
             side="right"
             bordered
+            behavior="mobile"
             style="bg-gray-3"
+            @show="loadLiftInfo"
+            @hide="loading = 0"
           >
             <div class="q-pa-md">
-              <p class="text-h6">Info</p>
-              <q-separator spaced />
-              <q-card flat bordered class="my-card bg-grey-1">
-                <q-card-section>
-                  <div class="row items-center no-wrap">
-                    <div class="col">
-                      <div class="text-h6">{{lift.car.brand}} {{lift.car.model}}</div>
-                      <div class="text-subtitle2">{{lift.car.type}} - {{lift.car.color}}</div>
-                    </div>
-
-                    <div class="col-auto">
-                      <q-btn color="grey-7" round flat icon="more_vert">
-                        <q-menu cover auto-close>
-                          <q-btn flat clickable @click="viewCar()">Modell online ansehen</q-btn>
-                        </q-menu>
-                      </q-btn>
-                    </div>
-                  </div>
-                </q-card-section>
-                <q-card-section>{{lift.car.number_plate}}</q-card-section>
-                <q-separator />
-              </q-card>
-              <q-card class="my-card" flat bordered>
-                <q-card-section horizontal>
-                  <q-card-section class="q-pt-xs">
-                    <div class="text-overline">Angeboten von</div>
-                    <div class="text-h5 q-mt-sm q-mb-xs">{{lift.created_by}}</div>
-                    <div class="text-caption text-grey">Lorem</div>
-                  </q-card-section>
-
-                  <q-card-section class="col-5 flex flex-center">
-                    <q-img class="rounded-borders" src="https://cdn.quasar.dev/img/parallax2.jpg" />
-                  </q-card-section>
-                </q-card-section>
-
-                <q-separator />
-              </q-card>
-              <q-list bordered>
-                <q-item-label header>
-                  <p>
-                    Mitfahrer
-                    <span
-                      class="text-caption float-right"
-                    >({{lift.users.length}} von {{lift.car.seats}} möglichen)</span>
+              <p class="text-h6 row items-center">
+                Info
+                <q-space />
+                <q-btn
+                  icon="close"
+                  flat
+                  round
+                  dense
+                  @click="openLiftInfo = false"
+                />
+              </p>
+              <q-slide-transition>
+                <div v-if="loading == 1">
+                  <q-separator spaced />
+                  <p class="q-mt-md text-center">
+                    Daten werden geladen
+                    <q-circular-progress
+                      indeterminate
+                      size="20px"
+                      color="primary"
+                      class="q-ma-md"
+                    />
                   </p>
-                </q-item-label>
-                <q-item v-for="item in lift.users" :key="item.uid">
-                  <q-item-section top avatar>
-                    <q-avatar>
-                      <img src="https://cdn.quasar.dev/img/avatar.png" />
-                    </q-avatar>
-                  </q-item-section>
+                </div>
+              </q-slide-transition>
+              <div v-if="loading == -1">
+                <q-card>
+                  <q-card-section>
+                    <p>
+                      <q-icon
+                        name="error_outline"
+                        size="md"
+                        color="negative"
+                      />Ein Fehler ist aufgetreten. Wenn das auftritt, dann
+                      <a href="#/contact">schreib uns</a> bitte.
+                    </p>
+                  </q-card-section>
+                </q-card>
+              </div>
+              <div v-if="loading == 2">
+                <q-card
+                  flat
+                  bordered
+                  class="my-card bg-grey-1"
+                >
+                  <q-card-section>
+                    <div class="row items-center no-wrap">
+                      <div class="col">
+                        <div class="text-h6">{{lift.car.brand}} {{lift.car.model}}</div>
+                        <div class="text-subtitle2">{{lift.car.type}}</div>
+                        <extHR
+                          :color="lift.car.color"
+                          size="xs"
+                        />
+                      </div>
 
-                  <q-item-section>
-                    <q-item-label>{{item.uid}}</q-item-label>
-                    <q-item-label caption lines="2">
-                      Musterstraße 4
-                      <br />84846 Holzheim
-                    </q-item-label>
-                  </q-item-section>
+                      <div class="col-auto">
+                        <q-btn
+                          color="grey-7"
+                          round
+                          flat
+                          icon="more_vert"
+                        >
+                          <q-menu
+                            cover
+                            auto-close
+                          >
+                            <q-btn
+                              flat
+                              clickable
+                              @click="viewCar()"
+                            >Modell online ansehen</q-btn>
+                          </q-menu>
+                        </q-btn>
+                      </div>
+                    </div>
+                  </q-card-section>
+                  <q-card-section>{{lift.car.licensePlate}}</q-card-section>
+                  <q-separator />
+                </q-card>
 
-                  <q-item-section side top>PRef</q-item-section>
-                </q-item>
-              </q-list>
+                <q-list bordered>
+                  <q-item-label header>
+                    <p v-if="lift.passengers.length > 0">
+                      Mitfahrer
+                      <span class="text-caption float-right">
+                        {{lift.passengers.length}} / {{lift.seats}}
+                        <q-icon
+                          name="airline_seat_recline_normal"
+                          size="xs"
+                        />belegt
+                      </span>
+                    </p>
+                    <p
+                      v-if="lift.passengers.length == 0"
+                      class="text-center q-pt-sm text-gray"
+                    >Bis jetzt hast du noch keine Mitfahrer.</p>
+                    <p
+                      class="text-right text-primary text-caption"
+                      v-if="lift.passengers.length == lift.seats"
+                    >Volles Auto. Wow!</p>
+                  </q-item-label>
+                  <q-item
+                    v-for="item in lift.passengers"
+                    :key="item.userId"
+                    clickable
+                    @click="alert"
+                  >
+                    <q-item-section
+                      top
+                      avatar
+                    >
+                      <q-avatar>
+                        <img :src="getImageOfUser(item.userId)" />
+                      </q-avatar>
+                    </q-item-section>
+
+                    <q-item-section>
+                      <q-item-label>{{item.nameOfUser}}</q-item-label>
+                      <q-item-label caption>
+                        <div class="row">
+                          <div class="col-3">
+                            <p :class="'text-' + pref.talk.toLowerCase()">●</p>
+                          </div>
+                          <div class="col-3">
+                            <p :class="'text-' + pref.talkMorning.toLowerCase()">●</p>
+                          </div>
+                          <div class="col-3">
+                            <p :class="'text-' + pref.smoking.toLowerCase()">●</p>
+                          </div>
+                          <div class="col-3">
+                            <p :class="'text-' + pref.music.toLowerCase()">●</p>
+                          </div>
+                        </div>
+                      </q-item-label>
+                    </q-item-section>
+
+                    <q-item-section
+                      side
+                      top
+                    >
+                      <q-icon
+                        name="directions_car"
+                        v-if="item.userId == user"
+                        size="sm"
+                      />
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </div>
             </div>
           </q-drawer>
-
-          <div class="q-pa-md bg-white">
-            <!-- v-touch-swipe.mouse.right="goBack" -->
-            <q-page-scroller
-              reverse
-              position="bottom-right"
-              :scroll-offset="1000"
-              :duration="50"
-              :offset="[10, 18]"
+          <q-page-container>
+            <div
+              class="q-pa-md bg-white scroll overflow-hidden"
+              id="scrollTarget"
             >
-              <q-page-sticky position="bottom-right" :offset="[18, 18]">
-                <q-btn fab icon="add" color="accent" />
-              </q-page-sticky>
-            </q-page-scroller>
-            <br />
-            <br />
-            <br />
-            <div v-for="item in lift.messages" :key="item.timestamp">
-              <q-chat-message
-                class="custom-chat-label q-mt-xl"
-                v-if="checkDayBreak(item) != ''"
-                :label="checkDayBreak(item)"
-              />
-              <q-chat-message
-                :name="item.sender == user ? '' : '' + item.sender"
-                :sent="item.sender == user"
-                size="8"
-                :text="item.audio ? [] : [item.content]"
-                :stamp="formatDate(item)"
-                :bg-color="getColor(item.sender)"
+              <!-- v-touch-swipe.mouse.right="goBack" -->
+              <q-page-scroller
+                reverse
+                position="bottom-right"
+                :scroll-offset="1000"
+                :duration="50"
+                :offset="[10, 18]"
               >
-                <div v-if="item.audio">
-                  <audio
-                    v-if="item.audio"
-                    :src="makeBLOB(item.audio)"
-                    controls
-                  >Dein Browser unterstützt keine Audios.</audio>
-                  <div>
-                    <p>[Custom Controls]</p>
-                  </div>
-                </div>
-              </q-chat-message>
-            </div>
-            <br />
-            <br />
-            <br />
-          </div>
+                <q-page-sticky
+                  position="bottom-right"
+                  :offset="[18, 18]"
+                >
+                  <q-btn
+                    fab
+                    icon="add"
+                    color="accent"
+                  />
+                </q-page-sticky>
+              </q-page-scroller>
 
-          <q-footer elevated class="bg-grey-8 text-white">
-            <q-toolbar class="row">
-              <extHR color="primary" size="xs" />
-              <div class="col-xs-10 col-md-11 bg-grey-3">
-                <q-btn flat dense icon="call_split" v-if="false"></q-btn>
-                <q-toolbar-title>
-                  <template>
-                    <div>
-                      <q-form @submit="sendMessage" @input="alert()" class="q-gutter-md q-pa-none">
-                        <q-input
-                          type="text"
-                          class="custom-input q-pa-none"
-                          v-model="messageText"
-                          placeholder="Schreibe etwas..."
-                        />
-                      </q-form>
+              <div
+                v-for="item in messages.list"
+                :key="item.timestamp"
+              >
+                <q-chat-message
+                  class="custom-chat-label q-mt-xl text-gray"
+                  v-if="checkDayBreak(item) != ''"
+                  :label="checkDayBreak(item)"
+                />
+                <div>
+                  <q-chat-message
+                    :name="item.userId == user ? '' : item.nameOfUser"
+                    :sent="item.userId == user"
+                    size="8"
+                    text-sanitize
+                    :text="item.type == 2 ? [] : [item.content]"
+                    :stamp="formatDate(item)"
+                    :bg-color="getColor(item.userId)"
+                  >
+                    <div v-if="item.type == 2">
+                      <audio
+                        v-if="item.type == 2"
+                        :src="makeAudioSRC(item.content)"
+                        controls
+                      >Dein Browser unterstützt keine Audios.</audio>
+                      <div>
+                        <p>[Custom Controls]</p>
+                      </div>
                     </div>
-                  </template>
-                </q-toolbar-title>
+                  </q-chat-message>
+                </div>
+              </div>
+              <span id="endOfPage"></span>
+            </div>
+          </q-page-container>
+
+          <q-footer
+            reveal
+            class="q-pa-none text-white"
+          >
+            <extHR
+              color="primary"
+              size="xs"
+            />
+            <div class="row">
+              <div class="col-xs-10 col-md-11 bg-grey-3">
+                <q-btn
+                  flat
+                  dense
+                  icon="call_split"
+                  v-if="false"
+                ></q-btn>
+                <q-toolbar>
+                  <q-toolbar-title>
+                    <q-form
+                      @submit="sendMessage"
+                      class="q-gutter-md q-pa-none"
+                    >
+                      <q-input
+                        type="text"
+                        class="custom-input q-pa-none"
+                        v-model="messageText"
+                        placeholder="Schreibe etwas..."
+                      />
+                    </q-form>
+                  </q-toolbar-title>
+                </q-toolbar>
               </div>
 
-              <div class="col-xs-2 col-md-1 bg-white text-center">
-                <div class="full-height full-width q-py-sm">
-                  <vue-record-audio
-                    :style="'transform: scale(' +  (recorderBig ? 2.4 : 1) + ')'"
-                    v-show="!messageText"
-                    mode="hold"
-                    @result="sendMessage"
-                    @onContextMenu="false"
-                    @stream="recorderBig = true"
-                    class="record-audio"
-                  />
-                </div>
+              <div class="col-xs-2 bg-white text-center">
+                <vue-record-audio
+                  :style="'transform: scale(' +  (recorderBig ? 2.4 : 1) + ')'"
+                  v-show="!messageText"
+                  mode="hold"
+                  @result="sendAudio"
+                  @onContextMenu="false"
+                  @stream="recorderBig = true"
+                  class="record-audio"
+                />
 
                 <q-btn
-                  @click="sendMessage()"
+                  @click="sendMessage(1)"
                   icon="arrow_forward_ios"
                   flat
                   v-show="messageText"
@@ -207,63 +340,83 @@
                   style="transition: all .1s"
                 />
               </div>
-            </q-toolbar>
+            </div>
           </q-footer>
-        </q-card>
+        </q-layout>
       </q-dialog>
     </div>
-  </q-layout>
+  </div>
 </template>
 
 <script>
 
-import { openURL } from 'quasar'
-
-import { date } from 'quasar'
+import { openURL, date, scroll } from 'quasar'
 import extHR from 'components/extended_hr'
+import liftInfoDrawer from 'components/liftInfoDrawer'
+import { sendApiRequest, SQL_SEND_MESSAGE, SQL_GET_LIFT_INFO } from '../ApiAccess'
+
+const { getScrollPosition, setScrollPosition } = scroll
 
 
 export default {
   name: 'LiftPopup',
   components: {
-    extHR
+    extHR,
+
+  },
+  data () {
+    return {
+      openLayout: true,
+      closing: false,
+      alreadyScrolledDown: false,
+      coloredIDs: {},
+      recorderBig: false,
+      openLiftInfo: false,
+      messageText: '',
+      user: this.$store.getters['auth/user'].id,
+      lift: {
+        car: {
+          brand: '',
+          model: '',
+          color: '',
+          type: '',
+          licensePlate: ''
+        },
+        passengers: [],
+        seats: 0 // all "empty" data just to avoid errors when calling variables
+      },
+      loading: 0 // as always: 0 means not loading, 1 means in progress, 2 means success and -1 error.
+    }
   },
   props: {
     open: {
       type: Boolean,
       required: true
     },
-		liftProp:{
-			type: Object, // not required to avoid error messages
-				id: {
-						type: Number,
-						required: true
-				},
-				title:{
-						type: String,
-						required: true
-				},
-				time: {
-						type: Number
-				},
-				last: {
-					type: Object,
-					user:{
-							type: String,
-							required: true
-					},
-					last_message: {
-							type: String,
-							required: true
-					}
-				}
-			}
-    },
+    messages: {
+      type: Object,	// not required to avoid error messages
+      list: [] // I have chosen this unusual way because Array as type didn't work. So I give messages as property and take the real data from the inner array
+    }
+  },
   computed: {
-    
+    liftId () {
+      var firstMessage = this.messages.list[0] || { firstId: 1 } // when no messages selected, just give 1 as parameter
+      return firstMessage.liftId
+    },
+    isLayoutOpen () {
+      // if(!this.open && !this.closing){
+      //   this.closing = true
+      //   setTimeout(_=>{
+      //     this.openLayout = false
+      //   }, 500) // 500ms after getting the close trigger layout will be hidden, because otherwise it would still be visible and just a blank area below the last messages
+      //   return true
+      // }
+
+      return true
+    }
   },
 
-  mounted(){
+  mounted () {
 
     //  document.getElementById("recordButton").onmousedown = (event) => {
     //    event.preventDefault()
@@ -274,112 +427,21 @@ export default {
     //    event.preventDefault()
     //    this.sendAudio()
     //  }
-     
-  },
-  ready(){
-    if(this.open){
-      setTimeout(() => window.scrollTo(0,1000000), 200)
-    }
-  },
-  data(){
-    
-    return{
-      recorderBig: false,
-      openliftInfo: false,
-      messageText: '',
-      user: 61668646,
-      lift: {
-        id: 64165,
-        created_by: 61668646,
-        created_at: 1573618642779,
-        users: [
-          {
-            uid: 61668646
-          },
-          {
-            uid: 65163163
-          },
-          {
-            uid: 611655814
-          },
-          {
-            uid: 61565165
-          }
-            
-        ],
-        car: {
-            brand: "Audi",
-            model: "A3",
-            color: "grün",
-            type: "Limousine",
-            number_plate: "B-HU-569",
-            seats: 4
-        },
-        messages: [
-            {
-                sender: 61668646,
-                timestamp: 1580778889523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },
-            {
-                sender: 65163163,
-                timestamp: 1581778889523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },{
-                sender: 61565165,
-                timestamp: 1582778889523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus','Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },
-            {
-                sender: 61668646,
-                timestamp: 1583778889523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },
-            {
-                sender: 65163163,
-                timestamp: 1584778889523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },{
-                sender: 61668646,
-                timestamp: 1585778889523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },
-            {
-                sender: 65163163,
-                timestamp: 1586210889523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus','Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },
-            {
-                sender: 611655814,
-                timestamp: 1586297289523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },{
-                sender: 65163163,
-                timestamp: 1586470089523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus','Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },
-            {
-                sender: 61668646,
-                timestamp: 1586642889523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },
-            {
-                sender: 65163163,
-                timestamp: 1586646489523,
-                content: ['Kein Content'],
-            }
-        ]
-      }
-    }
-  },
 
+  },
 
   methods: {
-    makeBLOB(data){
-      try{
-        return window.URL.createObjectURL(data)
+    getImageOfUser (id) {
+      return require('../assets/sad.svg')
+    },
+
+    makeBLOB (data) {
+      try {
+        var s = window.URL.createObjectURL(data)
+        var blob = new Blob(s, { type: "application/json" });
+        return blob
       }
-      catch(e){
+      catch (e) {
         console.error('---')
         console.error('could not make BLOB')
         console.error('---')
@@ -387,122 +449,219 @@ export default {
       }
     },
 
-    alert(){
+    alert () {
       alert('köb')
     },
 
-    getColor(user){
-      if(user == this.user){ // Sent messages have special color
-        return 'light-blue-2'
-      }
-      else{
+    getColor (userId) {
+      if (userId == this.user) return 'light-blue-2' // Sent messages have special color
+      else {
         /* just some standard colors from the quasar palette: */
         var dark = ['deep-purple-10', 'indigo-10', 'teal-10', 'lime-10', 'brown', 'grey-10', 'red-14', 'blue-grey-10'] // dark/colorful selection
         var light = ['red-3', 'indigo-3', 'purple-2', 'blue-1', 'green-3', 'yellow-3', 'orange-4', 'deep-orange-2', 'brown-4', 'grey-6']
-
-        var colors = light
-        
-        var obj = this.lift.users.find(o => o.uid == user)
-        var pos = this.lift.users.indexOf(obj)
-        //console.log(user + ': ' + pos)
-        var color = 'black'
-        try{
-        color = colors[pos];
-        } catch(e){
-          console.warn('Error at selecting color for user ' + user)
+        if (!this.coloredIDs[userId]) {
+          // userId hasn't been colored so far, we have to assign new color
+          // colors are assigned one after another. So we just have to get the numbers of properties of coloredIDs and know, which color will be assigned next
+          var next = Object.keys(this.coloredIDs).length
+          this.coloredIDs[userId] = light[next]
         }
-        return color
+        return this.coloredIDs[userId]
       }
     },
 
-    checkDayBreak(item){ // when a parameter is given, return true or false. When no parameter is given, returns the text of the label
-      var pos = this.lift.messages.indexOf(item)
-      
-      var label = ''
-      
-      if(pos > 0){
-        var preceder = this.lift.messages[pos-1]
-        
-        var same_day = date.isSameDate(new Date(item.timestamp), new Date(preceder.timestamp), 'day') // immer neuerer Zeitpunkt zuerst
-        var same_month = date.isSameDate(new Date(item.timestamp), new Date(preceder.timestamp), 'month') // immer neuerer Zeitpunkt zuerst
+    checkDayBreak (message) {
+      // when a parameter is given, return true or false. When no parameter is given, returns the text of the label
+      // currently function is always called with a parameter given
+      var pos = this.messages.list.indexOf(message)
 
-        //console.warn('item: ' + item.sender + ', Vorgänger: ' + preceder.sender + ' is? : ' + (same_day && same_month))
-          var diff = date.getDateDiff(new Date(), new Date(item.timestamp), 'days')
-          if(!(same_day && same_month)){ // checks whether the item and its preceder are not the same day (and not the same month)
-            if(diff == 0){
-              label = 'Heute'
-            }
-            else if(diff == 1){
-              label = 'Gestern'
-            }
-            else if(diff == 2){
-              label = 'Vorgestern'
-            }
-            else{
-              label = 'Vor ' + diff + ' Tagen'
-            }
-          }
+      var label = false
+
+      if (!this.open) return
+
+      if (pos > 0) {
+        var preceder = this.messages.list[pos - 1] // preceder is the older message
+
+        var sameDay = date.isSameDate(new Date(message.timestamp), new Date(preceder.timestamp), 'day') // alwast newest time first at this function
+        var sameMonth = date.isSameDate(new Date(message.timestamp), new Date(preceder.timestamp), 'month')
+
       }
+      else if (pos == 0) {
+        // though check timestamp of message
+        var sameDay = date.isSameDate(new Date(message.timestamp), new Date(), 'day')
+        var sameMonth = date.isSameDate(new Date(message.timestamp), new Date(), 'month')
+      }
+
+      var diff = date.getDateDiff(new Date(), new Date(message.timestamp), 'days')
+
+      // if you have the order the other way round (newest on top of list and oldest on bottom), then just swap the two params
+
+      if (!sameDay) { // checks whether the item and its preceder are not the same day (and not the same month)
+        switch (diff) {
+          case 0: label = 'Heute'
+            break
+          case 1: label = 'Gestern'
+            break
+          case 3: label = 'Vorgestern'
+            break
+          default: label = 'Vor ' + diff + ' Tagen'
+        }
+      }
+      return label
 
       //console.warn(label)
 
       return label
-      
+
     },
 
-    formatDate(item){
+    formatDate (item) {
       // var fullDate = date.formatDate(item.timestamp, 'DD.MM.YYYY - H:mm')
       var normalDate = date.formatDate(item.timestamp, 'H:mm')
       return normalDate
     },
 
-    false(){
+    false () {
       return false
     },
 
-    preventDefault(e){
+    scrollDown () {
+      // setTimeout(_=> {
+      //   var target = getScrollTarget('endOfPage')
+      //   setScrollPosition (target, target.offsetTop, 0)
+      // }, 100)
+    },
+
+    preventDefault (e) {
       e.preventDefault()
     },
 
-    sendMessage(data){
+    makeAudioSRC (buffer) {
+      const blob = new Blob([buffer], { type: 'audio/mp3' })
+      console.warn(blob)
+      return window.URL.createObjectURL(blob)
+    },
+
+    sendAudio (blob) {
+      this.sendMessage(2, blob)
+    },
+
+    sendMessage (type, blob) {
       this.recorderBig = false
-      var json = JSON.stringify(data)
-      var blob = new Blob([json], {type: "application/json"})
+      var msgObj = {
+        content: '',
+        type: 0, // 1 means raw text, 2 means audio, 3 means image (hopefully will come in the future)
+        liftId: this.messages.list[0].liftId, // all from same lift, doesn't matter which one is taken
+        timestamp: Date.now()
+      }
+      switch (type) {
+        case 1: // only text
+        default: // when no type is given, propably sent from form which doesn't give any parameters, but still text
+          msgObj.content = this.messageText
+          msgObj.type = 1
+          break
+        case 2: // audio
+          msgObj.type = 2
+          var content = makeBinary(blob)
+
+          if (!content) {
+            break
+            return
+          }
+          msgObj.content = content
+          break
+        case 3:
+          var content = makeBinary(blob)
+          if (!content) return
+          msgObj.content = content
+          msgObj.type = 3
+          break
+      }
+
+
+      function makeBinary (blob) {
+        try {
+          return window.URL.createObjectURL(blob)
+        }
+        catch (e) {
+          return false
+        }
+      }
+
       console.log(blob)
       console.log(JSON.stringify(blob))
+      sendApiRequest(SQL_SEND_MESSAGE, {
+        id: this.user,
+        message: msgObj
+      }, data => { // is id of just inserted row
+        // check whether last message was from this user
+        msgObj.messageId = data
+        msgObj.nameOfUser = this.$store.getters['auth/user'].name.split(' ')[0]
+        msgObj.userId = this.user
+        msgObj.destination = this.messages.list[0].destination // just copy the remaining properties from the other messages
+        msgObj.start = this.messages.list[0].start
+        this.messages.list.push(msgObj)
+        this.messages.list.sort((a, b) => {
+          return a.timestamp < b.timestamp
+        })
+      }, error => {
+        throw error
+      })
 
-      // check whether last message was from this user
-      var lastMsg = this.lift.messages[this.lift.messages.length - 1]
-      if(lastMsg.sender == this.user && !data){
-        // yes, last message was from this user
-        lastMsg.content.push(this.messageText)
-      }
-      else{
-        var newMsg = {
-          sender: this.user,
-          timestamp: (new Date()).getTime(),
-          content: data? [] : [this.messageText],
-          audio: data // when no data, 
-        }
-        this.lift.messages.push(newMsg)
-      }
+
       this.messageText = ''
-      setTimeout(() => window.scrollTo(0,1000000), 100)
+      setTimeout(() => window.scrollTo(0, 1000000), 100)
     },
 
-    viewCar(){
+    viewCar () {
       var car = this.lift.car
       var search = car.brand + '+' + car.model.replace(' ', '') + '+' + car.type + '+' + this.lift.car.color
-      openURL('https://www.ecosia.org/images?q=' + search)
+      openURL('https://www.ecosia.org/images?q=' + search) // easiest way, real images from db would be an extra study exam for laws student
     },
 
-    goBack(){
-      this.$emit('pagetrans_slide')
-      this.chatOpen = false
-      this.$store.commit('setPageTrans', 'collapse')
-      window.location.href = '/#/chats'
-      
+    loadLiftInfo () {
+      if (this.loading != 1) { // just in case this function is called more times, this is a catcher
+        this.loading = 1
+        var t = setTimeout(_ => {
+          loading = -1 // simple request timeout after 10sec, I have built it because there were some issues I had no idea where they were coming from
+        }, 10000)
+        sendApiRequest(SQL_GET_LIFT_INFO, {
+          id: this.liftId
+        }, lift => {
+          try {
+            this.loading = 2
+            this.lift = lift // data is structured exact like "empty" values above
+            clearTimeout(t)
+          }
+          catch (e) {
+            alert('error: ' + e)
+            this.loading = -1
+            clearTimeout = -1
+          }
+
+        }, error => {
+          this.loading = -1
+          alert('errr')
+          clearTimeout(t)
+        })
+      }
+
     }
+
   }
 }
 </script>
+
+<style scoped lang="scss">
+.hiding {
+  animation: hide 0.8s forwards;
+}
+@keyframes hide {
+  0%,
+  99% {
+    visibility: visible;
+  }
+  100% {
+    visibility: hidden;
+  }
+}
+</style>

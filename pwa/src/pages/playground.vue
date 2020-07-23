@@ -7,30 +7,6 @@
 
     <q-slider v-model="splitterModel" :min="0" :max="100" />
 
-    <!-- <q-splitter
-      horizontal
-      id="photos"
-      v-model="splitterModel"
-      :limits="[0, 100]"
-      :style="splitterStyle"
-      before-class="overflow-hidden"
-      after-class="overflow-hidden"
-      disable
-    >
-      <template v-slot:before>
-        <img :src="imageUrl" :height="height" class="absolute-top-left" />
-      </template>
-
-      <template v-slot:after>
-        <img
-          :src="imageUrl"
-          :style="'filter: grayscale(' + grayscale + '%)'"
-          :height="height"
-          class="absolute-bottom-left"
-        />
-      </template>
-    </q-splitter>-->
-
     <div class="row">
       <q-img
         class="col-3"
