@@ -7,6 +7,7 @@
     </q-header>
     <q-page-container>
       <router-view v-if="$store.getters['auth/signinLoaded']" />
+      <LoadingScreen v-else />
     </q-page-container>
   </q-layout>
 </template>
@@ -19,7 +20,7 @@ import LoadingScreen from 'components/LoadingScreen'
 export default {
   name: 'without_nav',
   components: {
-    
+    LoadingScreen
   }
 }
 </script>

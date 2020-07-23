@@ -5,27 +5,48 @@
         <div class="q-px-md q-py-sm">
           <q-card>
             <div>
-              <q-img spinner-color="primary" spinner-size="82px" :src="ppPath">
+              <q-img
+                spinner-color="primary"
+                spinner-size="82px"
+                :src="ppPath"
+              >
                 <template v-slot:error>
-                  <div
-                    class="absolute-full flex flex-center text-white"
-                  >Wir konnten dein Bild leider nicht laden. Bitte gehe online, um dein Profilbild zu sehen.</div>
+                  <div class="absolute-full flex flex-center text-white">Wir konnten dein Bild leider nicht laden. Bitte gehe online, um dein Profilbild zu sehen.</div>
                 </template>
               </q-img>
-              <q-badge floating class="q-pa-none" style="background-color: transparent;">
-                <q-btn round color="black" size="sm" icon="edit" @click="openUpload = true" />
+              <q-badge
+                floating
+                class="q-pa-none"
+                style="background-color: transparent;"
+              >
+                <q-btn
+                  round
+                  color="black"
+                  size="sm"
+                  icon="edit"
+                  @click="openUpload = true"
+                />
               </q-badge>
             </div>
 
             <q-card-section class="row">
-              <div
-                class="col-8 text-h5 text-weight-light text-left q-mt-none q-mb-xs custom-overline c-o-1 c-o-l c-o-sm"
-              >
+              <div class="col-8 text-h5 text-weight-light text-left q-mt-none q-mb-xs custom-overline c-o-1 c-o-l c-o-sm">
                 {{username}}
-                <q-btn dense icon="settings" flat size="sm">
-                  <q-menu transition-show="jump-down" transition-hide="jump-up">
+                <q-btn
+                  dense
+                  icon="settings"
+                  flat
+                  size="sm"
+                >
+                  <q-menu
+                    transition-show="jump-down"
+                    transition-hide="jump-up"
+                  >
                     <q-list>
-                      <q-item clickable disable>
+                      <q-item
+                        clickable
+                        disable
+                      >
                         <q-item-section>
                           <q-btn>Mein Passwort ändern</q-btn>
                         </q-item-section>
@@ -35,11 +56,20 @@
                           <SignOutButton class="q-ma-sm full-width" />
                         </q-item-section>
                       </q-item>
-                      <q-item clickable disable>
+                      <q-item
+                        clickable
+                        disable
+                      >
                         <q-item-section>
                           <q-item-label>
-                            <q-toggle v-model="dataSaver" label="Datennutzung reduzieren">
-                              <q-icon size="sm" name="info">
+                            <q-toggle
+                              v-model="dataSaver"
+                              label="Datennutzung reduzieren"
+                            >
+                              <q-icon
+                                size="sm"
+                                name="info"
+                              >
                                 <q-tooltip
                                   content-class="text-white bg-black"
                                   anchor="top middle"
@@ -56,7 +86,11 @@
                 </q-btn>
               </div>
               <p class="col-4">
-                <q-btn icon="select_all" @click="shareProfileQR = true" flat />
+                <q-btn
+                  icon="select_all"
+                  @click="shareProfileQR = true"
+                  flat
+                />
               </p>
             </q-card-section>
           </q-card>
@@ -65,18 +99,28 @@
 
       <template v-slot:after>
         <q-list class="shadow-2 rounded-borders">
-          <q-item-label header class="q-pt-xs q-pb-xs text-uppercase text-caption">Statistik</q-item-label>
+          <q-item-label
+            header
+            class="q-pt-xs q-pb-xs text-uppercase text-caption"
+          >Statistik</q-item-label>
           <q-item>Fahrten angeboten: {{liftsOffered}}</q-item>
           <q-item>Fahrten gesamt: {{liftsAll}}</q-item>
           <q-item>Durchschnitt: {{liftAverage}}/W</q-item>
 
-          <q-item-label header class="q-pt-xs q-pb-xs text-uppercase text-caption">Dabei seit</q-item-label>
+          <q-item-label
+            header
+            class="q-pt-xs q-pb-xs text-uppercase text-caption"
+          >Dabei seit</q-item-label>
           <q-item>{{since}}</q-item>
         </q-list>
       </template>
     </q-splitter>
 
-    <qrGen @close="shareProfileQR = false" :show="shareProfileQR" :input="secureInput" />
+    <qrGen
+      @close="shareProfileQR = false"
+      :show="shareProfileQR"
+      :input="secureInput"
+    />
 
     <div class="q-py-md q-px-none">
       <q-tabs
@@ -88,8 +132,14 @@
         align="justify"
         narrow-indicator
       >
-        <q-tab name="data" label="Meine Daten" />
-        <q-tab name="reservoir" label="Reservoir" />
+        <q-tab
+          name="data"
+          label="Meine Daten"
+        />
+        <q-tab
+          name="reservoir"
+          label="Reservoir"
+        />
       </q-tabs>
 
       <q-separator />
@@ -101,7 +151,10 @@
         transition-prev="slide-right"
         transition-next="slide-left"
       >
-        <q-tab-panel name="data" class="q-mt-sm q-pt-none">
+        <q-tab-panel
+          name="data"
+          class="q-mt-sm q-pt-none"
+        >
           <div class="q-pa-sm shadow-1">
             <p class="text-uppercase text-caption q-mt-none q-mb-xs">Über Mich</p>
 
@@ -116,7 +169,13 @@
             <div class="row q-pt-md">
               <p class="text-uppercase text-caption q-mb-none col-10">Kurzbeschreibung</p>
               <div class="col-2">
-                <q-btn size="sm" flat color="black" icon="edit" @click="toggleOpenEditDescription" />
+                <q-btn
+                  size="sm"
+                  flat
+                  color="black"
+                  icon="edit"
+                  @click="toggleOpenEditDescription"
+                />
               </div>
               <div class="q-pa-sm">{{description}}</div>
             </div>
@@ -129,7 +188,12 @@
                 <div class="text-uppercase text-caption q-mt-none q-mb-xs">
                   Präferenzen
                   <br />im Auto
-                  <q-btn size="sm" flat @click="toggleOpenEditPrefs()" icon="edit" />
+                  <q-btn
+                    size="sm"
+                    flat
+                    @click="toggleOpenEditPrefs()"
+                    icon="edit"
+                  />
                 </div>
                 <div class="row">
                   <div class="col-9">Redseligkeit</div>
@@ -151,7 +215,12 @@
 
                   <div class="col-12 text-h5 text-right">
                     {{liftMaxDistance}} km
-                    <q-btn size="sm" flat @click="toggleEditLiftMaxDistance" icon="edit" />
+                    <q-btn
+                      size="sm"
+                      flat
+                      @click="toggleEditLiftMaxDistance"
+                      icon="edit"
+                    />
                   </div>
                 </div>
               </div>
@@ -197,7 +266,11 @@
               class="text-weight-light"
             >Du hast noch keine Adressen hinzugefügt</div>
             <q-list>
-              <div class="row" v-for="item in addresses" :key="item.id">
+              <div
+                class="row"
+                v-for="item in addresses"
+                :key="item.id"
+              >
                 <q-item class="col-10">
                   <div class="row">
                     <q-item-section
@@ -211,9 +284,7 @@
                       <q-item-label>{{item.street}} {{item.number}}</q-item-label>
                       <q-item-label caption>
                         {{item.postcode}}
-                        <span
-                          style="display: inline-block; max-width: 70%;"
-                        >{{item.city}}</span>
+                        <span style="display: inline-block; max-width: 70%;">{{item.city}}</span>
                       </q-item-label>
                     </q-item-section>
                   </div>
@@ -247,10 +318,19 @@
                 />
               </div>
               <p class="col-2">
-                <q-btn size="sm" flat @click="openEditCars = !openEditCars" icon="edit" />
+                <q-btn
+                  size="sm"
+                  flat
+                  @click="openEditCars = !openEditCars"
+                  icon="edit"
+                />
               </p>
               <q-slide-transition>
-                <p v-show="openEditCars" dense class="q-ma-none text-caption">
+                <p
+                  v-show="openEditCars"
+                  dense
+                  class="q-ma-none text-caption"
+                >
                   Hinweis: Deine Aktionen werden sofort synchronisiert, der Haken blendet nur die Knöpfe aus.
                   <br />
                 </p>
@@ -280,12 +360,20 @@
                     />
                   </div>
                 </q-slide-transition>
-                <q-img src="~assets/app-logo.svg" style="height: 15vh;">
+                <q-img
+                  src="~assets/app-logo.svg"
+                  style="height: 15vh;"
+                >
                   <div class="absolute-bottom">
                     <div class="text-h6">{{item.brand}}</div>
                     <div class="text-caption">
                       {{item.model}}
-                      <q-btn icon="info" @click="showCarInfo(item)" flat size="md" />
+                      <q-btn
+                        icon="info"
+                        @click="showCarInfo(item)"
+                        flat
+                        size="md"
+                      />
                     </div>
                   </div>
                 </q-img>
@@ -295,7 +383,11 @@
         </q-tab-panel>
       </q-tab-panels>
 
-      <q-dialog v-model="openEditDescription" persistent full-width>
+      <q-dialog
+        v-model="openEditDescription"
+        persistent
+        full-width
+      >
         <q-card>
           <q-card-section>
             <div class="text-h6">Kurzinfo</div>
@@ -313,11 +405,24 @@
               autofocus
               @keyup.enter="prompt = false"
             />
-            <q-btn class="col-2" icon="clear" flat size="sm" @click="newDescription = ''" />
+            <q-btn
+              class="col-2"
+              icon="clear"
+              flat
+              size="sm"
+              @click="newDescription = ''"
+            />
           </q-card-section>
 
-          <q-card-actions align="right" class="text-primary">
-            <q-btn flat label="Abbrechen" v-close-popup />
+          <q-card-actions
+            align="right"
+            class="text-primary"
+          >
+            <q-btn
+              flat
+              label="Abbrechen"
+              v-close-popup
+            />
             <q-btn
               :disabled="!atLeastFiveWords"
               flat
@@ -329,13 +434,19 @@
         </q-card>
       </q-dialog>
 
-      <q-dialog v-model="openUpload" full-width>
+      <q-dialog
+        v-model="openUpload"
+        full-width
+      >
         <q-card>
           <q-card-section>
             <div class="q-pa-md column items-start q-gutter-y-md">
               <p class="text-h6">Lade dein neues Bild hoch</p>
               <q-slide-transition>
-                <div v-if="!file" class="full-width">
+                <div
+                  v-if="!file"
+                  class="full-width"
+                >
                   <!-- this area will be shown when no image has been selected yet -->
                   <q-file
                     @input="loadFile"
@@ -346,7 +457,10 @@
                 </div>
               </q-slide-transition>
               <q-slide-transition>
-                <div v-if="file" class="row full-width">
+                <div
+                  v-if="file"
+                  class="row full-width"
+                >
                   <!-- and this area will be shown when not no image has been selected yet -->
                   <div class="col-8 text-center">
                     <canvas
@@ -364,7 +478,11 @@
                     />
                     <br />
                     <br />
-                    <q-btn flat icon="backspace" @click="file = null" />
+                    <q-btn
+                      flat
+                      icon="backspace"
+                      @click="file = null"
+                    />
                   </div>
                 </div>
               </q-slide-transition>
@@ -373,7 +491,10 @@
                 v-if="!file"
                 class="text-caption"
               >Bitte stelle sicher, dass du auf dem Bild gut zu sehen bist. Vergewissere dich außerdem, dass du berechtigt bist, dieses Bild hochzuladen.</p>
-              <p v-if="file" class="text-caption">
+              <p
+                v-if="file"
+                class="text-caption"
+              >
                 Wir haben dein Bild etwas zugeschnitten, damit es den Abmessungen für Profilbilder entspricht.
                 Aktuell kannst du den Ausschnitt leider noch nicht selbst einstellen, wir arbeiten aber daran.
               </p>
@@ -382,7 +503,12 @@
         </q-card>
       </q-dialog>
 
-      <q-dialog v-model="editDistance" full-height full-width persistent>
+      <q-dialog
+        v-model="editDistance"
+        full-height
+        full-width
+        persistent
+      >
         <q-card class="column full-height">
           <q-card-section class="q-pb-none">
             <div class="text-h6">Entfernung einstellen</div>
@@ -406,19 +532,40 @@
             />
             <div style="min-height: 30vh;"></div>
           </q-card-section>
-          <q-card-actions align="right" class="text-primary">
-            <q-btn flat label="Abbrechen" v-close-popup />
-            <q-btn flat label="Speichern" @click="toggleEditLiftMaxDistance" v-close-popup />
+          <q-card-actions
+            align="right"
+            class="text-primary"
+          >
+            <q-btn
+              flat
+              label="Abbrechen"
+              v-close-popup
+            />
+            <q-btn
+              flat
+              label="Speichern"
+              @click="toggleEditLiftMaxDistance"
+              v-close-popup
+            />
           </q-card-actions>
         </q-card>
       </q-dialog>
 
-      <q-dialog v-model="carInfoOpen" position="bottom">
+      <q-dialog
+        v-model="carInfoOpen"
+        position="bottom"
+      >
         <q-card>
           <q-card-section class="row items-center q-pb-none">
             <div class="text-h6 custom-underline c-u-4 c-u-l c-u-md">Infos zum Fahrzeug</div>
             <q-space />
-            <q-btn icon="close" flat round dense v-close-popup />
+            <q-btn
+              icon="close"
+              flat
+              round
+              dense
+              v-close-popup
+            />
           </q-card-section>
           <q-card-section>
             <div class="row">
@@ -437,7 +584,10 @@
               </div>
             </div>
           </q-card-section>
-          <extHR :color="carInfo.color ? carInfo.color : 'black'" size="xs" />
+          <extHR
+            :color="carInfo.color ? carInfo.color : 'black'"
+            size="xs"
+          />
           <q-card-section class="q-pt-sm">
             <div class="q-pa-lg row">
               <p class="text-uppercase text-caption col-7">Fahrzeugtyp</p>
@@ -453,7 +603,11 @@
         </q-card>
       </q-dialog>
 
-      <q-dialog v-model="openEditPrefs" position="bottom" class="q-pa-md">
+      <q-dialog
+        v-model="openEditPrefs"
+        position="bottom"
+        class="q-pa-md"
+      >
         <q-card class="q-pa-xs">
           <q-btn
             icon="close"
@@ -465,15 +619,37 @@
             @click="toggleOpenEditPrefs(true)"
           />
           <q-splitter :value="20">
-            <template v-slot:before class="full-height">
-              <q-tabs v-model="openEditPrefsTab" vertical class="text-primary">
-                <q-tab name="talk" icon="record_voice_over" />
-                <q-tab name="talkMorning" icon="alarm" />
-                <q-tab name="smoking" icon="smoking_rooms" />
-                <q-tab name="music" icon="music_note" />
+            <template
+              v-slot:before
+              class="full-height"
+            >
+              <q-tabs
+                v-model="openEditPrefsTab"
+                vertical
+                class="text-primary"
+              >
+                <q-tab
+                  name="talk"
+                  icon="record_voice_over"
+                />
+                <q-tab
+                  name="talkMorning"
+                  icon="alarm"
+                />
+                <q-tab
+                  name="smoking"
+                  icon="smoking_rooms"
+                />
+                <q-tab
+                  name="music"
+                  icon="music_note"
+                />
               </q-tabs>
             </template>
-            <template v-slot:after style="height: 300px;">
+            <template
+              v-slot:after
+              style="height: 300px;"
+            >
               <q-tab-panels
                 v-model="openEditPrefsTab"
                 swipeable
@@ -486,7 +662,10 @@
                 <q-tab-panel name="talk">
                   <div class="text-h6 q-mb-md">Redseligkeit</div>
                   <q-list>
-                    <q-item tag="label" v-ripple>
+                    <q-item
+                      tag="label"
+                      v-ripple
+                    >
                       <q-radio
                         keep-color
                         v-model="newPrefs.talk"
@@ -495,7 +674,10 @@
                         color="red"
                       />
                     </q-item>
-                    <q-item tag="label" v-ripple>
+                    <q-item
+                      tag="label"
+                      v-ripple
+                    >
                       <q-radio
                         keep-color
                         v-model="newPrefs.talk"
@@ -504,7 +686,10 @@
                         color="orange"
                       />
                     </q-item>
-                    <q-item tag="label" v-ripple>
+                    <q-item
+                      tag="label"
+                      v-ripple
+                    >
                       <q-radio
                         keep-color
                         v-model="newPrefs.talk"
@@ -519,7 +704,10 @@
                 <q-tab-panel name="talkMorning">
                   <div class="text-h6 q-mb-md">...am Morgen</div>
                   <q-list>
-                    <q-item tag="label" v-ripple>
+                    <q-item
+                      tag="label"
+                      v-ripple
+                    >
                       <q-radio
                         keep-color
                         v-model="newPrefs.talkMorning"
@@ -528,7 +716,10 @@
                         color="red"
                       />
                     </q-item>
-                    <q-item tag="label" v-ripple>
+                    <q-item
+                      tag="label"
+                      v-ripple
+                    >
                       <q-radio
                         keep-color
                         v-model="newPrefs.talkMorning"
@@ -537,7 +728,10 @@
                         color="orange"
                       />
                     </q-item>
-                    <q-item tag="label" v-ripple>
+                    <q-item
+                      tag="label"
+                      v-ripple
+                    >
                       <q-radio
                         keep-color
                         v-model="newPrefs.talkMorning"
@@ -552,7 +746,10 @@
                 <q-tab-panel name="smoking">
                   <div class="text-h6 q-mb-md">Rauchen im Auto</div>
                   <q-list>
-                    <q-item tag="label" v-ripple>
+                    <q-item
+                      tag="label"
+                      v-ripple
+                    >
                       <q-radio
                         keep-color
                         v-model="newPrefs.smoking"
@@ -561,7 +758,10 @@
                         color="red"
                       />
                     </q-item>
-                    <q-item tag="label" v-ripple>
+                    <q-item
+                      tag="label"
+                      v-ripple
+                    >
                       <q-radio
                         keep-color
                         v-model="newPrefs.smoking"
@@ -570,7 +770,10 @@
                         color="orange"
                       />
                     </q-item>
-                    <q-item tag="label" v-ripple>
+                    <q-item
+                      tag="label"
+                      v-ripple
+                    >
                       <q-radio
                         keep-color
                         v-model="newPrefs.smoking"
@@ -585,7 +788,10 @@
                 <q-tab-panel name="music">
                   <div class="text-h6 q-mb-md">Musik im Auto</div>
                   <q-list>
-                    <q-item tag="label" v-ripple>
+                    <q-item
+                      tag="label"
+                      v-ripple
+                    >
                       <q-radio
                         keep-color
                         v-model="newPrefs.music"
@@ -594,7 +800,10 @@
                         color="red"
                       />
                     </q-item>
-                    <q-item tag="label" v-ripple>
+                    <q-item
+                      tag="label"
+                      v-ripple
+                    >
                       <q-radio
                         keep-color
                         v-model="newPrefs.music"
@@ -603,7 +812,10 @@
                         color="orange"
                       />
                     </q-item>
-                    <q-item tag="label" v-ripple>
+                    <q-item
+                      tag="label"
+                      v-ripple
+                    >
                       <q-radio
                         keep-color
                         v-model="newPrefs.music"
@@ -625,9 +837,16 @@
         </q-card>
       </q-dialog>
 
-      <q-dialog v-model="openNewAddress" position="bottom" persistent>
+      <q-dialog
+        v-model="openNewAddress"
+        position="bottom"
+        persistent
+      >
         <q-card>
-          <q-form @submit="addAddress" class="q-gutter-md">
+          <q-form
+            @submit="addAddress"
+            class="q-gutter-md"
+          >
             <q-card-section class="text-h6 text-weight-light">Eine Adresse hinzufügen</q-card-section>
 
             <q-card-section>
@@ -702,7 +921,12 @@
             </q-card-section>
 
             <q-card-actions align="right">
-              <q-btn flat label="Abbrechen" @click="openNewAddress = false" color="primary" />
+              <q-btn
+                flat
+                label="Abbrechen"
+                @click="openNewAddress = false"
+                color="primary"
+              />
               <q-btn
                 flat
                 label="Hinzufügen"
@@ -716,7 +940,13 @@
         </q-card>
       </q-dialog>
 
-      <q-dialog v-model="openAddCar" full-height full-width position="bottom" persistent>
+      <q-dialog
+        v-model="openAddCar"
+        full-height
+        full-width
+        position="bottom"
+        persistent
+      >
         <q-card>
           <q-card-section
             clickable
@@ -725,12 +955,29 @@
           >
             Ein neues Fahrzeug hinzufügen
             <q-space />
-            <q-btn icon="close" flat round dense v-close-popup />
+            <q-btn
+              icon="close"
+              flat
+              round
+              dense
+              v-close-popup
+            />
           </q-card-section>
 
           <q-card-section class="overflow-auto">
-            <q-stepper v-model="openNewCarTab" ref="stepper" color="primary" animated swipeable>
-              <q-step :name="1" title="Marke" icon="home" :done="openNewCarTab > 1">
+            <q-stepper
+              v-model="openNewCarTab"
+              ref="stepper"
+              color="primary"
+              animated
+              swipeable
+            >
+              <q-step
+                :name="1"
+                title="Marke"
+                icon="home"
+                :done="openNewCarTab > 1"
+              >
                 <q-select
                   v-model="newCar.brand"
                   label="Marke auswählen"
@@ -745,7 +992,12 @@
                 </p>
               </q-step>
 
-              <q-step :name="2" title="Modell" icon="rv_hookup" :done="openNewCarTab > 2">
+              <q-step
+                :name="2"
+                title="Modell"
+                icon="rv_hookup"
+                :done="openNewCarTab > 2"
+              >
                 <q-select
                   v-model="newCar.model"
                   :label="newCar.brand ? 'Modell auswählen' : 'Wähle zuerst deine Marke aus'"
@@ -759,7 +1011,12 @@
                   <a href="#/contact">schreib uns</a> bitte das fehlende Modell.
                 </p>
               </q-step>
-              <q-step :name="3" title="Typ" icon="rv_hookup" :done="openNewCarTab > 3">
+              <q-step
+                :name="3"
+                title="Typ"
+                icon="rv_hookup"
+                :done="openNewCarTab > 3"
+              >
                 <q-select
                   v-model="newCar.type"
                   label="Typ auswählen"
@@ -770,7 +1027,12 @@
                 />
               </q-step>
 
-              <q-step :name="4" title="Farbe" icon="brush" :done="openNewCarTab > 4">
+              <q-step
+                :name="4"
+                title="Farbe"
+                icon="brush"
+                :done="openNewCarTab > 4"
+              >
                 <div class="text-caption">Wähle zuerst den Farbton und dann die Farbe</div>
                 <q-splitter :value="50">
                   <template v-slot:before>
@@ -795,7 +1057,10 @@
 
                   <template v-slot:after>
                     <div v-if="newCar.colorTone">
-                      <q-list style="max-height: 40vh;" class="full-height overflow-auto">
+                      <q-list
+                        style="max-height: 40vh;"
+                        class="full-height overflow-auto"
+                      >
                         <q-item
                           v-for="item in Object.keys(newCarOptions.colors[newCar.colorTone])"
                           :key="item"
@@ -826,7 +1091,12 @@
                 ></extHR>
               </q-step>
 
-              <q-step :name="5" title="Baujahr" icon="query_builder" :done="openNewCarTab > 5">
+              <q-step
+                :name="5"
+                title="Baujahr"
+                icon="query_builder"
+                :done="openNewCarTab > 5"
+              >
                 <q-select
                   v-model="newCar.year"
                   label="Baujahr auswählen"
@@ -837,7 +1107,12 @@
                 />
               </q-step>
 
-              <q-step :name="6" title="Nummernschild" icon="money" :done="openNewCarTab > 6">
+              <q-step
+                :name="6"
+                title="Nummernschild"
+                icon="money"
+                :done="openNewCarTab > 6"
+              >
                 <q-input
                   type="text"
                   placeholder="HDH DH 2020"
@@ -853,7 +1128,12 @@
                 </q-slide-transition>
               </q-step>
 
-              <q-step :name="7" title="Sitze" icon="supervisor_account" :done="openNewCarTab > 7">
+              <q-step
+                :name="7"
+                title="Sitze"
+                icon="supervisor_account"
+                :done="openNewCarTab > 7"
+              >
                 <q-select
                   @input="$refs.stepper.next()"
                   v-model="newCar.seats"
@@ -861,9 +1141,7 @@
                   :options="[1,2,3,4,5,6,7]"
                   hint="Wie viele Leute kannst du normalerweise noch mitnehmen?"
                 />
-                <p
-                  class="text-caption q-mt-lg"
-                >Wir werden dich vor jeder Fahrt fragen, ob es dabei bleibt.</p>
+                <p class="text-caption q-mt-lg">Wir werden dich vor jeder Fahrt fragen, ob es dabei bleibt.</p>
               </q-step>
 
               <template v-slot:navigation>
@@ -919,9 +1197,7 @@
                 Bitte stelle sicher, dass deine Angaben korrekt und vollständig sind.
                 <br />
                 <br />Und falls noch nicht geschehen: Schau dir bitte noch unsere
-                <a
-                  href="https://mi.com"
-                >Datenverarbeitung</a> an.
+                <a href="https://mi.com">Datenverarbeitung</a> an.
               </p>
             </q-expansion-item>
           </q-card-section>
@@ -963,7 +1239,12 @@
           </q-card-section>
 
           <q-card-actions align="right">
-            <q-btn flat label="Bearbeiten" @click="openAddCarConfirm = false" v-close-popup />
+            <q-btn
+              flat
+              label="Bearbeiten"
+              @click="openAddCarConfirm = false"
+              v-close-popup
+            />
             <q-btn
               color="primary"
               label="Auto hinzufügen"
@@ -988,11 +1269,13 @@ import extHR from '../components/extended_hr'
 
 
 export default {
-  components: { SignOutButton,
-  qrGen,
-  extHR },
+  components: {
+    SignOutButton,
+    qrGen,
+    extHR
+  },
 
-  data() {
+  data () {
     return {
       since: date.formatDate( // user statistics, cannot directly be changed by user
         this.$store.getters["auth/user"].stats.createdAt,
@@ -1016,7 +1299,7 @@ export default {
       ),
       liftsOffered: this.$store.getters["auth/user"].stats.liftsOffered,
       liftsAll: this.$store.getters["auth/user"].stats.liftsAll,
-      username:  this.$store.getters['auth/user'].name.split(' ')[0],
+      username: this.$store.getters['auth/user'].name.split(' ')[0],
       liftAverage: 5,
       newLiftMaxDistance: 0, // basic profile settings
       editDistance: false,
@@ -1033,24 +1316,24 @@ export default {
       file: null,
       fileBlob: null,
 
-			openEditPrefs: false, // prefs settings
-			openEditPrefsTab: 'talk',
-			newPrefs: {
+      openEditPrefs: false, // prefs settings
+      openEditPrefsTab: 'talk',
+      newPrefs: {
         talk: '',
         talkMorning: '',
         smoking: '',
         music: ''
       },
       prefsDocu: this.$store.state.prefsDocu,
-      
-			openEditAddresses: false, // addresses settings
-			openNewAddress: false,
-			newAddress: {
+
+      openEditAddresses: false, // addresses settings
+      openNewAddress: false,
+      newAddress: {
         nickname: '',
-				street: '',
-				number: '',
-				postcode: '',
-				city: ''
+        street: '',
+        number: '',
+        postcode: '',
+        city: ''
       },
 
       carInfo: { // cars settings
@@ -1091,13 +1374,13 @@ export default {
       openEditCars: false,
       openAddCar: false,
       openAddCarConfirm: false,
-      
-      tab: 'reservoir', // vue models which doesn't belong to specific function
+
+      tab: 'data', // vue models which doesn't belong to specific function
     }
   },
   computed: {
     gender: {
-      get() {
+      get () {
         switch (this.$store.getters["auth/user"].gender) {
           case "W":
             return "Weiblich"
@@ -1111,138 +1394,138 @@ export default {
             return "Ein Fehler ist aufgetreten";
         }
       },
-      set(value) {
+      set (value) {
         this.$store.dispatch("auth/updateGender", value)
       }
     },
 
     liftMaxDistance: {
-      get(){
+      get () {
         return this.$store.getters["auth/user"].settings.liftMaxDistance
       },
-      set(value){
+      set (value) {
         this.$store.dispatch("auth/updateLiftMaxDistance", value);
       }
     },
 
     description: {
-      get(){
+      get () {
         return this.$store.getters["auth/user"].description
       },
-      set(value){
+      set (value) {
         this.$store.dispatch("auth/updateDescription", value);
       }
-		},
-
-		prefs: {
-			get(){
-				return this.$store.getters["auth/user"].prefs
-			},
-			set(value){
-				this.$store.dispatch("auth/updatePrefs", value);
-			}
     },
-    
-		addresses: {
-			get(){
-				return this.$store.getters['auth/user'].addresses.filter(item => {
+
+    prefs: {
+      get () {
+        return this.$store.getters["auth/user"].prefs
+      },
+      set (value) {
+        this.$store.dispatch("auth/updatePrefs", value);
+      }
+    },
+
+    addresses: {
+      get () {
+        return this.$store.getters['auth/user'].addresses.filter(item => {
           return item.id > 3 // filter only private adresses, IDs 1 to 3 are reserved for schools
         })
-			}
-		},
-
-		cars: {
-			get(){
-				return this.$store.getters['auth/user'].cars
-			}
+      }
     },
-    
+
+    cars: {
+      get () {
+        return this.$store.getters['auth/user'].cars
+      }
+    },
+
     dataSaver: {
-      get(){
+      get () {
         return this.$store.getters['auth/user'].dataSaver
       },
-      set(value){
+      set (value) {
         this.$store.dispatch("auth/updateDataSaver", value);
       }
     },
 
-    atLeastFiveWords(){
-      if(this.username == 'Bernd'){
+    atLeastFiveWords () {
+      if (this.username == 'Bernd') {
         return true
       }
-      else{
+      else {
         var splitted = this.newDescription.split(' ')
         var length = splitted.length
         var lastItemIsWord = splitted[length - 1] != ''
         return length > 5 ? true : (length >= 5) && lastItemIsWord // when more than 5 words, just return true
       }
-		},
-
-		secureInput(){
-			let id = this.$store.getters['auth/user'].uid
-			var alphabet = "qwertzuiopasdfghjklyxcvbnm1234567890"
-      let letter
-			do{
-				letter = alphabet[Math.floor(Math.random() * alphabet.length)]
-			}
-			while(letter.charCodeAt(0) % 9 != 0) // 9 people working on the project
-			return id + letter
     },
-    
-    getNewCarColorOptions(){
+
+    secureInput () {
+      let id = this.$store.getters['auth/user'].uid
+      var alphabet = "qwertzuiopasdfghjklyxcvbnm1234567890"
+      let letter
+      do {
+        letter = alphabet[Math.floor(Math.random() * alphabet.length)]
+      }
+      while (letter.charCodeAt(0) % 9 != 0) // 9 people working on the project
+      return id + letter
+    },
+
+    getNewCarColorOptions () {
       return this.newCarOptions.colors.map(color => '<div style="border: 1px solid black; border-width: 1px 0;" class="text-transparent bg-' + color.toLowerCase() + '">.</div>')
     },
 
-    possibleBuildYears(){
+    possibleBuildYears () {
       var reverse = true
       let years = []
-      for(var i=1940; i<=(new Date).getFullYear(); i++){
+      for (var i = 1940; i <= (new Date).getFullYear(); i++) {
         years.push(i)
       }
       return reverse ? years.reverse() : years
     },
 
-    newAddressFilled(){
-      for(let key in this.newAddress){
-        if(!this.newAddress[key] && key != 'nickname') return false // only nickname can be blank
+    newAddressFilled () {
+      for (let key in this.newAddress) {
+        if (!this.newAddress[key] && key != 'nickname') return false // only nickname can be blank
       }
       return true
     },
 
-    newCarFilled(){
-      for(let key in this.newCar){
-        if(!this.newCar[key]) return false
+    newCarFilled () {
+      for (let key in this.newCar) {
+        if (!this.newCar[key]) return false
       }
       return true
-        
+
     }
   },
   methods: {
 
-    toggleOpenEditDescription(){
-      if(this.openEditDescription){ // already open
+    toggleOpenEditDescription () {
+      if (this.openEditDescription) { // already open
         this.description = this.newDescription
       }
       else { // still closed
-         this.newDescription = this.description
+        this.newDescription = this.description
       }
       this.openEditDescription = !this.openEditDescription
     },
 
-    toggleEditLiftMaxDistance(){
-      if(this.editDistance){ // already open
+    toggleEditLiftMaxDistance () {
+      if (this.editDistance) { // already open
         this.liftMaxDistance = this.newLiftMaxDistance
       }
       else { // still closed
-         this.newLiftMaxDistance = this.liftMaxDistance
+        this.newLiftMaxDistance = this.liftMaxDistance
       }
       this.editDistance = !this.editDistance
-		},
-		
-		toggleOpenEditPrefs(save){
-     
-      if(this.openEditPrefs){ // open, shall be closed, so prefs have to be converted and stored back to original var (only when save)
-        if(save){
+    },
+
+    toggleOpenEditPrefs (save) {
+
+      if (this.openEditPrefs) { // open, shall be closed, so prefs have to be converted and stored back to original var (only when save)
+        if (save) {
           this.prefs = this.newPrefs // just to minimize traffic, prefs are only stored when clicking on save
           this.newPrefs = {
             talk: '',
@@ -1260,85 +1543,85 @@ export default {
           }
         }
       }
-			else { // still closed, shall be opened, so we have to copy (and first convert) prefs to another var
-         
+      else { // still closed, shall be opened, so we have to copy (and first convert) prefs to another var
+
         this.newPrefs = this.prefs
-        
+
       }
-      
+
 
       this.openEditPrefs = !this.openEditPrefs
     },
 
-    betterPrefColor(color){
-      if(color == 'GREEN') return 'green-8'
-      else if(color == 'YELLOW') return 'orange'
+    betterPrefColor (color) {
+      if (color == 'GREEN') return 'green-8'
+      else if (color == 'YELLOW') return 'orange'
       else return color.toLowerCase()
     },
 
-    showCarInfo(item){
-      for(let key in item){
+    showCarInfo (item) {
+      for (let key in item) {
         this.carInfo[key] = item[key]
-			}
+      }
       this.carInfoOpen = true
     },
-		
-		addAddress(){
-			this.$store.dispatch("auth/addAddress", {
-				id: this.$store.getters['auth/user'].id,
-				address: this.newAddress
-			})
-			this.newAddress = {
-        nickname: '',
-				street: '',
-				number: '',
-				postcode: '',
-				city: ''
-			}
-		},
 
-		removeAddress(id){
-			if(id) this.$store.dispatch("auth/removeAddress", id)
+    addAddress () {
+      this.$store.dispatch("auth/addAddress", {
+        id: this.$store.getters['auth/user'].id,
+        address: this.newAddress
+      })
+      this.newAddress = {
+        nickname: '',
+        street: '',
+        number: '',
+        postcode: '',
+        city: ''
+      }
     },
-    
-    async addCar(){
+
+    removeAddress (id) {
+      if (id) this.$store.dispatch("auth/removeAddress", id)
+    },
+
+    async addCar () {
       let id = this.$store.getters['auth/user'].id
       let car = this.newCar
-      
+
       await this.$store.dispatch("auth/addCar", JSON.parse(JSON.stringify({
         id: id,
         car: car
       })))
-      
 
-      for(let key in this.newCar){
+
+      for (let key in this.newCar) {
         this.newCar[key] = key != 'seats' ? '' : 3; // original state, 3 seats look better than 0, it's the default value when selecting the seats.
       }
       this.openAddCar = false
       this.openAddCarConfirm = false
-      
+
     },
 
-    removeCar(id){
-      if(id) this.$store.dispatch("auth/removeCar", id)
+    removeCar (id) {
+      if (id) this.$store.dispatch("auth/removeCar", id)
     },
 
-    addRandomCar(){
+    addRandomCar () {
       this.newCar.brand = this.randomItemFromArray(Object.keys(this.newCarOptions.cars))
       this.newCar.type = this.randomItemFromArray(Object.keys(this.newCarOptions.cars[this.newCar.brand]))
       this.newCar.model = this.randomItemFromArray(this.newCarOptions.cars[this.newCar.brand][this.newCar.type])
       this.newCar.colorTone = this.randomItemFromArray(Object.keys(this.newCarOptions.colors))
       this.newCar.color = this.randomItemFromArray(Object.keys(this.newCarOptions.colors[this.newCar.colorTone]))
-      this.newCar.seats = this.randomItemFromArray([1,2,3,4,5,6,7])
-      this.newCar.year = this.randomItemFromArray([2020,2019,2018,2017,2016,2015])
+      this.newCar.seats = this.randomItemFromArray([1, 2, 3, 4, 5, 6, 7])
+      this.newCar.year = this.randomItemFromArray([2020, 2019, 2018, 2017, 2016, 2015])
 
       let validPlate = true
       this.newCar.licensePlate = validPlate ? 'HDH DH 2020' : 'B SS 2330'
       this.openAddCarConfirm = true
-      
+
     },
 
-    loadFile(file) {
+    loadFile (file) {
       this.file = file
       const size = 300; // represents the height
       const ratio = 1; // default ratio at profile pictures
@@ -1370,10 +1653,10 @@ export default {
             var indent = (img.height - img.width) / scale; // indent has to be half of the difference and negative, additionally divided by scale
             ctx.drawImage(img, 0, indent / -2, width, size + indent);
           }
-          try{
+          try {
             this.fileBlob = elem.toBlob()
           }
-          catch(e){
+          catch (e) {
             alert('Die Konvertierung zum BLOB hat nicht funktioniert. E:' + e)
           }
         }, reader.onerror = error => {
@@ -1381,70 +1664,70 @@ export default {
         }
       }
 
-          // input image is made square and scaled
-    //       sendApiRequest(
-    //         SQL_UPDATE_PROFILE_PICTURE,
-    //         { imageData: elem.toDataURL() },
-    //         _ => {
-    //           this.ppPath = '';
-    //           buildGetRequestUrl(
-    //             GET_USER_PROFILE_PIC,
-    //             { fbid: this.$store.getters["auth/user"].uid },
-    //             url => {
-    //               this.ppPath = url;
-    //             }
-    //           )
-    //         },
-    //         error => {
-    //           throw error;
-    //         }
-    //         else { // portrait
-    //           var scale = img.width / size
-    //           var indent  = (img.height - img.width) / scale // indent has to be half of the difference and negative, additionally divided by scale
-    //           ctx.drawImage(img, 0, indent / -2, width, size + indent)
-    //         }
+      // input image is made square and scaled
+      //       sendApiRequest(
+      //         SQL_UPDATE_PROFILE_PICTURE,
+      //         { imageData: elem.toDataURL() },
+      //         _ => {
+      //           this.ppPath = '';
+      //           buildGetRequestUrl(
+      //             GET_USER_PROFILE_PIC,
+      //             { fbid: this.$store.getters["auth/user"].uid },
+      //             url => {
+      //               this.ppPath = url;
+      //             }
+      //           )
+      //         },
+      //         error => {
+      //           throw error;
+      //         }
+      //         else { // portrait
+      //           var scale = img.width / size
+      //           var indent  = (img.height - img.width) / scale // indent has to be half of the difference and negative, additionally divided by scale
+      //           ctx.drawImage(img, 0, indent / -2, width, size + indent)
+      //         }
 
-    //         var image_blob = elem.toBlob()
-    //         this.updateProfilePicture(image_blob)
-    //         // input image is made square and scaled
-            
-            
-    //         console.log(elem.toBlob())
-    //         console.log(elem)
-    //           },
-    //           reader.onerror = error => console.log(error);
-    //   };
-    //       );
-    //       this.openUpload = false;
-    //     }
-    //   }
-    //   reader.readAsDataURL(file);
+      //         var image_blob = elem.toBlob()
+      //         this.updateProfilePicture(image_blob)
+      //         // input image is made square and scaled
+
+
+      //         console.log(elem.toBlob())
+      //         console.log(elem)
+      //           },
+      //           reader.onerror = error => console.log(error);
+      //   };
+      //       );
+      //       this.openUpload = false;
+      //     }
+      //   }
+      //   reader.readAsDataURL(file);
     },
 
 
-    updateProfilePicture(blob) {
+    updateProfilePicture (blob) {
       sendApiRequest(SQL_UPDATE_PROFILE_PICTURE,
-      {imageData: blob},
-      _ => console.warn('success'),
-      error => {throw error})
+        { imageData: blob },
+        _ => console.warn('success'),
+        error => { throw error })
     },
 
-    capitalize(string){
+    capitalize (string) {
       return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase()
     },
 
-    randomItemFromArray(array){
+    randomItemFromArray (array) {
       return array[Math.floor(Math.random() * array.length)]
     },
 
-    validNumberPlate(){
+    validNumberPlate () {
       this.newCar.licensePlate = this.newCar.licensePlate.toUpperCase()
       var pattern = /[A-Z]{1,3} [A-Z]{1,2} \d{1,4}$/gm
       var match = this.newCar.licensePlate.match(pattern)
       return match
     }
   },
-  mounted() {
+  mounted () {
     buildGetRequestUrl(
       GET_USER_PROFILE_PIC,
       { fbid: this.$store.getters["auth/user"].uid },
@@ -1452,13 +1735,13 @@ export default {
         this.ppPath = url;
       }
     )
-    
+
     sendApiRequest(GET_CAR_MODELS,
-    {},
-    data => {
-      this.newCarOptions = data
+      {},
+      data => {
+        this.newCarOptions = data
       },
-    error => {throw error})
+      error => { throw error })
 
     this.$store.state.pageName = 'Profil'
   }

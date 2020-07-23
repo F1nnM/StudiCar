@@ -2,3 +2,6 @@ dbConfig.js
 server.key
 server.pem
 firebaseAccountKey.json
+
+# ignoring all the modules
+node_modules/

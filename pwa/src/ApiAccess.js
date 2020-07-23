@@ -79,6 +79,11 @@ export const SQL_GET_USER_DATA = {
   method: "GET"
 }
 
+export const SQL_GET_LIFT_INFO = {
+  path: "/getLiftInfo",
+  method: "GET"
+}
+
 export const SQL_UPDATE_DESCRIPTION = {
   path: "/updateDescription",
   method: "POST"
@@ -133,3 +138,9 @@ export const SQL_ADD_LIFT = {
   path: "/addLift",
   method: "POST"
 }
+
+export const SQL_SEND_MESSAGE = {
+  path: "/sendMessage",
+  method: "POST"
+}
+
