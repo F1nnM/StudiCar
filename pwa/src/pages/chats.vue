@@ -1,10 +1,6 @@
 <template>
   <div class="q-pa-md">
-    <LiftPopup
-      @close="liftOpen = false"
-      :open="liftOpen"
-      :messages="messagesToBeShown"
-    />
+    <LiftPopup @close="liftOpen = false" :open="liftOpen" :messages="messagesToBeShown" />
     <q-list>
       <chatItem
         v-for="(item, index) in lastMessages"
@@ -15,106 +11,37 @@
         @shortLiftInfo="openShortLiftInfo"
       />
     </q-list>
-    <q-dialog
-      v-model="shortLiftInfo"
-      full-width
-      square
-      persistent
-      position="bottom"
-    >
-      <div class="row">
-        <div class="col-8">
-          <q-expansion-item>
-            <template v-slot:header>
-              <q-toolbar>
-                <q-toolbar-title>Würzburg -> Ansbach</q-toolbar-title>
-              </q-toolbar>
-              <p>
-                <q-icon
-                  name="directions_car"
-                  size="xs"
-                />VW Golf
-              </p>
-            </template>
-            <q-stepper
-              v-model="shortLiftInfo"
-              color="primary"
-            >
-              <q-step
-                :name="1"
-                title="Erste Stadt"
-                caption="Straße soundso"
-                icon="settings"
-              ></q-step>
-              <q-step
-                :name="1"
-                title="Erste Stadt"
-                caption="Straße soundso"
-                icon="settings"
-              ></q-step>
-            </q-stepper>
-          </q-expansion-item>
-          <div class="row">
-            <div
-              v-for="day in week"
-              :key="day"
-              class="col-1"
-            >
-              <p>{{day.name}}</p>
-            </div>
+    <q-dialog v-model="shortLiftInfo" full-width square position="bottom">
+      <q-card>
+        <q-card-section>
+          <div>
+            <q-toolbar>
+              <q-toolbar-title>
+                <p>Würzburg -> Ansbach</p>
+              </q-toolbar-title>
+            </q-toolbar>
+            <p class="q-px-sm">
+              <q-icon name="directions_car" size="xs" />VW Golf
+              <span class="q-pl-md">
+                {{lift.stops.length - 1}} / {{lift.seats}}
+                <q-icon name="airline_seat_recline_normal" size="sm" />
+              </span>
+            </p>
+            <q-timeline layout="comfortable" side="right" color="primary">
+              <q-timeline-entry
+                v-for="(s, index) in lift.stops"
+                :key="s.id"
+                :title="s.adress.city"
+                :subtitle="s.name"
+                side="left"
+                :icon="getTimelineIcon(index, s.beginsAtSchool)"
+              >
+                <div>{{s.adress.street}}</div>
+              </q-timeline-entry>
+            </q-timeline>
           </div>
-
-          <div class="row">
-            <div
-              v-for="day in week"
-              :key="day"
-              class="col-1"
-            >
-              <p>{{day.value}}</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-4">
-          <q-list
-            bordered
-            padding
-          >
-            <q-item-label header>Fahrer</q-item-label>
-            <q-item
-              clickable
-              v-ripple
-            >
-              <q-item-section>
-                <q-item-label>{{lift.driverName}}</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-separator spaced />
-            <q-item>
-              <q-item-label header>
-                <div class="row">
-                  <div class="col-7">Mitfahrer</div>
-                  <div class="col-5">
-                    {{lift.passengers.length}} / {{lift.seats}}
-                    <q-icon
-                      name="airline_seat_recline_normal"
-                      size="xs"
-                    />
-                  </div>
-                </div>
-              </q-item-label>
-            </q-item>
-
-            <q-item
-              v-for="user in lift.passengers"
-              :key="user.id"
-            >
-              <q-item-section>
-                <q-item-label>user.name</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </div>
-      </div>
+        </q-card-section>
+      </q-card>
     </q-dialog>
   </div>
 </template>
@@ -133,55 +60,42 @@ export default {
   data () {
     return {
       liftOpen: false,
+      liftOpenId: lifts[0].id, // just set to id of first item to avoid error messages when no lift has been selected yet to show short info of lift
       messagesToBeShown: {
         list: []
       },
       allMessages: this.$store.getters['auth/user'].messages,
       shortLiftInfo: false,
-      lift: {
+      lifts: [{
+        id: 9,
+        beginsAtSchool: true,
         driverName: 'Günther',
         seats: 5,
-        passengers: [{
+        stops: [{
           name: 'Alicia',
-          id: 61654
+          id: 61654,
+          adress: {
+            street: 'Hauserstraße 7',
+            city: 'Hansestadt'
+          }
         },
         {
           name: 'Peter',
-          id: 654
+          id: 654,
+          adress: {
+            street: 'Hauserstraße 7',
+            city: 'Hansestadt'
+          }
         },
         {
           name: 'Bob',
-          id: 665
+          id: 665,
+          adress: {
+            street: 'Hauserstraße 7',
+            city: 'Hansestadt'
+          }
         }
         ]
-      },
-      week: [{
-        name: 'M',
-        value: 1
-      },
-      {
-        name: 'D',
-        value: 2
-      },
-      {
-        name: 'M',
-        value: 3
-      },
-      {
-        name: 'D',
-        value: 1
-      },
-      {
-        name: 'F',
-        value: 2
-      },
-      {
-        name: 'S',
-        value: 2
-      },
-      {
-        name: 'S',
-        value: 1
       }]
     }
   },
@@ -201,6 +115,16 @@ export default {
         return new Date(b.timestamp) - new Date(a.timestamp) // newest message is on top of list
       })
       return lastOfThem
+    },
+    lift () {
+      var item = this.lifts
+      
+      //.find(l => l.id == this.liftOpenId)
+      if (!item) {
+      
+        return null
+      }
+      else return item
     }
   },
 
@@ -233,6 +157,7 @@ export default {
 
     openShortLiftInfo (liftId) {
       this.shortLiftInfo = true
+      
     },
 
     sortMessages (liftId, ascending) {
@@ -241,6 +166,12 @@ export default {
         return new Date(b.timestamp) - new Date(a.timestamp)
       })
       return list
+    },
+
+    getTimelineIcon (index, beginsAtSchool) {
+      if (index == 0) return beginsAtSchool ? 'school' : 'home'
+      else if (index == this.lift.stops.length - 1) return !beginsAtSchool ? 'school' : 'home'
+      return ''
     },
 
     pagetrans_zoom () {
