@@ -16,13 +16,12 @@
           <q-toolbar-title class="row">
             <div class="text-weight-light q-pt-xs col-xs-10 col-md-11">
               <q-slide-transition :duration="300">
-                <div v-show="!scrolled">{{!scannerOpen ? 'StudiCar ' + pageTrans : 'Scanvorgang läuft'}}</div>
+                <div
+                  v-show="!scrolled"
+                >{{!scannerOpen ? 'StudiCar ' + pageTrans : 'Scanvorgang läuft'}}</div>
               </q-slide-transition>
               <q-slide-transition :duration="150">
-                <div
-                  v-show="scrolled"
-                  class
-                >{{pageName}}</div>
+                <div v-show="scrolled" class>{{pageName}}</div>
               </q-slide-transition>
             </div>
             <div class="col-xs-2 col-md-1">
@@ -55,15 +54,8 @@
       <drawerImage :timeText="greeting" />
       <hr style="margin: 0; background-color: black;" />
       <q-list>
-        <q-item-label
-          header
-          class="text-grey-8"
-        >Navigation</q-item-label>
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
+        <q-item-label header class="text-grey-8">Navigation</q-item-label>
+        <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link" />
       </q-list>
       <div style="padding: 10px;">StudiCar v{{ $q.version }}</div>
     </q-drawer>
@@ -73,19 +65,13 @@
         <q-scroll-observer @scroll="scrollHandler" />
 
         <div class="text-h5 q-pl-md q-pt-md">
-          <span
-            class="custom-underline c-u-l c-u-2 c-u-md"
-            transition="slide-left"
-          >{{pageName}}</span>
+          <span class="custom-underline c-u-l c-u-2 c-u-md" transition="slide-left">{{pageName}}</span>
         </div>
 
         <br />
       </div>
 
-      <transition
-        :name="pageTrans"
-        mode="out-in"
-      >
+      <transition :name="pageTrans" mode="out-in">
         <router-view
           @pagetrans_y="pageTransY = $event"
           :style="'transform-origin: 20% ' + pageTransY + 'vh;'"
@@ -93,10 +79,7 @@
       </transition>
     </q-page-container>
 
-    <q-footer
-      elevated
-      v-show="!(scannerOpen)"
-    >
+    <q-footer elevated v-show="!(scannerOpen)">
       <q-tabs
         full-width
         no-caps
@@ -109,26 +92,10 @@
         class="text-black bg-white"
         align="center"
       >
-        <q-route-tab
-          icon="home"
-          to="/"
-          label="Marktplatz"
-        />
-        <q-route-tab
-          icon="add_circle_outline"
-          to="/chats/lift/add"
-          label="Neue Fahrt"
-        />
-        <q-route-tab
-          icon="directions_car"
-          to="/chats"
-          label="Chats"
-        />
-        <q-route-tab
-          icon="account_box"
-          to="/profil"
-          label="Profil"
-        />
+        <q-route-tab icon="home" to="/" label="Marktplatz" />
+        <q-route-tab icon="add_circle_outline" to="/chats/lift/add" label="Neue Fahrt" />
+        <q-route-tab icon="directions_car" to="/chats" label="Chats" />
+        <q-route-tab icon="account_box" to="/profil" label="Profil" />
       </q-tabs>
     </q-footer>
   </q-layout>

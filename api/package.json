@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \\\"No test specified\\\" && exit 0",
-    "start": "node index.js"
+    "start": "node index.js",
+    "autoreload-nodemon": "nodemon index.js"
   },
   "author": "Finn Melzer <studicar@mfinn.de>",
   "license": "ISC",
@@ -14,6 +15,7 @@
     "image-size": "^0.8.3",
     "jdenticon": "^2.2.0",
     "mariadb": "^2.3.1",
+    "nodemon": "^2.0.4",
     "showdown": "^1.9.1"
   }
 }

@@ -1,6 +1,8 @@
-var runQuery = require('./db')
-var carModels = require('./carModels')
-var showdown = require('showdown')
+var runQuery = require('./db'),
+  showdown = require('showdown'),
+  fs = require('fs'),
+  readline = require('readline'),
+  carModels = require('./carModels')
 
 function updateModels (req, res) {
   var cars = carModels.all()
@@ -54,6 +56,33 @@ module.exports = {
         res.end(result.result[0].PICTURE, 'binary');
       }
     },
+    '/getNewsticker': async (req, res, options) => {
+      if (!isOptionMissing(options, [], res)) {
+        var i,
+          count = 0;
+        fs.createReadStream(process.argv[2]) // first detect number of lines in file
+          .on('data', function (chunk) {
+            for (i = 0; i < chunk.length; ++i)
+              if (chunk[i] == 10) count++;
+          });
+
+        const rl = readline.createInterface({
+          input: fs.createReadStream('news/postillon/ticker.txt'),
+          output: process.stdout,
+          terminal: false
+        });
+
+        const n = Math.floor(Math.random() * count) // getting a random line number
+        var currentLine = 0,
+          ticker = ''
+
+        rl.on('line', (line) => {
+          currentLine++
+          if (currentLine == n) ticker = line
+        });
+        res.end(line);
+      }
+    },
     '/getUserData': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid', 'secretFbId'], res)) {
         let userData = (await runQuery("SELECT ID, NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKING, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `users` WHERE users.FB_ID = ?", [options.fbid])).result[0]
@@ -85,7 +114,7 @@ module.exports = {
           }
           let addresses = await runQuery("SELECT adresses.ID, adresses.NICKNAME, POSTCODE, CITY, STREET, NUMBER FROM adresses INNER JOIN users ON adresses.USER_ID = users.ID WHERE users.FB_ID = ? UNION SELECT adresses.ID, adresses.NICKNAME, POSTCODE, CITY, STREET, NUMBER FROM adresses WHERE adresses.ID < 4", [options.fbid]);
           data.addresses = []
-          
+
           addresses.result.forEach(item => {
             let obj = {
               id: item.ID,
@@ -234,7 +263,7 @@ module.exports = {
             music: item.PREF_MUSIC
           })
         })
-        
+
         res.end(JSON.stringify({
           car: car,
           passengers: passengers,
@@ -371,9 +400,9 @@ module.exports = {
         let id = options.data.id
 
         result = await runQuery("SELECT car_models.ID FROM car_models WHERE BRAND = ? AND MODEL = ?",
-            [car.brand, car.model]).catch(error => {
-              throw error
-            })
+          [car.brand, car.model]).catch(error => {
+            throw error
+          })
 
         var modelId = result.result[0].ID
 
@@ -418,7 +447,7 @@ module.exports = {
           [newLiftId, userId]).catch(error => {
             throw error;
           })
-        
+
 
         res.end();
       }
@@ -431,25 +460,25 @@ module.exports = {
           case 1: // text
             await runQuery("INSERT INTO `messages` (`CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (?, ?, ?, current_timestamp())",
               [message.content, id, message.liftId]).catch(error => {
-              throw error
+                throw error
               })
             break
           case 2: // audio blob
             var blob = await (await fetch(dataURI)).blob();
             await runQuery("INSERT INTO `messages` (`AUDIO`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (?, ?, ?, current_timestamp())",
               [blob, id, message.liftId]).catch(error => {
-              throw error
+                throw error
               })
             break
           case 3: // image blob
-            var blob = await (await fetch(dataURI)).blob(); 
+            var blob = await (await fetch(dataURI)).blob();
             await runQuery("INSERT INTO `messages` (`PICTURE`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (?, ?, ?, current_timestamp())",
               [message.content, id, message.liftId]).catch(error => {
-              throw error
+                throw error
               })
             break
         }
-        function dataURItoBlob(dataURI) {
+        function dataURItoBlob (dataURI) {
           // convert base64 to raw binary data held in a string
           // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
           var byteString = atob(dataURI.split(',')[1]);
@@ -465,18 +494,18 @@ module.exports = {
 
           // set the bytes of the buffer to the correct values
           for (var i = 0; i < byteString.length; i++) {
-              ia[i] = byteString.charCodeAt(i);
+            ia[i] = byteString.charCodeAt(i);
           }
 
           // write the ArrayBuffer to a blob, and you're done
-          var blob = new Blob([ab], {type: mimeString});
+          var blob = new Blob([ab], { type: mimeString });
           return blob;
 
         }
         let result = await runQuery("SELECT MAX(ID) FROM `messages`",
-              []).catch(error => {
-              throw error
-              })
+          []).catch(error => {
+            throw error
+          })
         var id = result.result[0]['MAX(ID)'] + ''
         console.log(typeof id)
         res.end(id)
