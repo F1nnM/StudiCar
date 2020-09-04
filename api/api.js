@@ -4,25 +4,6 @@ var runQuery = require('./db'),
   readline = require('readline'),
   carModels = require('./carModels')
 
-function updateModels (req, res) {
-  var cars = carModels.all()
-  for (let brand in cars) {
-    for (let type in cars[brand]) {
-      cars[brand][type].forEach(async function (model) {
-        let exists = (await runQuery("SELECT * FROM car_models WHERE BRAND = ? AND MODEL = ? AND TYPE = ?;", [brand, model, type])).result.length
-        if (exists) {
-          console.log('Model already exists: ' + brand + ' ' + model + ' (' + type + ')')
-        }
-        else {
-          await runQuery("INSERT INTO `car_models` (`ID`, `BRAND`, `MODEL`, `TYPE`, `PICTURE`, `OFFICIAL`) VALUES (NULL, ?, ?, ?, NULL, '1');", [brand, model, type])
-
-          console.log('Model has been inserted: ' + brand + ' ' + model + ' (' + brand + ')')
-        }
-      })
-    }
-  }
-}
-
 function isOptionMissing (data, needed, res) {
   return needed.some(key => {
     if (typeof data[key] == "undefined") {
@@ -54,33 +35,6 @@ module.exports = {
         let result = await runQuery("SELECT PICTURE FROM `users` WHERE users.FB_ID = ?", [options.fbid]);
         res.setHeader('Content-Type', 'image/png');
         res.end(result.result[0].PICTURE, 'binary');
-      }
-    },
-    '/getNewsticker': async (req, res, options) => {
-      if (!isOptionMissing(options, [], res)) {
-        var i,
-          count = 0;
-        fs.createReadStream(process.argv[2]) // first detect number of lines in file
-          .on('data', function (chunk) {
-            for (i = 0; i < chunk.length; ++i)
-              if (chunk[i] == 10) count++;
-          });
-
-        const rl = readline.createInterface({
-          input: fs.createReadStream('news/postillon/ticker.txt'),
-          output: process.stdout,
-          terminal: false
-        });
-
-        const n = Math.floor(Math.random() * count) // getting a random line number
-        var currentLine = 0,
-          ticker = ''
-
-        rl.on('line', (line) => {
-          currentLine++
-          if (currentLine == n) ticker = line
-        });
-        res.end(line);
       }
     },
     '/getUserData': async (req, res, options) => {
@@ -141,31 +95,28 @@ module.exports = {
               color: carModels.allColors()[item.COLOR.split(':')[0]][item.COLOR.split(':')[1]] /* I apologize for not-clean-code, but this was the easiest way */
             }
             data.cars.push(obj)
-            //console.log(obj)
           })
-          let allMessages = await runQuery("SELECT messages.ID, messages.CONTENT, messages.AUDIO, messages.PICTURE, FROM_USER_ID, lift_map.LIFT_ID, users.NAME, messages.TIMESTAMP, start_adress.NICKNAME AS START_NICK, dest_adress.NICKNAME AS DEST_NICK FROM messages JOIN lift_map ON lift_map.LIFT_ID = messages.LIFT_ID JOIN users ON FROM_USER_ID = users.ID JOIN lift ON lift.ID = messages.LIFT_ID JOIN adresses AS start_adress ON start_adress.ID = lift.START JOIN adresses AS dest_adress ON dest_adress.ID = lift.DESTINATION WHERE lift_map.USER_ID = ? AND lift_map.PENDING = 0 ORDER BY messages.TIMESTAMP DESC;",
-            [userData.ID])
+          let allMessages = await runQuery("SELECT messages.ID, messages.CONTENT, messages.AUDIO, messages.PICTURE, FROM_USER_ID, lift_map.LIFT_ID, users.NAME, messages.TIMESTAMP, start_adress.NICKNAME AS START_NICK, dest_adress.NICKNAME AS DEST_NICK FROM messages JOIN lift_map ON lift_map.LIFT_ID = messages.LIFT_ID JOIN users ON FROM_USER_ID = users.ID JOIN lift ON lift.ID = messages.LIFT_ID JOIN adresses AS start_adress ON start_adress.ID = lift.START JOIN adresses AS dest_adress ON dest_adress.ID = lift.DESTINATION WHERE lift_map.USER_ID = ? AND lift_map.PENDING = 0 ORDER BY messages.TIMESTAMP DESC;", [userData.ID])
           var liftMessages = {}
           allMessages.result.forEach(item => {
             if (!liftMessages[item.LIFT_ID]) {
               liftMessages[item.LIFT_ID] = [] // making object if not existing
             }
-            var content = '', type = 0
+            var content = '',
+              type = 0
             if (item.AUDIO) {
               content = item.AUDIO
               type = 2
-            }
-            else if (item.PICTURE) {
+            } else if (item.PICTURE) {
               content = item.PICTURE
               type = 3
-            }
-            else {
+            } else {
               content = item.CONTENT
               type = 1
             }
             let obj = {
               messageID: item.ID,
-              nameOfUser: item.NAME.split(' ')[0], // we take just the first name
+              nameOfUser: item.NAME.split(' ')[0], // we take just the first name, looks more friendly in chat
               userId: item.FROM_USER_ID,
               content: content,
               type: type, // for docs see above
@@ -192,20 +143,13 @@ module.exports = {
         cars.forEach(item => {
           if (!carsObj[item.BRAND]) { // when brand not initialized, then do it
             carsObj[item.BRAND] = []
-            // console.log('ARRAY AND OBJECT CREATED')
-            // console.log(carsObj[item.BRAND])
           }
           if (carsObj[item.BRAND].indexOf(item.MODEL) == -1) { // models should not exist twice in array
             carsObj[item.BRAND].push(item.MODEL)
-          }
-          //console.log(carsObj[item.BRAND]
+          } // basically grouped all cars in object array
         })
-        //console.log(carsObj)
 
-        // structure of cars now should look like: {'Mercedes': ['C-Klasse', 'A-Klasse'], 'Audi': []}
-
-        // console.log(carsObj)
-        let colors = carModels.allColors()
+        let colors = carModels.allColors() // just transferring color reference in this step
         res.end(JSON.stringify({
           cars: carsObj,
           colors: colors
@@ -231,8 +175,7 @@ module.exports = {
           try {
             var html = converter.makeHtml(rawMD)
             res.end(html)
-          }
-          catch (e) {
+          } catch (e) {
             res.end(false)
           }
         })
@@ -301,8 +244,7 @@ module.exports = {
 
           await runQuery(
             "INSERT INTO `users` (`ID`, `FB_ID`, `NAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKING`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`)" +
-            "VALUES (NULL, ?, ?, 'X', '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED')",
-            [options.secretFbId, options.name, png, options.mail]).catch(error => {
+            "VALUES (NULL, ?, ?, 'X', '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED')", [options.secretFbId, options.name, png, options.mail]).catch(error => {
               throw error;
             });
           res.end("added")
@@ -313,8 +255,7 @@ module.exports = {
     '/updateDescription': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'description'], res)) {
         await runQuery(
-          "UPDATE `users` SET `DESCRIPTION` = ? WHERE `users`.`FB_ID` = ?",
-          [options.description, options.secretFbId]).catch(error => {
+          "UPDATE `users` SET `DESCRIPTION` = ? WHERE `users`.`FB_ID` = ?", [options.description, options.secretFbId]).catch(error => {
             throw error;
           });
         res.end();
@@ -323,8 +264,7 @@ module.exports = {
     '/updateGender': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'gender'], res)) {
         await runQuery(
-          "UPDATE `users` SET `GENDER` = ? WHERE `users`.`FB_ID` = ?",
-          [options.gender, options.secretFbId]).catch(error => {
+          "UPDATE `users` SET `GENDER` = ? WHERE `users`.`FB_ID` = ?", [options.gender, options.secretFbId]).catch(error => {
             throw error;
           });
         res.end();
@@ -333,8 +273,7 @@ module.exports = {
     '/updateLiftMaxDistance': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'liftMaxDistance'], res)) {
         await runQuery(
-          "UPDATE `users` SET `LIFT_MAX_DISTANCE` = ? WHERE `users`.`FB_ID` = ?",
-          [options.liftMaxDistance, options.secretFbId]).catch(error => {
+          "UPDATE `users` SET `LIFT_MAX_DISTANCE` = ? WHERE `users`.`FB_ID` = ?", [options.liftMaxDistance, options.secretFbId]).catch(error => {
             throw error;
           });
         res.end();
@@ -352,8 +291,7 @@ module.exports = {
         }
         let blob = Buffer.from(options.imageData, "base64")
         await runQuery(
-          "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?",
-          [blob, options.secretFbId]).catch(error => {
+          "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?", [blob, options.secretFbId]).catch(error => {
             throw error;
           });
         res.end();
@@ -362,8 +300,7 @@ module.exports = {
     '/updatePrefs': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'prefs'], res)) {
         await runQuery(
-          "UPDATE users SET PREF_TALK = ?, PREF_TALK_MORNING = ?, PREF_SMOKING = ?, PREF_MUSIC = ? WHERE FB_ID = ?;",
-          [options.prefs.talk, options.prefs.talkMorning, options.prefs.smoking, options.prefs.music, options.secretFbId]).catch(error => {
+          "UPDATE users SET PREF_TALK = ?, PREF_TALK_MORNING = ?, PREF_SMOKING = ?, PREF_MUSIC = ? WHERE FB_ID = ?;", [options.prefs.talk, options.prefs.talkMorning, options.prefs.smoking, options.prefs.music, options.secretFbId]).catch(error => {
             throw error;
           });
         res.end();
@@ -372,12 +309,9 @@ module.exports = {
     '/addAddress': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'adresses', 'id'], res)) {
         await runQuery(
-          "INSERT INTO `address` (`ID`, `NICKNAME`, `POSTCODE`, `CITY`, `NUMBER`, `STREET`, `USER_INDEX`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, '1', ?);",
-          [options.address.nickname, options.address.postcode, options.address.city, options.address.number, options.address.street, options.id]).catch(error => {
+          "INSERT INTO `address` (`ID`, `NICKNAME`, `POSTCODE`, `CITY`, `NUMBER`, `STREET`, `USER_INDEX`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, '1', ?);", [options.address.nickname, options.address.postcode, options.address.city, options.address.number, options.address.street, options.id]).catch(error => {
             throw error;
           });
-        // let result = await runQuery("SELECT ID FROM address WHERE USER_ID = ? ORDER BY ID DESC", [options.id])
-        // result = result.result[0]
 
         res.end();
       }
@@ -385,8 +319,7 @@ module.exports = {
     '/removeAddress': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'id'], res)) {
         await runQuery(
-          "DELETE FROM `adresses` WHERE `adresses`.`ID` = ?",
-          [options.id]).catch(error => {
+          "DELETE FROM `adresses` WHERE `adresses`.`ID` = ?", [options.id]).catch(error => {
             throw error;
           });
 
@@ -399,18 +332,15 @@ module.exports = {
         let car = options.data.car
         let id = options.data.id
 
-        result = await runQuery("SELECT car_models.ID FROM car_models WHERE BRAND = ? AND MODEL = ?",
-          [car.brand, car.model]).catch(error => {
-            throw error
-          })
+        result = await runQuery("SELECT car_models.ID FROM car_models WHERE BRAND = ? AND MODEL = ?", [car.brand, car.model]).catch(error => {
+          throw error
+        })
 
         var modelId = result.result[0].ID
 
-
-        await runQuery("INSERT INTO `car` (`ID`, `LICENSE_PLATE`, `SEATS`, `TYPE`, `COLOR`, `YEAR`, `MODEL_ID`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)",
-          [car.licensePlate, car.seats, car.type, (car.colorTone + ':' + car.color), car.year, modelId, id]).catch(error => {
-            throw error
-          })
+        await runQuery("INSERT INTO `car` (`ID`, `LICENSE_PLATE`, `SEATS`, `TYPE`, `COLOR`, `YEAR`, `MODEL_ID`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)", [car.licensePlate, car.seats, car.type, (car.colorTone + ':' + car.color), car.year, modelId, id]).catch(error => {
+          throw error
+        })
 
         res.end();
       }
@@ -418,8 +348,7 @@ module.exports = {
     '/removeCar': async (req, res, options) => {
       if (!isOptionMissing(options, ['id'], res)) {
         await runQuery(
-          "DELETE FROM `car` WHERE `car`.`ID` = ?",
-          [options.id]).catch(error => {
+          "DELETE FROM `car` WHERE `car`.`ID` = ?", [options.id]).catch(error => {
             throw error;
           })
 
@@ -432,19 +361,16 @@ module.exports = {
         var userId = options.id
 
         await runQuery(
-          "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `DRIVER_ID`, `START`, `DESTINATION`) VALUES (current_timestamp(), ?, ?, ?, ?, ?)",
-          [lift.seats, lift.carId, userId, lift.startAddressId, lift.destinationAddressId]).catch(error => {
+          "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `DRIVER_ID`, `START`, `DESTINATION`) VALUES (current_timestamp(), ?, ?, ?, ?, ?)", [lift.seats, lift.carId, userId, lift.startAddressId, lift.destinationAddressId]).catch(error => {
             throw error;
           })
         let insertedResult = await runQuery(
-          "SELECT MAX(ID) FROM `lift`",
-          []).catch(error => {
+          "SELECT MAX(ID) FROM `lift`", []).catch(error => {
             throw error;
           })
         let newLiftId = insertedResult.result[0]['MAX(ID)']
         await runQuery(
-          "INSERT INTO `lift_map` VALUES (?, ?, 1, 1)",
-          [newLiftId, userId]).catch(error => {
+          "INSERT INTO `lift_map` VALUES (?, ?, 1, 1)", [newLiftId, userId]).catch(error => {
             throw error;
           })
 
@@ -458,26 +384,24 @@ module.exports = {
         var id = options.id
         switch (message.type) {
           case 1: // text
-            await runQuery("INSERT INTO `messages` (`CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (?, ?, ?, current_timestamp())",
-              [message.content, id, message.liftId]).catch(error => {
-                throw error
-              })
+            await runQuery("INSERT INTO `messages` (`CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (?, ?, ?, current_timestamp())", [message.content, id, message.liftId]).catch(error => {
+              throw error
+            })
             break
           case 2: // audio blob
             var blob = await (await fetch(dataURI)).blob();
-            await runQuery("INSERT INTO `messages` (`AUDIO`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (?, ?, ?, current_timestamp())",
-              [blob, id, message.liftId]).catch(error => {
-                throw error
-              })
+            await runQuery("INSERT INTO `messages` (`AUDIO`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (?, ?, ?, current_timestamp())", [blob, id, message.liftId]).catch(error => {
+              throw error
+            })
             break
           case 3: // image blob
             var blob = await (await fetch(dataURI)).blob();
-            await runQuery("INSERT INTO `messages` (`PICTURE`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (?, ?, ?, current_timestamp())",
-              [message.content, id, message.liftId]).catch(error => {
-                throw error
-              })
+            await runQuery("INSERT INTO `messages` (`PICTURE`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (?, ?, ?, current_timestamp())", [message.content, id, message.liftId]).catch(error => {
+              throw error
+            })
             break
         }
+
         function dataURItoBlob (dataURI) {
           // convert base64 to raw binary data held in a string
           // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
@@ -502,10 +426,9 @@ module.exports = {
           return blob;
 
         }
-        let result = await runQuery("SELECT MAX(ID) FROM `messages`",
-          []).catch(error => {
-            throw error
-          })
+        let result = await runQuery("SELECT MAX(ID) FROM `messages`", []).catch(error => {
+          throw error
+        })
         var id = result.result[0]['MAX(ID)'] + ''
         console.log(typeof id)
         res.end(id)
