@@ -57,7 +57,7 @@ module.exports = function (ctx) {
 
       // Quasar plugins
       plugins: [
-        
+
       ]
     },
 
@@ -98,7 +98,7 @@ module.exports = function (ctx) {
       open: true, // opens browser window automatically
       key: fs.readFileSync('server.key'),
       cert: fs.readFileSync('server.pem'),
-      ca: fs.readFileSync('ca.pem'),
+      ca: fs.readFileSync('ca.pem')
     },
 
     // animations: 'all', // --- includes all animations

@@ -3,6 +3,7 @@ var runQuery = require('./db'),
   fs = require('fs'),
   readline = require('readline'),
   carModels = require('./carModels')
+const newsPath = 'news/postillon/ticker.txt'
 
 function isOptionMissing (data, needed, res) {
   return needed.some(key => {
@@ -35,6 +36,19 @@ module.exports = {
         let result = await runQuery("SELECT PICTURE FROM `users` WHERE users.FB_ID = ?", [options.fbid]);
         res.setHeader('Content-Type', 'image/png');
         res.end(result.result[0].PICTURE, 'binary');
+      }
+    },
+    '/getNewsticker': async (req, res, options) => {
+      if (!isOptionMissing(options, [], res)) {
+        fs.readFile(newsPath, 'utf8', (err, data) => {
+          if (err) throw err;
+          var news = data.toString().split("\n");
+
+          var rnd = Math.floor(Math.random() * news.length)
+          news = news[rnd].split('+++')[1].trim()
+
+          res.end(news)
+        })
       }
     },
     '/getUserData': async (req, res, options) => {
@@ -128,7 +142,6 @@ module.exports = {
             liftMessages[item.LIFT_ID].push(obj)
           })
           data.messages = liftMessages
-
         }
 
         res.end(JSON.stringify(data))

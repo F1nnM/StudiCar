@@ -4,7 +4,7 @@ import 'firebase/auth'
 export const ApiBasePath = process.env.DEV ? "https://" + window.location.hostname :
   (window.location.hostname.startsWith("dev") ? "https://dev.api.studicar.mfinn.de" : "https://api.studicar.mfinn.de")
 
-export function sendApiRequest(action, options, successCallback, errorCallback) {
+export function sendApiRequest (action, options, successCallback, errorCallback) {
   options = JSON.parse(JSON.stringify(options)); //deep copy. Somehow {...options} and Object.assign({}, options) did both not work;
   if (!(action.path && action.method))
     errorCallback(new Error("Invalid action supplied. Use predefined or make sure that it contains a path and a method."))
@@ -54,6 +54,11 @@ export const GET_LEGAL = {
   method: "GET"
 }
 
+export const GET_NEWSTICKER = {
+  path: "/getNewsticker",
+  method: "GET"
+}
+
 export const SQL_TEST_READ = {
   path: "/sqlTest",
   method: "GET"
@@ -83,6 +88,7 @@ export const SQL_GET_LIFT_INFO = {
   path: "/getLiftInfo",
   method: "GET"
 }
+
 
 export const SQL_UPDATE_DESCRIPTION = {
   path: "/updateDescription",
