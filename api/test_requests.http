@@ -1,13 +1,2 @@
 ###
 GET https://localhost/ping
-
-"rest-client.certificates": {
-  "localhost:3000": {
-      "cert": "/Users/demo/Certificates/client.crt",
-      "key": "/Users/demo/Keys/client.key"
-  },
-  "example.com": {
-      "cert": "/Users/demo/Certificates/client.crt",
-      "key": "/Users/demo/Keys/client.key"
-  }
-}

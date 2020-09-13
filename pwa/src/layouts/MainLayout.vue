@@ -21,7 +21,7 @@
                 >{{!scannerOpen ? 'StudiCar ' + pageTrans : 'Scanvorgang läuft'}}</div>
               </q-slide-transition>
               <q-slide-transition :duration="150">
-                <div v-show="scrolled" class>{{pageName}}</div>
+                <div v-show="scrolled" class>{{ pageName }}</div>
               </q-slide-transition>
             </div>
             <div class="col-xs-2 col-md-1">
@@ -51,7 +51,7 @@
       content-class="bg-grey-1"
       class="drawer-no-border"
     >
-      <drawerImage :timeText="greeting" />
+      <drawerImage :timeText="greeting" :caption="newsticker" />
       <hr style="margin: 0; background-color: black;" />
       <q-list>
         <q-item-label header class="text-grey-8">Navigation</q-item-label>
@@ -65,7 +65,7 @@
         <q-scroll-observer @scroll="scrollHandler" />
 
         <div class="text-h5 q-pl-md q-pt-md">
-          <span class="custom-underline c-u-l c-u-2 c-u-md" transition="slide-left">{{pageName}}</span>
+          <span class="custom-underline c-u-l c-u-2 c-u-md" transition="slide-left">{{ pageName }}</span>
         </div>
 
         <br />
@@ -102,113 +102,124 @@
 </template>
 
 <script>
+import qrScanner from "components/qrScanner";
 
-import qrScanner from 'components/qrScanner'
+import { scroll } from "quasar";
 
-import { scroll } from 'quasar'
+import EssentialLink from "components/EssentialLink";
+import drawerImage from "components/drawerWelcomeImage";
 
-import EssentialLink from 'components/EssentialLink'
-import drawerImage from 'components/drawerWelcomeImage'
-
+import { sendApiRequest, GET_NEWSTICKER } from "../ApiAccess";
 
 export default {
-  name: 'MainLayout',
+  name: "MainLayout",
 
   components: {
     EssentialLink,
     qrScanner,
-    drawerImage
+    drawerImage,
   },
 
   computed: {
-    username () {
-      return this.$store.getters['auth/user'].name.split(' ')[0]
+    username() {
+      return this.$store.getters["auth/user"].name.split(" ")[0];
     },
 
-    pageName () {
-      return this.$store.state.pageName
+    pageName() {
+      return this.$store.state.pageName;
     },
 
-    loc () {
-      return document.location.href
+    loc() {
+      return document.location.href;
     },
 
-    pageTrans () {
-      return this.$store.state.pageTrans
-    }
+    pageTrans() {
+      return this.$store.state.pageTrans;
+    },
   },
 
   methods: {
-
-    scannerSwiped (e) {
-      alert(e)
+    scannerSwiped(e) {
+      alert(e);
     },
 
-    scrollHandler (info) {
-      this.scrolled = !this.scannerOpen ? info.position > 30 : false
+    scrollHandler(info) {
+      this.scrolled = !this.scannerOpen ? info.position > 30 : false;
     },
 
-    gotScanResult (e) {
-      this.scannerOpen = false
-      window.location.href = '#/benutzerinfo?' + e + '">{{lift.driver.name}}'
+    gotScanResult(e) {
+      this.scannerOpen = false;
+      window.location.href = "#/benutzerinfo?" + e + '">{{lift.driver.name}}';
     },
 
-    closeScanner (e) {
-      if (e.direction == 'up') {
-        this.scannerOpen = false
-        setTimeout(() => window.scrollTo(0, 0), 300)
+    closeScanner(e) {
+      if (e.direction == "up") {
+        this.scannerOpen = false;
+        setTimeout(() => window.scrollTo(0, 0), 300);
       }
-
     },
 
-
-    toggleScannerOpen () {
-      this.scannerOpen = !this.scannerOpen
+    toggleScannerOpen() {
+      this.scannerOpen = !this.scannerOpen;
       if (this.scannerOpen) {
-        this.leftDrawerOpen = false
+        this.leftDrawerOpen = false;
       }
     },
 
-    randomArrayItem (array) {
-      return array[Math.floor(Math.random() * array.length)]
-    }
+    randomArrayItem(array) {
+      return array[Math.floor(Math.random() * array.length)];
+    },
 
-
+    reloadNews() {
+      sendApiRequest(
+        GET_NEWSTICKER,
+        {},
+        (data) => {
+          this.newsticker = data;
+        },
+        (err) => {
+          this.newsticker = "Fehler aufgetreten";
+        }
+      );
+    },
   },
 
+  mounted() {
+    this.reloadNews();
+  },
 
-  data () {
-
+  data() {
     return {
       greeting: this.$store.state.greeting,
+      newsticker: "Wird geladen...",
       leftDrawerOpen: false,
       pageTransY: 15,
       scannerOpen: false,
       scrolled: false,
-      tab: 'home',
-      chats: 'Main',
+      tab: "home",
+      chats: "Main",
       show: true,
       essentialLinks: [
         {
-          title: 'Marktplatz',
-          caption: 'Zur Übersicht',
-          icon: 'home',
-          link: '/#/'
+          title: "Marktplatz",
+          caption: "Zur Übersicht",
+          icon: "home",
+          link: "/#/",
         },
         {
-          title: 'Spielwiese',
-          caption: 'Endlich wieder Kind sein',
-          icon: 'toys',
-          link: '/#/spielwiese'
+          title: "Spielwiese",
+          caption: "Endlich wieder Kind sein",
+          icon: "toys",
+          link: "/#/spielwiese",
         },
         {
-          title: 'Rechtliches',
-          caption: 'Muss auch sein',
-          icon: 'policy',
-          link: '/#/rechtliches'
-        }
-      ]
-    }
-  }
-}
+          title: "Rechtliches",
+          caption: "Muss auch sein",
+          icon: "policy",
+          link: "/#/rechtliches",
+        },
+      ],
+    };
+  },
+};
 </script>

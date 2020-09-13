@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \\\"No test specified\\\" && exit 0",
     "start": "node index.js",
-    "autoreload-nodemon": "nodemon index.js"
+    "nodemon": "nodemon index.js"
   },
   "author": "Finn Melzer <studicar@mfinn.de>",
   "license": "ISC",
