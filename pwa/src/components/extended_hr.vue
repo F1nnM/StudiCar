@@ -1,29 +1,38 @@
 <template>
   <div>
-    <div
-      :class="'to-hr bg-' + color + ' to-hr-' + size"
-      :style="borderRadius ? 'border-radius: ' + borderRadius : ''"
-    ></div>
+    <div :class="classAttr" :style="style"></div>
   </div>
 </template>
 
 <script>
 export default {
-    name: 'extended_hr',
-    props: {
-        color:{	
-            required: true,
-            type: String
-        },
-        size: {
-            required: true,
-            type: String
-        },
-        borderRadius: {
-            type: String
-        }
-    }
-}
+  name: "extended_hr",
+  computed: {
+    classAttr() {
+      var text = "to-hr to-hr-" + this.size;
+      if (!this.hex) text += " bg-" + this.color;
+      return text;
+    },
+    style() {
+      var style = "";
+      if (this.borderRadius) style += "; border-radius: " + this.borderRadius;
+      if (this.hex) style += "; background-color: " + this.color;
+      return style;
+    },
+  },
+  props: {
+    color: {
+      required: true,
+      type: String,
+    },
+    size: {
+      required: true,
+      type: String,
+    },
+    borderRadius: String,
+    hex: Boolean,
+  },
+};
 </script>
 
 <style lang="scss" scoped>

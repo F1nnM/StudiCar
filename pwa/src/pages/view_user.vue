@@ -201,104 +201,115 @@
 </template>
 
 <script>
-
-import { date } from 'quasar'
-import { sendApiRequest, SQL_GET_USER_DATA, GET_USER_PROFILE_PIC, buildGetRequestUrl } from "../ApiAccess";
+import { date } from "quasar";
+import {
+  sendApiRequest,
+  SQL_GET_USER_DATA,
+  GET_USER_PROFILE_PIC,
+  buildGetRequestUrl,
+} from "../ApiAccess";
 export default {
-
-  data(){
-    
-    return{
+  data() {
+    return {
       prefInfo: false,
       loaded: false,
-      prefInfoTab: 'talkativeness',
+      prefInfoTab: "talkativeness",
       splitterModel: 20,
       splitter: 50,
       viewedUser: {
-          name: 'Johannes',
-          createdAt: date.formatDate(Date.now(), 'MMMM YYYY'),
-          imageUrl: '~assets/loremimage.jpg',
-          bio: 'Bin der Johannes und freu mich auf die Fahrt. Dieser Text ist absichtlich lang gehalten, um die Darstellung von so extrem langen Texten zu sehen.',
-          lifts: {
-              offered: 7,
-              all: 19,
-              average: 5
-          },
-          preferences: [{
-              name: 'Redseligkeit', value: 'GREEN'
+        name: "Johannes",
+        createdAt: date.formatDate(Date.now(), "MMMM YYYY"),
+        imageUrl: "~assets/loremimage.jpg",
+        bio:
+          "Bin der Johannes und freu mich auf die Fahrt. Dieser Text ist absichtlich lang gehalten, um die Darstellung von so extrem langen Texten zu sehen.",
+        lifts: {
+          offered: 7,
+          all: 19,
+          average: 5,
+        },
+        preferences: [
+          {
+            name: "Redseligkeit",
+            value: "GREEN",
           },
           {
-              name: ' ...am Morgen', value: 'YELLOW'
+            name: " ...am Morgen",
+            value: "YELLOW",
           },
           {
-              name: 'Rauchen', value: 'RED'
+            name: "Rauchen",
+            value: "RED",
           },
           {
-              name: 'Musik', value: 'YELLOW'
-          }]
-      }
-    }
+            name: "Musik",
+            value: "YELLOW",
+          },
+        ],
+      },
+    };
   },
 
   computed: {
-      prefsDocu(){
-        return this.$store.state.prefsDocu
-      }
+    prefsDocu() {
+      return this.$store.state.prefsDocu;
+    },
   },
 
-  mounted(){
+  mounted() {
+    let loc = document.location.href;
+    let otherFbId = loc.split("?slId=")[1];
 
-    let loc = document.location.href
-    let otherFbId = loc.split('?')[1]
+    let imageUrl;
+    buildGetRequestUrl(GET_USER_PROFILE_PIC, { fbid: otherFbId }, (url) => {
+      imageUrl = url;
+    });
 
-    let imageUrl
-    buildGetRequestUrl(
-      GET_USER_PROFILE_PIC,
-      { fbid: otherFbId },
-      url => {
-        imageUrl = url
-      }
-    )
-    
-
-    sendApiRequest(SQL_GET_USER_DATA,
-    {
-      fbid: otherFbId,
-      secretFbId: 'lorem' // I hope nobody will ever have this secretFbId, cause then our server is gonna crash
-    },
-    data => {
-      this.viewedUser = {
-        name: data.name.split(' ')[0],
-        createdAt: date.formatDate(data.stats.createdAt, 'MMMM YYYY'),
-        bio: data.description,
-        lifts: {
+    sendApiRequest(
+      SQL_GET_USER_DATA,
+      {
+        fbid: otherFbId,
+        secretFbId: "/°", // I hope nobody will ever have this secretFbId, cause then our server is gonna crash
+      },
+      (data) => {
+        this.viewedUser = {
+          name: data.name.split(" ")[0],
+          createdAt: date.formatDate(data.stats.createdAt, "MMMM YYYY"),
+          bio: data.description,
+          lifts: {
             offered: data.stats.liftsOffered,
             all: data.stats.driverCount,
-            average: 5
-        },
-        imageUrl: imageUrl,
-        preferences: [{
-            name: 'Redseligkeit', value: data.prefs.talk
-        },
-        {
-            name: ' ...am Morgen', value: data.prefs.talkMorning
-        },
-        {
-            name: 'Rauchen', value: data.prefs.smoking
-        },
-        {
-            name: 'Musik', value: data.prefs.music
-        }]
+            average: 5,
+          },
+          imageUrl: imageUrl,
+          preferences: [
+            {
+              name: "Redseligkeit",
+              value: data.prefs.talk,
+            },
+            {
+              name: " ...am Morgen",
+              value: data.prefs.talkMorning,
+            },
+            {
+              name: "Rauchen",
+              value: data.prefs.smoking,
+            },
+            {
+              name: "Musik",
+              value: data.prefs.music,
+            },
+          ],
+        };
+        this.loaded = true;
+      },
+      (error) => {
+        throw error;
       }
-      this.loaded = true
-    },
-    error => {throw error})
+    );
 
-    
-
-    this.$store.commit('setPage', '')
-    }
-}
+    this.$store.commit("setPage", "");
+  },
+};
 </script>
 
 <style scoped lang="scss">
