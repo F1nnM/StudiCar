@@ -6,17 +6,17 @@
         <q-icon size="sm" class="col-2" :name="greetingIcon" />
       </div>
       <div v-if="caption" class="full-width absolute-bottom-left text-caption">
-        {{ caption }} -
-        <a class="text-white" href="der-postillon.com">der Postillon</a>
+        {{ caption }}
+        <small>
+          <br />bereitgestellt von
+          <a class="text-white" href="https://der-postillon.com">der Postillon</a>
+        </small>
       </div>
     </q-img>
   </div>
 </template>
 
 <script>
-const Parser = require("rss-parser");
-const parser = new Parser();
-
 export default {
   name: "drawerWelcomeImage",
   props: {

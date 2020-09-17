@@ -149,7 +149,7 @@ export default {
 
     gotScanResult(e) {
       this.scannerOpen = false;
-      window.location.href = "#/benutzerinfo?" + e + '">{{lift.driver.name}}';
+      window.location.href = "#/benutzerinfo?slId=" + e;
     },
 
     closeScanner(e) {

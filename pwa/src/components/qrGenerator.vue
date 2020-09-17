@@ -22,7 +22,8 @@
           <extHR color="primary" size="xs" class="z-top" />
         </q-card-section>
         <q-card-section class="q-pa-sm text-caption text-center">
-          <p>
+          <p v-if="text">{{ text }}</p>
+          <p v-else>
             Über diesen Code kannst du Daten an andere Nutzer der App übertragen. Dafür muss ein anderer StudiCar-Nutzer den Code
             mit seinem Scanner scannen und er wird direkt auf den passenden Inhalt weitergeleitet.
           </p>
@@ -33,48 +34,44 @@
 </template>
 
 <script>
-
-import VueQrcode from 'vue-qrcode' // docs: https://github.com/rx-ts/vue/tree/master/packages/vue-qrcode
-import extHR from 'components/extended_hr'
-import { colors } from 'quasar'
+import VueQrcode from "vue-qrcode"; // docs: https://github.com/rx-ts/vue/tree/master/packages/vue-qrcode
+import extHR from "components/extended_hr";
+import { colors } from "quasar";
 
 export default {
-    name: 'qrGenerator',
-    components: {
-        VueQrcode, extHR
+  name: "qrGenerator",
+  components: {
+    VueQrcode,
+    extHR,
+  },
+  props: {
+    input: {
+      type: String,
+      required: true,
     },
-    props: {
-        input: {
-            type: String,
-            required: true
-        },
-        show: {
-            type: Boolean,
-            required: true
-        },
-        primColor: {
-            type: Boolean,
-            default: false
-        }
+    show: {
+      type: Boolean,
+      required: true,
     },
+    primColor: Boolean,
+    text: String,
+  },
 
-    data(){
-        return{
-            color: {
-                dark: this.primColor ? colors.getBrand('primary') : '#000000FF',
-                light: '#FFFFFFFF'
-            }
-        }
-    },
+  data() {
+    return {
+      color: {
+        dark: this.primColor ? colors.getBrand("primary") : "#000000FF",
+        light: "#FFFFFFFF",
+      },
+    };
+  },
 
-    methods: {
-      close(){
-        
-        this.$emit('close')
-       
-      }
-    }
-}
+  methods: {
+    close() {
+      this.$emit("close");
+    },
+  },
+};
 </script>
 
 <style lang="scss">

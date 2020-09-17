@@ -1,9 +1,9 @@
 var runQuery = require('./db'),
   showdown = require('showdown'),
   fs = require('fs'),
-  readline = require('readline'),
-  carModels = require('./carModels')
-const newsPath = 'news/postillon/ticker.txt'
+  readline = require('readline')
+const newsPath = 'news/postillon/ticker.txt',
+  longQueries = require('./longQueries')
 
 function isOptionMissing (data, needed, res) {
   return needed.some(key => {
@@ -53,9 +53,10 @@ module.exports = {
     },
     '/getUserData': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid', 'secretFbId'], res)) {
-        let userData = (await runQuery("SELECT ID, NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKING, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `users` WHERE users.FB_ID = ?", [options.fbid])).result[0]
-        let liftCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS LIFT_COUNT FROM `lift_map` WHERE `USER_ID` = ? ", [options.fbid])).result[0].LIFT_COUNT
-        let driverCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS DRIVER_COUNT FROM `lift_map` WHERE `IS_DRIVER` = true AND `USER_ID` = ? ", [options.fbid])).result[0].DRIVER_COUNT
+        var userData = (await runQuery("SELECT ID, NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKING, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `users` WHERE users.FB_ID = ?", [options.fbid])).result[0],
+          liftCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS LIFT_COUNT FROM `lift_map` WHERE `USER_ID` = ? ", [options.fbid])).result[0].LIFT_COUNT,
+          driverCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS DRIVER_COUNT FROM `lift_map` WHERE `IS_DRIVER` = true AND `USER_ID` = ? ", [options.fbid])).result[0].DRIVER_COUNT,
+          uid = userData.ID
 
         let data = {
           id: userData.ID,
@@ -80,7 +81,7 @@ module.exports = {
           data.settings = {
             liftMaxDistance: userData.LIFT_MAX_DISTANCE
           }
-          let addresses = await runQuery("SELECT adresses.ID, adresses.NICKNAME, POSTCODE, CITY, STREET, NUMBER FROM adresses INNER JOIN users ON adresses.USER_ID = users.ID WHERE users.FB_ID = ? UNION SELECT adresses.ID, adresses.NICKNAME, POSTCODE, CITY, STREET, NUMBER FROM adresses WHERE adresses.ID < 4", [options.fbid]);
+          var addresses = await runQuery("SELECT adresses.* FROM adresses INNER JOIN users ON adresses.USER_ID = users.ID WHERE users.ID = ? UNION SELECT adresses.* FROM adresses WHERE adresses.ID < 4", [uid]);
           data.addresses = []
 
           addresses.result.forEach(item => {
@@ -94,7 +95,7 @@ module.exports = {
             }
             data.addresses.push(obj)
           })
-          let cars = await runQuery("SELECT car.MODEL_ID, car.ID, BRAND, MODEL, TYPE, LICENSE_PLATE, SEATS, COLOR, YEAR, PICTURE FROM car_models JOIN car ON car.MODEL_ID = car_models.ID WHERE car.USER_ID = ?", [data.id]);
+          var cars = await runQuery("SELECT car.*, car_models.BRAND, car_models.MODEL FROM car_models JOIN car ON car.MODEL_ID = car_models.ID WHERE car.USER_ID = ?", [uid]);
           data.cars = []
           cars.result.forEach(item => {
             let obj = {
@@ -106,11 +107,11 @@ module.exports = {
               licensePlate: item.LICENSE_PLATE,
               year: item.YEAR,
               seats: item.SEATS,
-              color: carModels.allColors()[item.COLOR.split(':')[0]][item.COLOR.split(':')[1]] /* I apologize for not-clean-code, but this was the easiest way */
+              color: '#' + item.COLOR
             }
             data.cars.push(obj)
           })
-          let allMessages = await runQuery("SELECT messages.ID, messages.CONTENT, messages.AUDIO, messages.PICTURE, FROM_USER_ID, lift_map.LIFT_ID, users.NAME, messages.TIMESTAMP, start_adress.NICKNAME AS START_NICK, dest_adress.NICKNAME AS DEST_NICK FROM messages JOIN lift_map ON lift_map.LIFT_ID = messages.LIFT_ID JOIN users ON FROM_USER_ID = users.ID JOIN lift ON lift.ID = messages.LIFT_ID JOIN adresses AS start_adress ON start_adress.ID = lift.START JOIN adresses AS dest_adress ON dest_adress.ID = lift.DESTINATION WHERE lift_map.USER_ID = ? AND lift_map.PENDING = 0 ORDER BY messages.TIMESTAMP DESC;", [userData.ID])
+          let allMessages = await runQuery(longQueries.getMessages, [uid])
           var liftMessages = {}
           allMessages.result.forEach(item => {
             if (!liftMessages[item.LIFT_ID]) {
@@ -162,11 +163,7 @@ module.exports = {
           } // basically grouped all cars in object array
         })
 
-        let colors = carModels.allColors() // just transferring color reference in this step
-        res.end(JSON.stringify({
-          cars: carsObj,
-          colors: colors
-        }))
+        res.end(JSON.stringify(carsObj))
       }
     },
     '/getMessages': async (req, res, options) => {
@@ -351,9 +348,10 @@ module.exports = {
 
         var modelId = result.result[0].ID
 
-        await runQuery("INSERT INTO `car` (`ID`, `LICENSE_PLATE`, `SEATS`, `TYPE`, `COLOR`, `YEAR`, `MODEL_ID`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)", [car.licensePlate, car.seats, car.type, (car.colorTone + ':' + car.color), car.year, modelId, id]).catch(error => {
-          throw error
-        })
+        await runQuery("INSERT INTO `car` (`ID`, `LICENSE_PLATE`, `SEATS`, `TYPE`, `COLOR`, `YEAR`, `MODEL_ID`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)",
+          [car.licensePlate, car.seats, car.type, car.color, car.year, modelId, id]).catch(error => {
+            throw error
+          })
 
         res.end();
       }
