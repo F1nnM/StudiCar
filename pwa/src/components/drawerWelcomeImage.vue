@@ -18,7 +18,7 @@
 
 <script>
 export default {
-  name: "drawerWelcomeImage",
+  name: "DrawerWelcomeImage",
   props: {
     timeText: {
       type: String,

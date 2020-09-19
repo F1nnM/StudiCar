@@ -35,7 +35,7 @@
           </q-toolbar-title>
         </q-toolbar>
       </div>
-      <qrScanner
+      <QRScanner
         :open="scannerOpen"
         @result="gotScanResult"
         @help="toggleScannerOpen"
@@ -102,12 +102,12 @@
 </template>
 
 <script>
-import qrScanner from "components/qrScanner";
+import QRScanner from "components/QRScanner";
 
 import { scroll } from "quasar";
 
 import EssentialLink from "components/EssentialLink";
-import drawerImage from "components/drawerWelcomeImage";
+import drawerImage from "components/DrawerWelcomeImage";
 
 import { sendApiRequest, GET_NEWSTICKER } from "../ApiAccess";
 
@@ -116,7 +116,7 @@ export default {
 
   components: {
     EssentialLink,
-    qrScanner,
+    QRScanner,
     drawerImage,
   },
 

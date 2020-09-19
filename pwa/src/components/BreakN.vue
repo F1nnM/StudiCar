@@ -7,16 +7,13 @@
 </template>
 
 <script>
-
 export default {
-  name: 'break_n',
+  name: "BreakN",
   props: {
-        value:{
-            type: Number,
-            required: true
-        }
-    }
-  }
-  
-
+    value: {
+      type: Number,
+      required: true,
+    },
+  },
+};
 </script>

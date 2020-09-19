@@ -103,67 +103,68 @@
 
 
 <script>
-
-import { openURL } from 'quasar'
-import { date } from 'quasar'
-import extHR from 'components/extended_hr'
-import { sendApiRequest, SQL_GET_LIFT_INFO } from '../ApiAccess'
-
+import { openURL } from "quasar";
+import { date } from "quasar";
+import extHR from "components/ExtendedHr";
+import { sendApiRequest, SQL_GET_LIFT_INFO } from "../ApiAccess";
 
 export default {
-  name: 'liftInfoDrawer',
+  name: "LiftInfoDrawer",
   components: {
-    extHR
+    extHR,
   },
-  data(){
+  data() {
     return {
-			user: this.$store.getters['auth/user'].id,
-			lift: {
-				car: {
-					brand: '',
-					model: '',
-					color: '',
-					type: '',
-					licensePlate: ''
-				},
-				passengers: [],
-				seats: 0 // all "empty" data just to avoid errors when calling variables
-			},
-			loading: 0 // as always: 0 means not loading, 1 means in progress, 2 means success and -1 error.
-    }
+      user: this.$store.getters["auth/user"].id,
+      lift: {
+        car: {
+          brand: "",
+          model: "",
+          color: "",
+          type: "",
+          licensePlate: "",
+        },
+        passengers: [],
+        seats: 0, // all "empty" data just to avoid errors when calling variables
+      },
+      loading: 0, // as always: 0 means not loading, 1 means in progress, 2 means success and -1 error.
+    };
   },
   props: {
     open: {
       type: Boolean,
-      required: true
+      required: true,
     },
-		liftId: {
+    liftId: {
       type: Number,
-      required: true
-    }
+      required: true,
+    },
   },
-  mounted(){
-		this.loading = 1
-		sendApiRequest(SQL_GET_LIFT_INFO, {
-				id: this.liftId
-		}, data => {
-			this.lift = data
-			this.loading = 2
-		}, error => {
-			this.loading = -1
-		})
+  mounted() {
+    this.loading = 1;
+    sendApiRequest(
+      SQL_GET_LIFT_INFO,
+      {
+        id: this.liftId,
+      },
+      (data) => {
+        this.lift = data;
+        this.loading = 2;
+      },
+      (error) => {
+        this.loading = -1;
+      }
+    );
   },
-  computed: {
-    
-	},
-	watch: {
-		open: _=>{
-			alert('changed')
-		}
-	},
+  computed: {},
+  watch: {
+    open: (_) => {
+      alert("changed");
+    },
+  },
   methods: {
-		getImageOfUser(id){
-			return require('~assets/sad.svg')
-		}
-  }
-}
+    getImageOfUser(id) {
+      return require("~assets/sad.svg");
+    },
+  },
+};

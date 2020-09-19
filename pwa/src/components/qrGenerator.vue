@@ -35,11 +35,11 @@
 
 <script>
 import VueQrcode from "vue-qrcode"; // docs: https://github.com/rx-ts/vue/tree/master/packages/vue-qrcode
-import extHR from "components/extended_hr";
+import extHR from "components/ExtendedHr";
 import { colors } from "quasar";
 
 export default {
-  name: "qrGenerator",
+  name: "QRGenerator",
   components: {
     VueQrcode,
     extHR,
