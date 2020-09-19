@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  name: "extended_hr",
+  name: "ExtendedHr",
   computed: {
     classAttr() {
       var text = "to-hr to-hr-" + this.size;

@@ -8,7 +8,7 @@ export default ({ app, router, Vue, store }) => {
 
     const byPass = true
 
-    if (!process.env.DEV) byPass = false // bypass is only possible in development
+    if (!process.env.DEV) byPass = false // bypass can only be used in development
     let isAuthenticated = await Firebase.auth().currentUser !== null
 
     if (authRequired && !byPass) {

@@ -25,17 +25,17 @@
                 <q-btn dense icon="settings" flat size="sm">
                   <q-menu transition-show="jump-down" transition-hide="jump-up">
                     <q-list>
-                      <q-item clickable disable>
+                      <!-- <q-item clickable disable>
                         <q-item-section>
                           <q-btn>Mein Passwort ändern</q-btn>
                         </q-item-section>
-                      </q-item>
+                      </q-item>-->
                       <q-item>
                         <q-item-section>
                           <SignOutButton class="q-ma-sm full-width" />
                         </q-item-section>
                       </q-item>
-                      <q-item clickable disable>
+                      <!-- <q-item clickable disable>
                         <q-item-section>
                           <q-item-label>
                             <q-toggle v-model="dataSaver" label="Datennutzung reduzieren">
@@ -50,7 +50,7 @@
                             </q-toggle>
                           </q-item-label>
                         </q-item-section>
-                      </q-item>
+                      </q-item>-->
                     </q-list>
                   </q-menu>
                 </q-btn>
@@ -943,8 +943,8 @@ import {
   SQL_UPDATE_PROFILE_PICTURE,
   GET_CAR_MODELS,
 } from "../ApiAccess";
-import qrGen from "../components/qrGenerator";
-import extHR from "../components/extended_hr";
+import qrGen from "../components/QRGenerator";
+import extHR from "../components/ExtendedHr";
 
 export default {
   components: {
@@ -1430,7 +1430,8 @@ export default {
       }
     );
 
-    this.$store.state.pageName = "Profil";
+    this.$store.commit("setPage", "Profil");
+    this.$store.commit("setPageTrans", "slide");
   },
 };
 </script>
