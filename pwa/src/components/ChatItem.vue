@@ -30,7 +30,7 @@
             {{ message.destination }}
           </q-item-label>
           <q-item-label caption lines="3">
-            <span class="text-weight-bold">{{ message.nameOfUser }}:</span>
+            <span class="text-weight-bold">{{ message.sentBy }}:</span>
 
             <q-icon
               v-if="message.type != 1"

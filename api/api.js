@@ -81,7 +81,7 @@ module.exports = {
           data.settings = {
             liftMaxDistance: userData.LIFT_MAX_DISTANCE
           }
-          var addresses = await runQuery("SELECT adresses.* FROM adresses INNER JOIN users ON adresses.USER_ID = users.ID WHERE users.ID = ? UNION SELECT adresses.* FROM adresses WHERE adresses.ID < 4", [uid]);
+          var addresses = await runQuery("SELECT adresses.* FROM adresses INNER JOIN users ON adresses.USER_ID = users.ID WHERE users.ID = ? AND adresses.ID > 3", [uid]);
           data.addresses = []
 
           addresses.result.forEach(item => {
