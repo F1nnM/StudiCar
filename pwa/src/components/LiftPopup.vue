@@ -9,32 +9,39 @@
         transition-show="slide-up"
         transition-hide="slide-down"
         @show="scrollDown()"
+        @input="emitAndClose()"
       >
         <q-layout view="hHh lpR fFr" class="bg-white q-pa-none">
           <q-header reveal elevated class="bg-primary text-white">
             <div class="row">
-              <div class="col-8 bg-primary row items-center">
+              <div class="col-10 bg-primary">
                 <q-toolbar>
-                  <q-toolbar-title>
-                    Würzburg &rarr; Ansbach
-                    <q-btn flat round dense icon="search" />
+                  <q-toolbar-title class="row">
+                    <div class="col-9 text-h6 text-weight-light">
+                      {{ lift.start.name }}
+                      <span class="q-mx-sm">&rsaquo;</span>
+                      {{ lift.destination.name }}
+                    </div>
+                    <div class="col-3 text-right">
+                      <!-- <q-btn flat round dense icon="search" /> -->
+                      <q-btn
+                        @click="openLiftInfo = true"
+                        icon="info"
+                        flat
+                        v-ripple
+                        round
+                        size="md"
+                        dense
+                        class="q-mr-sm"
+                      />
+                    </div>
                   </q-toolbar-title>
                 </q-toolbar>
               </div>
-
-              <div class="col-4 bg-white text-primary">
+              <div class="col-2 bg-white text-primary">
                 <q-toolbar>
                   <q-toolbar-title>
-                    <q-btn
-                      @click="openLiftInfo = true"
-                      icon="info"
-                      flat
-                      v-ripple
-                      round
-                      dense
-                      class="q-mr-sm"
-                    />
-                    <q-btn v-ripple icon="close" flat round dense @click="$emit('close')" />
+                    <q-btn v-ripple icon="close" flat round dense @click="emitAndClose()" />
                   </q-toolbar-title>
                 </q-toolbar>
               </div>
@@ -48,7 +55,6 @@
             side="right"
             bordered
             show-if-above
-            @show="loadLiftInfo"
           >
             <div class="q-pa-md">
               <p class="text-h6 row items-center">
@@ -56,84 +62,107 @@
                 <q-space />
                 <q-btn icon="close" flat round dense @click="openLiftInfo = false" />
               </p>
-              <q-slide-transition>
-                <div v-if="loading == 1">
-                  <q-separator spaced />
-                  <p class="q-mt-md text-center">
-                    Daten werden geladen
-                    <q-circular-progress indeterminate size="20px" color="primary" class="q-ma-md" />
-                  </p>
-                </div>
-              </q-slide-transition>
-              <div v-if="loading == -1">
-                <q-card>
-                  <q-card-section>
+
+              <extHR color="grey-4" size="xs" />
+              <q-timeline color="primary" class="q-mt-xl">
+                <!-- <q-item-label header>Fahrtverlauf</q-item-label> -->
+                <q-timeline-entry>
+                  <template v-slot:title>
                     <p>
-                      <q-icon name="error_outline" size="md" color="negative" />Ein Fehler ist aufgetreten. Wenn das auftritt, dann
-                      <a
-                        href="#/contact"
-                      >schreib uns</a> bitte.
+                      {{ lift.start.name }}
+                      <span
+                        class="q-ml-md text-subtitle1"
+                      >{{ formatAsTime(lift.departAt) }}</span>
                     </p>
-                  </q-card-section>
-                </q-card>
+                  </template>
+                </q-timeline-entry>
+                <q-timeline-entry>
+                  <template v-slot:title>
+                    <p>
+                      {{ lift.destination.name }}
+                      <span
+                        class="q-ml-md text-subtitle1"
+                      >{{ formatAsTime(lift.arriveBy) }}</span>
+                      <!-- <q-badge floating v-if="lift.destination.id < 4">
+                            <q-icon color="dark" name="school" size="xs" />
+                      </q-badge>-->
+                    </p>
+                  </template>
+                </q-timeline-entry>
+              </q-timeline>
+              <div class="shadow-9 q-pa-md">
+                <div class="row">
+                  <div class="col-6">
+                    <div class="text-subtitle1">{{ lift.car.brand }} {{ lift.car.model }}</div>
+                    <div class="text-caption">{{ lift.car.type }}</div>
+                  </div>
+                  <div class="col-5">
+                    <q-avatar>
+                      <div :style="`background-color: ${ lift.car.color }`" class="full-width">
+                        <q-img src="~assets/app-icon_color_preview.png" />
+                      </div>
+                    </q-avatar>
+                    <q-btn color="grey-7" round flat dense icon="help_outline">
+                      <q-menu cover auto-close>
+                        <q-btn flat no-caps clickable @click="viewCar()">Modell online ansehen</q-btn>
+                      </q-menu>
+                    </q-btn>
+                  </div>
+                </div>
+                <extHR :color="lift.car.color" hex size="xs" class="q-my-sm" />
+                <p
+                  class="text-grey-7 q-mb-none"
+                >{{ lift.car.licensePlate }} - Baujahr {{ lift.car.built }}</p>
               </div>
-              <div v-if="loading == 2">
-                <q-card flat bordered class="my-card bg-grey-1">
-                  <q-card-section>
-                    <div class="row items-center no-wrap">
-                      <div class="col">
-                        <div class="text-h6">{{lift.car.brand}} {{lift.car.model}}</div>
-                        <div class="text-subtitle2">{{lift.car.type}}</div>
-                        <extHR :color="lift.car.color" size="xs" />
-                      </div>
 
-                      <div class="col-auto">
-                        <q-btn color="grey-7" round flat icon="more_vert">
-                          <q-menu cover auto-close>
-                            <q-btn flat clickable @click="viewCar()">Modell online ansehen</q-btn>
-                          </q-menu>
-                        </q-btn>
-                      </div>
-                    </div>
-                  </q-card-section>
-                  <q-card-section>{{lift.car.licensePlate}}</q-card-section>
-                  <q-separator />
-                </q-card>
-
-                <q-list bordered>
-                  <q-item-label header>
-                    <p v-if="lift.passengers.length > 0">
-                      Mitfahrer
-                      <span class="text-caption float-right">
-                        {{lift.passengers.length}} / {{lift.seats}}
-                        <q-icon name="airline_seat_recline_normal" size="xs" />belegt
-                      </span>
+              <q-list bordered class="q-mt-md">
+                <q-item-label header>Fahrer</q-item-label>
+                <q-item>
+                  <q-item-section top avatar>
+                    <q-avatar>
+                      <img :src="getImageOfUser(lift.driver.id)" />
+                    </q-avatar>
+                  </q-item-section>
+                  <q-item-section>
+                    <p>
+                      {{ lift.driver.name }}
+                      <br />
+                      <small>{{ lift.driver.surname }}</small>
                     </p>
-                    <p
-                      v-if="lift.passengers.length == 0"
-                      class="text-center q-pt-sm text-gray"
-                    >Bis jetzt hast du noch keine Mitfahrer.</p>
-                    <p
-                      class="text-right text-primary text-caption"
-                      v-if="lift.passengers.length == lift.seats"
-                    >Volles Auto. Wow!</p>
-                  </q-item-label>
-                  <q-item
-                    v-for="item in lift.passengers"
-                    :key="item.userId"
-                    clickable
-                    @click="alert"
-                  >
-                    <q-item-section top avatar>
-                      <q-avatar>
-                        <img :src="getImageOfUser(item.userId)" />
-                      </q-avatar>
-                    </q-item-section>
+                  </q-item-section>
+                </q-item>
+                <q-item-label header>
+                  <p v-if="lift.passengers.length">
+                    Mitfahrer
+                    <span class="text-caption float-right">
+                      {{ lift.car.occupiedSeats }} / {{ lift.car.allSeats }}
+                      <q-icon name="airline_seat_recline_normal" size="xs" />
+                    </span>
+                  </p>
+                  <p
+                    v-if="!lift.passengers.length"
+                    class="text-center q-pt-sm text-gray"
+                  >Bis jetzt hast du noch keine Mitfahrer.</p>
+                  <p
+                    class="text-right text-primary text-caption"
+                    v-if="lift.passengers.length == lift.seats"
+                  >Volles Auto. Wow!</p>
+                </q-item-label>
+                <q-item v-for="item in lift.passengers" :key="item.id" clickable @click="alert">
+                  <q-item-section top avatar>
+                    <q-avatar>
+                      <img :src="getImageOfUser(item.id)" />
+                    </q-avatar>
+                  </q-item-section>
 
-                    <q-item-section>
-                      <q-item-label>{{item.nameOfUser}}</q-item-label>
-                      <q-item-label caption>
-                        <div class="row">
+                  <q-item-section>
+                    <q-item-label>
+                      {{ item.name }}
+                      <br />
+                      <small>{{ item.surname }}</small>
+                    </q-item-label>
+                    <q-item-label caption>
+                      <!-- <div class="row">
                           <div class="col-3">
                             <p :class="'text-' + pref.talk.toLowerCase()">●</p>
                           </div>
@@ -146,16 +175,15 @@
                           <div class="col-3">
                             <p :class="'text-' + pref.music.toLowerCase()">●</p>
                           </div>
-                        </div>
-                      </q-item-label>
-                    </q-item-section>
+                      </div>-->
+                    </q-item-label>
+                  </q-item-section>
 
-                    <q-item-section side top>
-                      <q-icon name="directions_car" v-if="item.userId == user" size="sm" />
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </div>
+                  <q-item-section side top>
+                    <q-icon name="directions_car" v-if="item.id == user" size="sm" />
+                  </q-item-section>
+                </q-item>
+              </q-list>
             </div>
           </q-drawer>
           <q-page-container>
@@ -173,26 +201,25 @@
                 </q-page-sticky>
               </q-page-scroller>
 
-              <div v-for="item in messages.list" :key="item.timestamp">
-                <q-chat-message
-                  class="custom-chat-label q-mt-xl text-gray"
-                  v-if="checkDayBreak(item) != ''"
-                  :label="checkDayBreak(item)"
-                />
+              <div v-for="m in lift.messages" :key="m.timestamp">
+                <p
+                  class="custom-chat-label text-caption text-center q-mt-xl text-grey-7"
+                  v-if="checkDayBreak(m) != ''"
+                >{{ checkDayBreak(m) }}</p>
                 <div>
                   <q-chat-message
-                    :name="item.userId == user ? '' : item.nameOfUser"
-                    :sent="item.userId == user"
+                    :name="m.sentBy == user ? '' : getNameFromId(m.sentBy)"
+                    :sent="m.sentBy == user"
                     size="8"
                     text-sanitize
-                    :text="item.type == 2 ? [] : [item.content]"
-                    :stamp="formatDate(item)"
-                    :bg-color="getColor(item.userId)"
+                    :text="m.type == 2 ? [] : [m.content]"
+                    :stamp="formatAsTime(m.timestamp)"
+                    :bg-color="getColor(m.id)"
                   >
-                    <div v-if="item.type == 2">
+                    <div v-if="m.type == 2">
                       <audio
-                        v-if="item.type == 2"
-                        :src="makeAudioSRC(item.content)"
+                        v-if="m.type == 2"
+                        :src="makeAudioSRC(m.content)"
                         controls
                       >Dein Browser unterstützt keine Audios.</audio>
                       <div>
@@ -207,10 +234,10 @@
           </q-page-container>
 
           <q-footer reveal class="q-pa-none text-white">
-            <extHR color="primary" size="xs" />
+            <!-- <extHR color="primary" size="xs" /> -->
             <div class="row">
               <div class="col-xs-10 col-md-11 bg-grey-3">
-                <q-btn flat dense icon="call_split" v-if="false"></q-btn>
+                <!-- <q-btn flat dense icon="call_split" /> -->
                 <q-toolbar>
                   <q-toolbar-title>
                     <q-form @submit="sendMessage" class="q-gutter-md q-pa-none">
@@ -218,7 +245,7 @@
                         type="text"
                         class="custom-input q-pa-none"
                         v-model="messageText"
-                        placeholder="Schreibe etwas..."
+                        placeholder="Schreib eine Nachricht..."
                       />
                     </q-form>
                   </q-toolbar-title>
@@ -226,26 +253,29 @@
               </div>
 
               <div class="col-xs-2 bg-white text-center">
-                <vue-record-audio
-                  :style="'transform: scale(' +  (recorderBig ? 2.4 : 1) + ')'"
-                  v-show="!messageText"
-                  mode="hold"
-                  @result="sendAudio"
-                  @onContextMenu="false"
-                  @stream="recorderBig = true"
-                  class="record-audio"
-                />
-
-                <q-btn
-                  @click="sendMessage(1)"
-                  icon="arrow_forward_ios"
-                  flat
-                  v-show="messageText"
-                  round
-                  dense
-                  class="q-mr-sm bg-green-10 text-white"
-                  style="transition: all .1s"
-                />
+                <q-toolbar>
+                  <q-toolbar-title>
+                    <q-btn
+                      @click="sendMessage(1)"
+                      icon="arrow_forward_ios"
+                      flat
+                      v-if="messageText"
+                      round
+                      dense
+                      class="q-mr-sm bg-positive text-white"
+                      style="transition: all .1s"
+                    />
+                    <vue-record-audio
+                      :style="'transform: scale(' +  (recorderBig ? 2.4 : 1) + ')'"
+                      v-else
+                      mode="hold"
+                      @result="sendAudio"
+                      @onContextMenu="false"
+                      @stream="recorderBig = true"
+                      class="record-audio"
+                    />
+                  </q-toolbar-title>
+                </q-toolbar>
               </div>
             </div>
           </q-footer>
@@ -274,55 +304,35 @@ export default {
   },
   data() {
     return {
-      openLayout: true,
-      closing: false,
       alreadyScrolledDown: false,
       coloredIDs: {},
       recorderBig: false,
       openLiftInfo: false,
       messageText: "",
       user: this.$store.getters["auth/user"].id,
-      lift: {
-        car: {
-          brand: "",
-          model: "",
-          color: "",
-          type: "",
-          licensePlate: "",
-        },
-        passengers: [],
-        seats: 0, // all "empty" data just to avoid errors when calling variables
-      },
+      // lift: {
+      //   car: {
+      //     brand: "",
+      //     model: "",
+      //     color: "",
+      //     type: "",
+      //     licensePlate: "",
+      //   },
+      //   passengers: [],
+      //   seats: 0, // all "empty" data just to avoid errors when calling variables
+      // },
       loading: 0, // as always: 0 means not loading, 1 means in progress, 2 means success and -1 error.
     };
   },
+  model: {
+    prop: "open",
+    event: "input",
+  },
   props: {
-    open: {
-      type: Boolean,
-      required: true,
-    },
-    messages: {
-      type: Object, // not required to avoid error messages
-      list: [], // I have chosen this unusual way because Array as type didn't work. So I give messages as property and take the real data from the inner array
-    },
+    open: Boolean,
+    lift: Object,
   },
-  computed: {
-    liftId() {
-      var firstMessage = this.messages.list[0] || { firstId: 1 }; // when no messages selected, just give 1 as parameter
-      return firstMessage.liftId;
-    },
-    isLayoutOpen() {
-      // if(!this.open && !this.closing){
-      //   this.closing = true
-      //   setTimeout(_=>{
-      //     this.openLayout = false
-      //   }, 500) // 500ms after getting the close trigger layout will be hidden, because otherwise it would still be visible and just a blank area below the last messages
-      //   return true
-      // }
-
-      return true;
-    },
-  },
+  computed: {},
 
   mounted() {
     //  document.getElementById("recordButton").onmousedown = (event) => {
@@ -340,6 +350,14 @@ export default {
       return require("../assets/sad.svg");
     },
 
+    getNameFromId(userId) {
+      var people = JSON.parse(JSON.stringify(this.lift.passengers)); // otherwise passengers would be overwritten
+      people.push(this.lift.driver);
+      return people.find((p) => {
+        return p.id == userId;
+      }).name;
+    },
+
     makeBLOB(data) {
       try {
         var s = window.URL.createObjectURL(data);
@@ -355,6 +373,11 @@ export default {
 
     alert() {
       alert("köb");
+    },
+
+    emitAndClose() {
+      this.open = false;
+      this.$emit("input", this.open);
     },
 
     getColor(userId) {
@@ -394,37 +417,37 @@ export default {
       }
     },
 
-    checkDayBreak(message) {
+    checkDayBreak(messageItem) {
       // when a parameter is given, return true or false. When no parameter is given, returns the text of the label
       // currently function is always called with a parameter given
-      var pos = this.messages.list.indexOf(message);
-
-      var label = false;
+      var messages = this.lift.messages,
+        pos = this.lift.messages.indexOf(messageItem),
+        label = false;
 
       if (!this.open) return;
 
       if (pos > 0) {
-        var preceder = this.messages.list[pos - 1]; // preceder is the older message
+        var preceder = messages[pos - 1]; // preceder is the older message
 
         var sameDay = date.isSameDate(
-          new Date(message.timestamp),
+          new Date(messageItem.timestamp),
           new Date(preceder.timestamp),
           "day"
         ); // alwast newest time first at this function
         var sameMonth = date.isSameDate(
-          new Date(message.timestamp),
+          new Date(messageItem.timestamp),
           new Date(preceder.timestamp),
           "month"
         );
       } else if (pos == 0) {
         // though check timestamp of message
         var sameDay = date.isSameDate(
-          new Date(message.timestamp),
+          new Date(messageItem.timestamp),
           new Date(),
           "day"
         );
         var sameMonth = date.isSameDate(
-          new Date(message.timestamp),
+          new Date(messageItem.timestamp),
           new Date(),
           "month"
         );
@@ -432,7 +455,7 @@ export default {
 
       var diff = date.getDateDiff(
         new Date(),
-        new Date(message.timestamp),
+        new Date(messageItem.timestamp),
         "days"
       );
 
@@ -455,16 +478,11 @@ export default {
         }
       }
       return label;
-
-      //console.warn(label)
-
-      return label;
     },
 
-    formatDate(item) {
-      // var fullDate = date.formatDate(item.timestamp, 'DD.MM.YYYY - H:mm')
-      var normalDate = date.formatDate(item.timestamp, "H:mm");
-      return normalDate;
+    formatAsTime(dateString) {
+      var d = date.formatDate(new Date(dateString), "H:mm");
+      return d;
     },
 
     false() {
@@ -568,46 +586,8 @@ export default {
     viewCar() {
       var car = this.lift.car;
       var search =
-        car.brand +
-        "+" +
-        car.model.replace(" ", "") +
-        "+" +
-        car.type +
-        "+" +
-        this.lift.car.color;
+        car.brand + "+" + car.model.replace(" ", "") + "+" + car.type;
       openURL("https://www.ecosia.org/images?q=" + search); // easiest way, real images from db would be an extra study exam for laws student
-    },
-
-    loadLiftInfo() {
-      if (this.loading != 1) {
-        // just in case this function is called more times, this is a catcher
-        this.loading = 1;
-        var t = setTimeout((_) => {
-          loading = -1; // simple request timeout after 10sec, I have built it because there were some issues I had no idea where they were coming from
-        }, 10000);
-        sendApiRequest(
-          SQL_GET_LIFT_INFO,
-          {
-            id: this.liftId,
-          },
-          (lift) => {
-            try {
-              this.loading = 2;
-              this.lift = lift; // data is structured exact like "empty" values above
-              clearTimeout(t);
-            } catch (e) {
-              alert("error: " + e);
-              this.loading = -1;
-              clearTimeout = -1;
-            }
-          },
-          (error) => {
-            this.loading = -1;
-            alert("errr");
-            clearTimeout(t);
-          }
-        );
-      }
     },
   },
 };
@@ -624,6 +604,23 @@ export default {
   }
   100% {
     visibility: hidden;
+  }
+}
+
+.custom-chat-label {
+  position: relative;
+  &:after {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10vw;
+    border-top: 1px solid lightgray;
+  }
+
+  > .q-message-label.text-center {
+    margin: 0px;
   }
 }
 </style>

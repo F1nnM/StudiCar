@@ -4,23 +4,6 @@
 //   scroll-behavior: smooth;
 // }
 
-.custom-chat-label {
-  position: relative;
-  &:after {
-    content: "";
-    position: absolute;
-    top: -5px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 10vw;
-    border-top: 1px solid lightgray;
-  }
-
-  > .q-message-label.text-center {
-    margin: 0px;
-  }
-}
-
 .record-audio {
   -youbkit-touch-callout: none; /* iOS Safari */
   -youbkit-user-select: none; /* Chrome 6.0+, Safari 3.1+, Edge & Opera 15+ */
