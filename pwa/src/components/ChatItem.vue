@@ -1,7 +1,7 @@
 <template>
   <div>
     <q-slide-item @left="onLeft" @right="onRight">
-      <q-separator inset="item" v-if="!firstItem" />
+      <q-separator v-if="!firstItem" inset="item" />
       <template v-slot:left>
         <q-icon name="delete_outline" backgroundColor="red" />
       </template>
