@@ -405,7 +405,7 @@ export default {
 
   mounted() {
     this.$store.commit("setPage", "");
-    this.$store.commit("setPageTrans", "slide-up");
+    this.$store.commit("setPageTrans", "slide");
   },
 
   methods: {

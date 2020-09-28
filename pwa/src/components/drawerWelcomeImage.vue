@@ -69,10 +69,8 @@ export default {
         default:
           error = true;
       }
-      if (error) {
-        return require("../assets/sad.svg");
-      }
-      return require("../assets/drawer_images/" + img + ".jpg");
+      if (error) return require("../assets/sad.svg");
+      else return require("../assets/drawer_images/" + img + ".jpg");
     },
 
     greeting() {
@@ -108,6 +106,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-</style>

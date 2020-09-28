@@ -5,95 +5,206 @@
       <div class="row">
         <div class="col">
           <span>
-            {{lift.city}}
-            <small>({{lift.distance}}km entfernt)</small>
+            {{ lift.city }}
+            <small>({{ lift.distance }}km entfernt)</small>
           </span>
         </div>
         <div class="col-auto">
-          <span>{{lift.seats_occupied}} / {{lift.seats_offered}}</span>
+          <span>{{ lift.seatsOccupied }} / {{ lift.seatsOffered }}</span>
           <q-icon id="seats" name="airline_seat_recline_normal" />
         </div>
       </div>
-      <div v-if="lift.day_pattern" class="row q-pt-sm">
+      <div v-if="lift.dayPattern" class="row q-pt-sm">
         <div
-          v-for="(values, day) in lift.day_pattern"
+          v-for="(values, day) in lift.dayPattern"
           :key="day"
           class="drive_indicator"
           :class="'drive_indicator_'+(values[0]+values[1])"
           :title="day"
         >
-          <q-tooltip anchor="top middle" self="bottom middle">{{day}}</q-tooltip>
+          <q-tooltip anchor="top middle" self="bottom middle">{{ day }}</q-tooltip>
           <q-icon name="unfold_more" v-if="values[0] && values[1]" />
           <q-icon name="arrow_upward" v-else-if="values[0]" />
           <q-icon name="arrow_downward" v-else-if="values[1]" />
           <q-icon name="close" v-else />
         </div>
       </div>
-      <div v-else-if="date_single_drive[0]==date_single_drive[1]" class="row q-pt-sm">
+      <div v-else-if="dateSingleDrive[0]==dateSingleDrive[1]" class="row q-pt-sm">
         <div class="drive_indicator drive_indicator_2">
           <q-icon name="unfold_more" />
         </div>
-        <span class="vertical_middle">{{date_single_drive[0]}}</span>
+        <span class="vertical_middle">{{ dateSingleDrive[0] }}</span>
       </div>
       <div v-else class="row q-pt-sm">
-        <div class="drive_indicator drive_indicator_1" v-if="date_single_drive[0]">
+        <div class="drive_indicator drive_indicator_1" v-if="dateSingleDrive[0]">
           <q-icon name="arrow_upward" />
         </div>
-        <span class="vertical_middle" v-if="date_single_drive[0]">{{date_single_drive[0]}}</span>
-        <div class="drive_indicator drive_indicator_1" v-if="date_single_drive[1]">
+        <span class="vertical_middle" v-if="dateSingleDrive[0]">{{ dateSingleDrive[0] }}</span>
+        <div class="drive_indicator drive_indicator_1" v-if="dateSingleDrive[1]">
           <q-icon name="arrow_downward" />
         </div>
-        <span class="vertical_middle" v-if="date_single_drive[1]">{{date_single_drive[1]}}</span>
+        <span class="vertical_middle" v-if="dateSingleDrive[1]">{{ dateSingleDrive[1] }}</span>
       </div>
-      <div class="row q-pt-sm">
-        <div class="col-4">Redseligkeit</div>
-        <div :class="'col-2 text-' + betterPrefColor(lift.driver.prefs.talk)">●</div>
-        <div class="col-4">... am Morgen</div>
-        <div :class="'col-2 text-' + betterPrefColor(lift.driver.prefs.talkMorning)">●</div>
-        <div class="col-4">Rauchen</div>
-        <div :class="'col-2 text-' + betterPrefColor(lift.driver.prefs.smoking)">●</div>
-        <div class="col-4">Musik</div>
-        <div :class="'col-2 text-' + betterPrefColor(lift.driver.prefs.music)">●</div>
-      </div>
-      <div class="row self-end">
-        <span>
-          Angeboten von
-          <a v-bind:href="'#/benutzerinfo?'+lift.driver.fbid">{{lift.driver.name}}</a>
-        </span>
+
+      <div class="q-pt-md">
+        <!-- <ExtendedHr color="grey-5" class="q-mt-md q-pl-lg" size="xs" /> -->
+
+        <q-expansion-item dense-toggle dense expand-icon-toggle v-model="prefsExpanded">
+          <template v-slot:header>
+            <q-btn
+              :to="'benutzerinfo?slId='+lift.driver.fbid"
+              flat
+              color="grey-9"
+              no-caps
+              full-width
+              dense
+              class="q-mr-md full-width"
+            >
+              <q-item class="link-border q-py-xs">
+                <q-item-section class="text-right">
+                  <span class="text-caption">Angeboten von</span>
+                  {{ lift.driver.name }}
+                </q-item-section>
+                <q-item-section avatar>
+                  <q-avatar>
+                    <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
+                  </q-avatar>
+                </q-item-section>
+              </q-item>
+              <!-- <a v-bind:href="'#/benutzerinfo?'+lift.driver.fbid" /> -->
+            </q-btn>
+          </template>
+          <q-card>
+            <q-card-section>
+              <p class="text-subtitle1 text-grey-7">
+                Präferenzen
+                <q-btn dense flat icon="info" @click="changePrefView" />
+              </p>
+              <q-tab-panels
+                transition-prev="fade"
+                transition-next="fade"
+                v-model="prefViewTab"
+                animated
+              >
+                <q-tab-panel name="short" class="q-pa-none">
+                  <div class="row q-mt-sm">
+                    <div class="col-8">Redseligkeit</div>
+                    <div :class="'col-4 text-' + betterPrefColor(lift.driver.prefs.talk)">●</div>
+                    <div class="col-8">... am Morgen</div>
+                    <div :class="'col-4 text-' + betterPrefColor(lift.driver.prefs.talkMorning)">●</div>
+                    <div class="col-8">Rauchen</div>
+                    <div :class="'col-4 text-' + betterPrefColor(lift.driver.prefs.smoking)">●</div>
+                    <div class="col-8">Musik</div>
+                    <div :class="'col-4 text-' + betterPrefColor(lift.driver.prefs.music)">●</div>
+                  </div>
+                </q-tab-panel>
+
+                <q-tab-panel name="legend" class="q-pa-none">
+                  <p class="text-caption">
+                    <q-icon
+                      name="record_voice_over"
+                      :color="betterPrefColor(lift.driver.prefs.talk)"
+                      size="xs"
+                      class="q-mb-xs q-mr-xs"
+                    />
+                    {{ prefsDocu.talk[lift.driver.prefs.talk.toLowerCase()] }}
+                  </p>
+                  <p class="text-caption">
+                    <q-icon
+                      name="alarm"
+                      :color="betterPrefColor(lift.driver.prefs.talkMorning)"
+                      size="xs"
+                      class="q-mb-xs q-mr-xs"
+                    />
+                    {{ prefsDocu.talkMorning[lift.driver.prefs.talkMorning.toLowerCase()] }}
+                  </p>
+                  <p class="text-caption">
+                    <q-icon
+                      name="smoking_rooms"
+                      :color="betterPrefColor(lift.driver.prefs.smoking)"
+                      size="xs"
+                      class="q-mb-xs q-mr-xs"
+                    />
+                    {{ prefsDocu.smoking[lift.driver.prefs.smoking.toLowerCase()] }}
+                  </p>
+                  <p class="text-caption">
+                    <q-icon
+                      name="music_note"
+                      :color="betterPrefColor(lift.driver.prefs.music)"
+                      size="xs"
+                      class="q-mb-xs q-mr-xs"
+                    />
+                    {{ prefsDocu.music[lift.driver.prefs.music.toLowerCase()] }}
+                  </p>
+                </q-tab-panel>
+              </q-tab-panels>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
       </div>
     </div>
   </q-card>
 </template>
 
 <script>
-import { date } from 'quasar'
+import { date } from "quasar";
+import ExtendedHr from "components/ExtendedHr";
 export default {
-  name: 'LiftOffer',
-  props: ['lift'],
+  name: "LiftOffer",
+  components: {},
+  props: {
+    lift: {
+      type: Object,
+      required: true,
+    },
+  },
   data() {
     return {
-    }
+      prefViewTab: "short",
+      prefsDocu: this.$store.state.prefsDocu,
+      prefsExpanded: false,
+    };
   },
   computed: {
-    date_single_drive() {
-      if (!this.lift)
-        return ""
-      if (!this.lift.next_drive)
-        return ""
+    dateSingleDrive() {
+      if (!this.lift) return "";
+      if (!this.lift.next_drive) return "";
       return [
-        this.lift.next_drive[0] ? date.formatDate(this.lift.next_drive[0], 'DD. MM. YY') : null,
-        this.lift.next_drive[1] ? date.formatDate(this.lift.next_drive[1], 'DD. MM. YY') : null
-      ]
-    }
+        this.lift.next_drive[0]
+          ? date.formatDate(this.lift.next_drive[0], "DD. MM. YY")
+          : null,
+        this.lift.next_drive[1]
+          ? date.formatDate(this.lift.next_drive[1], "DD. MM. YY")
+          : null,
+      ];
+    },
   },
-  methods:{
-    betterPrefColor(color){
-      if(color == 'GREEN') return 'green-8'
-      else if(color == 'YELLOW') return 'orange'
-      else return color.toLowerCase()
-    }
-  }
-}
+  methods: {
+    betterPrefColor(color) {
+      if (color == "GREEN") return "green-8";
+      else if (color == "YELLOW") return "orange";
+      else return color.toLowerCase();
+    },
+
+    changePrefView() {
+      if (this.prefViewTab != "legend") {
+        this.prefViewTab = "legend";
+        this.prefsExpanded = false;
+        setTimeout((_) => {
+          this.prefsExpanded = true;
+        }, 50);
+      } else {
+        this.prefViewTab = "short";
+        this.prefsExpanded = false;
+
+        setTimeout((_) => {
+          this.prefsExpanded = true;
+        }, 0); // just that we have a transition, otherwise there would be no scaling effect
+      }
+    },
+  },
+  mounted() {},
+};
 </script>
 
 <style scoped>
@@ -138,5 +249,15 @@ export default {
 }
 .vertical_middle {
   line-height: 38px;
+}
+
+/* .q-expansion-item > div > .q-item {
+  display: none;
+  visibility: hidden;
+} */
+
+.link-border {
+  border-radius: 4px;
+  border: 1px solid rgba(19, 70, 21, 0.671);
 }
 </style>

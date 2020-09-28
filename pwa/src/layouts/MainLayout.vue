@@ -18,7 +18,7 @@
               <q-slide-transition :duration="300">
                 <div
                   v-show="!scrolled"
-                >{{!scannerOpen ? 'StudiCar ' + pageTrans : 'Scanvorgang läuft'}}</div>
+                >{{ !scannerOpen ? 'StudiCar ' + pageTrans : 'Scanvorgang läuft' }}</div>
               </q-slide-transition>
               <q-slide-transition :duration="150">
                 <div v-show="scrolled" class>{{ pageName }}</div>
@@ -36,6 +36,7 @@
         </q-toolbar>
       </div>
       <QRScanner
+        overlay="primary"
         :open="scannerOpen"
         @result="gotScanResult"
         @help="toggleScannerOpen"
@@ -72,10 +73,7 @@
       </div>
 
       <transition :name="pageTrans" mode="out-in">
-        <router-view
-          @pagetrans_y="pageTransY = $event"
-          :style="'transform-origin: 20% ' + pageTransY + 'vh;'"
-        />
+        <router-view />
       </transition>
     </q-page-container>
 
@@ -92,7 +90,7 @@
         class="text-black bg-white"
         align="center"
       >
-        <q-route-tab icon="home" to="/" label="Marktplatz" />
+        <q-route-tab exact icon="home" to="/" label="Marktplatz" />
         <q-route-tab icon="add_circle_outline" to="/chats/lift/add" label="Neue Fahrt" />
         <q-route-tab icon="directions_car" to="/chats" label="Chats" />
         <q-route-tab icon="account_box" to="/profil" label="Profil" />
@@ -205,6 +203,12 @@ export default {
           caption: "Zur Übersicht",
           icon: "home",
           link: "/#/",
+        },
+        {
+          title: "Einstellungen",
+          caption: "Personalisiere die App",
+          icon: "settings",
+          link: "/#/einstellungen",
         },
         {
           title: "Spielwiese",
