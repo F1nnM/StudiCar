@@ -98,17 +98,21 @@
       </q-slide-transition>
 
       <!-- <p>Der Marktplatz ist so etwas wie das Schwarze Brett von StudiCar. Hier siehst du alle aktuellen Mitfahrgelegenheiten, aufsteigend nach Entfernung geordnet.</p> -->
-      <LiftOffer v-for="lift in getLifts" :key="lift.index" v-bind:lift="lift">{{lift.city}}</LiftOffer>
+      <LiftOffer
+        v-for="lift in getFilteredAndSortedOffers"
+        :key="lift.index"
+        v-bind:lift="lift"
+      >{{lift.city}}</LiftOffer>
       <div
         class="text-caption"
-        v-show="!(getLifts.length || filter.length)"
+        v-show="!(getFilteredAndSortedOffers.length || filter.length)"
       >Anscheinend gibt es für dich gerade keine Angebote. Schau einfach später nochmal vorbei.</div>
-      <!-- above case for neither lifts nor filter applied -->
+      <!-- above case for neither offers nor filter applied -->
       <div
         class="text-caption"
-        v-show="!getLifts.length && filter.length"
+        v-show="!getFilteredAndSortedOffers.length && filter.length"
       >Anscheinend gibt es keine Angebote, die deinen Filterkriterien entsprechen.</div>
-      <!-- above case for lifts all not matching selected filter settings -->
+      <!-- above case for offers all not matching selected filter settings -->
     </div>
   </div>
 </template>
@@ -119,10 +123,40 @@ export default {
   components: { LiftOffer },
   data() {
     return {
-      showAllLifts: true,
       openEditSort: false,
       sort: { value: "distance", label: "niedrigste Entfernung" }, //default sorting order
-      sortOptions: [
+      allOffers: require("../js/apiResponse").marketplaceOffers,
+      filter: [],
+      filterOptions: [
+        {
+          label: "Nur noch nicht angefragte Angebote",
+          caption:
+            "Nur Fahrten anzeigen, bei denen du noch nicht um Mitnahme gebeten hast",
+          value: "notAsked",
+          icon: "device_unknown",
+          disabled: true,
+        },
+        {
+          label: "Meine Präferenzen streng berücksichtigen",
+          caption:
+            "Nur Fahrten mit absolut denselben (!) Präferenzen werden angezeigt",
+          value: "prefs",
+          icon: "face",
+        },
+        // here an additional option will be dynamically generated in mounted()
+      ],
+    };
+  },
+
+  computed: {
+    title() {
+      var greeting = this.$store.state.greeting;
+      var name = this.$store.getters["auth/user"].name.split(" ")[0];
+      return greeting + ", " + name;
+    },
+
+    sortOptions() {
+      return [
         {
           label: "niedrigste Entfernung",
           caption: "Sortiert aufsteigend nach Luftlinie",
@@ -148,128 +182,11 @@ export default {
           icon: "timer",
           disabled: true,
         },
-      ],
-      filter: [],
-      filterOptions: [
-        {
-          label: "Nur noch nicht angefragte Angebote",
-          caption:
-            "Nur Fahrten anzeigen, bei denen du noch nicht um Mitnahme gebeten hast",
-          value: "notAsked",
-          icon: "device_unknown",
-          disabled: true,
-        },
-        {
-          label: "Meine Präferenzen streng berücksichtigen",
-          caption:
-            "Nur Fahrten mit absolut denselben (!) Präferenzen werden angezeigt.",
-          value: "prefs",
-          icon: "face",
-        },
-        // here an additional option will be generated in mounted() since we didn't make it to access computeds in here
-      ],
-      lifts: [
-        {
-          id: 1,
-          driver: {
-            fbid: "QTs2vuk6O0RHjr8uDyLBwb9DZ5G3",
-            name: "Finn",
-            prefs: {
-              talk: "GREEN",
-              talkMorning: "GREEN",
-              smoking: "GREEN",
-              music: "GREEN",
-            },
-          },
-          day_pattern: null,
-          next_drive: [new Date(), new Date()],
-          postcode: 70182,
-          city: "Stuttgart",
-          distance: 35,
-          seats_offered: 4,
-          seats_occupied: 2,
-        },
-        {
-          id: 2,
-          driver: {
-            fbid: "QTs2vuk6O0RHjr8uDyLBwb9DZ5G3",
-            name: "Finn",
-            prefs: {
-              talk: "RED",
-              talkMorning: "RED",
-              smoking: "RED",
-              music: "RED",
-            },
-          },
-          day_pattern: null,
-          next_drive: [new Date("2-2-2020"), new Date()],
-          postcode: 70182,
-          city: "Stuttgart",
-          distance: 30,
-          seats_offered: 3,
-          seats_occupied: 1,
-        },
-        {
-          id: 3,
-          driver: {
-            fbid: "QTs2vuk6O0RHjr8uDyLBwb9DZ5G3",
-            name: "Finn",
-            prefs: {
-              talk: "YELLOW",
-              talkMorning: "YELLOW",
-              smoking: "YELLOW",
-              music: "YELLOW",
-            },
-          },
-          day_pattern: {
-            Montag: [true, true],
-            Dienstag: [false, true],
-            Mittwoch: [true, false],
-            Donnerstag: [true, true],
-            Freitag: [false, true],
-            Samstag: [false, false],
-            Sonntag: [false, false],
-          },
-          next_drive: null,
-          postcode: 70182,
-          city: "Stuttgart",
-          distance: 20,
-          seats_offered: 2,
-          seats_occupied: 0,
-        },
-        {
-          id: 4, // this offer always has preferences of visiting user, perfect for testing prefs filter
-          driver: {
-            fbid: "wG3cG4M7NFMJzJYcreFjLrJC9Q23",
-            name: "Bernd",
-            prefs: {
-              talk: this.$store.getters["auth/user"].prefs.talk,
-              talkMorning: this.$store.getters["auth/user"].prefs.talkMorning,
-              smoking: this.$store.getters["auth/user"].prefs.smoking,
-              music: this.$store.getters["auth/user"].prefs.music,
-            },
-          },
-          day_pattern: null,
-          next_drive: [new Date("2-2-2020"), new Date()],
-          postcode: 86653,
-          city: "Daiting",
-          distance: 15,
-          seats_offered: 3,
-          seats_occupied: 1,
-        },
-      ],
-    };
-  },
-
-  computed: {
-    title() {
-      var greeting = this.$store.state.greeting;
-      var name = this.$store.getters["auth/user"].name.split(" ")[0];
-      return greeting + ", " + name;
+      ];
     },
 
-    getLifts() {
-      var lifts = this.lifts;
+    getFilteredAndSortedOffers() {
+      var offers = this.allOffers;
 
       // filter code
       if (this.filter.length) {
@@ -277,21 +194,21 @@ export default {
           item = item.value;
           switch (item) {
             case "notAsked":
-              lifts.filter((lift) => {
+              offers.filter((offer) => {
                 return true; // API not implemented yet
               });
               break;
             case "gender":
-              lifts.filter((lift) => {
+              offers.filter((offer) => {
                 return true; // API not implemented yet
               });
               break;
             case "prefs":
               var userPrefs = this.$store.getters["auth/user"].prefs;
-              lifts = lifts.filter((lift) => {
-                var prefValues = Object.keys(lift.driver.prefs);
+              offers = offers.filter((offer) => {
+                var prefValues = Object.keys(offer.driver.prefs);
                 var atLeastOneDifferent = prefValues.some((pref) => {
-                  if (userPrefs[pref] != lift.driver.prefs[pref]) return true;
+                  if (userPrefs[pref] != offer.driver.prefs[pref]) return true;
                 });
 
                 return !atLeastOneDifferent; // when at least one different, remove that element
@@ -307,20 +224,20 @@ export default {
       if (this.sort) {
         switch (this.sort.value) {
           case "distance":
-            lifts.sort((a, b) => {
+            offers.sort((a, b) => {
               return a.distance - b.distance;
             });
             break;
           case "seats":
-            lifts.sort((a, b) => {
+            offers.sort((a, b) => {
               return a.seats_occupied - b.seats_occupied;
             });
             break;
           case "prefs":
             var prefScores = [];
             var userPrefs = this.$store.getters["auth/user"].prefs;
-            lifts.forEach((lift) => {
-              let liftScore = 0;
+            offers.forEach((lift) => {
+              let offerscore = 0;
               Object.keys(lift.driver.prefs).forEach((prefName) => {
                 // get the prefs by themself
                 let liftPref = lift.driver.prefs[prefName];
@@ -332,21 +249,21 @@ export default {
 
                 //userPref = userPref == 'GREEN' ? 3 : userPref == 'YELLOW' ? 2 : 1
 
-                liftScore += liftPref; // - userPref) // the better pref of the lift related to pref of user, the better the score
+                offerscore += liftPref; // - userPref) // the better pref of the lift related to pref of user, the better the score
 
                 // AT MOMENT NOT USED: when user's Pref higher than liftPref, it is negative and so the average result of all pref comparisons in this lift is worse
               });
 
-              prefScores.push(liftScore); // when saving like this, the index of the value is the same as the lift id, because outer loop goes through lifts
+              prefScores.push(offerscore); // when saving like this, the index of the value is the same as the lift id, because outer loop goes through offers
             });
-            // now we have an array containing our stores, and have to sort our lifts depending on the score they got
+            // now we have an array containing our stores, and have to sort our offers depending on the score they got
 
-            lifts.sort((a, b) => {
+            offers.sort((a, b) => {
               // here we get a and b as lift to be compared. The ids are the indices of prefArray
 
               return prefScores[a.id - 1] - prefScores[b.id - 1];
             });
-            lifts.reverse();
+            offers.reverse();
 
             break;
           case "time":
@@ -355,7 +272,7 @@ export default {
         }
       }
 
-      return lifts;
+      return offers;
     },
   },
 

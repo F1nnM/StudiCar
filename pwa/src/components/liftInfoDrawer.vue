@@ -103,8 +103,7 @@
 
 
 <script>
-import { openURL } from "quasar";
-import { date } from "quasar";
+import { openURL, date } from "quasar";
 import extHR from "components/ExtendedHr";
 import { sendApiRequest, SQL_GET_LIFT_INFO } from "../ApiAccess";
 

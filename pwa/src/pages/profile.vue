@@ -20,41 +20,7 @@
             <q-card-section class="row">
               <div
                 class="col-8 text-h5 text-weight-light text-left q-mt-none q-mb-xs custom-overline c-o-1 c-o-l c-o-sm"
-              >
-                {{ username }}
-                <q-btn dense icon="settings" flat size="sm">
-                  <q-menu transition-show="jump-down" transition-hide="jump-up">
-                    <q-list>
-                      <!-- <q-item clickable disable>
-                        <q-item-section>
-                          <q-btn>Mein Passwort ändern</q-btn>
-                        </q-item-section>
-                      </q-item>-->
-                      <q-item>
-                        <q-item-section>
-                          <SignOutButton class="q-ma-sm full-width" />
-                        </q-item-section>
-                      </q-item>
-                      <!-- <q-item clickable disable>
-                        <q-item-section>
-                          <q-item-label>
-                            <q-toggle v-model="dataSaver" label="Datennutzung reduzieren">
-                              <q-icon size="sm" name="info">
-                                <q-tooltip
-                                  content-class="text-white bg-black"
-                                  anchor="top middle"
-                                  self="bottom middle"
-                                  :offset="[10, 10]"
-                                >Lädt keine großen Bilder, beschränkt sich auf die notwendigen Funktionen der App</q-tooltip>
-                              </q-icon>
-                            </q-toggle>
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>-->
-                    </q-list>
-                  </q-menu>
-                </q-btn>
-              </div>
+              >{{ username }}</div>
               <p class="col-4">
                 <q-btn icon="select_all" @click="shareProfileQR = true" flat />
               </p>
@@ -77,8 +43,7 @@
     </q-splitter>
 
     <qrGen
-      @close="shareProfileQR = false"
-      :show="shareProfileQR"
+      v-model="shareProfileQR"
       :input="secureInput"
       text="Über diesen Code können auch Nutzer außerhalb von Fahrgemeinschaften dein Profil besuchen."
     />
@@ -380,7 +345,7 @@
               >Bitte stelle sicher, dass du auf dem Bild gut zu sehen bist. Vergewissere dich außerdem, dass du berechtigt bist, dieses Bild hochzuladen.</p>
               <p v-if="file" class="text-caption">
                 Wir haben dein Bild etwas zugeschnitten, damit es den Abmessungen für Profilbilder entspricht.
-                Aktuell kannst du den Ausschnitt leider noch nicht selbst einstellen, wir arbeiten aber daran.
+                Aktuell kannst du den Ausschnitt noch nicht selbst einstellen, wir arbeiten aber daran.
               </p>
             </div>
           </q-card-section>
@@ -935,7 +900,6 @@
 import { date } from "quasar";
 import ImageColorPicker from "components/ImageColorPicker";
 
-import SignOutButton from "../components/SignOutButton";
 import {
   buildGetRequestUrl,
   GET_USER_PROFILE_PIC,
@@ -948,7 +912,6 @@ import extHR from "../components/ExtendedHr";
 
 export default {
   components: {
-    SignOutButton,
     qrGen,
     extHR,
     ImageColorPicker,

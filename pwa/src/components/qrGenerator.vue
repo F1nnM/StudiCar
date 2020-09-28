@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-dialog v-model="show" persistent transition-show="slide-up" transition-hide="jump-down">
+    <q-dialog v-model="show" @input="emit()" transition-show="slide-up" transition-hide="jump-down">
       <q-card>
         <q-toolbar>
           <!-- <q-avatar>
@@ -11,7 +11,7 @@
             <span class="text-primary">Studi</span>Car Code
           </q-toolbar-title>
 
-          <q-btn flat round dense icon="close" v-close-popup @click="close()" />
+          <q-btn flat round dense icon="close" v-close-popup />
         </q-toolbar>
 
         <q-card-section class="text-center overflow-hidden-y q-pa-none q-ma-md">
@@ -49,12 +49,13 @@ export default {
       type: String,
       required: true,
     },
-    show: {
-      type: Boolean,
-      required: true,
-    },
+    show: Boolean,
     primColor: Boolean,
     text: String,
+  },
+  model: {
+    prop: "show",
+    event: "input",
   },
 
   data() {
@@ -67,8 +68,8 @@ export default {
   },
 
   methods: {
-    close() {
-      this.$emit("close");
+    emit() {
+      this.$emit("input", this.show);
     },
   },
 };

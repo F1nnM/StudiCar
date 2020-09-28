@@ -61,9 +61,7 @@ export default {
       type: Object,
       required: true,
     },
-    firstItem: {
-      type: Boolean,
-    },
+    firstItem: Boolean
   },
 
   methods: {

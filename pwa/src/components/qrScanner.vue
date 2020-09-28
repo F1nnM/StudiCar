@@ -175,6 +175,25 @@ export default {
   visibility: hidden;
   transition: 0.35s;
   max-height: 0vh;
+  position: relative;
+  &:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgb(0, 0, 0);
+    background: linear-gradient(
+      0deg,
+      $primary 0%,
+      $primary 12%,
+      transparent 21%,
+      transparent 96%,
+      $primary 100%
+    );
+  }
+
   &.open {
     visibility: visible;
     transition-duration: 0.5s;

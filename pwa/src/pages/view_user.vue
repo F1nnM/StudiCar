@@ -34,7 +34,7 @@
                   <template v-slot:error>
                     <div
                       class="absolute-full flex flex-center text-white"
-                    >Bild kann leider nicht geladen werden. Bitte überprüfe deine Internetverbindung.</div>
+                    >Bild konnte nicht geladen werden. Bitte überprüfe deine Internetverbindung.</div>
                   </template>
                 </q-img>
               </q-card>

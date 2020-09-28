@@ -32,7 +32,7 @@ export default {
 
   data() {
     return {
-      lifts: require("../js/apiResponse").lifts,
+      lifts: require("../js/apiResponse").chatLifts,
       alreadyTappedOnItem: false,
       chatPopup: {
         isOpen: false,
