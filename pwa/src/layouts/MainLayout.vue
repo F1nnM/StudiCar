@@ -15,14 +15,33 @@
 
           <q-toolbar-title class="row">
             <div class="text-weight-light q-pt-xs col-xs-10 col-md-11">
-              <q-slide-transition :duration="300">
-                <div
-                  v-show="!scrolled"
-                >{{ !scannerOpen ? 'StudiCar ' + pageTrans : 'Scanvorgang läuft' }}</div>
-              </q-slide-transition>
-              <q-slide-transition :duration="150">
-                <div v-show="scrolled" class>{{ pageName }}</div>
-              </q-slide-transition>
+              <q-tab-panels
+                v-model="scrolled"
+                class="bg-primary"
+                animated
+                transition-prev="jump-down"
+                transition-next="jump-up"
+              >
+                <q-tab-panel class="q-pa-none bg-primary text-white" :name="false">
+                  <q-tab-panels
+                    v-model="scannerOpen"
+                    class="bg-primary"
+                    animated
+                    transition-prev="slide-right"
+                    transition-next="slide-left"
+                  >
+                    <q-tab-panel
+                      class="bg-primary q-pa-none text-white"
+                      :name="false"
+                    >StudiCar {{ pageTrans }}</q-tab-panel>
+                    <q-tab-panel
+                      class="bg-primary q-pa-none text-white"
+                      :name="true"
+                    >Scanvorgang läuft</q-tab-panel>
+                  </q-tab-panels>
+                </q-tab-panel>
+                <q-tab-panel class="q-pa-none bg-primary text-white" :name="true">{{ pageName }}</q-tab-panel>
+              </q-tab-panels>
             </div>
             <div class="col-xs-2 col-md-1">
               <q-btn
@@ -43,6 +62,7 @@
         @swipe="closeScanner"
       />
     </q-header>
+    <GetUserDataLoading persistent v-model="loadingScreenVisible" />
 
     <q-drawer
       :no-swipe-open="scannerOpen"
@@ -52,7 +72,7 @@
       content-class="bg-grey-1"
       class="drawer-no-border"
     >
-      <drawerImage :timeText="greeting" :caption="newsticker" />
+      <DrawerWelcomeImage :timeText="greeting" :caption="newsticker || 'Ticker wird geladen...'" />
       <hr style="margin: 0; background-color: black;" />
       <q-list>
         <q-item-label header class="text-grey-8">Navigation</q-item-label>
@@ -105,7 +125,8 @@ import QRScanner from "components/QRScanner";
 import { scroll } from "quasar";
 
 import EssentialLink from "components/EssentialLink";
-import drawerImage from "components/DrawerWelcomeImage";
+import GetUserDataLoading from "components/GetUserDataLoading";
+import DrawerWelcomeImage from "components/DrawerWelcomeImage";
 
 import { sendApiRequest, GET_NEWSTICKER } from "../ApiAccess";
 
@@ -115,12 +136,17 @@ export default {
   components: {
     EssentialLink,
     QRScanner,
-    drawerImage,
+    DrawerWelcomeImage,
+    GetUserDataLoading,
   },
 
   computed: {
     username() {
       return this.$store.getters["auth/user"].name.split(" ")[0];
+    },
+
+    loadingScreenVisible() {
+      return process.env.DEV ? this.$store.getters["auth/signinLoaded"] : false;
     },
 
     pageName() {
@@ -183,13 +209,14 @@ export default {
   },
 
   mounted() {
-    this.reloadNews();
+    setTimeout(this.reloadNews, 1000); // simple call was buggy, no idea why
   },
 
   data() {
     return {
       greeting: this.$store.state.greeting,
-      newsticker: "Wird geladen...",
+      newsticker: null,
+      userDataLoading: true,
       leftDrawerOpen: false,
       pageTransY: 15,
       scannerOpen: false,

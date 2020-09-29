@@ -7,6 +7,7 @@ export default ({ router, store }) => {
   // Register the Firebase authentication listener
   Firebase.auth().onAuthStateChanged(user => {
     if (user) {
+      store.commit("auth/SET_USER_DATA_LOADING", true)
       sendApiRequest(
         SQL_CREATE_USER_IF_NOT_EXISTING,
         { name: user.displayName, mail: user.email },
@@ -16,15 +17,15 @@ export default ({ router, store }) => {
           data => {
             store.commit("auth/SET_USER", data)
             router.replace({ name: 'marketplace' }).catch(() => { })
-            store.commit("auth/SET_SIGNIN_LOADED")
+            store.commit("auth/SET_USER_DATA_LOADING", false)
           },
           error => {
             store.dispatch('auth/signOut')
-            store.commit("auth/SET_SIGNIN_LOADED")
+            store.commit("auth/SET_USER_DATA_LOADING", false)
           }),
         error => {
           store.dispatch('auth/signOut')
-          store.commit("auth/SET_SIGNIN_LOADED")
+          store.commit("auth/SET_USER_DATA_LOADING", false)
         }
       );
     } else {

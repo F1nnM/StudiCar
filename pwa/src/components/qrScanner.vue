@@ -4,7 +4,7 @@
       <q-slide-transition>
         <div class="scanning-overlay">
           <qrcode-stream
-            :style="'height: 100vh; transition: .5s; opacity:' + (scannerLoaded ? 1 : 0)"
+            :style="'height: 100vh; transition: .5s; opacity:' + (scannerReady ? 1 : 0)"
             v-if="open"
             @init="onInit"
             @decode="decoded"
@@ -65,9 +65,18 @@ export default {
       result: "",
       otherQR: false,
       error: "",
-      scannerLoaded: false,
+      scannerReady: false,
       scannerHelp: false,
     };
+  },
+  computed: {},
+  watch: {
+    open: {
+      immediate: true,
+      handler(new_, old_) {
+        if (new_ == true && old_ == false) this.scannerReady = false; // so that we always have fade animation on scanner init
+      },
+    },
   },
   methods: {
     openScannerHelp() {
@@ -78,7 +87,7 @@ export default {
     async onInit(promise) {
       try {
         await promise;
-        this.scannerLoaded = true;
+        this.scannerReady = true;
       } catch (error) {
         if (error.name === "NotAllowedError") {
           this.error = "ERROR: you need to grant camera access permisson";
@@ -112,6 +121,10 @@ export default {
     swiped(info) {
       this.$emit("swipe", info);
     },
+  },
+
+  ready() {
+    this.scannerReady = false;
   },
 };
 </script>
