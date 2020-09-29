@@ -67,7 +67,7 @@
                 </q-item-section>
                 <q-item-section avatar>
                   <q-avatar>
-                    <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
+                    <img :src="lift.driver.imageUrl" />
                   </q-avatar>
                 </q-item-section>
               </q-item>
@@ -149,6 +149,12 @@
 <script>
 import { date } from "quasar";
 import ExtendedHr from "components/ExtendedHr";
+import {
+  buildGetRequestUrl,
+  sendApiRequest,
+  GET_USER_PROFILE_PIC,
+} from "../ApiAccess";
+
 export default {
   name: "LiftOffer",
   components: {},
@@ -163,6 +169,7 @@ export default {
       prefViewTab: "short",
       prefsDocu: this.$store.state.prefsDocu,
       prefsExpanded: false,
+      imageUrl: "",
     };
   },
   computed: {
@@ -199,7 +206,7 @@ export default {
 
         setTimeout((_) => {
           this.prefsExpanded = true;
-        }, 0); // just that we have a transition, otherwise there would be no scaling effect
+        }, 0); // just that we have a transition, otherwise there would be no pretty scaling effect
       }
     },
   },

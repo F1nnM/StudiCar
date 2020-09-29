@@ -69,8 +69,8 @@ export default {
       })
     },
 
-    SET_SIGNIN_LOADED (state) {
-      state.signinLoaded = true
+    SET_USER_DATA_LOADING (state, payload) {
+      state.signinLoaded = payload
     }
   },
 

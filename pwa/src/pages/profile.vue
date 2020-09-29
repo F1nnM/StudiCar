@@ -9,7 +9,7 @@
                 <template v-slot:error>
                   <div
                     class="absolute-full flex flex-center text-white"
-                  >Wir konnten dein Bild leider nicht laden. Bitte gehe online, um dein Profilbild zu sehen.</div>
+                  >Wir konnten dein Bild nicht laden. Bitte stelle eine Internetverbindung her, um dein Profilbild zu sehen.</div>
                 </template>
               </q-img>
               <q-badge floating class="q-pa-none" style="background-color: transparent;">

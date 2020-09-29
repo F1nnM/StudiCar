@@ -106,8 +106,9 @@ module.exports = {
 			{
 				id: 1,
 				driver: {
-					fbid: "QTs2vuk6O0RHjr8uDyLBwb9DZ5G3",
-					name: "Finn",
+					fbid: "wG3cG4M7NFMJzJYhfzFjLrJC9Q23",
+					name: "Ipsum",
+					imageUrl: 'https://cdn.pixabay.com/photo/2017/02/15/20/22/animal-2069717_960_720.png',
 					prefs: {
 						talk: "GREEN",
 						talkMorning: "GREEN",
@@ -128,6 +129,7 @@ module.exports = {
 				driver: {
 					fbid: "QTs2vuk6O0RHjr8uDyLBwb9DZ5G3",
 					name: "Finn",
+					imageUrl: 'https://cdn.pixabay.com/photo/2017/02/25/23/50/animal-2099057_960_720.png',
 					prefs: {
 						talk: "RED",
 						talkMorning: "RED",
@@ -146,8 +148,9 @@ module.exports = {
 			{
 				id: 3,
 				driver: {
-					fbid: "QTs2vuk6O0RHjr8uDyLBwb9DZ5G3",
-					name: "Finn",
+					fbid: "wG3cG4M7NFMJzJYcreFjLrJC9jf6",
+					name: "Herr",
+					imageUrl: 'https://cdn.pixabay.com/photo/2016/10/29/20/25/beard-1781443_960_720.png',
 					prefs: {
 						talk: "YELLOW",
 						talkMorning: "YELLOW",
@@ -176,6 +179,7 @@ module.exports = {
 				driver: {
 					fbid: "wG3cG4M7NFMJzJYcreFjLrJC9Q23",
 					name: "Bernd",
+					imageUrl: 'https://cdn.pixabay.com/photo/2016/10/18/18/49/witch-1751025_960_720.png',
 					prefs: {
 						talk: "YELLOW", // this.$store.getters["auth/user"].prefs.talk,
 						talkMorning: "YELLOW",
