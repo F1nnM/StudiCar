@@ -907,7 +907,7 @@ import {
   SQL_UPDATE_PROFILE_PICTURE,
   GET_CAR_MODELS,
 } from "../ApiAccess";
-import qrGen from "../components/QRGenerator";
+import qrGen from "../components/QrGenerator";
 import extHR from "../components/ExtendedHr";
 
 export default {
