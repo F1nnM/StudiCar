@@ -1,4 +1,4 @@
-export default class QRScanner {
+export default class QrScanner {
     /* async */
     static hasCamera () {
         // note that enumerateDevices can always be called and does not prompt the user for permission. However, device
@@ -9,7 +9,7 @@ export default class QRScanner {
             .catch(() => false);
     }
 
-    constructor(video, onDecode, canvasSize = QRScanner.DEFAULT_CANVAS_SIZE) {
+    constructor(video, onDecode, canvasSize = QrScanner.DEFAULT_CANVAS_SIZE) {
         this.$video = video;
         this.$canvas = document.createElement('canvas');
         this._onDecode = onDecode;
@@ -33,7 +33,7 @@ export default class QRScanner {
         this.$video.addEventListener('play', this._onPlay);
         document.addEventListener('visibilitychange', this._onVisibilityChange);
 
-        this._qrWorker = new Worker(QRScanner.WORKER_PATH);
+        this._qrWorker = new Worker(QrScanner.WORKER_PATH);
     }
 
     destroy () {
@@ -116,7 +116,7 @@ export default class QRScanner {
         let createdNewWorker = false;
         let promise = new Promise((resolve, reject) => {
             if (!worker) {
-                worker = new Worker(QRScanner.WORKER_PATH);
+                worker = new Worker(QrScanner.WORKER_PATH);
                 createdNewWorker = true;
                 worker.postMessage({ type: 'inversionMode', data: 'both' }); // scan inverted color qr codes too
             }
@@ -144,8 +144,8 @@ export default class QRScanner {
             worker.addEventListener('message', onMessage);
             worker.addEventListener('error', onError);
             timeout = setTimeout(() => onError('timeout'), 3000);
-            QRScanner._loadImage(imageOrFileOrUrl).then(image => {
-                const imageData = QRScanner._getImageData(image, sourceRect, canvas, fixedCanvasSize);
+            QrScanner._loadImage(imageOrFileOrUrl).then(image => {
+                const imageData = QrScanner._getImageData(image, sourceRect, canvas, fixedCanvasSize);
                 worker.postMessage({
                     type: 'decode',
                     data: imageData
@@ -154,7 +154,7 @@ export default class QRScanner {
         });
 
         if (sourceRect && alsoTryWithoutSourceRect) {
-            promise = promise.catch(() => QRScanner.scanImage(imageOrFileOrUrl, null, worker, canvas, fixedCanvasSize));
+            promise = promise.catch(() => QrScanner.scanImage(imageOrFileOrUrl, null, worker, canvas, fixedCanvasSize));
         }
 
         promise = promise.finally(() => {
@@ -211,7 +211,7 @@ export default class QRScanner {
         if (!this._active || this.$video.paused || this.$video.ended) return false;
         // using requestAnimationFrame to avoid scanning if tab is in background
         requestAnimationFrame(() => {
-            QRScanner.scanImage(this.$video, this._sourceRect, this._qrWorker, this.$canvas, true)
+            QrScanner.scanImage(this.$video, this._sourceRect, this._qrWorker, this.$canvas, true)
                 .then(this._onDecode, error => {
                     if (this._active && error !== 'QR code not found.') {
                         console.error(error);
@@ -275,7 +275,7 @@ export default class QRScanner {
             || window.OffscreenCanvas && imageOrFileOrUrl instanceof window.OffscreenCanvas) {
             return Promise.resolve(imageOrFileOrUrl);
         } else if (imageOrFileOrUrl instanceof Image) {
-            return QRScanner._awaitImageLoad(imageOrFileOrUrl).then(() => imageOrFileOrUrl);
+            return QrScanner._awaitImageLoad(imageOrFileOrUrl).then(() => imageOrFileOrUrl);
         } else if (imageOrFileOrUrl instanceof File || imageOrFileOrUrl instanceof URL
             || typeof (imageOrFileOrUrl) === 'string') {
             const image = new Image();
@@ -284,7 +284,7 @@ export default class QRScanner {
             } else {
                 image.src = imageOrFileOrUrl;
             }
-            return QRScanner._awaitImageLoad(image).then(() => {
+            return QrScanner._awaitImageLoad(image).then(() => {
                 if (imageOrFileOrUrl instanceof File) {
                     URL.revokeObjectURL(image.src);
                 }
@@ -319,5 +319,5 @@ export default class QRScanner {
         });
     }
 }
-QRScanner.DEFAULT_CANVAS_SIZE = 400;
-QRScanner.WORKER_PATH = 'qr-scanner-worker.min.js';
+QrScanner.DEFAULT_CANVAS_SIZE = 400;
+QrScanner.WORKER_PATH = 'qr-scanner-worker.min.js';
