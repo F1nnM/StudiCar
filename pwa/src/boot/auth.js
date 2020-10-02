@@ -6,7 +6,7 @@ export default ({ app, router, Vue, store }) => {
     // Check to see if the route has the meta field "authRequired" set to true
     let authRequired = to.matched.some(route => route.meta.requiresAuth)
 
-    byPass = true
+    var byPass = true
 
     if (!process.env.DEV) byPass = false // bypass can only be used in development
     let isAuthenticated = await Firebase.auth().currentUser !== null
