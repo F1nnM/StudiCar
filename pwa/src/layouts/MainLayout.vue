@@ -54,7 +54,7 @@
           </q-toolbar-title>
         </q-toolbar>
       </div>
-      <QRScanner
+      <QrScanner
         overlay="primary"
         :open="scannerOpen"
         @result="gotScanResult"
@@ -120,7 +120,7 @@
 </template>
 
 <script>
-import QRScanner from "components/QRScanner";
+import QrScanner from "components/QrScanner";
 
 import { scroll } from "quasar";
 
@@ -135,7 +135,7 @@ export default {
 
   components: {
     EssentialLink,
-    QRScanner,
+    QrScanner,
     DrawerWelcomeImage,
     GetUserDataLoading,
   },

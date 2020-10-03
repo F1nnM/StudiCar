@@ -39,7 +39,7 @@ import extHR from "components/ExtendedHr";
 import { colors } from "quasar";
 
 export default {
-  name: "QRGenerator",
+  name: "QrGenerator",
   components: {
     VueQrcode,
     extHR,
