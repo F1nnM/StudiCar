@@ -59,9 +59,27 @@
             <div class="q-pa-md">
               <p class="text-h6 row items-center">
                 Info
+                <q-btn flat class="q-ml-sm" icon="select_all" size="md" @click="showQR = !showQR" />
+
                 <q-space />
                 <q-btn icon="close" flat round dense @click="openLiftInfo = false" />
               </p>
+              <q-slide-transition>
+                <div v-if="showQR">
+                  <div class="relative-position text-center">
+                    <VueQrcode
+                      class="full-width"
+                      color="primary"
+                      errorCorrectionLevel="H"
+                      :value="lift.qr"
+                    />
+                    <q-img src="~assets/app-icon.svg" class="absolute-center qrcode-image" />
+                  </div>
+                  <p
+                    class="text-center text-caption"
+                  >Vergrößerte Ansicht, geeignet für kleine und dunkle Bildschirme</p>
+                </div>
+              </q-slide-transition>
 
               <extHR color="grey-4" size="xs" />
               <q-timeline color="primary" class="q-mt-xl">
@@ -288,6 +306,7 @@
 <script>
 import { openURL, date, scroll } from "quasar";
 import extHR from "components/ExtendedHr";
+import VueQrcode from "vue-qrcode";
 import LiftInfoDrawer from "components/LiftInfoDrawer";
 import {
   sendApiRequest,
@@ -301,10 +320,12 @@ export default {
   name: "LiftPopup",
   components: {
     extHR,
+    VueQrcode,
   },
   data() {
     return {
       alreadyScrolledDown: false,
+      showQR: false,
       coloredIDs: {},
       recorderBig: false,
       openLiftInfo: false,
@@ -622,5 +643,11 @@ export default {
   > .q-message-label.text-center {
     margin: 0px;
   }
+}
+
+.qrcode-image {
+  width: 55px;
+  height: 55px;
+  background: white;
 }
 </style>

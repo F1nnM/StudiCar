@@ -48,7 +48,8 @@ module.exports = {
 					timestamp: "2020-09-19T06:17:08.000Z",
 					sentBy: 1
 				}
-			]
+			],
+			qr: 'this is unique data referring to this lift'
 		},
 		2: {
 			car: {
@@ -98,7 +99,8 @@ module.exports = {
 					timestamp: "2020-09-21T06:17:08.000Z",
 					sentBy: 1
 				}
-			]
+			],
+			qr: 'this is unique data referring to this lift'
 		}
 	},
 	marketplaceOffers:

@@ -14,7 +14,7 @@
             <div class="overlay-inner">
               <p>
                 <b>StudiCar</b> Code
-                <q-btn round flat dense size="sm" icon="help_outline" @click="openScannerHelp" />
+                <!-- <q-btn round flat size="sm" icon="help_outline" @click="scannerHelp = true" /> -->
               </p>
               <p>
                 <small>Bitte halte dein Gerät ruhig</small>
@@ -59,6 +59,10 @@ export default {
       required: true,
     },
   },
+  model: {
+    prop: "open",
+    event: "input",
+  },
 
   data() {
     return {
@@ -79,9 +83,8 @@ export default {
     },
   },
   methods: {
-    openScannerHelp() {
-      this.scannerHelp = true;
-      this.$emit("help");
+    emit() {
+      this.$emit("input", this.open);
     },
 
     async onInit(promise) {
