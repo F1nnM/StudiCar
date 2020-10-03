@@ -15,7 +15,7 @@
         </q-toolbar>
 
         <q-card-section class="text-center overflow-hidden-y q-pa-none q-ma-md">
-          <div :class="'relative studicar-code' + (show ? ' show' : '')">
+          <div :class="'relative-position studicar-code' + (show ? ' show' : '')">
             <VueQrcode :width="200" :color="color" errorCorrectionLevel="H" :value="input" />
             <q-img src="~assets/app-icon.svg" class="absolute-center qrcode-image" />
           </div>

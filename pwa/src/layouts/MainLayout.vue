@@ -30,10 +30,10 @@
                     transition-prev="slide-right"
                     transition-next="slide-left"
                   >
-                    <q-tab-panel
-                      class="bg-primary q-pa-none text-white"
-                      :name="false"
-                    >StudiCar {{ pageTrans }}</q-tab-panel>
+                    <q-tab-panel class="bg-primary q-pa-none text-white" :name="false">
+                      StudiCar
+                      <!-- {{ pageTrans }} -->
+                    </q-tab-panel>
                     <q-tab-panel
                       class="bg-primary q-pa-none text-white"
                       :name="true"
@@ -58,7 +58,7 @@
         overlay="primary"
         :open="scannerOpen"
         @result="gotScanResult"
-        @help="toggleScannerOpen"
+        @help="scannerHelpNeeded"
         @swipe="closeScanner"
       />
     </q-header>
@@ -188,6 +188,10 @@ export default {
       if (this.scannerOpen) {
         this.leftDrawerOpen = false;
       }
+    },
+
+    scannerHelpNeeded() {
+      this.scannerOpen = false;
     },
 
     randomArrayItem(array) {
