@@ -1,69 +1,79 @@
 <template>
   <div class="q-ma-md">
-    <q-btn @click="getContent" label="reload" icon="reload" />
-
-    <div class="q-mt-xl">
-      <div v-show="downloading == 1">
-        <q-card-section>
-          <p>Inhalt wird geladen, bitte hab noch einen Moment Geduld...</p>
-
-          <q-linear-progress indeterminate color="primary" class="q-mt-sm" />
-        </q-card-section>
-      </div>
-      <!-- <q-card v-show="downloading == 2">
-        <q-card-section>
-          <p>
-            <q-icon name="check" size="md" color="primary" />Success text
-          </p>
-        </q-card-section>
-      </q-card>-->
-      <q-card v-show="downloading == -1">
-        <q-card-section>
-          <p>
-            <q-icon name="error_outline" size="md" color="negative" />Beim Download ist ein Fehler aufgetreten. Wenn das Problem öfter auftritt, dann
-            <a
-              href="#/contact"
-            >schreib uns</a> bitte.
-          </p>
-        </q-card-section>
-      </q-card>
+    <TitleButton @click="getContent(true)" icon="refresh" size="md" flat />
+    <div v-show="downloading == 2" class="overflow-hidden" id="text">
+      <!-- content goes here after downloading -->
     </div>
-    <div id="anchor">
-      <!-- here goes the content after downloading -->
-    </div>
+    <LoadingDisplay
+      v-model="downloading"
+      loadingText="Inhalt wird geladen"
+      errorText="Ein Fehler ist aufgetreten. Bitte versuch es später noch mal"
+    />
   </div>
 </template>
 
 <script>
 import { sendApiRequest, GET_LEGAL } from "../ApiAccess";
+import LoadingDisplay from "components/LoadingDisplay";
+import TitleButton from "components/TitleButton";
 
 export default {
-  name: 'Contact',
-  mounted(){
-			this.$store.state.pageName = 'Rechtliches'
-			this.getContent()
+  name: "legal",
+  components: {
+    LoadingDisplay,
+    TitleButton,
   },
-  data(){
-      return {
-					downloading: 1, // 0 means not downloading, 1 means downloading, 2 means success and -1 means error
-					legalText: null,
-					started: false,
-					converter: null
+  mounted() {
+    this.$store.commit("setPage", "Rechtliches");
+    this.$store.commit("setPageTrans", "slide");
+    this.getContent();
+  },
+  data() {
+    return {
+      downloading: 0, // 0 means not downloading, 1 means downloading, 2 means success and -1 means error
+      converter: null,
+    };
+  },
+  methods: {
+    getContent(force) {
+      const currentLegal = this.$store.getters["getLegal"];
+      if (currentLegal != "" && !force) {
+        // already some content
+        document.getElementById("text").innerHTML = currentLegal;
+        this.downloading = 2;
+      } else {
+        this.downloading = 1;
+        sendApiRequest(
+          GET_LEGAL,
+          {},
+          (data) => {
+            switch (data.code) {
+              case 0: // fine
+                document.getElementById("text").innerHTML = data.html;
+                this.$store.commit("setLegal", data.html);
+                this.downloading = 2;
+                break;
+              case 1: // error while reading file
+                alert("File error, err as warning in console");
+                console.warn(data.html);
+                this.downloading = -1;
+                break;
+              case 2: // convertion error
+                alert("Convertion error, err as warning in console");
+                console.warn(data.html);
+                this.downloading = -1;
+                break;
+              default:
+                alert("other error: " + data.html);
+                this.downloading = -1;
+            }
+          },
+          (err) => {
+            this.downloading = -1;
+          }
+        );
       }
-	},
-	methods: {
-		getContent(){
-			this.started = true
-			this.downloading = 1
-      sendApiRequest(GET_LEGAL, {}, html => {
-        if(!html) alert('notiing')
-        document.getElementById('anchor').innerHTML = html
-        this.downloading = 2
-			}, err => {
-				this.downloading = -1
-			})
-		}
-	}
-	
-}
+    },
+  },
+};
 </script>

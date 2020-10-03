@@ -175,19 +175,29 @@ module.exports = {
     },
     '/getLegal': async (req, res, options) => {
       if (!isOptionMissing(options, [], res)) {
-        var fs = require('fs')
-        fs.readFile('legal/legal.md', [], (err, data) => {
+        var code = 0,
+          html = ''
+        fs.readFile('legal/legal.md', 'utf8', (err, data) => {
           if (err) {
-            console.log(err)
+            code = 1
+          } else {
+            // console.log('success')
+            try {
+              var converter = new showdown.Converter()
+              // console.log('data:')
+              // console.log(data)
+              html = converter.makeHtml(data)
+              // console.log('html:')
+              // console.log(html)
+            } catch (e) {
+              code = 2
+              html = e
+            }
           }
-          var rawMD = data + ''
-          var converter = new showdown.Converter()
-          try {
-            var html = converter.makeHtml(rawMD)
-            res.end(html)
-          } catch (e) {
-            res.end(false)
-          }
+          res.end(JSON.stringify({
+            code: code,
+            html: html
+          }))
         })
       }
     },
