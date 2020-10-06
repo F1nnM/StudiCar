@@ -96,6 +96,7 @@
         <router-view />
       </transition>
     </q-page-container>
+    <QRLiftDisplay v-model="qrLiftId" />
 
     <q-footer elevated v-show="!(scannerOpen)">
       <q-tabs
@@ -127,6 +128,7 @@ import { scroll } from "quasar";
 import EssentialLink from "components/EssentialLink";
 import GetUserDataLoading from "components/GetUserDataLoading";
 import DrawerWelcomeImage from "components/DrawerWelcomeImage";
+import QRLiftDisplay from "components/QRLiftDisplay";
 
 import { sendApiRequest, GET_NEWSTICKER } from "../ApiAccess";
 
@@ -138,6 +140,23 @@ export default {
     QrScanner,
     DrawerWelcomeImage,
     GetUserDataLoading,
+    QRLiftDisplay,
+  },
+
+  data() {
+    return {
+      greeting: this.$store.state.greeting,
+      newsticker: null,
+      userDataLoading: true,
+      leftDrawerOpen: false,
+      pageTransY: 15,
+      scannerOpen: false,
+      scrolled: false,
+      tab: "home",
+      chats: "Main",
+      show: true,
+      qrLiftId: null,
+    };
   },
 
   computed: {
@@ -146,7 +165,7 @@ export default {
     },
 
     loadingScreenVisible() {
-      return process.env.DEV ? this.$store.getters["auth/signinLoaded"] : false;
+      return this.$store.getters["auth/signinLoaded"];
     },
 
     pageName() {
@@ -159,6 +178,35 @@ export default {
 
     pageTrans() {
       return this.$store.state.pageTrans;
+    },
+
+    essentialLinks() {
+      return [
+        {
+          title: "Marktplatz",
+          caption: "Zur Übersicht",
+          icon: "home",
+          link: "/#/",
+        },
+        {
+          title: "Einstellungen",
+          caption: "Personalisiere die App",
+          icon: "settings",
+          link: "/#/einstellungen",
+        },
+        {
+          title: "Spielwiese",
+          caption: "Endlich wieder Kind sein",
+          icon: "toys",
+          link: "/#/spielwiese",
+        },
+        {
+          title: "Rechtliches",
+          caption: "Muss auch sein",
+          icon: "policy",
+          link: "/#/rechtliches",
+        },
+      ];
     },
   },
 
@@ -173,7 +221,15 @@ export default {
 
     gotScanResult(e) {
       this.scannerOpen = false;
-      window.location.href = "#/benutzerinfo?slId=" + e;
+      switch (e.type) {
+        case "u":
+          window.location.href = "#/benutzerinfo?slId=" + e.res;
+          break;
+        case "l":
+          this.qrLiftId = e.res;
+          window.location.href = "#/";
+          break;
+      }
     },
 
     closeScanner(e) {
@@ -214,47 +270,6 @@ export default {
 
   mounted() {
     setTimeout(this.reloadNews, 1000); // simple call was buggy, no idea why
-  },
-
-  data() {
-    return {
-      greeting: this.$store.state.greeting,
-      newsticker: null,
-      userDataLoading: true,
-      leftDrawerOpen: false,
-      pageTransY: 15,
-      scannerOpen: false,
-      scrolled: false,
-      tab: "home",
-      chats: "Main",
-      show: true,
-      essentialLinks: [
-        {
-          title: "Marktplatz",
-          caption: "Zur Übersicht",
-          icon: "home",
-          link: "/#/",
-        },
-        {
-          title: "Einstellungen",
-          caption: "Personalisiere die App",
-          icon: "settings",
-          link: "/#/einstellungen",
-        },
-        {
-          title: "Spielwiese",
-          caption: "Endlich wieder Kind sein",
-          icon: "toys",
-          link: "/#/spielwiese",
-        },
-        {
-          title: "Rechtliches",
-          caption: "Muss auch sein",
-          icon: "policy",
-          link: "/#/rechtliches",
-        },
-      ],
-    };
   },
 };
 </script>

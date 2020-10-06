@@ -49,7 +49,7 @@ module.exports = {
 					sentBy: 1
 				}
 			],
-			qr: 'this is unique data referring to this lift'
+			qr: 1 //'l501cd12fb282713d2f52ec56393f1309'
 		},
 		2: {
 			car: {
@@ -100,7 +100,7 @@ module.exports = {
 					sentBy: 1
 				}
 			],
-			qr: 'this is unique data referring to this lift'
+			qr: 2// 'lcc7fb9185dcf1535b4211d661b6a0572'
 		}
 	},
 	marketplaceOffers:
@@ -125,6 +125,8 @@ module.exports = {
 				distance: 35,
 				seatsOffered: 4,
 				seatsOccupied: 2,
+				requested: true,
+				qr: 'lf6b9fde87097ad72c08d91fa9cc32754'
 			},
 			{
 				id: 2,
@@ -146,6 +148,7 @@ module.exports = {
 				distance: 30,
 				seatsOffered: 3,
 				seatsOccupied: 1,
+				qr: 'l7aa0bb70783505b942fda3277be8b7cb'
 			},
 			{
 				id: 3,
@@ -175,6 +178,7 @@ module.exports = {
 				distance: 20,
 				seatsOffered: 2,
 				seatsOccupied: 0,
+				qr: 'l1cfcc168ce73625da23dadebd027030d'
 			},
 			{
 				id: 4, // this offer always has preferences of visiting user, perfect for testing prefs filter
@@ -196,6 +200,7 @@ module.exports = {
 				distance: 15,
 				seatsOffered: 3,
 				seatsOccupied: 1,
+				qr: 'l9dc9ec941d0673fcc299db0dbcad4e21'
 			},
 		]
 }

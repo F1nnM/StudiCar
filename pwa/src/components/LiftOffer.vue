@@ -10,6 +10,7 @@
           </span>
         </div>
         <div class="col-auto">
+          <q-icon v-if="lift.requested" name="chat_bubble_outline" size="sm" class="q-pr-lg" />
           <span>{{ lift.seatsOccupied }} / {{ lift.seatsOffered }}</span>
           <q-icon id="seats" name="airline_seat_recline_normal" />
         </div>
