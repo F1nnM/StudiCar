@@ -10,7 +10,9 @@
             @decode="decoded"
             v-touch-swipe.mouse="swiped"
           >
-            <div v-if="otherQR" class="fixed-center text-no-wrap text-h5 strobo">kein StudiCar Code</div>
+            <q-dialog v-model="otherQR" transition-show="jump-up" transition-hide="jump-up">
+              <div class="text-no-wrap text-h5 q-pa-xl bg-black text-primary">kein StudiCar Code</div>
+            </q-dialog>
             <div class="overlay-inner">
               <p>
                 <b>StudiCar</b> Code
@@ -110,14 +112,19 @@ export default {
     },
 
     decoded(res) {
-      if (res.slice(-1).charCodeAt(0) % 9 == 0) {
-        var code = res.slice(0, -1);
-        this.$emit("result", code);
-      } else {
+      var type = res.slice(0, 1),
+        res = res.slice(1);
+
+      if ("ul".includes(type))
+        this.$emit("result", {
+          type: type,
+          res: res,
+        });
+      else {
         this.otherQR = true;
         setTimeout(() => {
           this.otherQR = false;
-        }, 2500);
+        }, 1500);
       }
     },
 
@@ -229,7 +236,7 @@ export default {
 
   .strobo {
     color: transparent;
-    animation: strobo 0.1s reverse infinite;
+    animation: strobo 0.4s reverse infinite;
 
     @keyframes strobo {
       to {

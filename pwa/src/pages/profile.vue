@@ -44,7 +44,7 @@
 
     <qrGen
       v-model="shareProfileQR"
-      :input="secureInput"
+      :input="qrInput"
       text="Über diesen Code können auch Nutzer außerhalb von Fahrgemeinschaften dein Profil besuchen."
     />
 
@@ -1098,14 +1098,10 @@ export default {
       }
     },
 
-    secureInput() {
-      let id = this.$store.getters["auth/user"].uid;
-      var alphabet = "qwertzuiopasdfghjklyxcvbnm1234567890";
-      let letter;
-      do {
-        letter = alphabet[Math.floor(Math.random() * alphabet.length)];
-      } while (letter.charCodeAt(0) % 9 != 0); // 9 people working on the project
-      return id + letter;
+    qrInput() {
+      const id = this.$store.getters["auth/user"].uid;
+
+      return "u" + id;
     },
 
     possibleBuildYears() {

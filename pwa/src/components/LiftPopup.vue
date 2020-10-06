@@ -71,7 +71,7 @@
                       class="full-width"
                       color="primary"
                       errorCorrectionLevel="H"
-                      :value="lift.qr"
+                      :value="'l' + lift.qr"
                     />
                     <q-img src="~assets/app-icon.svg" class="absolute-center qrcode-image" />
                   </div>

@@ -98,11 +98,7 @@
       </q-slide-transition>
 
       <!-- <p>Der Marktplatz ist so etwas wie das Schwarze Brett von StudiCar. Hier siehst du alle aktuellen Mitfahrgelegenheiten, aufsteigend nach Entfernung geordnet.</p> -->
-      <LiftOffer
-        v-for="lift in getFilteredAndSortedOffers"
-        :key="lift.index"
-        v-bind:lift="lift"
-      >{{lift.city}}</LiftOffer>
+      <LiftOffer v-for="lift in getFilteredAndSortedOffers" :key="lift.index" v-bind:lift="lift" />
       <div
         class="text-caption"
         v-show="!(getFilteredAndSortedOffers.length || filter.length)"
@@ -132,9 +128,8 @@ export default {
           label: "Nur noch nicht angefragte Angebote",
           caption:
             "Nur Fahrten anzeigen, bei denen du noch nicht um Mitnahme gebeten hast",
-          value: "notAsked",
+          value: "notRequested",
           icon: "device_unknown",
-          disabled: true,
         },
         {
           label: "Meine Präferenzen streng berücksichtigen",
@@ -193,9 +188,9 @@ export default {
         this.filter.forEach((item) => {
           item = item.value;
           switch (item) {
-            case "notAsked":
-              offers.filter((offer) => {
-                return true; // API not implemented yet
+            case "notRequested":
+              offers = offers.filter((offer) => {
+                return !offer.requested;
               });
               break;
             case "gender":
@@ -308,6 +303,8 @@ export default {
       icon: "wc",
       disabled: true, // genderCarsAvaiable ? this.$store.getters['auth/user'].gender == 'X'
     });
+
+    this.filter.push(this.filterOptions[0]); // only show not yet requested offers by default
   },
 };
 </script>
