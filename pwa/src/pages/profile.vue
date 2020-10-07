@@ -906,6 +906,7 @@ import {
   sendApiRequest,
   SQL_UPDATE_PROFILE_PICTURE,
   GET_CAR_MODELS,
+  // SQL_SET_USER_PROFILE_PICTURE
 } from "../ApiAccess";
 import qrGen from "../components/QrGenerator";
 import extHR from "../components/ExtendedHr";
@@ -1300,11 +1301,16 @@ export default {
             var indent = (img.height - img.width) / scale; // indent has to be half of the difference and negative, additionally divided by scale
             ctx.drawImage(img, 0, indent / -2, width, size + indent);
           }
-          try {
-            this.fileBlob = elem.toBlob();
-          } catch (e) {
-            alert("Die Konvertierung zum BLOB hat nicht funktioniert. E:" + e);
-          }
+          if (false)
+            sendApiRequest(
+              SQL_UPDATE_PROFILE_PICTURE,
+              {
+                base64: img.src,
+              },
+              (newUrl) => {
+                this.ppPath = newUrl;
+              }
+            );
         }),
           (reader.onerror = (error) => {
             alert(error);
@@ -1348,17 +1354,6 @@ export default {
       //     }
       //   }
       //   reader.readAsDataURL(file);
-    },
-
-    updateProfilePicture(blob) {
-      sendApiRequest(
-        SQL_UPDATE_PROFILE_PICTURE,
-        { imageData: blob },
-        (_) => console.warn("success"),
-        (error) => {
-          throw error;
-        }
-      );
     },
 
     capitalize(string) {
