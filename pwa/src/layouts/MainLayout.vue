@@ -96,7 +96,7 @@
         <router-view />
       </transition>
     </q-page-container>
-    <QRLiftDisplay v-model="qrLiftId" />
+    <QRLiftDisplay v-model="liftQrId" />
 
     <q-footer elevated v-show="!(scannerOpen)">
       <q-tabs
@@ -155,7 +155,7 @@ export default {
       tab: "home",
       chats: "Main",
       show: true,
-      qrLiftId: null,
+      liftQrId: null,
     };
   },
 
@@ -226,7 +226,7 @@ export default {
           window.location.href = "#/benutzerinfo?slId=" + e.res;
           break;
         case "l":
-          this.qrLiftId = e.res;
+          this.liftQrId = e.res;
           window.location.href = "#/";
           break;
       }

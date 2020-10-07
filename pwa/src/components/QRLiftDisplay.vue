@@ -21,6 +21,9 @@
               </q-item-section>
             </q-item>
           </div>
+          <div v-if="err">
+            <p class="text-red text-caption">Ein Fehler ist aufgetreten: {{ err }}</p>
+          </div>
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -39,49 +42,52 @@ export default {
     LiftOffer,
   },
   model: {
-    prop: "liftId",
+    prop: "liftQrId",
     event: "input",
   },
   props: {
-    liftId: Number,
+    liftQrId: Number,
   },
   data() {
     return {
       viewTab: "info",
       lift: null,
+      err: null,
     };
   },
   computed: {
     isOpen: {
       get() {
-        return !!this.liftId;
+        return !!this.liftQrId;
       },
       set(value) {
         if (!value) {
-          this.liftId = 0;
+          this.liftQrId = 0;
           this.emit();
         }
       },
     },
   },
   watch: {
-    liftId: function (val) {
+    liftQrId: function (val) {
       if (false)
         sendApiRequest(
           SQL_GET_LIFT_INFO,
           {
-            id: val,
+            qrId: val, // here comes the scanned qr content without the type letter, is encrypted lift id
           },
-          (data) => {
-            lift = data;
+          (lift_) => {
+            this.lift = lift_;
           },
-          (_) => {} // no error handling
+          (err_) => {
+            this.err = err_;
+          }
         );
       else {
         if (val) {
           const allLifts = require("../js/apiResponse").marketplaceOffers;
           this.lift = allLifts.find((item) => {
-            return item.id == this.liftId;
+            return item.id == this.liftQrId;
           });
         }
       }
