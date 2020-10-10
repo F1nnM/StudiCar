@@ -206,6 +206,12 @@ export default {
           icon: "policy",
           link: "/#/rechtliches",
         },
+        {
+          title: "Support",
+          caption: "Wir helfen dir",
+          icon: "accessibility_new",
+          link: "/#/hilfe",
+        },
       ];
     },
   },

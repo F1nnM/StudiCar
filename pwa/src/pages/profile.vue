@@ -329,7 +329,8 @@
                     <q-btn
                       flat
                       icon="backup"
-                      @click="updateProfilePicture(fileBlob)"
+                      :disable="!this.newPPictureBase64"
+                      @click="uploadProfilePicture()"
                       class="vertical-middle"
                     />
                     <br />
@@ -410,14 +411,28 @@
           <extHR :color="carInfo.color ? carInfo.color : 'black'" hex size="xs" />
           <q-card-section class="q-pt-sm">
             <div class="q-pa-lg row">
-              <p class="text-uppercase text-caption col-7">Fahrzeugtyp</p>
-              <p class="col-5">{{ carInfo.type }}</p>
-              <p class="text-uppercase text-caption col-7">Freie Sitze</p>
-              <p class="col-5">{{ carInfo.seats }}</p>
-              <p class="text-uppercase text-caption col-7">Kennzeichen</p>
-              <p class="col-5">{{ carInfo.licensePlate }}</p>
-              <p class="text-uppercase text-caption col-7">Baujahr</p>
-              <p class="col-5">{{ carInfo.year }}</p>
+              <div
+                v-for="data in [{
+                prop: 'type',
+                label: 'Fahrzeugtyp'
+              },
+              {
+                prop: 'seats',
+                label: 'Freie Sitze'
+              },
+              {
+                prop: 'licensePlate',
+                label: 'Kennzeichen'
+              },
+              {
+                prop: 'year',
+                label: 'Baujahr'
+              }]"
+                :key="data.prop"
+              >
+                <p class="text-uppercase text-caption col-7">{{ data.label }}</p>
+                <p class="col-5">{{ carInfo[data.prop] }}</p>
+              </div>
             </div>
           </q-card-section>
         </q-card>
@@ -453,132 +468,52 @@
                 transition-next="jump-up"
                 style="height: 400px;"
               >
-                <q-tab-panel name="talk">
-                  <div class="text-h6 q-mb-md">Redseligkeit</div>
+                <q-tab-panel
+                  v-for="cat in [{
+                prop: 'talk',
+                label: 'Redseligkeit'
+              },
+              {
+                prop: 'talkMorning',
+                label: '... am Morgen'
+              },
+              {
+                prop: 'smoking',
+                label: 'Rauchen im Auto'
+              },
+              {
+                prop: 'music',
+                label: 'Musik im Auto'
+              }]"
+                  :key="cat.prop"
+                  :name="cat.prop"
+                >
+                  <div class="text-h6 q-mb-md">{{ cat.label }}</div>
                   <q-list>
                     <q-item tag="label" v-ripple>
                       <q-radio
                         keep-color
-                        v-model="newPrefs.talk"
+                        v-model="newPrefs[cat.prop]"
                         val="RED"
-                        :label="prefsDocu.talk.red"
+                        :label="prefsDocu[cat.prop].red"
                         color="red"
                       />
                     </q-item>
                     <q-item tag="label" v-ripple>
                       <q-radio
                         keep-color
-                        v-model="newPrefs.talk"
+                        v-model="newPrefs[cat.prop]"
                         val="YELLOW"
-                        :label="prefsDocu.talk.yellow"
+                        :label="prefsDocu[cat.prop].yellow"
                         color="orange"
                       />
                     </q-item>
                     <q-item tag="label" v-ripple>
                       <q-radio
                         keep-color
-                        v-model="newPrefs.talk"
+                        v-model="newPrefs[cat.prop]"
                         val="GREEN"
-                        :label="prefsDocu.talk.green"
-                        color="green"
-                      />
-                    </q-item>
-                  </q-list>
-                </q-tab-panel>
-
-                <q-tab-panel name="talkMorning">
-                  <div class="text-h6 q-mb-md">...am Morgen</div>
-                  <q-list>
-                    <q-item tag="label" v-ripple>
-                      <q-radio
-                        keep-color
-                        v-model="newPrefs.talkMorning"
-                        val="RED"
-                        :label="prefsDocu.talkMorning.red"
-                        color="red"
-                      />
-                    </q-item>
-                    <q-item tag="label" v-ripple>
-                      <q-radio
-                        keep-color
-                        v-model="newPrefs.talkMorning"
-                        val="YELLOW"
-                        :label="prefsDocu.talkMorning.yellow"
-                        color="orange"
-                      />
-                    </q-item>
-                    <q-item tag="label" v-ripple>
-                      <q-radio
-                        keep-color
-                        v-model="newPrefs.talkMorning"
-                        val="GREEN"
-                        :label="prefsDocu.talkMorning.green"
-                        color="green"
-                      />
-                    </q-item>
-                  </q-list>
-                </q-tab-panel>
-
-                <q-tab-panel name="smoking">
-                  <div class="text-h6 q-mb-md">Rauchen im Auto</div>
-                  <q-list>
-                    <q-item tag="label" v-ripple>
-                      <q-radio
-                        keep-color
-                        v-model="newPrefs.smoking"
-                        val="RED"
-                        :label="prefsDocu.smoking.red"
-                        color="red"
-                      />
-                    </q-item>
-                    <q-item tag="label" v-ripple>
-                      <q-radio
-                        keep-color
-                        v-model="newPrefs.smoking"
-                        val="YELLOW"
-                        :label="prefsDocu.smoking.yellow"
-                        color="orange"
-                      />
-                    </q-item>
-                    <q-item tag="label" v-ripple>
-                      <q-radio
-                        keep-color
-                        v-model="newPrefs.smoking"
-                        val="GREEN"
-                        :label="prefsDocu.smoking.green"
-                        color="green"
-                      />
-                    </q-item>
-                  </q-list>
-                </q-tab-panel>
-
-                <q-tab-panel name="music">
-                  <div class="text-h6 q-mb-md">Musik im Auto</div>
-                  <q-list>
-                    <q-item tag="label" v-ripple>
-                      <q-radio
-                        keep-color
-                        v-model="newPrefs.music"
-                        val="RED"
-                        :label="prefsDocu.music.red"
-                        color="red"
-                      />
-                    </q-item>
-                    <q-item tag="label" v-ripple>
-                      <q-radio
-                        keep-color
-                        v-model="newPrefs.music"
-                        val="YELLOW"
-                        :label="prefsDocu.music.yellow"
-                        color="orange"
-                      />
-                    </q-item>
-                    <q-item tag="label" v-ripple>
-                      <q-radio
-                        keep-color
-                        v-model="newPrefs.music"
-                        val="GREEN"
-                        :label="prefsDocu.music.green"
+                        :label="prefsDocu[cat.prop].green"
                         color="green"
                       />
                     </q-item>
@@ -587,11 +522,6 @@
               </q-tab-panels>
             </template>
           </q-splitter>
-          <!-- <q-card-actions align="right" class="text-primary">
-            <q-btn flat label="Abbrechen" @click="toggleOpenEditPrefs(false)" v-close-popup />
-            <q-btn flat label="Speichern" @click="toggleOpenEditPrefs(true)" v-close-popup />
-             have commented it, only had ominous, very strange troubles with it 
-          </q-card-actions>-->
         </q-card>
       </q-dialog>
 
@@ -806,16 +736,15 @@
               </template>
             </q-stepper>
           </q-card-section>
-          <!-- <q-card-section>
+          <q-card-section>
             <p class="text-caption">
-              Falls du nochmal nachlesen willst:
+              Bei Hinzufügen eines Autos erklärst du dich mit unserer
               <a
-                href="https://mi.com"
+                href="/#/legal"
                 class="block"
-              >Info zu unserer Datenverarbeitung</a>
+              >Datenverarbeitung</a> einverstanden.
             </p>
-            
-          </q-card-section>-->
+          </q-card-section>
         </q-card>
       </q-dialog>
 
@@ -930,6 +859,7 @@ export default {
       openEditDescription: false,
       newDescription: "",
       ppPath: "",
+      newPPictureBase64: "",
       shareProfileQR: false,
       openUpload: false,
       file: null,
@@ -1301,59 +1231,27 @@ export default {
             var indent = (img.height - img.width) / scale; // indent has to be half of the difference and negative, additionally divided by scale
             ctx.drawImage(img, 0, indent / -2, width, size + indent);
           }
-          if (false)
-            sendApiRequest(
-              SQL_UPDATE_PROFILE_PICTURE,
-              {
-                base64: img.src,
-              },
-              (newUrl) => {
-                this.ppPath = newUrl;
-              }
-            );
+          this.newPPictureBase64 = img.src;
         }),
           (reader.onerror = (error) => {
             alert(error);
           });
       };
+    },
 
-      // input image is made square and scaled
-      //       sendApiRequest(
-      //         SQL_UPDATE_PROFILE_PICTURE,
-      //         { imageData: elem.toDataURL() },
-      //         _ => {
-      //           this.ppPath = '';
-      //           buildGetRequestUrl(
-      //             GET_USER_PROFILE_PIC,
-      //             { fbid: this.$store.getters["auth/user"].uid },
-      //             url => {
-      //               this.ppPath = url;
-      //             }
-      //           )
-      //         },
-      //         error => {
-      //           throw error;
-      //         }
-      //         else { // portrait
-      //           var scale = img.width / size
-      //           var indent  = (img.height - img.width) / scale // indent has to be half of the difference and negative, additionally divided by scale
-      //           ctx.drawImage(img, 0, indent / -2, width, size + indent)
-      //         }
-
-      //         var image_blob = elem.toBlob()
-      //         this.updateProfilePicture(image_blob)
-      //         // input image is made square and scaled
-
-      //         console.log(elem.toBlob())
-      //         console.log(elem)
-      //           },
-      //           reader.onerror = error => console.log(error);
-      //   };
-      //       );
-      //       this.openUpload = false;
-      //     }
-      //   }
-      //   reader.readAsDataURL(file);
+    uploadProfilePicture() {
+      if (false) {
+        if (this.newPPictureBase64)
+          sendApiRequest(
+            SQL_UPDATE_PROFILE_PICTURE,
+            {
+              base64: img.src,
+            },
+            (newUrl) => {
+              this.ppPath = newUrl;
+            }
+          );
+      }
     },
 
     capitalize(string) {

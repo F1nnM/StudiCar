@@ -1,7 +1,7 @@
 <template>
   <div class="q-ma-md">
     <TitleButton @click="getContent(true)" icon="refresh" size="md" flat />
-    <div v-show="downloading == 2" class="overflow-hidden" id="text">
+    <div v-show="downloading == 2" class="overflow-hidden" id="text_anchor">
       <!-- content goes here after downloading -->
     </div>
     <LoadingDisplay
@@ -39,36 +39,20 @@ export default {
       const currentLegal = this.$store.getters["getLegal"];
       if (currentLegal != "" && !force) {
         // already some content
-        document.getElementById("text").innerHTML = currentLegal;
+        document.getElementById("text_anchor").innerHTML = currentLegal;
         this.downloading = 2;
       } else {
         this.downloading = 1;
         sendApiRequest(
           GET_LEGAL,
           {},
-          (data) => {
-            switch (data.code) {
-              case 0: // fine
-                document.getElementById("text").innerHTML = data.html;
-                this.$store.commit("setLegal", data.html);
-                this.downloading = 2;
-                break;
-              case 1: // error while reading file
-                alert("File error, err as warning in console");
-                console.warn(data.html);
-                this.downloading = -1;
-                break;
-              case 2: // convertion error
-                alert("Convertion error, err as warning in console");
-                console.warn(data.html);
-                this.downloading = -1;
-                break;
-              default:
-                alert("other error: " + data.html);
-                this.downloading = -1;
-            }
+          (html_) => {
+            document.getElementById("text_anchor").innerHTML = html_;
+            this.$store.commit("setLegal", html_);
+            this.downloading = 2;
           },
           (err) => {
+            alert("Fehler: " + err);
             this.downloading = -1;
           }
         );

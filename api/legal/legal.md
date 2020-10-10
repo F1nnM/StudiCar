@@ -1,7 +1,7 @@
 
 Hier wird dann der Rechtstext stehen.
 Im Folgenden hab ich noch paar Beispiele geschrieben, nur ein kleiner Teil von dem, was das von uns gewählte Dateiformat
-MD so alles bereitstellt.
+Markdown (Dateiendung .md) so alles bereitstellt.
 
 Heading
 =======

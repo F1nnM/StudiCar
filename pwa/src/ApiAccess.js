@@ -89,6 +89,20 @@ export const SQL_GET_LIFT_INFO = {
   method: "GET"
 }
 
+export const SQL_GET_FAQ = {
+  path: "/getFAQ",
+  method: "GET"
+}
+
+export const SQL_GET_ALL_FAQ = {
+  path: "/getAllFAQ",
+  method: "GET"
+}
+
+export const SQL_UPDATE_FAQ_QUESTION = {
+  path: "/updateQuestion",
+  method: "POST"
+}
 
 export const SQL_UPDATE_DESCRIPTION = {
   path: "/updateDescription",
@@ -150,3 +164,7 @@ export const SQL_SEND_MESSAGE = {
   method: "POST"
 }
 
+export const SQL_ADD_QUESTION = {
+  path: "/sendMessage",
+  method: "POST"
+}
