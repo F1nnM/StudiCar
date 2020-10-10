@@ -175,11 +175,10 @@ module.exports = {
     },
     '/getLegal': async (req, res, options) => {
       if (!isOptionMissing(options, [], res)) {
-        var code = 0,
-          html = ''
+        var html = ''
         fs.readFile('legal/legal.md', 'utf8', (err, data) => {
           if (err) {
-            code = 1
+            // error
           } else {
             // console.log('success')
             try {
@@ -190,14 +189,10 @@ module.exports = {
               // console.log('html:')
               // console.log(html)
             } catch (e) {
-              code = 2
-              html = e
+              // convertion error
             }
           }
-          res.end(JSON.stringify({
-            code: code,
-            html: html
-          }))
+          res.end(html)
         })
       }
     },
@@ -232,6 +227,47 @@ module.exports = {
           passengers: passengers,
           seats: carInfo.OFFERED_SEATS
         }))
+      }
+    },
+    '/getFAQ': async (req, res, options) => {
+      if (!isOptionMissing(options, [], res)) {
+        var result = (await runQuery(longQueries.getFAQ, [])).result,
+          data = []
+        result.forEach(item => {
+          data.push({
+            id: item.ID,
+            question: item.QUESTION,
+            answer: item.ANSWER,
+            category: item.CATEGORY,
+            answeredBy: {
+              name: item.ORGAS_NAME.split(' ')[0],
+              function: item.FUNCTION
+            }
+          })
+        })
+        res.end(JSON.stringify(data))
+      }
+    },
+    '/getAllFAQ': async (req, res, options) => {
+      if (!isOptionMissing(options, [], res)) {
+        var result = (await runQuery(longQueries.getAllFAQ, [])).result,
+          obj = {
+            'bedienung': [],
+            'sonstiges': []
+          }
+        result.forEach(item => {
+          obj[item.CATEGORY.toLowerCase()].push({
+            id: item.ID,
+            question: item.QUESTION,
+            askedBy: item.FIRST_NAME,
+            answer: item.ANSWER,
+            answeredBy: item.ORGAS_NAME.split(' ')[0],
+            isPublic: item.IS_PUBLIC,
+            lastChange: item.LAST_CHANGE
+          })
+        })
+
+        res.end(JSON.stringify(obj))
       }
     },
   },
@@ -454,6 +490,26 @@ module.exports = {
         console.log(typeof id)
         res.end(id)
       }
-    }
+    },
+    '/addQuestion': async (req, res, options) => {
+      if (!isOptionMissing(options, ['question', 'category', 'uid'], res)) {
+        var cat = options.category
+
+        await runQuery("INSERT INTO `faq` (`QUESTION`, `CATEGORY`, `ASKED_BY`) VALUES (?, ?, ?)", [options.question, cat, uid])
+        res.end()
+      }
+    },
+    '/updateQuestion': async (req, res, options) => {
+      if (!isOptionMissing(options, ['data', 'mode'], res)) {
+        var d = options.data
+        if (options.mode == 1) { // normal mode
+          await runQuery("UPDATE faq SET ANSWER = ?, ANSWERED_BY = ?, IS_PUBLIC = ? WHERE ID = ?;", [d.answer, d.orgaId, d.instantPublish, d.id])
+        } else { // mode is 2, special mode just to set publicity
+          await runQuery("UPDATE faq SET IS_PUBLIC = ? WHERE ID = ?;", [d.newValue, d.id])
+        }
+
+        res.end()
+      }
+    },
   }
 }

@@ -8,7 +8,7 @@
           <SignOutButton class="q-ma-sm full-width" />
         </q-item>
         <q-item-label header>Datennutzung</q-item-label>
-        <q-item>
+        <q-item disable>
           <q-checkbox v-model="dataSaver" label="Datennutzung vermindern" />
         </q-item>
       </q-list>

@@ -34,12 +34,27 @@ const store = new Vuex.Store({
 
     setPage (state, _pageName) {
       state.pageName = _pageName
-    }
+    },
+
+    setFAQ (state, faq_) {
+      state.faq = faq_
+    },
+
+    setLegal (state, legal) {
+      state.legal = legal
+    },
   },
   actions: {
-    dataSaver ({ commit }, payload) {
 
-    }
+  },
+  getters: {
+    getFAQ (state) {
+      return state.faq
+    },
+
+    getLegal (state) {
+      return state.legal
+    },
   },
   strict: process.env.DEV,
   state: {
@@ -49,6 +64,8 @@ const store = new Vuex.Store({
     transer: 'slide',
     pageName: 'Willkommen', // needed for scroll-relative Header
     testValue: 10,
+    legal: '',
+    faq: [],
     scroll: 0,
     message: 'Hello',
     systemInfo: {
