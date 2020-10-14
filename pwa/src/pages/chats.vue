@@ -1,19 +1,55 @@
 <template>
   <div class="q-pa-md">
-    <q-list>
-      <ChatItem
-        v-for="(m, index) in lastMessages"
-        :key="m.timestamp"
-        :message="m"
-        :firstItem="index == 0"
-        @left="onLeft"
-        @right="onRight"
-        @open="openTheLift"
-        @shortLiftInfo="openShortLiftInfo"
+    <TitleButtonAnchor>
+      <q-btn-toggle
+        v-model="liftTab"
+        no-caps
+        rounded
+        dense
+        unelevated
+        outline
+        toggle-color="primary"
+        color="white"
+        text-color="grey-5"
+        :options="[
+          {value: 'current', icon: 'done'},
+          {value: 'requests', icon: 'hearing'}
+        ]"
       />
-    </q-list>
-    <LiftPopup v-model="chatPopup.isOpen" :lift="chatPopup.data" />
-    <ShortLiftInfo v-model="shortLiftPopup.isOpen" :lift="shortLiftPopup.data" />
+    </TitleButtonAnchor>
+    <q-tab-panels
+      animated
+      v-model="liftTab"
+      transition-prev="jump-right"
+      transition-next="jump-left"
+    >
+      <q-tab-panel name="current">
+        <q-list>
+          <ChatItem
+            v-for="(m, index) in lastMessages"
+            :key="m.timestamp"
+            :message="m"
+            :firstItem="index == 0"
+            @left="onLeft"
+            @right="onRight"
+            @open="openTheLift"
+            @shortLiftInfo="openShortLiftInfo"
+          />
+        </q-list>
+        <LiftPopup v-model="chatPopup.isOpen" :lift="chatPopup.data" />
+        <ShortLiftInfo v-model="shortLiftPopup.isOpen" :lift="shortLiftPopup.data" />
+      </q-tab-panel>
+      <q-tab-panel name="requests">
+        <q-list>
+          <div v-if="false">
+            <q-item-label header>Anfragen von anderen Nutzern</q-item-label>here come the pending offers
+          </div>
+          <div v-else class="text-caption">
+            <q-item>Im Moment hast du keine Anfragen</q-item>
+          </div>
+        </q-list>
+      </q-tab-panel>
+    </q-tab-panels>
   </div>
 </template>
 
@@ -21,6 +57,7 @@
 import ChatItem from "components/ChatItem";
 import LiftPopup from "components/LiftPopup";
 import ShortLiftInfo from "components/ShortLiftInfo";
+import TitleButtonAnchor from "components/TitleButtonAnchor";
 import { date } from "quasar";
 
 export default {
@@ -28,12 +65,14 @@ export default {
     ChatItem,
     LiftPopup,
     ShortLiftInfo,
+    TitleButtonAnchor,
   },
 
   data() {
     return {
       lifts: require("../js/apiResponse").chatLifts,
       alreadyTappedOnItem: false,
+      liftTab: "current",
       chatPopup: {
         isOpen: false,
         data: require("../js/dummyValues").chats.shortLiftInfo, // can be used here as well
@@ -71,11 +110,6 @@ export default {
 
       return returnedArray;
     },
-  },
-
-  mounted() {
-    this.$store.commit("setPage", "Mitfahrgelegenheiten");
-    this.$store.commit("setPageTrans", "slide");
   },
 
   methods: {
@@ -139,6 +173,11 @@ export default {
         reset();
       }, 50);
     },
+  },
+
+  mounted() {
+    this.$store.commit("setPage", "Mitfahrgelegenheiten");
+    this.$store.commit("setPageTrans", "slide");
   },
 };
 </script>

@@ -81,7 +81,7 @@
                 </div>
               </q-slide-transition>
 
-              <extHR color="grey-4" size="xs" />
+              <extHR color="grey-5" size="xs" />
               <q-timeline color="primary" class="q-mt-xl">
                 <!-- <q-item-label header>Fahrtverlauf</q-item-label> -->
                 <q-timeline-entry>
@@ -225,6 +225,42 @@
                   v-if="checkDayBreak(m) != ''"
                 >{{ checkDayBreak(m) }}</p>
                 <div>
+                  <q-menu touch-position context-menu transition-show="fade" transition-hide="none">
+                    <q-list class="q-pa-xs">
+                      <q-item disable clickable v-ripple dense>
+                        <q-item-section avatar>
+                          <q-icon name="content_copy" size="sm" />
+                        </q-item-section>
+                        <q-item-section>Kopieren</q-item-section>
+                      </q-item>
+                      <q-item clickable @click="viewUserFromId(m.sentBy)" v-ripple dense>
+                        <q-item-section avatar>
+                          <q-icon name="account_circle" size="sm" />
+                        </q-item-section>
+                        <q-item-section
+                          v-if="m.sentBy != user"
+                        >Profil von {{ getNameFromId(m.sentBy) }}</q-item-section>
+                        <q-item-section v-else>Mein Profil</q-item-section>
+                      </q-item>
+                      <q-separator />
+                      <br />
+                      <q-expansion-item dense label="Details" icon="more_horiz">
+                        <q-card>
+                          <q-card-section>
+                            <q-list>
+                              <q-item-label header>Zeit</q-item-label>
+                              <q-item-label class="text-grey-9 row">
+                                <div class="col-3">am</div>
+                                <div class="col-9 q-mb-xs">{{ formatAsDate(m.timestamp) }}</div>
+                                <div class="col-3">um</div>
+                                <div class="col-9">{{ formatAsTime(m.timestamp) }} Uhr</div>
+                              </q-item-label>
+                            </q-list>
+                          </q-card-section>
+                        </q-card>
+                      </q-expansion-item>
+                    </q-list>
+                  </q-menu>
                   <q-chat-message
                     :name="m.sentBy == user ? '' : getNameFromId(m.sentBy)"
                     :sent="m.sentBy == user"
@@ -251,51 +287,146 @@
             </div>
           </q-page-container>
 
-          <q-footer reveal class="q-pa-none text-white">
-            <!-- <extHR color="primary" size="xs" /> -->
-            <div class="row">
-              <div class="col-xs-10 col-md-11 bg-grey-3">
-                <!-- <q-btn flat dense icon="call_split" /> -->
-                <q-toolbar>
-                  <q-toolbar-title>
-                    <q-form @submit="sendMessage" class="q-gutter-md q-pa-none">
-                      <q-input
-                        type="text"
-                        class="custom-input q-pa-none"
-                        v-model="messageText"
-                        placeholder="Schreib eine Nachricht..."
-                      />
-                    </q-form>
-                  </q-toolbar-title>
-                </q-toolbar>
+          <q-footer reveal :class="`q-pa-none bg-${footerBgColor} text-white`">
+            <q-slide-transition>
+              <div class="bg-white text-dark border-radius-50" v-if="showQuickMessages">
+                <div class="q-pl-sm q-pt-md">
+                  <q-splitter :value="10">
+                    <template v-slot:before>
+                      <q-tabs
+                        v-model="quickMessagesTab"
+                        dense
+                        vertical
+                        align="justify"
+                        class="bg-white text-primary"
+                        :breakpoint="0"
+                      >
+                        <q-tab name="text" icon="text_rotation_angleup" />
+                        <q-tab name="emoji" icon="sentiment_satisfied_alt" />
+                      </q-tabs>
+                    </template>
+                    <template v-slot:after>
+                      <q-tab-panels
+                        v-model="quickMessagesTab"
+                        swipeable
+                        infinite
+                        animated
+                        vertical
+                        transition-prev="jump-up"
+                        transition-next="jump-down"
+                      >
+                        <q-tab-panel name="emoji">
+                          <q-list>
+                            <q-item-label header>Emojis</q-item-label>
+                            <div v-for="cat in emojis" :key="cat">
+                              <q-btn
+                                v-for="icon in cat"
+                                :key="icon"
+                                flat
+                                dense
+                                @click="messageText += icon"
+                                class="text-h5"
+                              >{{ icon }}</q-btn>
+                              <br />
+                              <q-separator />
+                            </div>
+                          </q-list>
+                        </q-tab-panel>
+                        <q-tab-panel name="text" class="q-pt-none">
+                          <q-list>
+                            <q-item-label header>Gängige Nachrichten</q-item-label>
+                            <q-item
+                              clickable
+                              v-ripple
+                              @click="messageText += m.text"
+                              v-for="m in recentMessages"
+                              :key="m.icon"
+                            >
+                              <q-item-section avatar>
+                                <q-icon :name="m.icon" />
+                              </q-item-section>
+                              <q-item-section class="text-subtitle1">{{ m.text }}</q-item-section>
+                            </q-item>
+                          </q-list>
+                        </q-tab-panel>
+                      </q-tab-panels>
+                    </template>
+                  </q-splitter>
+                </div>
               </div>
+            </q-slide-transition>
+            <q-form @submit="sendMessage(1)" class="q-gutter-md q-pa-none">
+              <div>
+                <q-toolbar class="bg-white border-radius-50">
+                  <q-btn
+                    flat
+                    :v-if="!recording"
+                    dense
+                    class="q-pr-sm q-mr-xs notes-border"
+                    size="md"
+                    color="dark"
+                    icon="notes"
+                    @click="showQuickMessages = !showQuickMessages"
+                  />
+                  <q-toolbar-title class="footer-toolbar-title-border">
+                    <q-tab-panels
+                      v-model="recording"
+                      animated
+                      transition-prev="scale"
+                      transition-next="scale"
+                      class="q-pa-none"
+                    >
+                      <q-tab-panel :name="false" class="q-pa-none">
+                        <q-input
+                          borderless
+                          type="text"
+                          v-model="messageText"
+                          placeholder="Nachricht..."
+                        />
+                      </q-tab-panel>
+                      <q-tab-panel :name="true" class="q-pa-none q-my-md flex">
+                        <p
+                          class="text-subtitle1 text-dark q-mb-none recording-pulsing"
+                        >Audio wird aufgenommen...</p>
+                        <q-space />
+                      </q-tab-panel>
+                    </q-tab-panels>
+                  </q-toolbar-title>
 
-              <div class="col-xs-2 bg-white text-center">
-                <q-toolbar>
-                  <q-toolbar-title>
-                    <q-btn
-                      @click="sendMessage(1)"
-                      icon="arrow_forward_ios"
-                      flat
-                      v-if="messageText"
-                      round
-                      dense
-                      class="q-mr-sm bg-positive text-white"
-                      style="transition: all .1s"
-                    />
-                    <vue-record-audio
-                      :style="'transform: scale(' +  (recorderBig ? 2.4 : 1) + ')'"
-                      v-else
-                      mode="hold"
-                      @result="sendAudio"
-                      @onContextMenu="false"
-                      @stream="recorderBig = true"
-                      class="record-audio"
-                    />
-                  </q-toolbar-title>
+                  <q-tab-panels
+                    class="q-pa-none border-recorder-send"
+                    v-model="showRecorder"
+                    animated
+                    transition-prev="scale"
+                    transition-next="scale"
+                  >
+                    <q-tab-panel :name="false" class="q-pa-none flex">
+                      <q-btn
+                        @click="sendMessage(1)"
+                        icon="send"
+                        outline
+                        size="lg"
+                        type="submit"
+                        rounded
+                        dense
+                        color="primary"
+                      />
+                    </q-tab-panel>
+
+                    <q-tab-panel :name="true" class="q-pa-none full-width">
+                      <q-space />
+                      <vue-record-audio
+                        mode="hold"
+                        @result="sendAudio"
+                        @onContextMenu="false"
+                        @stream="recording = true"
+                        class="record-audio"
+                      />
+                    </q-tab-panel>
+                  </q-tab-panels>
                 </q-toolbar>
               </div>
-            </div>
+            </q-form>
           </q-footer>
         </q-layout>
       </q-dialog>
@@ -327,9 +458,12 @@ export default {
       alreadyScrolledDown: false,
       showQR: false,
       coloredIDs: {},
-      recorderBig: false,
+      recording: false,
       openLiftInfo: false,
       messageText: "",
+      showQuickMessages: false,
+      quickMessagesTab: "emoji",
+      footerBgColor: "white",
       user: this.$store.getters["auth/user"].id,
       // lift: {
       //   car: {
@@ -353,7 +487,27 @@ export default {
     open: Boolean,
     lift: Object,
   },
-  computed: {},
+  computed: {
+    showRecorder() {
+      return !this.messageText;
+    },
+
+    emojis() {
+      var stringArray = this.$store.state.emojis;
+      //   betterArray = [];
+      // stringArray.forEach((string) => {
+      //   var categoryArray = [];
+      //   for (var i = 0; i < string.length; i++)
+      //     categoryArray.push(string.slice(i, i + 1));
+      //   betterArray.push(categoryArray);
+      // });
+      return stringArray;
+    },
+
+    recentMessages() {
+      return this.$store.state.recentMessages;
+    },
+  },
 
   mounted() {
     //  document.getElementById("recordButton").onmousedown = (event) => {
@@ -372,28 +526,11 @@ export default {
     },
 
     getNameFromId(userId) {
-      var people = JSON.parse(JSON.stringify(this.lift.passengers)); // otherwise passengers would be overwritten
+      var people = JSON.parse(JSON.stringify(this.lift.passengers)); // deep copy, otherwise passengers would be overwritten
       people.push(this.lift.driver);
       return people.find((p) => {
         return p.id == userId;
       }).name;
-    },
-
-    makeBLOB(data) {
-      try {
-        var s = window.URL.createObjectURL(data);
-        var blob = new Blob(s, { type: "application/json" });
-        return blob;
-      } catch (e) {
-        console.error("---");
-        console.error("could not make BLOB");
-        console.error("---");
-        return null;
-      }
-    },
-
-    alert() {
-      alert("köb");
     },
 
     emitAndClose() {
@@ -454,7 +591,7 @@ export default {
           new Date(messageItem.timestamp),
           new Date(preceder.timestamp),
           "day"
-        ); // alwast newest time first at this function
+        ); // always newest time first at this function
         var sameMonth = date.isSameDate(
           new Date(messageItem.timestamp),
           new Date(preceder.timestamp),
@@ -502,8 +639,11 @@ export default {
     },
 
     formatAsTime(dateString) {
-      var d = date.formatDate(new Date(dateString), "H:mm");
-      return d;
+      return date.formatDate(new Date(dateString), "H:mm");
+    },
+
+    formatAsDate(dateObj) {
+      return date.formatDate(dateObj, "DD.MM.YYYY");
     },
 
     false() {
@@ -531,74 +671,58 @@ export default {
       this.sendMessage(2, blob);
     },
 
-    sendMessage(type, blob) {
-      this.recorderBig = false;
+    async sendMessage(type, blob) {
+      this.recording = false;
       var msgObj = {
-        content: "",
-        type: 0, // 1 means raw text, 2 means audio, 3 means image (hopefully will come in the future)
-        liftId: this.messages.list[0].liftId, // all from same lift, doesn't matter which one is taken
+        type: 0, // 1 means raw text, 2 means audio, 3 will mean image when implemented in future
+        liftId: this.lift.messages[0].id, // all from same lift, doesn't matter which one is taken
         timestamp: Date.now(),
       };
       switch (type) {
         case 1: // only text
-        default:
-          // when no type is given, propably sent from form which doesn't give any parameters, but still text
           msgObj.content = this.messageText;
           msgObj.type = 1;
           break;
         case 2: // audio
           msgObj.type = 2;
-          var content = makeBinary(blob);
 
-          if (!content) {
-            break;
-            return;
-          }
-          msgObj.content = content;
-          break;
-        case 3:
-          var content = makeBinary(blob);
-          if (!content) return;
-          msgObj.content = content;
-          msgObj.type = 3;
-          break;
-      }
-
-      function makeBinary(blob) {
-        try {
-          return window.URL.createObjectURL(blob);
-        } catch (e) {
-          return false;
-        }
-      }
-
-      console.log(blob);
-      console.log(JSON.stringify(blob));
-      sendApiRequest(
-        SQL_SEND_MESSAGE,
-        {
-          id: this.user,
-          message: msgObj,
-        },
-        (data) => {
-          // is id of just inserted row
-          // check whether last message was from this user
-          msgObj.messageId = data;
-          msgObj.nameOfUser = this.$store.getters["auth/user"].name.split(
-            " "
-          )[0];
-          msgObj.userId = this.user;
-          msgObj.destination = this.messages.list[0].destination; // just copy the remaining properties from the other messages
-          msgObj.start = this.messages.list[0].start;
-          this.messages.list.push(msgObj);
-          this.messages.list.sort((a, b) => {
-            return a.timestamp < b.timestamp;
+          await new Promise((res, rej) => {
+            var reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = (_) => {
+              msgObj.content = reader.result;
+              alert(reader.result);
+              res();
+            };
           });
-        },
-        (error) => {
-          throw error;
-        }
-      );
+          break;
+      }
+
+      // sendApiRequest(
+      //   SQL_SEND_MESSAGE,
+      //   {
+      //     id: this.user,
+      //     message: msgObj,
+      //   },
+      //   (data) => {
+      //     // is id of just inserted row
+      //     // check whether last message was from this user
+      //     msgObj.messageId = data;
+      //     msgObj.nameOfUser = this.$store.getters["auth/user"].name.split(
+      //       " "
+      //     )[0];
+      //     msgObj.userId = this.user;
+      //     msgObj.destination = this.messages.list[0].destination; // just copy the remaining properties from the other messages
+      //     msgObj.start = this.messages.list[0].start;
+      //     this.messages.list.push(msgObj);
+      //     this.messages.list.sort((a, b) => {
+      //       return a.timestamp < b.timestamp;
+      //     });
+      //   },
+      //   (error) => {
+      //     throw error;
+      //   }
+      // );
 
       this.messageText = "";
       setTimeout(() => window.scrollTo(0, 1000000), 100);
@@ -608,26 +732,17 @@ export default {
       var car = this.lift.car;
       var search =
         car.brand + "+" + car.model.replace(" ", "") + "+" + car.type;
-      openURL("https://www.ecosia.org/images?q=" + search); // easiest way, real images from db would be an extra study exam for laws student
+      openURL("https://www.ecosia.org/images?q=" + search); // easiest way, otherwise we would have to store a image of each model (!)
+    },
+
+    viewUserFromId(userId) {
+      window.location.href = "/#/benutzerinfo?slId=" + userId;
     },
   },
 };
 </script>
 
 <style scoped lang="scss">
-.hiding {
-  animation: hide 0.8s forwards;
-}
-@keyframes hide {
-  0%,
-  99% {
-    visibility: visible;
-  }
-  100% {
-    visibility: hidden;
-  }
-}
-
 .custom-chat-label {
   position: relative;
   &:after {
@@ -649,5 +764,50 @@ export default {
   width: 55px;
   height: 55px;
   background: white;
+}
+
+.border-radius-50 {
+  border-left: 1px solid $primary;
+  border-radius: 50px;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+.border-recorder-send {
+  border-radius: 50px;
+  // border-right: 1px solid $primary;
+}
+
+.record-audio {
+  -youbkit-touch-callout: none; /* iOS Safari */
+  -youbkit-user-select: none; /* Chrome 6.0+, Safari 3.1+, Edge & Opera 15+ */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE 10+ and Edge */
+  user-select: none; /* Non-prefixed version, 
+                  currently supported by Chrome and Opera */ // this setting is just to prevent text selecting
+
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  background-color: $primary;
+}
+
+.footer-toolbar-title-border {
+  border-top: 1px solid $primary;
+  border-bottom: 1px solid $primary;
+}
+
+.notes-border {
+  border-right: 1px solid rgb(134, 127, 127);
+}
+
+.recording-pulsing {
+  animation: pulsing 0.8s alternate infinite;
+
+  @keyframes pulsing {
+    to {
+      opacity: 0.75;
+    }
+  }
 }
 </style>

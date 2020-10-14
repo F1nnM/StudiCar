@@ -65,6 +65,11 @@ const routes = [{
       component: () =>
         import('pages/edit_faq.vue')
     },
+    {
+      path: '/das-team',
+      component: () =>
+        import('pages/team.vue')
+    },
   ]
 },
 {

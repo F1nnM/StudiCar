@@ -53,7 +53,7 @@ module.exports = {
     },
     '/getUserData': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid', 'secretFbId'], res)) {
-        var userData = (await runQuery("SELECT ID, NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, PREF_SMOKING, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `users` WHERE users.FB_ID = ?", [options.fbid])).result[0],
+        var userData = (await runQuery("SELECT ID, NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, LIFTS_OFFERED, LIFTS_ALL, PREF_SMOKING, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `users` WHERE users.FB_ID = ?", [options.fbid])).result[0],
           liftCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS LIFT_COUNT FROM `lift_map` WHERE `USER_ID` = ? ", [options.fbid])).result[0].LIFT_COUNT,
           driverCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS DRIVER_COUNT FROM `lift_map` WHERE `IS_DRIVER` = true AND `USER_ID` = ? ", [options.fbid])).result[0].DRIVER_COUNT,
           uid = userData.ID
@@ -67,8 +67,10 @@ module.exports = {
           description: userData.DESCRIPTION,
           stats: {
             createdAt: userData.CREATED_DATE,
-            liftsOffered: liftCount,
-            driverCount: driverCount
+            liftCount: liftCount,
+            driverCount: driverCount,
+            liftsOffered: userData.LIFTS_OFFERED,
+            liftsAll: userData.LIFTS_ALL,
           },
           prefs: {
             smoking: userData.PREF_SMOKING,
@@ -240,6 +242,7 @@ module.exports = {
             answer: item.ANSWER,
             category: item.CATEGORY,
             answeredBy: {
+              id: item.ORGA_ID,
               name: item.ORGAS_NAME.split(' ')[0],
               function: item.FUNCTION
             }

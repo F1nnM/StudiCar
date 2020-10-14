@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-img v-if="true" :src="randomImage" style="height: 35vh;">
+    <q-img v-if="true" :src="randomImage" style="height: 35vh;" class="text-white">
       <div class="row full-width q-pa-md">
         <div class="text-h6 col-10 text-weight-light">{{ greeting.full }}</div>
         <q-icon size="sm" class="col-2" :name="greetingIcon" />
@@ -8,7 +8,7 @@
       <div v-if="caption" class="full-width absolute-bottom-left text-caption">
         {{ caption }}
         <small>
-          <br />bereitgestellt von
+          <br />bezogen von
           <a class="text-white" href="https://der-postillon.com">der Postillon</a>
         </small>
       </div>
@@ -51,26 +51,26 @@ export default {
 
       var morningMax = 8;
       var dayMax = 14;
-      var eveningMax = 13; // currently hard coded, could be optimized by automatically all files from dir
+      var eveningMax = 13; // currently hard coded, could be optimized by automatically reading all files from dir
       var error = false;
 
-      var img;
+      var imgPath;
 
       switch (this.timeText) {
         case "Guten Morgen":
-          img = "morning/m" + Math.floor(Math.random() * morningMax);
+          imgPath = "morning/m" + Math.floor(Math.random() * morningMax);
           break;
         case "Willkommen":
-          img = "day/d" + Math.floor(Math.random() * dayMax);
+          imgPath = "day/d" + Math.floor(Math.random() * dayMax);
           break;
         case "Guten Abend":
-          img = "evening/e" + Math.floor(Math.random() * eveningMax);
+          imgPath = "evening/e" + Math.floor(Math.random() * eveningMax);
           break;
         default:
           error = true;
       }
       if (error) return require("../assets/sad.svg");
-      else return require("../assets/drawer_images/" + img + ".jpg");
+      else return require("../assets/drawer_images/" + imgPath + ".jpg");
     },
 
     greeting() {

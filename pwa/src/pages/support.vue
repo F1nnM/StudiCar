@@ -145,7 +145,7 @@
                     <q-item-label caption class="text-right q-pb-sm">
                       <p>({{ q.answeredBy.function }})</p>
                       <q-btn
-                        to="/das-team"
+                        :to="'/das-team?orgaId=' + q.answeredBy.id"
                         dense
                         outline
                         class="q-px-sm"

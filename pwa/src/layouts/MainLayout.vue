@@ -73,12 +73,12 @@
       class="drawer-no-border"
     >
       <DrawerWelcomeImage :timeText="greeting" :caption="newsticker || 'Ticker wird geladen...'" />
-      <hr style="margin: 0; background-color: black;" />
-      <q-list>
+      <q-list class="q-pb-sm">
         <q-item-label header class="text-grey-8">Navigation</q-item-label>
         <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link" />
       </q-list>
-      <div style="padding: 10px;">StudiCar v{{ $q.version }}</div>
+      <ExtHr color="grey-7" size="xs" />
+      <div class="q-pa-md text-grey-7">StudiCar v{{ $q.version }}</div>
     </q-drawer>
 
     <q-page-container>
@@ -129,6 +129,7 @@ import EssentialLink from "components/EssentialLink";
 import GetUserDataLoading from "components/GetUserDataLoading";
 import DrawerWelcomeImage from "components/DrawerWelcomeImage";
 import QRLiftDisplay from "components/QRLiftDisplay";
+import ExtHr from "components/ExtendedHr";
 
 import { sendApiRequest, GET_NEWSTICKER } from "../ApiAccess";
 
@@ -141,6 +142,7 @@ export default {
     DrawerWelcomeImage,
     GetUserDataLoading,
     QRLiftDisplay,
+    ExtHr,
   },
 
   data() {
@@ -207,8 +209,14 @@ export default {
           link: "/#/rechtliches",
         },
         {
+          title: "Team",
+          caption: "Wer hinter dem Projekt steckt",
+          icon: "emoji_people",
+          link: "/#/das-team",
+        },
+        {
           title: "Support",
-          caption: "Wir helfen dir",
+          caption: "Wie können wir dir helfen?",
           icon: "accessibility_new",
           link: "/#/hilfe",
         },

@@ -153,8 +153,8 @@ module.exports = {
 			{
 				id: 3,
 				driver: {
-					fbid: "wG3cG4M7NFMJzJYcreFjLrJC9jf6",
-					name: "Herr",
+					fbid: "lhlhugljhljlublib",
+					name: "Lorem",
 					imageUrl: 'https://cdn.pixabay.com/photo/2016/10/29/20/25/beard-1781443_960_720.png',
 					prefs: {
 						talk: "YELLOW",
@@ -202,5 +202,92 @@ module.exports = {
 				seatsOccupied: 1,
 				qr: 'l9dc9ec941d0673fcc299db0dbcad4e21'
 			},
-		]
+		],
+	team: [
+		{
+			id: 10,
+			name: 'Finn',
+			surname: 'Floruß',
+			function: 'Projektleitung',
+			funcShort: 'Leitung',
+			team: true,
+			bio: `Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner
+		 test Lorem ipsum dolor sit ein kleiner test`
+		},
+		{
+			id: 9,
+			name: 'Jonas',
+			surname: 'Hochstatter',
+			function: 'Projektleitung (stv)',
+			funcShort: 'Leitung (stv)',
+			bio: `Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner
+		 test Lorem ipsum dolor sit ein kleiner test`
+		},
+		{
+			id: 11,
+			name: 'Timo',
+			surname: 'Preißing',
+			function: 'Dokumentation & Qualitätssicherung',
+			funcShort: 'Dok & Quali',
+			bio: `Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner
+		 test Lorem ipsum dolor sit ein kleiner test`
+		},
+		{
+			id: 4,
+			name: 'Adam',
+			surname: 'Peller',
+			function: 'Marketing',
+			bio: `Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner
+		 test Lorem ipsum dolor sit ein kleiner test`
+		},
+		{
+			id: 8,
+			name: 'Merdan',
+			surname: 'Dursun',
+			function: 'Finanzen',
+			bio: `Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner
+		 test Lorem ipsum dolor sit ein kleiner test`
+		},
+		{
+			id: 6,
+			name: 'Julian',
+			surname: 'Essl',
+			function: 'Recht',
+			bio: `Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner
+		 test Lorem ipsum dolor sit ein kleiner test`
+		},
+		{
+			id: 13,
+			name: 'Dave',
+			surname: 'Deininger',
+			function: 'was anderes',
+			bio: `Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner
+		 test Lorem ipsum dolor sit ein kleiner test`
+		},
+		{
+			id: 17,
+			name: 'Jochen',
+			surname: 'King',
+			function: 'nochmal was anderes',
+			bio: `Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner
+		 test Lorem ipsum dolor sit ein kleiner test`
+		},
+		{
+			id: 1,
+			name: 'Bernd',
+			surname: 'Mayinger',
+			function: 'Frontend, Layout & UX Developer',
+			funcShort: 'UX & Design',
+			bio: `Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner
+		 test Lorem ipsum dolor sit ein kleiner test`
+		},
+		{
+			id: 7,
+			name: 'Finn',
+			surname: 'Melzer',
+			function: 'API Basis & Backend',
+			funcShort: 'Backend',
+			bio: `Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner
+		 test Lorem ipsum dolor sit ein kleiner test`
+		}]
 }
