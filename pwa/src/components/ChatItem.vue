@@ -45,7 +45,7 @@
           top
           class="text-right"
           style="max-width: 30vw;"
-        >{{ generate_time_string(message.timestamp) }}</q-item-section>
+        >{{ generateTimeString(message.timestamp) }}</q-item-section>
       </q-item>
     </q-slide-item>
   </div>
@@ -61,7 +61,7 @@ export default {
       type: Object,
       required: true,
     },
-    firstItem: Boolean
+    firstItem: Boolean,
   },
 
   methods: {
@@ -77,18 +77,14 @@ export default {
       this.finalize(reset);
     },
 
-    long_tab({ e }) {
-      alert("LONG TAPPED");
-    },
-
-    generate_time_string(time) {
+    generateTimeString(time) {
       var display_text;
       time = new Date(time); // conversion to JS Date Object we can work with
       if (diff("minutes") <= 2) {
         display_text = "gerade eben";
       } else if (diff("minutes") <= 30) {
         display_text = "vor " + diff("minutes") + " Minuten";
-      } else if (was_today()) {
+      } else if (wasToday()) {
         // checks whether message was still today
         display_text = date.formatDate(time, "HH:mm");
       } else if (diff("days") == 1) {
@@ -110,15 +106,11 @@ export default {
         return date.getDateDiff(new Date(), time, unit);
       }
 
-      function was_today() {
+      function wasToday() {
         var this_day = date.isSameDate(time, new Date(), "day");
         var this_month = date.isSameDate(time, new Date(), "month");
         var this_year = date.isSameDate(time, new Date(), "year");
-        if (this_day && this_month && this_year) {
-          return true;
-        } else {
-          return false;
-        }
+        return this_day && this_month && this_year;
       }
     },
 

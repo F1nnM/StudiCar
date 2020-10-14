@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-splitter :value="50">
+    <q-splitter :value="50" disable>
       <template v-slot:before>
         <div class="q-px-md q-py-sm">
           <q-card>
@@ -17,7 +17,7 @@
               </q-badge>
             </div>
 
-            <q-card-section class="row">
+            <q-card-section class="row q-pb-none">
               <div
                 class="col-8 text-h5 text-weight-light text-left q-mt-none q-mb-xs custom-overline c-o-1 c-o-l c-o-sm"
               >{{ username }}</div>
@@ -26,19 +26,140 @@
               </p>
             </q-card-section>
           </q-card>
+          <br />
+          <div class="full-width text-right">
+            <q-btn-toggle
+              v-model="statsFriendsTab"
+              rounded
+              outline
+              toggle-color="primary"
+              color="grey-5"
+              :options="[
+                {value: 'stats', slot: 'stats' },
+                {value: 'friends', slot: 'friends'}
+              ]"
+            >
+              <template v-slot:stats>
+                <q-icon name="bar_chart" size="xs" />
+              </template>
+              <template v-slot:friends>
+                <q-icon name="people_alt" size="xs" />
+              </template>
+            </q-btn-toggle>
+          </div>
         </div>
       </template>
 
       <template v-slot:after>
-        <q-list class="shadow-2 rounded-borders">
-          <q-item-label header class="q-pt-xs q-pb-xs text-uppercase text-caption">Statistik</q-item-label>
-          <q-item>Fahrten angeboten: {{ liftsOffered }}</q-item>
-          <q-item>Fahrten gesamt: {{ liftsAll }}</q-item>
-          <q-item>Durchschnitt: {{ liftAverage }}/W</q-item>
+        <q-tab-panels
+          v-model="statsFriendsTab"
+          animated
+          transition-prev="jump-left"
+          transition-next="jump-right"
+        >
+          <q-tab-panel name="stats">
+            <q-list>
+              <q-item-label
+                header
+                class="q-pt-xs q-pb-xs text-uppercase text-caption"
+              >Fahrtenstatistik</q-item-label>
+              <q-tabs v-model="statsTimeTab" dense class="bg-white text-grey-7">
+                <q-tab name="previous" icon="query_builder" />
+                <q-tab name="current" icon="check_circle_outline" />
+              </q-tabs>
+              <q-tab-panels v-model="statsTimeTab">
+                <q-tab-panel
+                  v-for="t in [{
+                  name: 'previous', label: 'Früher', lifts: {all: stats.liftsAll, driver: stats.liftsOffered }
+                  },
+                  {
+                  name: 'current', label: 'Aktuell', lifts: {all: stats.liftCount, driver: stats.driverCount }
+                }]"
+                  :key="t.name"
+                  :name="t.name"
+                >
+                  <p>{{ t.label }}</p>
 
-          <q-item-label header class="q-pt-xs q-pb-xs text-uppercase text-caption">Dabei seit</q-item-label>
-          <q-item>{{ since }}</q-item>
-        </q-list>
+                  <!-- <q-item class="q-pa-none">
+                    <q-item-section>
+                      <q-avatar
+                        color="white"
+                        class="text-weight-light"
+                        text-color="dark"
+                      >{{ t.lifts.all }}</q-avatar>
+                    </q-item-section>
+                    <q-item-section avatar>
+                      <q-circular-progress
+                        show-value
+                        font-size="16px"
+                        class="text-primary q-ma-sm"
+                        :value="Math.round(t.lifts.driver / t.lifts.all * 100)"
+                        size="xl"
+                        :thickness="0.05"
+                        color="primary"
+                        track-color="grey-3"
+                      >
+                        <q-icon name="emoji_people" color="dark" />
+                        {{ t.lifts.driver }}
+                      </q-circular-progress>
+                    </q-item-section>
+                  </q-item>-->
+
+                  <p class="text-caption">Angebotsbilanz:</p>
+                  <ColoredMeter
+                    :angle="t.lifts.driver / t.lifts.all"
+                    width="30vw"
+                    :minInput="0"
+                    :maxInput="1"
+                  >
+                    <p
+                      class="text-h6 text-weight-light q-pt-md"
+                    >{{ t.lifts.driver }} / {{ t.lifts.all }}</p>
+                  </ColoredMeter>
+                  <br />
+                  <q-separator />
+                </q-tab-panel>
+                <!-- <q-tab-panel name="current">
+                  <q-item class="q-pt-md">
+                    <q-item-section>
+                      im Moment
+                      <q-avatar
+                        color="white"
+                        class="text-weight-light"
+                        text-color="dark"
+                      >{{ stats.liftCount }}</q-avatar>
+                    </q-item-section>
+                    <q-item-section avatar>
+                      <q-circular-progress
+                        show-value
+                        font-size="16px"
+                        class="text-primary q-ma-sm"
+                        :value="Math.round(stats.driverCount / stats.liftCount * 100)"
+                        size="xl"
+                        :thickness="0.05"
+                        color="primary"
+                        track-color="grey-3"
+                      >
+                        <q-icon name="directions_car" color="dark" />
+                        {{ stats.driverCount }}
+                      </q-circular-progress>
+                    </q-item-section>
+                  </q-item>
+                </q-tab-panel>-->
+              </q-tab-panels>
+            </q-list>
+          </q-tab-panel>
+          <q-tab-panel name="friends">
+            <q-list>
+              <q-item-label header class="q-pt-xs q-pb-xs text-uppercase text-caption">Dabei seit</q-item-label>
+              <q-item>{{ since }}</q-item>
+              <q-item-label header class="q-pt-xs q-pb-xs text-uppercase text-caption">Freunde</q-item-label>
+              <q-item>
+                <p class="text-caption">Du hast noch keine Nutzer als Freunde markiert</p>
+              </q-item>
+            </q-list>
+          </q-tab-panel>
+        </q-tab-panels>
       </template>
     </q-splitter>
 
@@ -828,6 +949,9 @@
 <script>
 import { date } from "quasar";
 import ImageColorPicker from "components/ImageColorPicker";
+import ColoredMeter from "components/ColoredMeter";
+import extHR from "../components/ExtendedHr";
+import qrGen from "../components/QrGenerator";
 
 import {
   buildGetRequestUrl,
@@ -837,22 +961,19 @@ import {
   GET_CAR_MODELS,
   // SQL_SET_USER_PROFILE_PICTURE
 } from "../ApiAccess";
-import qrGen from "../components/QrGenerator";
-import extHR from "../components/ExtendedHr";
 
 export default {
   components: {
     qrGen,
     extHR,
     ImageColorPicker,
+    ColoredMeter,
   },
 
   data() {
     return {
-      liftsOffered: this.$store.getters["auth/user"].stats.liftsOffered,
-      liftsAll: this.$store.getters["auth/user"].stats.liftsAll,
+      stats: this.$store.getters["auth/user"].stats,
       username: this.$store.getters["auth/user"].name.split(" ")[0],
-      liftAverage: 5,
       newLiftMaxDistance: 0, // basic profile settings
       editDistance: false,
       genderOptions: ["Männlich", "Weiblich", "Divers"],
@@ -921,6 +1042,8 @@ export default {
       openAddCarConfirm: false,
 
       tab: "data", // vue models which doesn't belong to specific function
+      statsFriendsTab: "stats",
+      statsTimeTab: "previous",
     };
   },
   computed: {
@@ -1056,6 +1179,11 @@ export default {
         if (!this.newCar[key]) return false;
       }
       return true;
+    },
+
+    meterModelBefore() {
+      var a = this.stats;
+      return a.liftsOffered / a.liftsAll;
     },
   },
   methods: {

@@ -1,6 +1,8 @@
 <template>
   <div class="q-ma-md">
-    <TitleButton @click="getContent(true)" icon="refresh" size="md" flat />
+    <TitleButtonAnchor>
+      <q-btn @click="getContent(true)" icon="refresh" size="md" flat />
+    </TitleButtonAnchor>
     <div v-show="downloading == 2" class="overflow-hidden" id="text_anchor">
       <!-- content goes here after downloading -->
     </div>
@@ -15,13 +17,13 @@
 <script>
 import { sendApiRequest, GET_LEGAL } from "../ApiAccess";
 import LoadingDisplay from "components/LoadingDisplay";
-import TitleButton from "components/TitleButton";
+import TitleButtonAnchor from "components/TitleButtonAnchor";
 
 export default {
   name: "legal",
   components: {
     LoadingDisplay,
-    TitleButton,
+    TitleButtonAnchor,
   },
   mounted() {
     this.$store.commit("setPage", "Rechtliches");

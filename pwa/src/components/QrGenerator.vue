@@ -8,7 +8,7 @@
           </q-avatar>-->
 
           <q-toolbar-title>
-            <span class="text-primary">Studi</span>Car Code
+            <span class="text-primary">StudiCar</span> Code
           </q-toolbar-title>
 
           <q-btn flat round dense icon="close" v-close-popup />
@@ -93,8 +93,8 @@ export default {
 }
 
 .qrcode-image {
-  width: 50px;
-  height: 50px;
+  width: 45px;
+  height: 45px;
   background: white;
 }
 </style>
