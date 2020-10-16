@@ -28,20 +28,20 @@ const store = new Vuex.Store({
     }
   },
   mutations: {
-    setPageTrans (state, _trans) {
-      state.pageTrans = _trans
+    setPageTrans (state, trans_) {
+      state.pageTrans = trans_
     },
 
-    setPage (state, _pageName) {
-      state.pageName = _pageName
+    setPage (state, pageName_) {
+      state.pageName = pageName_
     },
 
     setFAQ (state, faq_) {
       state.faq = faq_
     },
 
-    setLegal (state, legal) {
-      state.legal = legal
+    setLegal (state, legal_) {
+      state.legal = legal_
     },
   },
   actions: {
