@@ -81,7 +81,7 @@
                 </div>
               </q-slide-transition>
 
-              <extHR color="grey-5" size="xs" />
+              <ExtHr color="grey-5" size="xs" />
               <q-timeline color="primary" class="q-mt-xl">
                 <!-- <q-item-label header>Fahrtverlauf</q-item-label> -->
                 <q-timeline-entry>
@@ -127,7 +127,7 @@
                     </q-btn>
                   </div>
                 </div>
-                <extHR :color="lift.car.color" hex size="xs" class="q-my-sm" />
+                <ExtHr :color="lift.car.color" hex size="xs" class="q-my-sm" />
                 <p
                   class="text-grey-7 q-mb-none"
                 >{{ lift.car.licensePlate }} - Baujahr {{ lift.car.built }}</p>
@@ -227,7 +227,13 @@
                 <div>
                   <q-menu touch-position context-menu transition-show="fade" transition-hide="none">
                     <q-list class="q-pa-xs">
-                      <q-item disable clickable v-ripple dense>
+                      <q-item
+                        :disable="m.type != 1"
+                        clickable
+                        @click="copyToClipboard(m.content)"
+                        v-ripple
+                        dense
+                      >
                         <q-item-section avatar>
                           <q-icon name="content_copy" size="sm" />
                         </q-item-section>
@@ -254,7 +260,22 @@
                                 <div class="col-9 q-mb-xs">{{ formatAsDate(m.timestamp) }}</div>
                                 <div class="col-3">um</div>
                                 <div class="col-9">{{ formatAsTime(m.timestamp) }} Uhr</div>
+                                <div class="col-5">Größe:</div>
+                                <div class="col-7">{{ (m.content / 1000).toFixed(2) }} KB</div>
                               </q-item-label>
+                              <q-separator class="q-mt-sm" />
+                              <q-item
+                                class="q-pt-sm"
+                                clickable
+                                @click="copyToClipboard(m)"
+                                v-ripple
+                                dense
+                              >
+                                <q-item-section avatar>
+                                  <q-icon name="file_copy" size="sm" />
+                                </q-item-section>
+                                <q-item-section>Infos kopieren</q-item-section>
+                              </q-item>
                             </q-list>
                           </q-card-section>
                         </q-card>
@@ -271,14 +292,7 @@
                     :bg-color="getColor(m.id)"
                   >
                     <div v-if="m.type == 2">
-                      <audio
-                        v-if="m.type == 2"
-                        :src="makeAudioSRC(m.content)"
-                        controls
-                      >Dein Browser unterstützt keine Audios.</audio>
-                      <div>
-                        <p>[Custom Controls]</p>
-                      </div>
+                      <AudioPlayer :src="m.content" />
                     </div>
                   </q-chat-message>
                 </div>
@@ -338,7 +352,7 @@
                             <q-item
                               clickable
                               v-ripple
-                              @click="messageText += m.text"
+                              @click="messageText = m.text"
                               v-for="m in recentMessages"
                               :key="m.icon"
                             >
@@ -436,9 +450,11 @@
 
 <script>
 import { openURL, date, scroll } from "quasar";
-import extHR from "components/ExtendedHr";
+import ExtHr from "components/ExtendedHr";
 import VueQrcode from "vue-qrcode";
 import LiftInfoDrawer from "components/LiftInfoDrawer";
+import AudioPlayer from "components/AudioPlayer";
+
 import {
   sendApiRequest,
   SQL_SEND_MESSAGE,
@@ -450,8 +466,9 @@ const { getScrollPosition, setScrollPosition } = scroll;
 export default {
   name: "LiftPopup",
   components: {
-    extHR,
+    ExtHr,
     VueQrcode,
+    AudioPlayer,
   },
   data() {
     return {
@@ -661,10 +678,11 @@ export default {
       e.preventDefault();
     },
 
-    makeAudioSRC(buffer) {
-      const blob = new Blob([buffer], { type: "audio/mp3" });
+    async makeAudioSRC(base64) {
+      const response = await fetch(base64),
+        blob = await response.blob();
       console.warn(blob);
-      return window.URL.createObjectURL(blob);
+      return blob;
     },
 
     sendAudio(blob) {
@@ -685,12 +703,13 @@ export default {
           break;
         case 2: // audio
           msgObj.type = 2;
-
+          var haha;
           await new Promise((res, rej) => {
             var reader = new FileReader();
             reader.readAsDataURL(blob);
             reader.onloadend = (_) => {
               msgObj.content = reader.result;
+              haha = reader.result;
               alert(reader.result);
               res();
             };
@@ -737,6 +756,29 @@ export default {
 
     viewUserFromId(userId) {
       window.location.href = "/#/benutzerinfo?slId=" + userId;
+    },
+
+    copyToClipboard(obj) {
+      // copied from 30secondsofcode
+      var toBeCopied;
+
+      if (typeof obj == "string") toBeCopied = obj;
+      else {
+        toBeCopied = JSON.stringify({
+          text: obj.content,
+          timestamp: obj.timestamp,
+          sentByName: this.getNameFromId(obj.sentBy),
+        });
+      }
+      const el = document.createElement("textarea");
+      el.value = toBeCopied;
+      el.setAttribute("readonly", "");
+      el.style.position = "fixed";
+      el.style.left = "-9999px";
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
     },
   },
 };
