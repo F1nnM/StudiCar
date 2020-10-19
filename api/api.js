@@ -43,6 +43,7 @@ module.exports = {
         fs.readFile(newsPath, 'utf8', (err, data) => {
           if (err) throw err;
           var news = data.toString().split("\n");
+          news = news.filter(line => !line.includes('//')) // ignore all lines containing //
 
           var rnd = Math.floor(Math.random() * news.length)
           news = news[rnd].split('+++')[1].trim()
