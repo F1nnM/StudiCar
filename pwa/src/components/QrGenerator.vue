@@ -17,7 +17,7 @@
         <q-card-section class="text-center overflow-hidden-y q-pa-none q-ma-md">
           <div :class="'relative-position studicar-code' + (show ? ' show' : '')">
             <VueQrcode :width="200" :color="color" errorCorrectionLevel="H" :value="input" />
-            <q-img src="~assets/app-icon.svg" class="absolute-center qrcode-image" />
+            <q-img src="~assets/app-icon_from_web_filled.png" class="absolute-center qrcode-image" />
           </div>
           <extHR color="primary" size="xs" class="z-top" />
         </q-card-section>
@@ -95,6 +95,6 @@ export default {
 .qrcode-image {
   width: 45px;
   height: 45px;
-  background: white;
+  background: transparent;
 }
 </style>

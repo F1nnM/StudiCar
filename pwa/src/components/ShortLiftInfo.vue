@@ -112,7 +112,10 @@
                       errorCorrectionLevel="H"
                       :value="'l' + lift.qr"
                     />
-                    <q-img src="~assets/app-icon.svg" class="absolute-center qrcode-image" />
+                    <q-img
+                      src="~assets/app-icon_from_web_filled.png"
+                      class="absolute-center qrcode-image"
+                    />
                   </div>
                 </div>
                 <ExtHR color="primary" size="xs" />
@@ -209,6 +212,6 @@ export default {
 .qrcode-image {
   width: 35px;
   height: 35px;
-  background: white;
+  background: transparent;
 }
 </style>

@@ -73,7 +73,10 @@
                       errorCorrectionLevel="H"
                       :value="'l' + lift.qr"
                     />
-                    <q-img src="~assets/app-icon.svg" class="absolute-center qrcode-image" />
+                    <q-img
+                      src="~assets/app-icon_from_web_filled.png"
+                      class="absolute-center qrcode-image"
+                    />
                   </div>
                   <p
                     class="text-center text-caption"
@@ -805,7 +808,7 @@ export default {
 .qrcode-image {
   width: 55px;
   height: 55px;
-  background: white;
+  background: transparent;
 }
 
 .border-radius-50 {
