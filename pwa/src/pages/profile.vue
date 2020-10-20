@@ -1330,16 +1330,16 @@ export default {
 
     loadFile(file) {
       this.file = file;
-      const size = 300; // represents the height
-      const ratio = 1; // default ratio at profile pictures
+      const size = 300, // represents the height
+        ratio = 1; // default ratio at profile pictures
 
-      const width = size * ratio;
-      const fileName = file.name;
-      const reader = new FileReader();
+      const width = size * ratio,
+        fileName = file.name,
+        reader = new FileReader();
       reader.onerror = (error) => console.log(error);
       reader.readAsDataURL(file);
       reader.onload = (event) => {
-        const img = new Image();
+        var img = new Image();
         img.src = event.target.result;
 
         (img.onload = () => {
@@ -1350,16 +1350,17 @@ export default {
           const ctx = elem.getContext("2d");
           if (img.width >= img.height) {
             // landscape or square: width has to be cropped
-            var scale = img.height / size;
-            var indent = (img.width - img.height) / scale; // indent has to be half of the difference and negative, additionally divided by scale
+            var scale = img.height / size,
+              indent = (img.width - img.height) / scale; // indent has to be half of the difference and negative, additionally divided by scale
             ctx.drawImage(img, indent / -2, 0, width + indent, size);
           } else {
             // portrait
-            var scale = img.width / size;
-            var indent = (img.height - img.width) / scale; // indent has to be half of the difference and negative, additionally divided by scale
+            var scale = img.width / size,
+              indent = (img.height - img.width) / scale; // indent has to be half of the difference and negative, additionally divided by scale
             ctx.drawImage(img, 0, indent / -2, width, size + indent);
           }
           this.newPPictureBase64 = img.src;
+          alert("Image size: " + (img.src.length / 1000).toFixed(2) + " KB");
         }),
           (reader.onerror = (error) => {
             alert(error);

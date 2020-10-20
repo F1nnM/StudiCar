@@ -26,17 +26,16 @@
         <q-item-section>
           <q-item-label lines="1">
             {{ message.start }}
-            <span class="text-h6">→</span>
+            <span class="text-subtitle1 q-px-sm">&rsaquo;</span>
             {{ message.destination }}
           </q-item-label>
           <q-item-label caption lines="3">
-            <span class="text-weight-bold">{{ message.sentBy }}:</span>
-
-            <q-icon
-              v-if="message.type != 1"
-              :name="message.type == 2 ? 'keyboard_voice' : 'image'"
-            />
-            {{ message.type == 1 ? message.content : '' }}
+            <span class="text-weight-bold q-mr-xs">{{ message.sentBy }}:</span>
+            <span v-if="message.type != 1">
+              <q-icon :name="message.type == 2 ? 'keyboard_voice' : 'image'" />
+              {{ (message.content.length / 1000).toFixed(2) }} KB
+            </span>
+            <span v-else>{{ message.content }}</span>
           </q-item-label>
         </q-item-section>
 
@@ -48,6 +47,7 @@
         >{{ generateTimeString(message.timestamp) }}</q-item-section>
       </q-item>
     </q-slide-item>
+    <audio></audio>
   </div>
 </template>
 
@@ -62,6 +62,10 @@ export default {
       required: true,
     },
     firstItem: Boolean,
+  },
+
+  data() {
+    return {};
   },
 
   methods: {
@@ -132,8 +136,7 @@ export default {
       this.$emit("shortLiftInfo", liftId);
     },
   },
-  data() {
-    return {};
-  },
+
+  mounted() {},
 };
 </script>

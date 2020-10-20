@@ -44,7 +44,7 @@ module.exports = {
 				{
 					id: 19,
 					type: 1,
-					content: "Neuere Testnachricht",
+					content: "Neuere Testnachricht, extra lang to span multiple lines",
 					timestamp: "2020-09-19T06:17:08.000Z",
 					sentBy: 1
 				},
@@ -102,7 +102,7 @@ module.exports = {
 				{
 					id: 19,
 					type: 1,
-					content: "Neuere Testnachricht",
+					content: "Neuere Testnachricht Neuere Testnachricht, extra lang to span multiple lines Neuere Testnachricht, extra lang to span multiple lines",
 					timestamp: "2020-09-21T06:17:08.000Z",
 					sentBy: 1
 				}
@@ -209,6 +209,28 @@ module.exports = {
 				seatsOccupied: 1,
 				qr: 'l9dc9ec941d0673fcc299db0dbcad4e21'
 			},
+			{
+				id: 5,
+				driver: {
+					fbid: "wG3cG4M7NFMhIgYcreFjLrJC9Q23",
+					name: "Alicia",
+					imageUrl: 'http://photos.modelmayhem.com/photos/080925/19/48dc225344d65_m.jpg',
+					prefs: {
+						talk: "GREEN",
+						talkMorning: "YELLOW",
+						smoking: "RED",
+						music: "GREEN"
+					},
+				},
+				day_pattern: null,
+				next_drive: [new Date("2-2-2020"), new Date()],
+				postcode: 86653,
+				city: "Daiting",
+				distance: 40,
+				seatsOffered: 3,
+				seatsOccupied: 1,
+				qr: 'l9dc9ec941d0673fcc299db0dbcad4e21'
+			},
 		],
 	team: [
 		{
@@ -296,5 +318,67 @@ module.exports = {
 			funcShort: 'Backend',
 			bio: `Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner
 		 test Lorem ipsum dolor sit ein kleiner test`
+		}],
+	liftRequests: {
+		'21/10': [{
+			id: 1, // points to chatLifts
+			requestingUser: {
+				fbId: 'kebngkg',
+				name: 'Alicia',
+				surname: 'Müller',
+				imageUrl: 'http://photos.modelmayhem.com/photos/080925/19/48dc225344d65_m.jpg',
+				prefs: {
+					talk: 'GREEN',
+					talkMorning: 'YELLOW',
+					smoking: 'RED',
+					music: 'GREEN'
+				},
+				stats: {
+					liftCount: 14,
+					driverCount: 5
+				},
+				bio: 'Kurzbeschreibung'
+			}
+		},
+		{
+			id: 3, // points to chatLifts
+			requestingUser: {
+				fbId: 'kebngkg',
+				name: 'Robert',
+				surname: 'Dommer',
+				imageUrl: 'http://photos.modelmayhem.com/photos/080925/19/48dc225344d65_m.jpg',
+				prefs: {
+					talk: 'GREEN',
+					talkMorning: 'YELLOW',
+					smoking: 'RED',
+					music: 'GREEN'
+				},
+				stats: {
+					liftCount: 1,
+					driverCount: 0
+				},
+				bio: 'Kurzbeschreibung'
+			}
+		}],
+		'23/10': [{
+			id: 2, // points to chatLifts
+			requestingUser: {
+				fbId: 'uvbgibeikj',
+				name: 'Alicia',
+				surname: 'Müller',
+				imageUrl: 'http://photos.modelmayhem.com/photos/080925/19/48dc225344d65_m.jpg',
+				prefs: {
+					talk: 'GREEN',
+					talkMorning: 'YELLOW',
+					smoking: 'RED',
+					music: 'GREEN'
+				},
+				stats: {
+					liftCount: 14,
+					driverCount: 5
+				},
+				bio: 'Kurzbeschreibung'
+			}
 		}]
+	}
 }

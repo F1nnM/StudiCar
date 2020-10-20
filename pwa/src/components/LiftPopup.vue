@@ -259,12 +259,12 @@
                             <q-list>
                               <q-item-label header>Zeit</q-item-label>
                               <q-item-label class="text-grey-9 row">
-                                <div class="col-3">am</div>
-                                <div class="col-9 q-mb-xs">{{ formatAsDate(m.timestamp) }}</div>
-                                <div class="col-3">um</div>
-                                <div class="col-9">{{ formatAsTime(m.timestamp) }} Uhr</div>
+                                <div class="col-5">am</div>
+                                <div class="col-7 q-mb-xs">{{ formatAsDate(m.timestamp) }}</div>
+                                <p class="col-5">um</p>
+                                <div class="col-7">{{ formatAsTime(m.timestamp) }} Uhr</div>
                                 <div class="col-5">Größe:</div>
-                                <div class="col-7">{{ (m.content / 1000).toFixed(2) }} KB</div>
+                                <div class="col-7">{{ (m.content.length / 1000).toFixed(2) }} KB</div>
                               </q-item-label>
                               <q-separator class="q-mt-sm" />
                               <q-item
