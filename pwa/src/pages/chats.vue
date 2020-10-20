@@ -41,8 +41,136 @@
       </q-tab-panel>
       <q-tab-panel name="requests">
         <q-list>
-          <div v-if="false">
-            <q-item-label header>Anfragen von anderen Nutzern</q-item-label>here come the pending offers
+          <div v-if="Object.keys(liftRequests).length">
+            <q-splitter :value="15">
+              <template v-slot:before>
+                <q-tabs v-model="liftRequestTab" vertical>
+                  <q-tab
+                    no-caps
+                    v-for="day in Object.keys(liftRequests)"
+                    :key="day"
+                    :name="day"
+                    :label="getDayLabel(day)"
+                  />
+                </q-tabs>
+              </template>
+
+              <template v-slot:after>
+                <q-tab-panels
+                  class="q-pa-none"
+                  v-model="liftRequestTab"
+                  animated
+                  swipeable
+                  vertical
+                  transition-prev="slide-down"
+                  transition-next="slide-up"
+                >
+                  <q-tab-panel
+                    class="q-pt-none q-pl-none"
+                    v-for="day in Object.keys(liftRequests)"
+                    :key="day"
+                    :name="day"
+                  >
+                    <div class="q-pa-md q-pl-lg" style="border-bottom: 1px solid black">
+                      <div class="row">
+                        <div class="col-8">
+                          <q-item-label>
+                            {{ dataOfSelectedDaysFirstLift.start.name }}
+                            <span
+                              class="text-subtitle1 q-px-sm"
+                            >&rsaquo;</span>
+                            {{ dataOfSelectedDaysFirstLift.destination.name }}
+                          </q-item-label>
+                          <q-item-label class="row">
+                            <div class="col-6">von da bis da halt</div>
+                            <div class="col-6">von da bis da halt</div>
+                          </q-item-label>
+                        </div>
+                        <div class="col-4">
+                          <div
+                            class="q-ma-md"
+                            :style="`background-color: ${dataOfSelectedDaysFirstLift.car.color}`"
+                          >
+                            <q-img src="~assets/app-icon_color_preview.png" />
+                          </div>
+                          <div class="flex">
+                            {{ dataOfSelectedDaysFirstLift.passengers.length }} /
+                            {{ dataOfSelectedDaysFirstLift.car.allSeats }}
+                            <q-icon name="person_outline" class="q-pl-xs" size="xs" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <q-expansion-item
+                      expand-separator
+                      v-for="r in liftRequests[day]"
+                      :key="r.id"
+                      style="border: 1px solid gray"
+                      class="q-my-md rounded-borders"
+                    >
+                      <template v-slot:header>
+                        <q-item>
+                          <q-item-section avatar>
+                            <q-avatar>
+                              <q-img :src="r.requestingUser.imageUrl" />
+                            </q-avatar>
+                          </q-item-section>
+                          <q-item-section>
+                            <div class="text-subtitle1">{{ r.requestingUser.name }}</div>
+                            <div>{{ r.requestingUser.surname }}</div>
+                            <div class="row full-width">
+                              <div
+                                :class="`col-auto q-px-xs text-${betterPrefColor(p)}`"
+                                v-for="(p,index) in r.requestingUser.prefs"
+                                :key="index"
+                              >●</div>
+                            </div>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                      <q-card>
+                        <q-card-section>
+                          <div class="row">
+                            <div class="col-8">
+                              <p class="text-caption">Nachricht</p>
+                              <div class="text-caption text-grey-9">{{ r.requestingUser.bio }}</div>
+                            </div>
+                            <div class="col-4">
+                              <ColoredMeter
+                                width="20vw"
+                                :angle="r.requestingUser.stats.driverCount / r.requestingUser.stats.liftCount"
+                                :minInput="0"
+                                :maxInput="1"
+                              >{{ r.requestingUser.stats.driverCount }} / {{ r.requestingUser.stats.liftCount }}</ColoredMeter>
+                            </div>
+                          </div>
+                        </q-card-section>
+                        <q-card-section class="text-right">
+                          <q-btn
+                            label="zum Profil"
+                            outline
+                            :to="'benutzerinfo?slId='+r.requestingUser.fbId"
+                            no-caps
+                            class="q-px-xs q-mr-lg"
+                            color="dark"
+                            dense
+                          />
+                          <q-btn
+                            :label="r.requestingUser.name + ' zusagen'"
+                            outline
+                            @click="grantRequest(r.id, r.requestingUser.fbId)"
+                            no-caps
+                            class="q-px-xs"
+                            color="primary"
+                            dense
+                          />
+                        </q-card-section>
+                      </q-card>
+                    </q-expansion-item>
+                  </q-tab-panel>
+                </q-tab-panels>
+              </template>
+            </q-splitter>
           </div>
           <div v-else class="text-caption">
             <q-item>Im Moment hast du keine Anfragen</q-item>
@@ -58,7 +186,9 @@ import ChatItem from "components/ChatItem";
 import LiftPopup from "components/LiftPopup";
 import ShortLiftInfo from "components/ShortLiftInfo";
 import TitleButtonAnchor from "components/TitleButtonAnchor";
+import ColoredMeter from "components/ColoredMeter";
 import { date } from "quasar";
+import { liftRequests } from "../js/apiResponse";
 
 export default {
   components: {
@@ -66,13 +196,14 @@ export default {
     LiftPopup,
     ShortLiftInfo,
     TitleButtonAnchor,
+    ColoredMeter,
   },
 
   data() {
     return {
       lifts: require("../js/apiResponse").chatLifts,
       alreadyTappedOnItem: false,
-      liftTab: "current",
+      liftTab: "requests",
       chatPopup: {
         isOpen: false,
         data: require("../js/dummyValues").chats.shortLiftInfo, // can be used here as well
@@ -81,6 +212,8 @@ export default {
         isOpen: false,
         data: require("../js/dummyValues").chats.shortLiftInfo,
       },
+      liftRequests: require("../js/apiResponse").liftRequests,
+      liftRequestTab: null,
     };
   },
 
@@ -109,6 +242,12 @@ export default {
       });
 
       return returnedArray;
+    },
+
+    dataOfSelectedDaysFirstLift() {
+      var idOfLiftToBeViewed = this.liftRequests[this.liftRequestTab][0].id,
+        lift = this.lifts[idOfLiftToBeViewed];
+      return lift;
     },
   },
 
@@ -173,11 +312,32 @@ export default {
         reset();
       }, 50);
     },
+
+    getDayLabel(stringOfDate) {
+      var array = stringOfDate.split("/"),
+        day = array[0],
+        month = array[1],
+        year = new Date().getFullYear(),
+        d = new Date(year, month, day);
+      return date.formatDate(d, "dd");
+    },
+
+    betterPrefColor(color) {
+      if (color == "GREEN") return "green-8";
+      else if (color == "YELLOW") return "orange";
+      else return color.toLowerCase();
+    },
+
+    grantRequest(liftId, userFbId) {
+      // here comes dispatching code then
+    },
   },
 
   mounted() {
     this.$store.commit("setPage", "Mitfahrgelegenheiten");
     this.$store.commit("setPageTrans", "slide");
+
+    this.liftRequestTab = Object.keys(this.liftRequests)[0];
   },
 };
 </script>
