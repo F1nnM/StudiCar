@@ -17,7 +17,7 @@ export default {
   },
   data() {
     return {
-      src: require("../js/apiResponse").chatLifts[1].messages[2].content,
+      src: this.$store.getters["auth/user"].chatLifts[1].messages[2].content,
     };
   },
   computed: {},

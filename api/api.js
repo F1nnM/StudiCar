@@ -3,7 +3,8 @@ var runQuery = require('./db'),
   fs = require('fs'),
   readline = require('readline')
 const newsPath = 'news/postillon/ticker.txt',
-  longQueries = require('./longQueries')
+  longQueries = require('./longQueries'),
+  apiResponseSimulation = require('./simulation/apiResponse')
 
 function isOptionMissing (data, needed, res) {
   return needed.some(key => {
@@ -114,38 +115,10 @@ module.exports = {
             }
             data.cars.push(obj)
           })
-          let allMessages = await runQuery(longQueries.getMessages, [uid])
-          var liftMessages = {}
-          allMessages.result.forEach(item => {
-            if (!liftMessages[item.LIFT_ID]) {
-              liftMessages[item.LIFT_ID] = [] // making object if not existing
-            }
-            var content = '',
-              type = 0
-            if (item.AUDIO) {
-              content = item.AUDIO
-              type = 2
-            } else if (item.PICTURE) {
-              content = item.PICTURE
-              type = 3
-            } else {
-              content = item.CONTENT
-              type = 1
-            }
-            let obj = {
-              messageID: item.ID,
-              nameOfUser: item.NAME.split(' ')[0], // we take just the first name, looks more friendly in chat
-              userId: item.FROM_USER_ID,
-              content: content,
-              type: type, // for docs see above
-              liftId: item.LIFT_ID,
-              start: item.START_NICK,
-              destination: item.DEST_NICK,
-              timestamp: item.TIMESTAMP
-            }
-            liftMessages[item.LIFT_ID].push(obj)
-          })
-          data.messages = liftMessages
+
+          data.chatLifts = apiResponseSimulation.chatLifts,
+            data.marketplaceOffers = apiResponseSimulation.marketplaceOffers,
+            data.liftRequests = apiResponseSimulation.liftRequests
         }
 
         res.end(JSON.stringify(data))

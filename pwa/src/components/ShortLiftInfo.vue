@@ -1,7 +1,7 @@
 <template>
   <div>
     <q-dialog v-model="open" @input="emit()" full-width square position="bottom">
-      <q-card>
+      <q-card v-if="open">
         <q-card-section>
           <div>
             <q-toolbar>
@@ -167,7 +167,7 @@ export default {
   computed: {
     fullCar() {
       var car = this.lift.car;
-      return car.occupiedSeats == car.allSeats;
+      return this.lift.passengers + 1 == this.lift.car.allSeats;
     },
 
     dateDiff() {

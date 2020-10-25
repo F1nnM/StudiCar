@@ -121,7 +121,7 @@ export default {
     return {
       openEditSort: false,
       sort: { value: "distance", label: "niedrigste Entfernung" }, //default sorting order
-      allOffers: require("../js/apiResponse").marketplaceOffers,
+      allOffers: this.$store.getters["auth/user"].marketplaceOffers,
       filter: [],
       filterOptions: [
         {
@@ -225,7 +225,7 @@ export default {
             break;
           case "seats":
             offers.sort((a, b) => {
-              return a.seats_occupied - b.seats_occupied;
+              return a.seatsOccupied - b.seatsOccupied;
             });
             break;
           case "prefs":

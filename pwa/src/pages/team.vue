@@ -126,7 +126,7 @@ export default {
   components: { ExtHr, TitleButton },
   data() {
     return {
-      team: require("../js/apiResponse").team,
+      team: this.$store.getters["auth/user"].team,
       viewTab: "matrix",
       showMember: null,
     };

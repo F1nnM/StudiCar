@@ -55,15 +55,26 @@
                     <!-- <q-btn
                       dense
                       size="md"
+                      
                       flat
-                      @click="bigImage = !bigImage"
-                      :icon="bigImage ? 'fullscreen_exit' : 'aspect_ratio'"
+                      no-ripple
+                      :icon="friended ? 'favorite' : 'favorite_border'"
+                      color="primary"
                     />-->
                   </p>
                 </q-item-section>
               </q-item>
               <q-item-label header class="q-pt-xs q-pb-xs text-uppercase text-caption">Dabei seit</q-item-label>
               <q-item>{{ since }}</q-item>
+              <q-btn @click="friended = !friended" dense flat size="md" color="dark" no-caps>
+                <q-icon
+                  size="sm"
+                  dense
+                  :color="friended ? 'red' : 'grey-7'"
+                  :name="friended ? 'favorite' : 'favorite_border'"
+                />
+                <span class="q-ml-xs">Als Freund{{ call }} markier{{ friended ? 't' : 'en' }}</span>
+              </q-btn>
             </q-list>
           </q-slide-transition>
         </template>
@@ -260,6 +271,7 @@ export default {
       },
       viewedUser: {},
       imageUrl: "",
+      friended: false,
     };
   },
 
@@ -295,6 +307,21 @@ export default {
           "Dezember",
         ],
       });
+    },
+
+    call() {
+      var gender = this.viewedUser.gender;
+      switch (gender) {
+        case "M":
+          return "";
+          break;
+        case "W":
+          return "in";
+          break;
+        default:
+          return "/in";
+          break;
+      }
     },
   },
 
