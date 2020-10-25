@@ -5,7 +5,6 @@ module.exports = {
 				brand: "VW",
 				model: "Golf",
 				color: "#FF00FF",
-				occupiedSeats: 5,
 				allSeats: 7,
 				licensePlate: "HH-BJ-88",
 				built: 2003,
@@ -29,6 +28,7 @@ module.exports = {
 			passengers: [
 				{
 					id: 4,
+					fbId: 'wG3cG4M7NFMJzJYhfzFjLrJC9Q23',
 					name: "Alicia",
 					surname: "Müller"
 				}
@@ -63,7 +63,6 @@ module.exports = {
 				brand: "HEHEHE",
 				model: "Golf",
 				color: "#FF00FF",
-				occupiedSeats: 5,
 				allSeats: 7,
 				licensePlate: "HH-BJ-88",
 				built: 2003,
@@ -87,6 +86,7 @@ module.exports = {
 			passengers: [
 				{
 					id: 4,
+					fbId: 'wG3cG4M7NFMJzJYhfzFjLrJC9Q23',
 					name: "Alicia",
 					surname: "Müller"
 				}
@@ -105,9 +105,102 @@ module.exports = {
 					content: "Neuere Testnachricht Neuere Testnachricht, extra lang to span multiple lines Neuere Testnachricht, extra lang to span multiple lines",
 					timestamp: "2020-09-21T06:17:08.000Z",
 					sentBy: 1
+				},
+				{
+					id: 59,
+					type: 1,
+					content: "Neuere Testnachricht Neuere Testnachricht, extra lang to span multiple lines Neuere Testnachricht, extra lang to span multiple lines",
+					timestamp: "2020-09-21T06:17:09.000Z",
+					sentBy: 1
+				},
+				{
+					id: 79,
+					type: 1,
+					content: "Neuere Testnachricht Neuere Testnachricht, extra lang to span multiple lines Neuere Testnachricht, extra lang to span multiple lines",
+					timestamp: "2020-09-21T06:17:18.000Z",
+					sentBy: 4
+				},
+				{
+					id: 100,
+					type: 1,
+					content: 'a newer message',
+					timestamp: "2020-10-21T06:18:08.000Z",
+					sentBy: 1
 				}
 			],
 			qr: 2// 'lcc7fb9185dcf1535b4211d661b6a0572'
+		},
+		3: {
+			car: {
+				brand: "HEHEHE",
+				model: "Golf",
+				color: "#FF00FF",
+				allSeats: 7,
+				licensePlate: "HH-BJ-88",
+				built: 2003,
+				type: 'Cabrio'
+			},
+			departAt: "2020-10-20T06:15:08.000Z",
+			arriveBy: "2020-10-20T07:15:08.000Z",
+			destination: {
+				id: 1,
+				name: "Dritter Würfel"
+			},
+			start: {
+				id: 6,
+				name: "Stuttgart"
+			},
+			driver: {
+				id: 1,
+				name: "Bernd",
+				surname: "Mayinger"
+			},
+			passengers: [
+				{
+					id: 4,
+					fbId: 'wG3cG4M7NFMJzJYhfzFjLrJC9Q23',
+					name: "Alicia",
+					surname: "Müller"
+				}
+			],
+			messages: [
+				{
+					id: 15,
+					type: 1,
+					content: "Testnachricht",
+					timestamp: "2020-07-02T06:15:08.000Z",
+					sentBy: 4
+				},
+				{
+					id: 19,
+					type: 1,
+					content: "Neuere Testnachricht Neuere Testnachricht, extra lang to span multiple lines Neuere Testnachricht, extra lang to span multiple lines",
+					timestamp: "2020-09-21T06:17:08.000Z",
+					sentBy: 1
+				},
+				{
+					id: 59,
+					type: 1,
+					content: "Neuere Testnachricht Neuere Testnachricht, extra lang to span multiple lines Neuere Testnachricht, extra lang to span multiple lines",
+					timestamp: "2020-09-21T06:17:09.000Z",
+					sentBy: 1
+				},
+				{
+					id: 79,
+					type: 1,
+					content: "Neuere Testnachricht Neuere Testnachricht, extra lang to span multiple lines Neuere Testnachricht, extra lang to span multiple lines",
+					timestamp: "2020-09-21T06:17:18.000Z",
+					sentBy: 4
+				},
+				{
+					id: 100,
+					type: 1,
+					content: 'a newer message',
+					timestamp: "2020-10-22T06:18:08.000Z",
+					sentBy: 1
+				}
+			],
+			qr: 3// 'lcc7fb9185dcf1535b4211d661b6a0572'
 		}
 	},
 	marketplaceOffers:
@@ -320,65 +413,89 @@ module.exports = {
 		 test Lorem ipsum dolor sit ein kleiner test`
 		}],
 	liftRequests: {
-		'21/10': [{
-			id: 1, // points to chatLifts
-			requestingUser: {
-				fbId: 'kebngkg',
-				name: 'Alicia',
-				surname: 'Müller',
-				imageUrl: 'http://photos.modelmayhem.com/photos/080925/19/48dc225344d65_m.jpg',
-				prefs: {
-					talk: 'GREEN',
-					talkMorning: 'YELLOW',
-					smoking: 'RED',
-					music: 'GREEN'
-				},
-				stats: {
-					liftCount: 14,
-					driverCount: 5
-				},
-				bio: 'Kurzbeschreibung'
-			}
+		'21/10': {
+			1: [{ // is id of lift, can be used to refer to data of lift
+				requestingUser: {
+					id: 4,
+					fbId: 'wG3cG4M7NFMhIgYcreFjLrJC9Q23',
+					name: 'Alicia',
+					surname: 'Müller',
+					imageUrl: 'http://photos.modelmayhem.com/photos/080925/19/48dc225344d65_m.jpg',
+					prefs: {
+						talk: 'GREEN',
+						talkMorning: 'YELLOW',
+						smoking: 'RED',
+						music: 'GREEN'
+					},
+					stats: {
+						liftCount: 14,
+						driverCount: 5
+					},
+					bio: 'Kurzbeschreibung'
+				}
+			}],
+			2: [{
+				requestingUser: {
+					id: 10,
+					fbId: 'kebngkg',
+					name: 'Robert',
+					surname: 'Dommer',
+					imageUrl: 'http://photos.modelmayhem.com/photos/080925/19/48dc225344d65_m.jpg',
+					prefs: {
+						talk: 'GREEN',
+						talkMorning: 'YELLOW',
+						smoking: 'RED',
+						music: 'GREEN'
+					},
+					stats: {
+						liftCount: 1,
+						driverCount: 0
+					},
+					bio: 'Kurzbeschreibung'
+				}
+			},
+			{
+				requestingUser: {
+					id: 20,
+					fbId: 'hajdkkfk0k0f',
+					name: 'Albert',
+					surname: 'Kazmaier',
+					imageUrl: 'http://photos.modelmayhem.com/photos/080925/19/48dc225344d65_m.jpg',
+					prefs: {
+						talk: 'GREEN',
+						talkMorning: 'YELLOW',
+						smoking: 'RED',
+						music: 'GREEN'
+					},
+					stats: {
+						liftCount: 1,
+						driverCount: 0
+					},
+					bio: 'Alberts Story'
+				}
+			}]
 		},
-		{
-			id: 3, // points to chatLifts
-			requestingUser: {
-				fbId: 'kebngkg',
-				name: 'Robert',
-				surname: 'Dommer',
-				imageUrl: 'http://photos.modelmayhem.com/photos/080925/19/48dc225344d65_m.jpg',
-				prefs: {
-					talk: 'GREEN',
-					talkMorning: 'YELLOW',
-					smoking: 'RED',
-					music: 'GREEN'
-				},
-				stats: {
-					liftCount: 1,
-					driverCount: 0
-				},
-				bio: 'Kurzbeschreibung'
-			}
-		}],
-		'23/10': [{
-			id: 2, // points to chatLifts
-			requestingUser: {
-				fbId: 'uvbgibeikj',
-				name: 'Alicia',
-				surname: 'Müller',
-				imageUrl: 'http://photos.modelmayhem.com/photos/080925/19/48dc225344d65_m.jpg',
-				prefs: {
-					talk: 'GREEN',
-					talkMorning: 'YELLOW',
-					smoking: 'RED',
-					music: 'GREEN'
-				},
-				stats: {
-					liftCount: 14,
-					driverCount: 5
-				},
-				bio: 'Kurzbeschreibung'
-			}
-		}]
+		'23/10': {
+			3: [{
+				requestingUser: {
+					id: 4,
+					fbId: 'wG3cG4M7NFMhIgYcreFjLrJC9Q23',
+					name: 'Alicia',
+					surname: 'Müller',
+					imageUrl: 'http://photos.modelmayhem.com/photos/080925/19/48dc225344d65_m.jpg',
+					prefs: {
+						talk: 'GREEN',
+						talkMorning: 'YELLOW',
+						smoking: 'RED',
+						music: 'GREEN'
+					},
+					stats: {
+						liftCount: 14,
+						driverCount: 5
+					},
+					bio: 'Kurzbeschreibung'
+				}
+			}]
+		}
 	}
 }

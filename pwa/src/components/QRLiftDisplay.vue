@@ -85,7 +85,7 @@ export default {
         );
       else {
         if (val) {
-          const allLifts = require("../js/apiResponse").marketplaceOffers;
+          const allLifts = this.$store.getters['auth/user'].marketplaceOffers;
           this.lift = allLifts.find((item) => {
             return item.id == this.liftQrId;
           });

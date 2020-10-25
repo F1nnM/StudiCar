@@ -1,4 +1,4 @@
-<template v-show="open">
+<template>
   <div>
     <div class="q-ma-none q-pa-none">
       <!-- <span v-if="isLayoutOpen"></span> -->
@@ -8,10 +8,9 @@
         maximized
         transition-show="slide-up"
         transition-hide="slide-down"
-        @show="scrollDown()"
         @input="emitAndClose()"
       >
-        <q-layout view="hHh lpR fFr" class="bg-white q-pa-none">
+        <q-layout v-if="lift" view="hHh lpR fFr" class="bg-white q-pa-none">
           <q-header reveal elevated class="bg-primary text-white">
             <div class="row">
               <div class="col-10 bg-primary">
@@ -156,7 +155,7 @@
                   <p v-if="lift.passengers.length">
                     Mitfahrer
                     <span class="text-caption float-right">
-                      {{ lift.car.occupiedSeats }} / {{ lift.car.allSeats }}
+                      {{ lift.passengers.length + 1 }} / {{ lift.car.allSeats }}
                       <q-icon name="airline_seat_recline_normal" size="xs" />
                     </span>
                   </p>
@@ -208,7 +207,7 @@
             </div>
           </q-drawer>
           <q-page-container>
-            <div class="q-pa-md bg-white scroll overflow-hidden" id="scrollTarget">
+            <div class="q-pa-md bg-white scroll overflow-hidden">
               <!-- v-touch-swipe.mouse.right="goBack" -->
               <q-page-scroller
                 reverse
@@ -222,7 +221,11 @@
                 </q-page-sticky>
               </q-page-scroller>
 
-              <div v-for="m in lift.messages" :key="m.timestamp">
+              <div
+                v-for="(m, messageIndex) in lift.messages"
+                :key="m.timestamp"
+                :ref="messageIndex == lift.messages.length - 1 ? 'last_message': ''"
+              >
                 <p
                   class="custom-chat-label text-caption text-center q-mt-xl text-grey-7"
                   v-if="checkDayBreak(m) != ''"
@@ -242,47 +245,22 @@
                         </q-item-section>
                         <q-item-section>Kopieren</q-item-section>
                       </q-item>
-                      <q-item clickable @click="viewUserFromId(m.sentBy)" v-ripple dense>
+                      <q-separator class="q-my-sm" />
+
+                      <q-item
+                        dense
+                        clickable
+                        @click="_=> { showMoreMessageOptions = {
+                        message: m,
+                        open: true
+                       }
+                       }"
+                      >
                         <q-item-section avatar>
-                          <q-icon name="account_circle" size="sm" />
+                          <q-icon name="more_horiz" size="sm" />
                         </q-item-section>
-                        <q-item-section
-                          v-if="m.sentBy != user"
-                        >Profil von {{ getNameFromId(m.sentBy) }}</q-item-section>
-                        <q-item-section v-else>Mein Profil</q-item-section>
+                        <q-item-section>Mehr</q-item-section>
                       </q-item>
-                      <q-separator />
-                      <br />
-                      <q-expansion-item dense label="Details" icon="more_horiz">
-                        <q-card>
-                          <q-card-section>
-                            <q-list>
-                              <q-item-label header>Zeit</q-item-label>
-                              <q-item-label class="text-grey-9 row">
-                                <div class="col-5">am</div>
-                                <div class="col-7 q-mb-xs">{{ formatAsDate(m.timestamp) }}</div>
-                                <p class="col-5">um</p>
-                                <div class="col-7">{{ formatAsTime(m.timestamp) }} Uhr</div>
-                                <div class="col-5">Größe:</div>
-                                <div class="col-7">{{ (m.content.length / 1000).toFixed(2) }} KB</div>
-                              </q-item-label>
-                              <q-separator class="q-mt-sm" />
-                              <q-item
-                                class="q-pt-sm"
-                                clickable
-                                @click="copyToClipboard(m)"
-                                v-ripple
-                                dense
-                              >
-                                <q-item-section avatar>
-                                  <q-icon name="file_copy" size="sm" />
-                                </q-item-section>
-                                <q-item-section>Infos kopieren</q-item-section>
-                              </q-item>
-                            </q-list>
-                          </q-card-section>
-                        </q-card>
-                      </q-expansion-item>
                     </q-list>
                   </q-menu>
                   <q-chat-message
@@ -300,8 +278,60 @@
                   </q-chat-message>
                 </div>
               </div>
-              <span id="endOfPage"></span>
+              <span ref="endOfPage" id="endOfPage"></span>
             </div>
+            <q-dialog position="top" v-model="showMoreMessageOptions.open">
+              <q-toolbar class="bg-primary text-white">
+                <q-toolbar-title class="text-subtitle1">Nachrichteninfos</q-toolbar-title>
+                <q-btn icon="close" flat round dense v-close-popup />
+              </q-toolbar>
+              <q-card v-if="showMoreMessageOptions.message">
+                <q-card-section>
+                  <q-list>
+                    <q-item dense>
+                      <q-item-section>Datum</q-item-section>
+                      <q-item-section>{{ formatAsDate(showMoreMessageOptions.message.timestamp) }}</q-item-section>
+                    </q-item>
+                    <q-item dense>
+                      <q-item-section>Genaue Uhrzeit</q-item-section>
+                      <q-item-section>{{ formatAsTime(showMoreMessageOptions.message.timestamp) }} Uhr</q-item-section>
+                    </q-item>
+                    <q-item dense>
+                      <q-item-section>Größe</q-item-section>
+                      <q-item-section>{{ (showMoreMessageOptions.message.content.length / 1000).toFixed(2) }} KB</q-item-section>
+                    </q-item>
+                    <q-separator class="q-mt-sm" />
+                    <div class="q-mt-sm row">
+                      <q-item
+                        class="col-6"
+                        clickable
+                        @click="copyToClipboard(showMoreMessageOptions.message)"
+                        v-ripple
+                        dense
+                      >
+                        <q-item-section avatar>
+                          <q-icon name="file_copy" size="sm" />
+                        </q-item-section>
+                        <q-item-section>Infos kopieren</q-item-section>
+                      </q-item>
+                      <q-item
+                        class="col-6"
+                        clickable
+                        @click="viewUserFromId(showMoreMessageOptions.message.sentBy)"
+                        v-ripple
+                        dense
+                        v-if="showMoreMessageOptions.message.sentBy != user"
+                      >
+                        <q-item-section avatar>
+                          <q-icon name="person_outline" size="sm" />
+                        </q-item-section>
+                        <q-item-section>Profil von {{ getNameFromId(showMoreMessageOptions.message.sentBy) }}</q-item-section>
+                      </q-item>
+                    </div>
+                  </q-list>
+                </q-card-section>
+              </q-card>
+            </q-dialog>
           </q-page-container>
 
           <q-footer reveal :class="`q-pa-none bg-${footerBgColor} text-white`">
@@ -381,6 +411,7 @@
                     dense
                     class="q-pr-sm q-mr-xs notes-border"
                     size="md"
+                    :ripple="false"
                     color="dark"
                     icon="notes"
                     @click="showQuickMessages = !showQuickMessages"
@@ -482,6 +513,10 @@ export default {
       openLiftInfo: false,
       messageText: "",
       showQuickMessages: false,
+      showMoreMessageOptions: {
+        open: false,
+        message: null,
+      },
       quickMessagesTab: "emoji",
       footerBgColor: "white",
       user: this.$store.getters["auth/user"].id,
@@ -506,6 +541,17 @@ export default {
   props: {
     open: Boolean,
     lift: Object,
+  },
+  watch: {
+    open: function (newValue) {
+      if (newValue) {
+        setTimeout((_) => {
+          var end =
+            this.$refs.endOfPage || document.getElementById("endOfPage");
+          end.scrollIntoView();
+        });
+      }
+    },
   },
   computed: {
     showRecorder() {
@@ -659,7 +705,7 @@ export default {
     },
 
     formatAsTime(dateString) {
-      return date.formatDate(new Date(dateString), "H:mm");
+      return date.formatDate(new Date(dateString), "H:mm:ss");
     },
 
     formatAsDate(dateObj) {
@@ -668,13 +714,6 @@ export default {
 
     false() {
       return false;
-    },
-
-    scrollDown() {
-      // setTimeout(_=> {
-      //   var target = getScrollTarget('endOfPage')
-      //   setScrollPosition (target, target.offsetTop, 0)
-      // }, 100)
     },
 
     preventDefault(e) {
@@ -694,6 +733,7 @@ export default {
 
     async sendMessage(type, blob) {
       this.recording = false;
+      this.showQuickMessages = false;
       var msgObj = {
         type: 0, // 1 means raw text, 2 means audio, 3 will mean image when implemented in future
         liftId: this.lift.messages[0].id, // all from same lift, doesn't matter which one is taken

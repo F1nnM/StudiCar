@@ -71,6 +71,16 @@ export default {
 
     SET_USER_DATA_LOADING (state, payload) {
       state.signinLoaded = payload
+    },
+
+    RESPOND_LIFT_REQUEST (state, payload) {
+      var dayShort = payload.dayShort,
+        liftId = payload.liftId,
+        userFbId = payload.user.fbId,
+        requestsOfThatLift = state.user.liftRequests[dayShort][liftId]
+      requestsOfThatLift = requestsOfThatLift.filter(request => request.requestingUser.fbId != userFbId) // sort out user with given fbId
+      state.user.liftRequests[dayShort][liftId] = requestsOfThatLift
+      if (payload.accepted) state.user.chatLifts[liftId].passengers.push(payload.user) // user object is structured like other passengers
     }
   },
 
@@ -220,6 +230,10 @@ export default {
         _ => commit('UPDATE_LIFT_MAX_DISTANCE', payload),
         error => alert(error)
       );
+    },
+
+    async respondLiftRequest ({ commit }, payload) {
+      commit('RESPOND_LIFT_REQUEST', payload)
     }
   }
 }
