@@ -25,8 +25,19 @@
       class="text-caption text-right q-pa-none"
     >
       <q-tab-panel class="q-pa-none" name="current">Bestehend</q-tab-panel>
-      <q-tab-panel class="q-pa-none" name="requests">
-        <q-badge class="q-mx-xs" :color="totalRequests ? 'primary' : 'dark'">{{ totalRequests }}</q-badge>eingehende Anfragen
+      <q-tab-panel class="q-pa-none row justify-between" name="requests">
+        <TextPagination
+          :options="Object.keys(liftRequests)"
+          labelCapitalized
+          v-model="liftRequestDayTab"
+        />
+        <div>
+          <q-badge class="q-mx-xs" :color="totalRequests ? 'primary' : 'dark'">{{ totalRequests }}</q-badge>
+          <span>
+            Anfragen
+            <br />eingehend
+          </span>
+        </div>
       </q-tab-panel>
     </q-tab-panels>
     <q-tab-panels
@@ -51,12 +62,12 @@
         <LiftPopup v-model="chatPopup.isOpen" :lift="chatPopup.data" />
         <ShortLiftInfo v-model="shortLiftPopup.isOpen" :lift="shortLiftPopup.data" />
       </q-tab-panel>
-      <q-tab-panel name="requests">
+      <q-tab-panel name="requests" class="q-px-none">
         <q-list>
           <div v-if="totalRequests">
-            <q-splitter :value="18" disable>
+            <!-- <q-splitter :value="18" disable>
               <template v-slot:before>
-                <q-tabs v-model="liftRequestDayTab" vertical>
+                <q-tabs  vertical>
                   <div v-for="(day, dayShortName) in liftRequests" :key="dayShortName">
                     <q-tab
                       v-if="requestsOfDay(day)"
@@ -71,99 +82,99 @@
                 </q-tabs>
               </template>
 
-              <template v-slot:after>
-                <q-tab-panels
-                  class="q-pa-none"
-                  v-model="liftRequestDayTab"
-                  animated
-                  vertical
-                  transition-prev="fade"
-                  transition-next="fade"
-                >
-                  <q-tab-panel
-                    v-for="(day, dayShort) in liftRequests"
-                    :key="dayShort"
-                    class="q-pt-none q-px-none"
-                    :name="dayShort"
+            <template v-slot:after>-->
+            <q-tab-panels
+              class="q-pa-none"
+              v-model="liftRequestDayTab"
+              animated
+              vertical
+              transition-prev="jump-right"
+              transition-next="jump-left"
+            >
+              <q-tab-panel
+                v-for="(day, dayShort) in liftRequests"
+                :key="dayShort"
+                class="q-pt-none q-px-none"
+                :name="dayShort"
+              >
+                <div v-if="requestsOfDay(day)">
+                  <q-tabs spread v-model="liftRequestTimeTab">
+                    <div v-for="(lift, liftId) in day" :key="liftId">
+                      <q-tab
+                        align="justify"
+                        dense
+                        v-if="lift.length"
+                        :name="liftId"
+                        no-caps
+                        content-class="text-caption"
+                        :label="`› ${ lifts[liftId].destination.name }`"
+                      />
+                    </div>
+                  </q-tabs>
+                  <q-tab-panels
+                    animated
+                    swipeable
+                    transition-prev="slide-right"
+                    class="q-pa-none"
+                    transition-next="slide-left"
+                    v-model="liftRequestTimeTab"
                   >
-                    <div v-if="requestsOfDay(day)">
-                      <q-tabs spread v-model="liftRequestTimeTab">
-                        <div v-for="(lift, liftId) in day" :key="liftId">
-                          <q-tab
-                            align="justify"
-                            dense
-                            v-if="lift.length"
-                            :name="liftId"
-                            no-caps
-                            content-class="text-caption"
-                            :label="`› ${ lifts[liftId].destination.name }`"
-                          />
+                    <q-tab-panel
+                      :name="liftId"
+                      class="q-pl-md q-pr-none"
+                      v-for="(lift, liftId) in day"
+                      :key="liftId"
+                    >
+                      <div class="row" v-if="lift.length">
+                        <div class="col-8">
+                          <q-item-label>
+                            {{ lifts[liftId].start.name }}
+                            <span
+                              class="text-subtitle1 q-px-sm"
+                            >&rsaquo;</span>
+                            {{ lifts[liftId].destination.name }}
+                          </q-item-label>
+                          <q-item-label class="row">
+                            <div class="col-6">von da bis da halt</div>
+                            <div class="col-6">von da bis da halt</div>
+                          </q-item-label>
                         </div>
-                      </q-tabs>
-                      <q-tab-panels
-                        animated
-                        swipeable
-                        transition-prev="slide-right"
-                        class="q-pa-none"
-                        transition-next="slide-left"
-                        v-model="liftRequestTimeTab"
-                      >
-                        <q-tab-panel
-                          :name="liftId"
-                          class="q-pl-md q-pr-none"
-                          v-for="(lift, liftId) in day"
-                          :key="liftId"
-                        >
-                          <div class="row" v-if="lift.length">
-                            <div class="col-8">
-                              <q-item-label>
-                                {{ lifts[liftId].start.name }}
-                                <span
-                                  class="text-subtitle1 q-px-sm"
-                                >&rsaquo;</span>
-                                {{ lifts[liftId].destination.name }}
-                              </q-item-label>
-                              <q-item-label class="row">
-                                <div class="col-6">von da bis da halt</div>
-                                <div class="col-6">von da bis da halt</div>
-                              </q-item-label>
-                            </div>
-                            <div class="col-4">
-                              <div
-                                class="q-ma-md"
-                                :style="`background-color: ${lifts[liftId].car.color}`"
-                              >
-                                <q-img src="~assets/app-icon_color_preview.png" />
-                              </div>
-                              <div class="flex">
-                                {{ lifts[liftId].passengers.length }} /
-                                {{ lifts[liftId].car.allSeats }}
-                                <q-icon name="person_outline" class="q-pl-xs" size="xs" />
-                              </div>
-                            </div>
+                        <div class="col-4">
+                          <div
+                            class="q-ma-md"
+                            :style="`background-color: ${lifts[liftId].car.color}`"
+                          >
+                            <q-img src="~assets/app-icon_color_preview.png" />
                           </div>
+                          <div class="flex">
+                            {{ lifts[liftId].passengers.length }} /
+                            {{ lifts[liftId].car.allSeats }}
+                            <q-icon name="person_outline" class="q-pl-xs" size="xs" />
+                          </div>
+                        </div>
+                      </div>
 
-                          <!-- <q-scroll-area
+                      <!-- <q-scroll-area
                           :thumb-style="thumbStyle"
                           :bar-style="barStyle"
                           style="height: 40vh"
-                          >-->
-                          <UserLiftRequest
-                            v-for="r in lift"
-                            :key="r.id"
-                            :request="r"
-                            :liftId="parseInt(liftId)"
-                            @respond="respondLiftRequest"
-                          />
+                      >-->
+                      <UserLiftRequest
+                        v-for="r in lift"
+                        :key="r.id"
+                        :request="r"
+                        :liftId="parseInt(liftId)"
+                        @respond="respondLiftRequest"
+                      />
 
-                          <!-- </q-scroll-area> -->
-                        </q-tab-panel>
-                      </q-tab-panels>
-                    </div>
-                  </q-tab-panel>
-                </q-tab-panels>
-              </template>
-            </q-splitter>
+                      <!-- </q-scroll-area> -->
+                    </q-tab-panel>
+                  </q-tab-panels>
+                </div>
+              </q-tab-panel>
+            </q-tab-panels>
+            <!-- </template>
+            </q-splitter>-->
           </div>
           <div v-else class="text-caption">
             <q-item>Im Moment hast du keine Anfragen</q-item>
@@ -180,6 +191,8 @@ import LiftPopup from "components/LiftPopup";
 import ShortLiftInfo from "components/ShortLiftInfo";
 import TitleButtonAnchor from "components/TitleButtonAnchor";
 import UserLiftRequest from "components/UserLiftRequest";
+import TextPagination from "components/TextPagination";
+
 import { date } from "quasar";
 
 export default {
@@ -189,13 +202,14 @@ export default {
     ShortLiftInfo,
     TitleButtonAnchor,
     UserLiftRequest,
+    TextPagination,
   },
 
   data() {
     return {
       lifts: this.$store.getters["auth/user"].chatLifts,
       alreadyTappedOnItem: false,
-      liftTab: "requests",
+      liftTab: "current",
       chatPopup: {
         isOpen: false,
         data: null,

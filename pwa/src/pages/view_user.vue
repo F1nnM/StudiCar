@@ -47,7 +47,6 @@
           <q-slide-transition>
             <q-list class="shadow-2 rounded-borders" style="width: 100%;">
               <br />
-              <br />
               <q-item>
                 <q-item-section>
                   <p class="text-h5 overflow q-pt-xs custom-underline c-u-4 c-u-md c-u-l">
@@ -237,7 +236,7 @@
       </q-card>
 
       <div class="full-width q-pa-md">
-        <p class="text-uppercase text-caption">Über mich</p>
+        <p class="text-uppercase text-caption">Kurzbeschreibung</p>
         <div class="padding">
           <div v-if="viewedUser.bio">{{ viewedUser.bio }}</div>
           <div v-else class="text-weight-light text-grey-7">Noch keine Beschreibung hinterlegt</div>

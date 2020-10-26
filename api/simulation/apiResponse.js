@@ -196,7 +196,7 @@ module.exports = {
 					id: 100,
 					type: 1,
 					content: 'a newer message',
-					timestamp: "2020-10-22T06:18:08.000Z",
+					timestamp: "2020-10-22T14:18:08.000Z",
 					sentBy: 1
 				}
 			],

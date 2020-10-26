@@ -205,11 +205,11 @@
               behavior="menu"
             />
             <div class="row q-pt-md">
-              <p class="text-uppercase text-caption q-mb-none col-10">Kurzbeschreibung</p>
+              <span class="text-caption text-grey-7 q-mb-none col-10">Kurzbeschreibung</span>
               <div class="col-2">
                 <q-btn size="sm" flat color="black" icon="edit" @click="toggleOpenEditDescription" />
               </div>
-              <div class="q-pa-sm">{{ description }}</div>
+              <div class>{{ description }}</div>
             </div>
             <br />
           </div>
@@ -859,10 +859,10 @@
           </q-card-section>
           <q-card-section>
             <p class="text-caption">
-              Bei Hinzufügen eines Autos erklärst du dich mit unserer
+              Beim Hinzufügen eines Autos erklärst du dich mit unserer
               <a
                 href="/#/legal"
-                class="block"
+                class="block text-dark"
               >Datenverarbeitung</a> einverstanden.
             </p>
           </q-card-section>

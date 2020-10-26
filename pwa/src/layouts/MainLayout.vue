@@ -78,7 +78,12 @@
         <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link" />
       </q-list>
       <ExtHr color="grey-7" size="xs" />
-      <div class="q-pa-md text-grey-7">StudiCar v{{ $q.version }}</div>
+      <div class="q-pa-md text-grey-7 row">
+        <div class="col-7">StudiCar v1.0</div>
+        <div class="col-5 text-right">
+          <q-btn flat @click="hardReload()" icon="refresh" size="sm" />
+        </div>
+      </div>
     </q-drawer>
 
     <q-page-container>
@@ -279,6 +284,10 @@ export default {
           this.newsticker = "Fehler aufgetreten";
         }
       );
+    },
+
+    hardReload() {
+      window.location.reload(true);
     },
   },
 
