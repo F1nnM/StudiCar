@@ -294,7 +294,7 @@
                     </q-item>
                     <q-item dense>
                       <q-item-section>Genaue Uhrzeit</q-item-section>
-                      <q-item-section>{{ formatAsTime(showMoreMessageOptions.message.timestamp) }} Uhr</q-item-section>
+                      <q-item-section>{{ formatAsLongTime(showMoreMessageOptions.message.timestamp) }} Uhr</q-item-section>
                     </q-item>
                     <q-item dense>
                       <q-item-section>Größe</q-item-section>
@@ -402,6 +402,7 @@
                 </div>
               </div>
             </q-slide-transition>
+
             <q-form @submit="sendMessage(1)" class="q-gutter-md q-pa-none">
               <div>
                 <q-toolbar class="bg-white border-radius-50">
@@ -425,8 +426,28 @@
                       class="q-pa-none"
                     >
                       <q-tab-panel :name="false" class="q-pa-none">
+                        <q-slide-transition>
+                          <div
+                            class="bg-white text-dark text-subtitle1 rounded-borders"
+                            v-if="showPassengersToBeMentioned"
+                          >
+                            <div class="q-pt-md row justify-start">
+                              <q-btn
+                                flat
+                                :label="p"
+                                v-for="p in passengersThatCanBeMentioned"
+                                no-caps
+                                :key="p"
+                                @click="_=> { messageText += p + ' '; showPassengersToBeMentioned = false }"
+                              />
+                            </div>
+                            <ExtHr color="grey-7" size="xs" />
+                          </div>
+                        </q-slide-transition>
                         <q-input
                           borderless
+                          ref="messageInput"
+                          id="messageInput"
                           type="text"
                           v-model="messageText"
                           placeholder="Nachricht..."
@@ -513,6 +534,7 @@ export default {
       openLiftInfo: false,
       messageText: "",
       showQuickMessages: false,
+      showPassengersToBeMentioned: false,
       showMoreMessageOptions: {
         open: false,
         message: null,
@@ -551,11 +573,22 @@ export default {
           end.scrollIntoView();
         });
       }
+      setTimeout((_) => {
+        (
+          this.$refs.messageInput || document.getElementById("messageInput")
+        ).focus();
+      });
+    },
+
+    messageText: function (newText) {
+      if (newText.slice(-1) == "@") {
+        this.showPassengersToBeMentioned = true;
+      } else this.showPassengersToBeMentioned = false;
     },
   },
   computed: {
     showRecorder() {
-      return !this.messageText;
+      return !this.messageText || this.messageText.slice(-1) == "@";
     },
 
     emojis() {
@@ -572,6 +605,16 @@ export default {
 
     recentMessages() {
       return this.$store.state.recentMessages;
+    },
+
+    passengersThatCanBeMentioned() {
+      return ["Günther", "Robert", "Alicia", "Sebastian", "Jonas", "Merdan"];
+      var all = [],
+        nameOfThisUser = this.$store.getters["auth/user"].name.split(" ")[0];
+      this.lift.passengers.forEach((p) => all.push(p.name));
+      all.push(this.lift.driver.name);
+      all = all.filter((name) => name != nameOfThisUser);
+      return all;
     },
   },
 
@@ -705,11 +748,30 @@ export default {
     },
 
     formatAsTime(dateString) {
+      return date.formatDate(new Date(dateString), "H:mm");
+    },
+
+    formatAsLongTime(dateString) {
       return date.formatDate(new Date(dateString), "H:mm:ss");
     },
 
     formatAsDate(dateObj) {
-      return date.formatDate(dateObj, "DD.MM.YYYY");
+      return date.formatDate(dateObj, "DD. MMMM YYYY", {
+        months: [
+          "Januar",
+          "Februar",
+          "März",
+          "April",
+          "Mai",
+          "Juni",
+          "Juli",
+          "August",
+          "September",
+          "Oktober",
+          "November",
+          "Dezember",
+        ],
+      });
     },
 
     false() {

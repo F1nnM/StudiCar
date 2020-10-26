@@ -1,23 +1,39 @@
 <template>
   <div class="q-pa-md">
     <q-btn label="Feuer" @click="go()" />
-    <AudioPlayer :src="src" />
+    <TextPagination
+      v-model="value"
+      :options="[{
+      val: 'one'
+    },{
+      val: 'two'
+    },
+    {
+      val: 'Sa'
+    },{
+      val: 'So'
+    },
+    {
+      val: 'Mo'
+    },{
+      val: 'Di'
+    }]"
+    />
     <p v-for="n in 20" :key="n">Lorem</p>
   </div>
 </template>
 
 <script>
 import { scroll } from "quasar";
-import AudioPlayer from "components/AudioPlayer";
-import { sendApiRequest } from "../ApiAccess";
+import TextPagination from "components/TextPagination";
 
 export default {
   components: {
-    AudioPlayer,
+    TextPagination,
   },
   data() {
     return {
-      src: this.$store.getters["auth/user"].chatLifts[1].messages[2].content,
+      value: "one",
     };
   },
   computed: {},

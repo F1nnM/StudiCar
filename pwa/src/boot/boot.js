@@ -17,7 +17,9 @@ export default ({ router, store }) => {
           data => {
             store.commit("auth/SET_USER", data)
             router.replace({ name: 'marketplace' }).catch(() => { })
-            store.commit("auth/SET_USER_DATA_LOADING", false)
+            setTimeout(_ => {
+              store.commit("auth/SET_USER_DATA_LOADING", false)
+            }, 100)
           },
           error => {
             store.dispatch('auth/signOut')
@@ -31,7 +33,7 @@ export default ({ router, store }) => {
     } else {
       // Signed out. Let Vuex know.
       store.commit('auth/RESET_USER')
-      store.commit("auth/SET_SIGNIN_LOADED")
+      store.commit("auth/SET_USER_DATA_LOADING", false)
       router.replace({ name: 'signIn' }).catch(() => { })
     }
   })
