@@ -3,6 +3,7 @@
     <q-btn-toggle
       v-model="tab"
       spread
+      dense
       no-caps
       @click="loadFAQ"
       rounded
@@ -16,7 +17,7 @@
           {label: 'FAQ', value: 'faq'}
         ]"
     />
-    <q-tab-panels v-model="tab" animated transition-prev="jump-left" transition-next="jump-right">
+    <q-tab-panels v-model="tab" animated transition-prev="jump-right" transition-next="jump-left">
       <q-tab-panel name="question">
         <br />
         <div class="text-h4 q-mb-md">Eine Frage stellen</div>

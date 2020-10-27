@@ -11,10 +11,9 @@ module.exports = function (ctx) {
     boot: [
       'auth',
       'axios',
-      'globalVars.js',
       'firebase',
       'boot',
-      'vue_record'
+      'vue_record',
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
@@ -57,7 +56,7 @@ module.exports = function (ctx) {
 
       // Quasar plugins
       plugins: [
-
+        'Notify'
       ]
     },
 

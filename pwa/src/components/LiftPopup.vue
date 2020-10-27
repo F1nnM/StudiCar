@@ -236,7 +236,7 @@
                       <q-item
                         :disable="m.type != 1"
                         clickable
-                        @click="copyToClipboard(m.content)"
+                        @click="customCopyToClipboard(m.content)"
                         v-ripple
                         dense
                       >
@@ -305,7 +305,7 @@
                       <q-item
                         class="col-6"
                         clickable
-                        @click="copyToClipboard(showMoreMessageOptions.message)"
+                        @click="customCopyToClipboard(showMoreMessageOptions.message)"
                         v-ripple
                         dense
                       >
@@ -438,7 +438,7 @@
                                 v-for="p in passengersThatCanBeMentioned"
                                 no-caps
                                 :key="p"
-                                @click="_=> { messageText += p + ' '; showPassengersToBeMentioned = false }"
+                                @click="mentionPassenger(p)"
                               />
                             </div>
                             <ExtHr color="grey-7" size="xs" />
@@ -504,7 +504,7 @@
 </template>
 
 <script>
-import { openURL, date, scroll } from "quasar";
+import { openURL, date, copyToClipboard, Notify } from "quasar";
 import ExtHr from "components/ExtendedHr";
 import VueQrcode from "vue-qrcode";
 import LiftInfoDrawer from "components/LiftInfoDrawer";
@@ -515,8 +515,6 @@ import {
   SQL_SEND_MESSAGE,
   SQL_GET_LIFT_INFO,
 } from "../ApiAccess";
-
-const { getScrollPosition, setScrollPosition } = scroll;
 
 export default {
   name: "LiftPopup",
@@ -573,11 +571,7 @@ export default {
           end.scrollIntoView();
         });
       }
-      setTimeout((_) => {
-        (
-          this.$refs.messageInput || document.getElementById("messageInput")
-        ).focus();
-      });
+      // this.focusTextInput()
     },
 
     messageText: function (newText) {
@@ -608,7 +602,7 @@ export default {
     },
 
     passengersThatCanBeMentioned() {
-      return ["Günther", "Robert", "Alicia", "Sebastian", "Jonas", "Merdan"];
+      // return ["Günther", "Robert", "Alicia", "Sebastian", "Jonas", "Merdan"];
       var all = [],
         nameOfThisUser = this.$store.getters["auth/user"].name.split(" ")[0];
       this.lift.passengers.forEach((p) => all.push(p.name));
@@ -627,6 +621,13 @@ export default {
     //    event.preventDefault()
     //    this.sendAudio()
     //  }
+
+    setTimeout((_) => {
+      var end = this.$refs.endOfPage || document.getElementById("endOfPage");
+      end.onfocus = (_) => {
+        scrollIntoView();
+      };
+    });
   },
 
   methods: {
@@ -782,6 +783,20 @@ export default {
       e.preventDefault();
     },
 
+    focusTextInput() {
+      setTimeout((_) => {
+        (
+          this.$refs.messageInput || document.getElementById("messageInput")
+        ).focus();
+      });
+    },
+
+    mentionPassenger() {
+      this.messageText += p + " ";
+      this.showPassengersToBeMentioned = false;
+      this.focusTextInput();
+    },
+
     async makeAudioSRC(base64) {
       const response = await fetch(base64),
         blob = await response.blob();
@@ -863,7 +878,7 @@ export default {
       window.location.href = "/#/benutzerinfo?slId=" + userId;
     },
 
-    copyToClipboard(obj) {
+    customCopyToClipboard(obj) {
       // copied from 30secondsofcode
       var toBeCopied;
 
@@ -875,15 +890,14 @@ export default {
           sentByName: this.getNameFromId(obj.sentBy),
         });
       }
-      const el = document.createElement("textarea");
-      el.value = toBeCopied;
-      el.setAttribute("readonly", "");
-      el.style.position = "fixed";
-      el.style.left = "-9999px";
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand("copy");
-      document.body.removeChild(el);
+      copyToClipboard(toBeCopied)
+        .then((_) => {
+          this.$q.notify({
+            message: "Inhalt wurde kopiert",
+            color: "white",
+          });
+        })
+        .catch((e) => alert("Fehler beim Kopieren: " + e));
     },
   },
 };

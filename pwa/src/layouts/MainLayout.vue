@@ -116,10 +116,10 @@
         class="text-black bg-white"
         align="center"
       >
-        <q-route-tab exact icon="home" to="/" label="Marktplatz" />
-        <q-route-tab icon="add_circle_outline" to="/chats/lift/add" label="Neue Fahrt" />
-        <q-route-tab icon="directions_car" to="/chats" label="Chats" />
-        <q-route-tab icon="account_box" to="/profil" label="Profil" />
+        <q-route-tab exact icon="home" to="/" label="Marktplatz" replace />
+        <q-route-tab icon="add_circle_outline" to="/chats/lift/add" replace label="Neue Fahrt" />
+        <q-route-tab icon="directions_car" to="/chats" replace label="Chats" />
+        <q-route-tab icon="account_box" to="/profil" replace label="Profil" />
       </q-tabs>
     </q-footer>
   </q-layout>
@@ -292,7 +292,7 @@ export default {
   },
 
   mounted() {
-    setTimeout(this.reloadNews, 1000); // simple call was buggy, no idea why
+    setTimeout(this.reloadNews(), 300); // simple call was buggy, no idea why
   },
 };
 </script>
