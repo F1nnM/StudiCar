@@ -69,6 +69,7 @@
                 <q-icon
                   size="sm"
                   dense
+                  no-ripple
                   :color="friended ? 'red' : 'grey-7'"
                   :name="friended ? 'favorite' : 'favorite_border'"
                 />
@@ -137,7 +138,7 @@
                 header
                 class="q-pt-sm q-pb-md text-uppercase text-caption"
               >Fahrtenstatistik</q-item-label>
-              <q-item-label>Früher</q-item-label>
+              <q-item-label>Historie</q-item-label>
               <q-expansion-item class="q-pa-none">
                 <template v-slot:header>
                   <q-item class="q-pa-none">

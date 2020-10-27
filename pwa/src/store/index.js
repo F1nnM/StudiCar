@@ -61,7 +61,6 @@ const store = new Vuex.Store({
     dataSaver: false,
     greeting: getGreeting(),
     pageTrans: 'slide',
-    transer: 'slide',
     pageName: 'Willkommen', // needed for scroll-relative Header
     testValue: 10,
     legal: '',
