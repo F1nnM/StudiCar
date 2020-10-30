@@ -16,6 +16,7 @@ jobs:
     - uses: actions/setup-node@v1
     - run: npm install -g @quasar/cli
     - run: npm install -g @quasar/icongenie
+    - run: cd ./pwa
     - run: npm ci
     - run: npm run build
     - uses: SamKirkland/FTP-Deploy-Action@3.1.1
