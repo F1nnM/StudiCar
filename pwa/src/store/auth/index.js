@@ -87,7 +87,7 @@ export default {
           delete state.user.liftRequests[dayShort]
         }
       }
-      if (payload.accepted) state.user.chatLifts[liftId].passengers.push(payload.user) // user object is structured like other passengers
+      if (payload.accepted == true) state.user.chatLifts[liftId].passengers.push(payload.user) // user object is structured like other passengers
     }
   },
 

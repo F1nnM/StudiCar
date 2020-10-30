@@ -88,15 +88,29 @@
                 animated
               >
                 <q-tab-panel name="short" class="q-pa-none">
-                  <div class="row q-mt-sm">
-                    <div class="col-8">Redseligkeit</div>
-                    <div :class="'col-4 text-' + betterPrefColor(lift.driver.prefs.talk)">●</div>
-                    <div class="col-8">... am Morgen</div>
-                    <div :class="'col-4 text-' + betterPrefColor(lift.driver.prefs.talkMorning)">●</div>
-                    <div class="col-8">Rauchen</div>
-                    <div :class="'col-4 text-' + betterPrefColor(lift.driver.prefs.smoking)">●</div>
-                    <div class="col-8">Musik</div>
-                    <div :class="'col-4 text-' + betterPrefColor(lift.driver.prefs.music)">●</div>
+                  <div class="row justify-evenly">
+                    <div
+                      class="text-center"
+                      v-for="pref in [{
+val: 'talk', icon: 'record_voice_over'
+                    },
+                    {
+val: 'talkMorning', icon: 'alarm'
+                    },
+                    {
+val: 'smoking', icon: 'smoking_rooms'
+                    },
+                    {
+val: 'music', icon: 'music_note'
+                    }]"
+                      :key="pref.val"
+                    >
+                      <q-icon
+                        :name="pref.icon"
+                        :color="betterPrefColor(lift.driver.prefs[pref.val])"
+                        size="sm"
+                      />
+                    </div>
                   </div>
                 </q-tab-panel>
 

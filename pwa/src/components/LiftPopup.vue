@@ -8,7 +8,7 @@
         maximized
         transition-show="slide-up"
         transition-hide="slide-down"
-        @input="emitAndClose()"
+        @input="emitAndClose"
       >
         <q-layout v-if="lift" view="hHh lpR fFr" class="bg-white q-pa-none">
           <q-header reveal elevated class="bg-primary text-white">
@@ -168,7 +168,7 @@
                     v-if="lift.passengers.length == lift.seats"
                   >Volles Auto. Wow!</p>
                 </q-item-label>
-                <q-item v-for="item in lift.passengers" :key="item.id" clickable @click="alert">
+                <q-item v-for="item in lift.passengers" :key="item.id">
                   <q-item-section top avatar>
                     <q-avatar>
                       <img :src="getImageOfUser(item.id)" />
@@ -285,52 +285,50 @@
                 <q-toolbar-title class="text-subtitle1">Nachrichteninfos</q-toolbar-title>
                 <q-btn icon="close" flat round dense v-close-popup />
               </q-toolbar>
-              <q-card v-if="showMoreMessageOptions.message">
-                <q-card-section>
-                  <q-list>
-                    <q-item dense>
-                      <q-item-section>Datum</q-item-section>
-                      <q-item-section>{{ formatAsDate(showMoreMessageOptions.message.timestamp) }}</q-item-section>
+              <div v-if="showMoreMessageOptions.message" class="q-pa-md bg-white">
+                <q-list>
+                  <q-item dense>
+                    <q-item-section>Datum</q-item-section>
+                    <q-item-section>{{ formatAsDate(showMoreMessageOptions.message.timestamp) }}</q-item-section>
+                  </q-item>
+                  <q-item dense>
+                    <q-item-section>Genaue Uhrzeit</q-item-section>
+                    <q-item-section>{{ formatAsLongTime(showMoreMessageOptions.message.timestamp) }} Uhr</q-item-section>
+                  </q-item>
+                  <q-item dense>
+                    <q-item-section>Größe</q-item-section>
+                    <q-item-section>{{ (showMoreMessageOptions.message.content.length / 1000).toFixed(2) }} KB</q-item-section>
+                  </q-item>
+                  <q-separator class="q-mt-sm" />
+                  <div class="q-mt-sm row">
+                    <q-item
+                      class="col-6"
+                      clickable
+                      @click="customCopyToClipboard(showMoreMessageOptions.message)"
+                      v-ripple
+                      dense
+                    >
+                      <q-item-section avatar>
+                        <q-icon name="file_copy" size="sm" />
+                      </q-item-section>
+                      <q-item-section>Infos kopieren</q-item-section>
                     </q-item>
-                    <q-item dense>
-                      <q-item-section>Genaue Uhrzeit</q-item-section>
-                      <q-item-section>{{ formatAsLongTime(showMoreMessageOptions.message.timestamp) }} Uhr</q-item-section>
+                    <q-item
+                      class="col-6"
+                      clickable
+                      @click="viewUserFromId(showMoreMessageOptions.message.sentBy)"
+                      v-ripple
+                      dense
+                      v-if="showMoreMessageOptions.message.sentBy != user"
+                    >
+                      <q-item-section avatar>
+                        <q-icon name="person_outline" size="sm" />
+                      </q-item-section>
+                      <q-item-section>Profil von {{ getNameFromId(showMoreMessageOptions.message.sentBy) }}</q-item-section>
                     </q-item>
-                    <q-item dense>
-                      <q-item-section>Größe</q-item-section>
-                      <q-item-section>{{ (showMoreMessageOptions.message.content.length / 1000).toFixed(2) }} KB</q-item-section>
-                    </q-item>
-                    <q-separator class="q-mt-sm" />
-                    <div class="q-mt-sm row">
-                      <q-item
-                        class="col-6"
-                        clickable
-                        @click="customCopyToClipboard(showMoreMessageOptions.message)"
-                        v-ripple
-                        dense
-                      >
-                        <q-item-section avatar>
-                          <q-icon name="file_copy" size="sm" />
-                        </q-item-section>
-                        <q-item-section>Infos kopieren</q-item-section>
-                      </q-item>
-                      <q-item
-                        class="col-6"
-                        clickable
-                        @click="viewUserFromId(showMoreMessageOptions.message.sentBy)"
-                        v-ripple
-                        dense
-                        v-if="showMoreMessageOptions.message.sentBy != user"
-                      >
-                        <q-item-section avatar>
-                          <q-icon name="person_outline" size="sm" />
-                        </q-item-section>
-                        <q-item-section>Profil von {{ getNameFromId(showMoreMessageOptions.message.sentBy) }}</q-item-section>
-                      </q-item>
-                    </div>
-                  </q-list>
-                </q-card-section>
-              </q-card>
+                  </div>
+                </q-list>
+              </div>
             </q-dialog>
           </q-page-container>
 
@@ -447,7 +445,7 @@
                         <q-input
                           borderless
                           ref="messageInput"
-                          id="messageInput"
+                          @focus="scrollToEnd(350)"
                           type="text"
                           v-model="messageText"
                           placeholder="Nachricht..."
@@ -552,6 +550,7 @@ export default {
       //   seats: 0, // all "empty" data just to avoid errors when calling variables
       // },
       loading: 0, // as always: 0 means not loading, 1 means in progress, 2 means success and -1 error.
+      endOfPage: null,
     };
   },
   model: {
@@ -566,9 +565,7 @@ export default {
     open: function (newValue) {
       if (newValue) {
         setTimeout((_) => {
-          var end =
-            this.$refs.endOfPage || document.getElementById("endOfPage");
-          end.scrollIntoView();
+          this.scrollToEnd();
         });
       }
       // this.focusTextInput()
@@ -577,7 +574,9 @@ export default {
     messageText: function (newText) {
       if (newText.slice(-1) == "@") {
         this.showPassengersToBeMentioned = true;
-      } else this.showPassengersToBeMentioned = false;
+      } else {
+        this.showPassengersToBeMentioned = false;
+      }
     },
   },
   computed: {
@@ -621,16 +620,26 @@ export default {
     //    event.preventDefault()
     //    this.sendAudio()
     //  }
-
-    setTimeout((_) => {
-      var end = this.$refs.endOfPage || document.getElementById("endOfPage");
-      end.onfocus = (_) => {
-        scrollIntoView();
-      };
-    });
   },
 
   methods: {
+    async scrollToEnd(delay) {
+      if (delay)
+        await new Promise((res) => {
+          setTimeout(res, delay);
+        });
+      var endOfPage = document.getElementById("endOfPage");
+      endOfPage.scrollIntoView(
+        delay
+          ? {
+              behavior: "smooth",
+              block: "start",
+            }
+          : null
+      );
+      console.warn("scrolled");
+    },
+
     getImageOfUser(id) {
       return require("../assets/sad.svg");
     },
@@ -643,9 +652,8 @@ export default {
       }).name;
     },
 
-    emitAndClose() {
-      this.open = false;
-      this.$emit("input", this.open);
+    emitAndClose(val) {
+      this.$emit("input", val);
     },
 
     getColor(userId) {
@@ -775,10 +783,6 @@ export default {
       });
     },
 
-    false() {
-      return false;
-    },
-
     preventDefault(e) {
       e.preventDefault();
     },
@@ -791,10 +795,11 @@ export default {
       });
     },
 
-    mentionPassenger() {
+    mentionPassenger(p) {
       this.messageText += p + " ";
       this.showPassengersToBeMentioned = false;
       this.focusTextInput();
+      this.scrollToEnd(50);
     },
 
     async makeAudioSRC(base64) {

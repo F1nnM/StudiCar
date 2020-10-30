@@ -130,8 +130,71 @@ export default {
       else return color.toLowerCase();
     },
 
-    respondLiftRequest(accepted) {
-      var user = this.request.requestingUser;
+    async respondLiftRequest(accepted) {
+      var user = this.request.requestingUser,
+        responseReason = "";
+      if (accepted == false)
+        responseReason = await new Promise((res, rej) => {
+          this.$q
+            .dialog({
+              dark: true,
+              title: "Absagen",
+              message: `Magst du ${user.name} mitteilen, warum du sie nicht mitnimmst?`,
+              ok: {
+                color: "negative",
+              },
+              cancel: {
+                color: "white",
+              },
+              options: {
+                type: "radio",
+                model: "prefs",
+                // inline: true
+                items: [
+                  { label: "Präferenzen passen nicht", value: "prefs" },
+                  { label: "Nein, keine Mitteilung", value: "private" },
+                ],
+              },
+              cancel: true,
+              persistent: true,
+            })
+            .onOk((data) => {
+              res(data);
+            })
+            .onCancel(rej);
+        });
+      else {
+        var confirmationRequired = this.$store.state.settings
+          .askAgainWhenAppreciatingNewPassenger;
+        if (confirmationRequired)
+          var doNotAskAgain = await new Promise((res, rej) => {
+            this.$q
+              .dialog({
+                title: "Zusagen",
+                message: `${user.name} in die Fahrgemeinschaft mit aufnehmen?`,
+                ok: {
+                  color: "positive",
+                },
+                cancel: {
+                  color: "white",
+                },
+                options: {
+                  type: "checkbox",
+                  model: [],
+                  // inline: true
+                  items: [{ label: "Nicht mehr fragen", value: true }],
+                },
+                cancel: true,
+                persistent: true,
+              })
+              .onOk((data) => {
+                res(data[0]);
+              })
+              .onCancel(rej);
+          });
+        if (doNotAskAgain)
+          this.$store.commit("setAskAgainWhenAppreciatingNewPassenger", false);
+      }
       this.$emit("respond", {
         liftId: this.liftId,
         user: {
@@ -142,6 +205,7 @@ export default {
           surname: user.surname,
         },
         accepted: accepted,
+        reason: responseReason,
       });
     },
     mounted() {},
