@@ -124,6 +124,11 @@ export const SQL_UPDATE_PROFILE_PICTURE = {
   method: "POST"
 }
 
+export const SQL_RESET_PROFILE_PICTURE = {
+  path: "/resetProfilePicture",
+  method: "POST"
+}
+
 export const SQL_UPDATE_PREFS = {
   path: "/updatePrefs",
   method: "POST"
