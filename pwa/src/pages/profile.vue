@@ -1359,8 +1359,7 @@ export default {
               indent = (img.height - img.width) / scale; // indent has to be half of the difference and negative, additionally divided by scale
             ctx.drawImage(img, 0, indent / -2, width, size + indent);
           }
-          this.newPPictureBase64 = img.src;
-          alert("Image size: " + (img.src.length / 1000).toFixed(2) + " KB");
+          this.newPPictureBase64 = elem.toDataURL();
         }),
           (reader.onerror = (error) => {
             alert(error);
@@ -1369,18 +1368,19 @@ export default {
     },
 
     uploadProfilePicture() {
-      if (false) {
         if (this.newPPictureBase64)
           sendApiRequest(
             SQL_UPDATE_PROFILE_PICTURE,
             {
-              base64: img.src,
+              imageData: this.newPPictureBase64
             },
-            (newUrl) => {
-              this.ppPath = newUrl;
+            _=> {
+              this.ppPath += "&timestamp="+Date.now()
+              this.openUpload = false
+              this.file = null
+              this.newPPictureBase64 = ""
             }
           );
-      }
     },
 
     capitalize(string) {
