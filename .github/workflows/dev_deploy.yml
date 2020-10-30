@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  pwa:
 
     runs-on: ubuntu-latest
 
@@ -24,6 +24,7 @@ jobs:
         ftp-username: ${{ secrets.FTP_USERNAME }}
         ftp-password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./pwa/dist/pwa
+  api:
     - uses: SamKirkland/FTP-Deploy-Action@3.1.1
       with:
         ftp-server: ftp://mfinn.de/httpdocs/studicar/dev/api
