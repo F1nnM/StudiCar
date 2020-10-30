@@ -4,7 +4,7 @@
 - Git
 - node + npm
 - Quasar `npm install -g @quasar/cli`
-- Quasar Icon-Genie `quasar ext add @quasar/icon-genie`
+- Quasar Icon-Genie `npm install -g @quasar/icongenie`
 - Recommended: Visual Studio Code with Vetur Extension
 
 ### To clone Github-Repository:
@@ -32,13 +32,3 @@ npm run start
 or in VS CODE, in the bottom left corner: NPM SCRIPTS > `API/package.json` > `start - API` > hover > little triangle to run
 
 The API can be reached at simply http://localhost
-
-### To deploy to [dev-server](https://dev.pwa.studicar.mfinn.de)
-- push to repository
-- easy as that
-
-### To deploy to [prod-server](https://pwa.studicar.mfinn.de)
-- Check if everything works
-- Create pull-request for dev-branch
-- Accept pull-request and merge
-- done
