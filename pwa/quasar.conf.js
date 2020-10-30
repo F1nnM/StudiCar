@@ -3,6 +3,14 @@
 
 const fs = require('fs')
 
+function tryReadFile(file){
+  try{
+    return fs.readFileSync(file);
+  }catch(e){
+    console.log(e);
+  }
+}
+
 module.exports = function (ctx) {
   return {
     // app boot file (/src/boot)
@@ -95,9 +103,9 @@ module.exports = function (ctx) {
       https: true,
       port: 3000,
       open: true, // opens browser window automatically
-      key: fs.readFileSync('server.key'),
-      cert: fs.readFileSync('server.pem'),
-      ca: fs.readFileSync('ca.pem')
+      key: tryReadFile('server.key'),
+      cert: tryReadFile('server.pem'),
+      ca: tryReadFile('ca.pem')
     },
 
     // animations: 'all', // --- includes all animations
