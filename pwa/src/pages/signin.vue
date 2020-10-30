@@ -9,7 +9,7 @@
       <q-separator />
       <p>
         Oder verwende deine Email: (
-        <a href="/#/auth/registrierung">Noch nicht registriert?</a>)
+        <a href="/#/auth/registrierung">Noch nicht registriert?</a> )
       </p>
       <div>
         <q-form @submit="onSubmit" class="q-gutter-md">
@@ -46,30 +46,30 @@
 import GoogleSignInButton from "../components/GoogleButton";
 export default {
   components: {
-    GoogleSignInButton
+    GoogleSignInButton,
   },
   data() {
     return {
       email: "",
-      password: ""
+      password: "",
     };
   },
   methods: {
     onSubmit() {
       let credentials = {
         email: this.email,
-        password: this.password
-      }
-      this.$store.dispatch('auth/signIn', credentials)
-        .then(user => {
-          this.$router.replace({ name: 'marketplace' }).catch(() => {})
+        password: this.password,
+      };
+      this.$store
+        .dispatch("auth/signIn", credentials)
+        .then((user) => {
+          this.$router.replace({ name: "marketplace" }).catch(() => {});
         })
-        .catch(error => {
-          this.$q.notify('Invalid Login!')
-          console.error(`Not signed in: ${error.message}`)
-        })
-        
-    }
-  }
+        .catch((error) => {
+          this.$q.notify("Invalid Login!");
+          console.error(`Not signed in: ${error.message}`);
+        });
+    },
+  },
 };
 </script>

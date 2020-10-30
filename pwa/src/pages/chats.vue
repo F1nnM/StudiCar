@@ -1,270 +1,397 @@
 <template>
   <div class="q-pa-md">
-    <LiftPopup
-      @close="liftOpen = false"
-      :open="liftOpen"
-      :messages="messagesToBeShown"
-    />
-    <q-list>
-      <chatItem
-        v-for="(item, index) in lastMessages"
-        :key="item.timestamp"
-        :message="item"
-        :firstItem="index == 0"
-        @openLift="openTheLift"
-        @shortLiftInfo="openShortLiftInfo"
+    <TitleButtonAnchor>
+      <q-btn-toggle
+        v-model="liftTab"
+        no-caps
+        rounded
+        dense
+        unelevated
+        outline
+        toggle-color="primary"
+        color="white"
+        text-color="grey-5"
+        :options="[
+          {value: 'current', icon: 'done'},
+          {value: 'requests', icon: 'search'}
+        ]"
       />
-    </q-list>
-    <q-dialog
-      v-model="shortLiftInfo"
-      full-width
-      square
-      persistent
-      position="bottom"
+    </TitleButtonAnchor>
+    <q-tab-panels
+      swipeable
+      animated
+      v-model="liftTab"
+      transition-prev="jump-right"
+      transition-next="jump-left"
+      class="text-caption text-right q-pa-none"
     >
-      <div class="row">
-        <div class="col-8">
-          <q-expansion-item>
-            <template v-slot:header>
-              <q-toolbar>
-                <q-toolbar-title>Würzburg -> Ansbach</q-toolbar-title>
-              </q-toolbar>
-              <p>
-                <q-icon
-                  name="directions_car"
-                  size="xs"
-                />VW Golf
-              </p>
-            </template>
-            <q-stepper
-              v-model="shortLiftInfo"
-              color="primary"
-            >
-              <q-step
-                :name="1"
-                title="Erste Stadt"
-                caption="Straße soundso"
-                icon="settings"
-              ></q-step>
-              <q-step
-                :name="1"
-                title="Erste Stadt"
-                caption="Straße soundso"
-                icon="settings"
-              ></q-step>
-            </q-stepper>
-          </q-expansion-item>
-          <div class="row">
-            <div
-              v-for="day in week"
-              :key="day"
-              class="col-1"
-            >
-              <p>{{day.name}}</p>
-            </div>
-          </div>
-
-          <div class="row">
-            <div
-              v-for="day in week"
-              :key="day"
-              class="col-1"
-            >
-              <p>{{day.value}}</p>
-            </div>
-          </div>
+      <q-tab-panel class="q-pa-none" name="current"></q-tab-panel>
+      <q-tab-panel class="q-pa-none row justify-between" name="requests">
+        <TextPagination
+          :options="Object.keys(liftRequests)"
+          labelCapitalized
+          v-model="liftRequestDayTab"
+        />
+        <div>
+          <q-badge class="q-mx-xs" :color="totalRequests ? 'primary' : 'dark'">{{ totalRequests }}</q-badge>
+          <span>
+            Anfragen
+            <br />eingehend
+          </span>
         </div>
-        <div class="col-4">
-          <q-list
-            bordered
-            padding
-          >
-            <q-item-label header>Fahrer</q-item-label>
-            <q-item
-              clickable
-              v-ripple
-            >
-              <q-item-section>
-                <q-item-label>{{lift.driverName}}</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-separator spaced />
-            <q-item>
-              <q-item-label header>
-                <div class="row">
-                  <div class="col-7">Mitfahrer</div>
-                  <div class="col-5">
-                    {{lift.passengers.length}} / {{lift.seats}}
-                    <q-icon
-                      name="airline_seat_recline_normal"
-                      size="xs"
-                    />
+      </q-tab-panel>
+    </q-tab-panels>
+    <q-tab-panels
+      animated
+      swipeable
+      v-model="liftTab"
+      transition-prev="jump-right"
+      transition-next="jump-left"
+    >
+      <q-tab-panel name="current">
+        <q-list>
+          <ChatItem
+            v-for="(m, index) in lastMessages"
+            :key="m.timestamp"
+            :message="m"
+            :firstItem="index == 0"
+            @left="onLeft"
+            @right="onRight"
+            @open="openTheLift"
+            @shortLiftInfo="openShortLiftInfo"
+          />
+        </q-list>
+        <LiftPopup v-model="chatPopup.isOpen" :lift="chatPopup.data" />
+        <ShortLiftInfo v-model="shortLiftPopup.isOpen" :lift="shortLiftPopup.data" />
+      </q-tab-panel>
+      <q-tab-panel name="requests" class="q-px-none">
+        <q-list>
+          <div v-if="totalRequests">
+            <!-- <q-splitter :value="18" disable>
+              <template v-slot:before>
+                <q-tabs  vertical>
+                  <div v-for="(day, dayShortName) in liftRequests" :key="dayShortName">
+                    <q-tab
+                      v-if="requestsOfDay(day)"
+                      align="left"
+                      no-caps
+                      :name="dayShortName"
+                      :label="getDayLabel(dayShortName)"
+                    >
+                      <q-badge floating transparent color="grey-7">{{ requestsOfDay(day) }}</q-badge>
+                    </q-tab>
                   </div>
-                </div>
-              </q-item-label>
-            </q-item>
+                </q-tabs>
+              </template>
 
-            <q-item
-              v-for="user in lift.passengers"
-              :key="user.id"
+            <template v-slot:after>-->
+            <q-tab-panels
+              class="q-pa-none"
+              v-model="liftRequestDayTab"
+              animated
+              vertical
+              transition-prev="jump-right"
+              transition-next="jump-left"
             >
-              <q-item-section>
-                <q-item-label>user.name</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </div>
-      </div>
-    </q-dialog>
+              <q-tab-panel
+                v-for="(day, dayShort) in liftRequests"
+                :key="dayShort"
+                class="q-pt-none q-px-none"
+                :name="dayShort"
+              >
+                <div v-if="requestsOfDay(day)">
+                  <q-tabs spread v-model="liftRequestTimeTab">
+                    <div v-for="(lift, liftId) in day" :key="liftId">
+                      <q-tab
+                        align="justify"
+                        dense
+                        v-if="lift.length"
+                        :name="liftId"
+                        no-caps
+                        content-class="text-caption"
+                        :label="`› ${ lifts[liftId].destination.name }`"
+                      />
+                    </div>
+                  </q-tabs>
+                  <q-tab-panels
+                    animated
+                    transition-prev="slide-right"
+                    class="q-pa-none"
+                    transition-next="slide-left"
+                    v-model="liftRequestTimeTab"
+                  >
+                    <q-tab-panel
+                      :name="liftId"
+                      class="q-pl-md q-pr-none"
+                      v-for="(lift, liftId) in day"
+                      :key="liftId"
+                    >
+                      <div class="row" v-if="lift.length">
+                        <div class="col-8">
+                          <q-item-label>
+                            {{ lifts[liftId].start.name }}
+                            <span
+                              class="text-subtitle1 q-px-sm"
+                            >&rsaquo;</span>
+                            {{ lifts[liftId].destination.name }}
+                          </q-item-label>
+                          <q-item-label class="row">
+                            <div class="col-6">von da bis da halt</div>
+                            <div class="col-6">von da bis da halt</div>
+                          </q-item-label>
+                        </div>
+                        <div class="col-4">
+                          <div
+                            class="q-ma-md"
+                            :style="`background-color: ${lifts[liftId].car.color}`"
+                          >
+                            <q-img src="~assets/app-icon_color_preview.png" />
+                          </div>
+                          <div class="flex">
+                            {{ lifts[liftId].passengers.length }} /
+                            {{ lifts[liftId].car.allSeats }}
+                            <q-icon name="person_outline" class="q-pl-xs" size="xs" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- <q-scroll-area
+                          :thumb-style="thumbStyle"
+                          :bar-style="barStyle"
+                          style="height: 40vh"
+                      >-->
+                      <UserLiftRequest
+                        v-for="r in lift"
+                        :key="r.id"
+                        :request="r"
+                        :liftId="parseInt(liftId)"
+                        @respond="respondLiftRequest"
+                      />
+
+                      <!-- </q-scroll-area> -->
+                    </q-tab-panel>
+                  </q-tab-panels>
+                </div>
+              </q-tab-panel>
+            </q-tab-panels>
+            <!-- </template>
+            </q-splitter>-->
+          </div>
+          <div v-else class="text-caption">
+            <q-item>Im Moment hast du keine Anfragen</q-item>
+          </div>
+        </q-list>
+      </q-tab-panel>
+    </q-tab-panels>
   </div>
 </template>
 
 <script>
+import ChatItem from "components/ChatItem";
+import LiftPopup from "components/LiftPopup";
+import ShortLiftInfo from "components/ShortLiftInfo";
+import TitleButtonAnchor from "components/TitleButtonAnchor";
+import UserLiftRequest from "components/UserLiftRequest";
+import TextPagination from "components/TextPagination";
 
-import chatItem from 'components/ChatItem'
-import LiftPopup from 'components/LiftPopup'
+import { date } from "quasar";
 
 export default {
   components: {
-    chatItem,
-    LiftPopup
+    ChatItem,
+    LiftPopup,
+    ShortLiftInfo,
+    TitleButtonAnchor,
+    UserLiftRequest,
+    TextPagination,
   },
 
-  data () {
+  data() {
     return {
-      liftOpen: false,
-      messagesToBeShown: {
-        list: []
+      lifts: this.$store.getters["auth/user"].chatLifts,
+      alreadyTappedOnItem: false,
+      liftTab: "current",
+      chatPopup: {
+        isOpen: false,
+        data: null,
       },
-      allMessages: this.$store.getters['auth/user'].messages,
-      shortLiftInfo: false,
-      lift: {
-        driverName: 'Günther',
-        seats: 5,
-        passengers: [{
-          name: 'Alicia',
-          id: 61654
-        },
-        {
-          name: 'Peter',
-          id: 654
-        },
-        {
-          name: 'Bob',
-          id: 665
-        }
-        ]
+      shortLiftPopup: {
+        isOpen: false,
+        data: null,
       },
-      week: [{
-        name: 'M',
-        value: 1
-      },
-      {
-        name: 'D',
-        value: 2
-      },
-      {
-        name: 'M',
-        value: 3
-      },
-      {
-        name: 'D',
-        value: 1
-      },
-      {
-        name: 'F',
-        value: 2
-      },
-      {
-        name: 'S',
-        value: 2
-      },
-      {
-        name: 'S',
-        value: 1
-      }]
-    }
+      liftRequests: this.$store.getters["auth/user"].liftRequests,
+      liftRequestDayTab: null,
+      liftRequestTimeTab: null,
+    };
+  },
+
+  watch: {
+    liftRequestDayTab: function (newDay) {
+      if (!this.liftRequests[newDay][this.liftRequestTimeTab]) {
+        // if previous selected lift isn't present at that day, select first lift of that day
+        this.liftRequestTimeTab = Object.keys(this.liftRequests[newDay])[0];
+      }
+    },
   },
 
   computed: {
-    lastMessages () {
-      var lastOfThem = []
-      var all = this.allMessages
-      for (let liftId in all) {
-        all[liftId].sort((a, b) => {
-          return new Date(a.timestamp) - new Date(b.timestamp) // make sure that is sorted ascending by timestamp
-        })
-        var length = all[liftId].length
-        lastOfThem.push(all[liftId][length - 1])
+    lastMessages() {
+      var returnedArray = [];
+      for (let liftId in this.lifts) {
+        var data = this.lifts[liftId],
+          lastMessage = data.messages[data.messages.length - 1];
+        returnedArray.push({
+          liftId: liftId, // id is property
+          start: data.start.name,
+          destination: data.destination.name,
+          sentBy: this.getNameFromId(liftId, lastMessage.sentBy),
+          type: lastMessage.type,
+          content: lastMessage.content,
+          timestamp: lastMessage.timestamp,
+        });
+        // if(firstItem) firstItem = false; // just not to have a gray line above top item
       }
-      lastOfThem.sort((a, b) => {
-        return new Date(b.timestamp) - new Date(a.timestamp) // newest message is on top of list
-      })
-      return lastOfThem
-    }
-  },
+      returnedArray.sort((a, b) => {
+        return (
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+        // sort descending, so swap compared values
+      });
 
-  mounted () {
-    this.$store.commit('setPage', 'Mitfahrgelegenheiten')
-    this.$store.commit('setPageTrans', 'slide')
+      return returnedArray;
+    },
+
+    dataOfSelectedDaysFirstLift() {
+      var liftsOfThatDay = Object.keys(
+        this.liftRequests[this.liftRequestDayTab]
+      );
+      lift = this.lifts[idOfLiftToBeViewed];
+      return lift;
+    },
+
+    thumbStyle() {
+      return {
+        right: "4px",
+        borderRadius: "5px",
+        backgroundColor: "#027be3",
+        width: "5px",
+        opacity: 0.75,
+      };
+    },
+
+    barStyle() {
+      return {
+        right: "2px",
+        borderRadius: "9px",
+        backgroundColor: "#027be3",
+        width: "9px",
+        opacity: 0.2,
+      };
+    },
+
+    totalRequests() {
+      var n = 0;
+      Object.values(this.liftRequests).forEach((day) => {
+        Object.values(day).forEach((lift) => {
+          n += lift.length;
+        });
+      });
+      return n;
+    },
   },
 
   methods: {
-    onLeft ({ reset }) {
+    onLeft({ reset }) {
       //alert("SWIPED LEFT")
 
-      this.finalize(reset)
+      this.finalize(reset);
     },
 
-    onRight ({ reset }) {
+    onRight({ reset }) {
       //alert("SWIPED RIGHT")
 
-      this.finalize(reset)
+      this.finalize(reset);
     },
 
-    openTheLift (liftId) {
-      this.liftOpen = true
+    getNameFromId(liftId, userId) {
+      var lift = this.lifts[liftId],
+        people = JSON.parse(JSON.stringify(lift.passengers)); // otherwise passengers would be overwritten
+      people.push(lift.driver);
+      return people.find((p) => {
+        return p.id == userId;
+      }).name;
+    },
 
-      this.messagesToBeShown = {
-        list: this.sortMessages(liftId, false) // last item in array will be displayed on top of page, so we have to sort descending
+    openTheLift(liftId) {
+      var enableDoubleTap = false;
+
+      if (!process.env.DEV) enableDoubleTap = false; // just to be sure
+      if (!enableDoubleTap) {
+        this.openLiftPopup(liftId);
+      } else {
+        if (this.alreadyTappedOnItem) this.openShortLiftInfo(liftId);
+        else {
+          this.alreadyTappedOnItem = true;
+          setTimeout((_) => {
+            if (!this.alreadyTappedOnItem) {
+              this.openLiftPopup(liftId);
+            }
+            this.alreadyTappedOnItem = false;
+          }, 200);
+        }
       }
-
     },
 
-    openShortLiftInfo (liftId) {
-      this.shortLiftInfo = true
+    openLiftPopup(liftId) {
+      var lift = this.lifts[liftId];
+      this.chatPopup.data = lift;
+      this.shortLiftPopup.isOpen = false; // just to be sure
+      this.chatPopup.isOpen = true;
     },
 
-    sortMessages (liftId, ascending) {
-      var list = this.allMessages[liftId]
-      list.sort((a, b) => {
-        return new Date(b.timestamp) - new Date(a.timestamp)
-      })
-      return list
+    openShortLiftInfo(liftId) {
+      var lift = this.lifts[liftId];
+      this.shortLiftPopup.data = lift;
+      this.chatPopup.isOpen = false; // just to be sure
+      this.shortLiftPopup.isOpen = true;
     },
 
-    pagetrans_zoom () {
-      this.$emit('pagetrans_zoom')
-    },
-
-    pagetrans_slide () {
-      this.$emit('pagetrans_slide')
-    },
-
-    long_tab ({ e }) {
-      alert("LONG")
-    },
-
-    finalize (reset) {
+    finalize(reset) {
       this.timer = setTimeout(() => {
-        reset()
-      }, 50)
+        reset();
+      }, 50);
     },
 
+    getDayLabel(stringOfDate) {
+      var array = stringOfDate.split("/"),
+        day = array[0],
+        month = array[1],
+        year = new Date().getFullYear(),
+        d = new Date(year, month, day);
+      return date.formatDate(d, "dd");
+    },
+
+    requestsOfDay(day) {
+      var a = 0;
+      Object.values(day).forEach((lift) => (a += lift.length));
+      return a;
+    },
+
+    respondLiftRequest(eventObj) {
+      // here comes dispatching code then
+      eventObj.dayShort = this.liftRequestDayTab; // add missing information to object
+      this.$store.dispatch("auth/respondLiftRequest", eventObj);
+    },
   },
 
-  beforeDestroy () {
-    clearTimeout(this.timer)
-  }
-}
+  mounted() {
+    this.$store.commit("setPage", "Mitfahrgelegenheiten");
+    this.$store.commit("setPageTrans", "slide");
+
+    this.liftRequestDayTab = Object.keys(this.liftRequests)[0];
+    this.liftRequestTimeTab = Object.keys(
+      this.liftRequests[this.liftRequestDayTab]
+    )[0];
+  },
+};
 </script>

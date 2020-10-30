@@ -15,15 +15,33 @@
 
           <q-toolbar-title class="row">
             <div class="text-weight-light q-pt-xs col-xs-10 col-md-11">
-              <q-slide-transition :duration="300">
-                <div v-show="!scrolled">{{!scannerOpen ? 'StudiCar ' + pageTrans : 'Scanvorgang läuft'}}</div>
-              </q-slide-transition>
-              <q-slide-transition :duration="150">
-                <div
-                  v-show="scrolled"
-                  class
-                >{{pageName}}</div>
-              </q-slide-transition>
+              <q-tab-panels
+                v-model="scrolled"
+                class="bg-primary"
+                animated
+                transition-prev="jump-down"
+                transition-next="jump-up"
+              >
+                <q-tab-panel class="q-pa-none bg-primary text-white" :name="false">
+                  <q-tab-panels
+                    v-model="scannerOpen"
+                    class="bg-primary"
+                    animated
+                    transition-prev="slide-right"
+                    transition-next="slide-left"
+                  >
+                    <q-tab-panel class="bg-primary q-pa-none text-white" :name="false">
+                      StudiCar
+                      <!-- {{ pageTrans }} -->
+                    </q-tab-panel>
+                    <q-tab-panel
+                      class="bg-primary q-pa-none text-white"
+                      :name="true"
+                    >Scanvorgang läuft</q-tab-panel>
+                  </q-tab-panels>
+                </q-tab-panel>
+                <q-tab-panel class="q-pa-none bg-primary text-white" :name="true">{{ pageName }}</q-tab-panel>
+              </q-tab-panels>
             </div>
             <div class="col-xs-2 col-md-1">
               <q-btn
@@ -36,13 +54,15 @@
           </q-toolbar-title>
         </q-toolbar>
       </div>
-      <qrScanner
+      <QrScanner
+        overlay="primary"
         :open="scannerOpen"
         @result="gotScanResult"
-        @help="toggleScannerOpen"
+        @help="scannerHelpNeeded"
         @swipe="closeScanner"
       />
     </q-header>
+    <GetUserDataLoading persistent v-model="loadingScreenVisible" />
 
     <q-drawer
       :no-swipe-open="scannerOpen"
@@ -52,20 +72,18 @@
       content-class="bg-grey-1"
       class="drawer-no-border"
     >
-      <drawerImage :timeText="greeting" />
-      <hr style="margin: 0; background-color: black;" />
-      <q-list>
-        <q-item-label
-          header
-          class="text-grey-8"
-        >Navigation</q-item-label>
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
+      <DrawerWelcomeImage :timeText="greeting" :caption="newsticker || 'Ticker wird geladen...'" />
+      <q-list class="q-pb-sm">
+        <q-item-label header class="text-grey-8">Navigation</q-item-label>
+        <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link" />
       </q-list>
-      <div style="padding: 10px;">StudiCar v{{ $q.version }}</div>
+      <ExtHr color="grey-7" size="xs" />
+      <div class="q-pa-md text-grey-7 row">
+        <div class="col-7">StudiCar v1.0</div>
+        <div class="col-5 text-right">
+          <q-btn flat @click="hardReload()" icon="refresh" size="sm" />
+        </div>
+      </div>
     </q-drawer>
 
     <q-page-container>
@@ -73,30 +91,19 @@
         <q-scroll-observer @scroll="scrollHandler" />
 
         <div class="text-h5 q-pl-md q-pt-md">
-          <span
-            class="custom-underline c-u-l c-u-2 c-u-md"
-            transition="slide-left"
-          >{{pageName}}</span>
+          <span class="custom-underline c-u-l c-u-2 c-u-md" transition="slide-left">{{ pageName }}</span>
         </div>
 
         <br />
       </div>
 
-      <transition
-        :name="pageTrans"
-        mode="out-in"
-      >
-        <router-view
-          @pagetrans_y="pageTransY = $event"
-          :style="'transform-origin: 20% ' + pageTransY + 'vh;'"
-        />
+      <transition :name="pageTrans" mode="out-in">
+        <router-view />
       </transition>
     </q-page-container>
+    <QRLiftDisplay v-model="liftQrId" />
 
-    <q-footer
-      elevated
-      v-show="!(scannerOpen)"
-    >
+    <q-footer elevated v-show="!(scannerOpen)">
       <q-tabs
         full-width
         no-caps
@@ -109,139 +116,183 @@
         class="text-black bg-white"
         align="center"
       >
-        <q-route-tab
-          icon="home"
-          to="/"
-          label="Marktplatz"
-        />
-        <q-route-tab
-          icon="add_circle_outline"
-          to="/chats/lift/add"
-          label="Neue Fahrt"
-        />
-        <q-route-tab
-          icon="directions_car"
-          to="/chats"
-          label="Chats"
-        />
-        <q-route-tab
-          icon="account_box"
-          to="/profil"
-          label="Profil"
-        />
+        <q-route-tab exact icon="home" to="/" label="Marktplatz" replace />
+        <q-route-tab icon="add_circle_outline" to="/chats/lift/add" replace label="Neue Fahrt" />
+        <q-route-tab icon="directions_car" to="/chats" replace label="Chats" />
+        <q-route-tab icon="account_box" to="/profil" replace label="Profil" />
       </q-tabs>
     </q-footer>
   </q-layout>
 </template>
 
 <script>
+import QrScanner from "components/QrScanner";
 
-import qrScanner from 'components/qrScanner'
+import { scroll } from "quasar";
 
-import { scroll } from 'quasar'
+import EssentialLink from "components/EssentialLink";
+import GetUserDataLoading from "components/GetUserDataLoading";
+import DrawerWelcomeImage from "components/DrawerWelcomeImage";
+import QRLiftDisplay from "components/QRLiftDisplay";
+import ExtHr from "components/ExtendedHr";
 
-import EssentialLink from 'components/EssentialLink'
-import drawerImage from 'components/drawerWelcomeImage'
-
+import { sendApiRequest, GET_NEWSTICKER } from "../ApiAccess";
 
 export default {
-  name: 'MainLayout',
+  name: "MainLayout",
 
   components: {
     EssentialLink,
-    qrScanner,
-    drawerImage
+    QrScanner,
+    DrawerWelcomeImage,
+    GetUserDataLoading,
+    QRLiftDisplay,
+    ExtHr,
   },
 
-  computed: {
-    username () {
-      return this.$store.getters['auth/user'].name.split(' ')[0]
-    },
-
-    pageName () {
-      return this.$store.state.pageName
-    },
-
-    loc () {
-      return document.location.href
-    },
-
-    pageTrans () {
-      return this.$store.state.pageTrans
-    }
-  },
-
-  methods: {
-
-    scannerSwiped (e) {
-      alert(e)
-    },
-
-    scrollHandler (info) {
-      this.scrolled = !this.scannerOpen ? info.position > 30 : false
-    },
-
-    gotScanResult (e) {
-      this.scannerOpen = false
-      window.location.href = '#/benutzerinfo?' + e + '">{{lift.driver.name}}'
-    },
-
-    closeScanner (e) {
-      if (e.direction == 'up') {
-        this.scannerOpen = false
-        setTimeout(() => window.scrollTo(0, 0), 300)
-      }
-
-    },
-
-
-    toggleScannerOpen () {
-      this.scannerOpen = !this.scannerOpen
-      if (this.scannerOpen) {
-        this.leftDrawerOpen = false
-      }
-    },
-
-    randomArrayItem (array) {
-      return array[Math.floor(Math.random() * array.length)]
-    }
-
-
-  },
-
-
-  data () {
-
+  data() {
     return {
       greeting: this.$store.state.greeting,
+      newsticker: null,
+      userDataLoading: true,
       leftDrawerOpen: false,
       pageTransY: 15,
       scannerOpen: false,
       scrolled: false,
-      tab: 'home',
-      chats: 'Main',
+      tab: "home",
+      chats: "Main",
       show: true,
-      essentialLinks: [
+      liftQrId: null,
+    };
+  },
+
+  computed: {
+    username() {
+      return this.$store.getters["auth/user"].name.split(" ")[0];
+    },
+
+    loadingScreenVisible() {
+      return this.$store.getters["auth/signinLoaded"];
+    },
+
+    pageName() {
+      return this.$store.state.pageName;
+    },
+
+    loc() {
+      return document.location.href;
+    },
+
+    pageTrans() {
+      return this.$store.state.pageTrans;
+    },
+
+    essentialLinks() {
+      return [
         {
-          title: 'Marktplatz',
-          caption: 'Zur Übersicht',
-          icon: 'home',
-          link: '/#/'
+          title: "Marktplatz",
+          caption: "Zur Übersicht",
+          icon: "home",
+          link: "/#/",
         },
         {
-          title: 'Spielwiese',
-          caption: 'Endlich wieder Kind sein',
-          icon: 'toys',
-          link: '/#/spielwiese'
+          title: "Einstellungen",
+          caption: "Personalisiere die App",
+          icon: "settings",
+          link: "/#/einstellungen",
         },
         {
-          title: 'Rechtliches',
-          caption: 'Muss auch sein',
-          icon: 'policy',
-          link: '/#/rechtliches'
+          title: "Spielwiese",
+          caption: "Endlich wieder Kind sein",
+          icon: "toys",
+          link: "/#/spielwiese",
+        },
+        {
+          title: "Rechtliches",
+          caption: "Muss auch sein",
+          icon: "policy",
+          link: "/#/rechtliches",
+        },
+        {
+          title: "Team",
+          caption: "Wer hinter dem Projekt steckt",
+          icon: "emoji_people",
+          link: "/#/das-team",
+        },
+        {
+          title: "Support",
+          caption: "Wie können wir dir helfen?",
+          icon: "accessibility_new",
+          link: "/#/hilfe",
+        },
+      ];
+    },
+  },
+
+  methods: {
+    scannerSwiped(e) {
+      alert(e);
+    },
+
+    scrollHandler(info) {
+      this.scrolled = !this.scannerOpen ? info.position > 30 : false;
+    },
+
+    gotScanResult(e) {
+      this.scannerOpen = false;
+      switch (e.type) {
+        case "u":
+          window.location.href = "#/benutzerinfo?slId=" + e.res;
+          break;
+        case "l":
+          this.liftQrId = e.res;
+          window.location.href = "#/";
+          break;
+      }
+    },
+
+    closeScanner(e) {
+      if (e.direction == "up") {
+        this.scannerOpen = false;
+        setTimeout(() => window.scrollTo(0, 0), 300);
+      }
+    },
+
+    toggleScannerOpen() {
+      this.scannerOpen = !this.scannerOpen;
+      if (this.scannerOpen) {
+        this.leftDrawerOpen = false;
+      }
+    },
+
+    scannerHelpNeeded() {
+      this.scannerOpen = false;
+    },
+
+    randomArrayItem(array) {
+      return array[Math.floor(Math.random() * array.length)];
+    },
+
+    reloadNews() {
+      sendApiRequest(
+        GET_NEWSTICKER,
+        {},
+        (data) => {
+          this.newsticker = data;
+        },
+        (err) => {
+          this.newsticker = "Fehler aufgetreten";
         }
-      ]
-    }
-  }
-}
+      );
+    },
+
+    hardReload() {
+      window.location.reload(true);
+    },
+  },
+
+  mounted() {
+    setTimeout(this.reloadNews(), 300); // simple call was buggy, no idea why
+  },
+};
 </script>

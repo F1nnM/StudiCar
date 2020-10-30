@@ -1,3 +1,9 @@
+/*
+
+THIS FILE IS CURRENTLY NOT NEEDED, BUT HAS BEEN KEPT BECAUSE OF NO NEED TO DELETE
+
+*/
+
 module.exports = {
     morning: [
         'Wer morgens zerknittert aufwacht, hat tagsüber viele Entfaltungsmöglichkeiten.',

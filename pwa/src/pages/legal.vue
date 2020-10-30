@@ -1,69 +1,65 @@
 <template>
   <div class="q-ma-md">
-    <q-btn @click="getContent" label="reload" icon="reload" />
-
-    <div class="q-mt-xl">
-      <div v-show="downloading == 1">
-        <q-card-section>
-          <p>Inhalt wird geladen, bitte hab noch einen Moment Geduld...</p>
-
-          <q-linear-progress indeterminate color="primary" class="q-mt-sm" />
-        </q-card-section>
-      </div>
-      <!-- <q-card v-show="downloading == 2">
-        <q-card-section>
-          <p>
-            <q-icon name="check" size="md" color="primary" />Success text
-          </p>
-        </q-card-section>
-      </q-card>-->
-      <q-card v-show="downloading == -1">
-        <q-card-section>
-          <p>
-            <q-icon name="error_outline" size="md" color="negative" />Beim Download ist ein Fehler aufgetreten. Wenn das Problem öfter auftritt, dann
-            <a
-              href="#/contact"
-            >schreib uns</a> bitte.
-          </p>
-        </q-card-section>
-      </q-card>
+    <TitleButtonAnchor>
+      <q-btn @click="getContent(true)" icon="refresh" size="md" flat />
+    </TitleButtonAnchor>
+    <div v-show="downloading == 2" class="overflow-hidden" id="text_anchor">
+      <!-- content goes here after downloading -->
     </div>
-    <div id="anchor">
-      <!-- here goes the content after downloading -->
-    </div>
+    <LoadingDisplay
+      v-model="downloading"
+      loadingText="Inhalt wird geladen"
+      errorText="Ein Fehler ist aufgetreten. Bitte versuch es später noch mal"
+    />
   </div>
 </template>
 
 <script>
 import { sendApiRequest, GET_LEGAL } from "../ApiAccess";
+import LoadingDisplay from "components/LoadingDisplay";
+import TitleButtonAnchor from "components/TitleButtonAnchor";
 
 export default {
-  name: 'Contact',
-  mounted(){
-			this.$store.state.pageName = 'Rechtliches'
-			this.getContent()
+  name: "legal",
+  components: {
+    LoadingDisplay,
+    TitleButtonAnchor,
   },
-  data(){
-      return {
-					downloading: 1, // 0 means not downloading, 1 means downloading, 2 means success and -1 means error
-					legalText: null,
-					started: false,
-					converter: null
+  mounted() {
+    this.$store.commit("setPage", "Rechtliches");
+    this.$store.commit("setPageTrans", "slide");
+    this.getContent();
+  },
+  data() {
+    return {
+      downloading: 0, // 0 means not downloading, 1 means downloading, 2 means success and -1 means error
+      converter: null,
+    };
+  },
+  methods: {
+    getContent(force) {
+      const currentLegal = this.$store.getters["getLegal"];
+      if (currentLegal != "" && !force) {
+        // already some content
+        document.getElementById("text_anchor").innerHTML = currentLegal;
+        this.downloading = 2;
+      } else {
+        this.downloading = 1;
+        sendApiRequest(
+          GET_LEGAL,
+          {},
+          (html_) => {
+            document.getElementById("text_anchor").innerHTML = html_;
+            this.$store.commit("setLegal", html_);
+            this.downloading = 2;
+          },
+          (err) => {
+            alert("Fehler: " + err);
+            this.downloading = -1;
+          }
+        );
       }
-	},
-	methods: {
-		getContent(){
-			this.started = true
-			this.downloading = 1
-      sendApiRequest(GET_LEGAL, {}, html => {
-        if(!html) alert('notiing')
-        document.getElementById('anchor').innerHTML = html
-        this.downloading = 2
-			}, err => {
-				this.downloading = -1
-			})
-		}
-	}
-	
-}
+    },
+  },
+};
 </script>

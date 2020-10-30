@@ -130,3 +130,17 @@
         transform: translateY(0%);
     }
 }
+
+.jump-up-enter-active,
+.jump-up-leave-active {
+    transition: all 0.1s;
+    transform-origin: center top;
+}
+
+.jump-up-leave-to {
+    transform: translateY(-5vh);
+}
+
+.jump-up-enter {
+    transform: translateY(5vh);
+}

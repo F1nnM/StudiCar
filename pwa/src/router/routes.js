@@ -54,7 +54,22 @@ const routes = [{
       path: '/rechtliches',
       component: () =>
         import('pages/legal.vue')
-    }
+    },
+    {
+      path: '/hilfe',
+      component: () =>
+        import('pages/support.vue')
+    },
+    {
+      path: '/hilfe/bearbeiten',
+      component: () =>
+        import('pages/edit_faq.vue')
+    },
+    {
+      path: '/das-team',
+      component: () =>
+        import('pages/team.vue')
+    },
   ]
 },
 {

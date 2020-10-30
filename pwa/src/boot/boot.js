@@ -7,6 +7,7 @@ export default ({ router, store }) => {
   // Register the Firebase authentication listener
   Firebase.auth().onAuthStateChanged(user => {
     if (user) {
+      store.commit("auth/SET_USER_DATA_LOADING", true)
       sendApiRequest(
         SQL_CREATE_USER_IF_NOT_EXISTING,
         { name: user.displayName, mail: user.email },
@@ -16,21 +17,23 @@ export default ({ router, store }) => {
           data => {
             store.commit("auth/SET_USER", data)
             router.replace({ name: 'marketplace' }).catch(() => { })
-            store.commit("auth/SET_SIGNIN_LOADED")
+            setTimeout(_ => {
+              store.commit("auth/SET_USER_DATA_LOADING", false)
+            }, 100)
           },
           error => {
             store.dispatch('auth/signOut')
-            store.commit("auth/SET_SIGNIN_LOADED")
+            store.commit("auth/SET_USER_DATA_LOADING", false)
           }),
         error => {
           store.dispatch('auth/signOut')
-          store.commit("auth/SET_SIGNIN_LOADED")
+          store.commit("auth/SET_USER_DATA_LOADING", false)
         }
       );
     } else {
       // Signed out. Let Vuex know.
       store.commit('auth/RESET_USER')
-      store.commit("auth/SET_SIGNIN_LOADED")
+      store.commit("auth/SET_USER_DATA_LOADING", false)
       router.replace({ name: 'signIn' }).catch(() => { })
     }
   })

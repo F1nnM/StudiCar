@@ -66,68 +66,58 @@
 </template>
 
 <script>
-
-
-import { scroll } from 'quasar'
-
+import { scroll } from "quasar";
 
 export default {
-  components: { 
-    
+  components: {},
+
+  computed: {
+    pageName() {
+      return this.$store.state.pageName;
+    },
+
+    pageTrans() {
+      return this.$store.state.transer;
+    },
   },
 
-    computed: {
-      pageName() {
-        return this.$store.state.pageName
-      },
-
-      pageTrans(){
-        var res
-        console.log(Date.now())
-        async() => {
-          res = !this.transer ? this.$global.transer : this.$store.state.transer
-        }
-        console.log(Date.now())
-        return res
-      }
+  data() {
+    return {
+      tab: "spielwiese",
+      code: "",
+      video: [],
+      result: "",
+      fullscreen: false,
+      scrolled: false,
+      leftDrawerOpen: false,
+      error: "",
+    };
+  },
+  methods: {
+    decoded(res) {
+      this.result = res;
+    },
+    message(error) {
+      this.$q
+        .dialog({
+          dark: true,
+          title: "Fehler",
+          message: "" + error,
+        })
+        .onOk(() => {
+          // console.log('OK')
+        })
+        .onCancel(() => {
+          // console.log('Cancel')
+        })
+        .onDismiss(() => {
+          // console.log('I am triggered on both OK and Cancel')
+        });
     },
 
-    data(){
-        return {
-            tab: 'spielwiese',
-            code: '',
-            video: [],
-            transer: false,
-            result: '',
-            fullscreen: false,
-            scrolled: false,
-            leftDrawerOpen: false,
-            error: ''
-        }
+    scrollHandler(info) {
+      this.scrolled = info.position > 30;
     },
-    methods: {
-
-
-      decoded(res){
-        this.result = res
-      },
-      message (error) {
-      this.$q.dialog({
-        dark: true,
-        title: 'Fehler',
-        message: '' + error
-      }).onOk(() => {
-        // console.log('OK')
-      }).onCancel(() => {
-        // console.log('Cancel')
-      }).onDismiss(() => {
-        // console.log('I am triggered on both OK and Cancel')
-      })
-    },
-
-    scrollHandler(info){
-      this.scrolled = info.position > 30
-    }
-  }
-}
+  },
+};
 </script>

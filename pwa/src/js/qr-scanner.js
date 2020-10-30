@@ -1,6 +1,6 @@
 export default class QrScanner {
     /* async */
-    static hasCamera() {
+    static hasCamera () {
         // note that enumerateDevices can always be called and does not prompt the user for permission. However, device
         // labels are only readable if served via https and an active media stream exists or permanent permission is
         // given. That doesn't matter for us though as we don't require labels.
@@ -36,7 +36,7 @@ export default class QrScanner {
         this._qrWorker = new Worker(QrScanner.WORKER_PATH);
     }
 
-    destroy() {
+    destroy () {
         this.$video.removeEventListener('canplay', this._onCanPlay);
         this.$video.removeEventListener('play', this._onPlay);
         document.removeEventListener('visibilitychange', this._onVisibilityChange);
@@ -48,7 +48,7 @@ export default class QrScanner {
     }
 
     /* async */
-    start() {
+    start () {
         if (this._active && !this._paused) {
             return Promise.resolve();
         }
@@ -87,12 +87,12 @@ export default class QrScanner {
             });
     }
 
-    stop() {
+    stop () {
         this.pause();
         this._active = false;
     }
 
-    pause() {
+    pause () {
         this._paused = true;
         if (!this._active) {
             return;
@@ -111,8 +111,8 @@ export default class QrScanner {
     }
 
     /* async */
-    static scanImage(imageOrFileOrUrl, sourceRect=null, worker=null, canvas=null, fixedCanvasSize=false,
-                     alsoTryWithoutSourceRect=false) {
+    static scanImage (imageOrFileOrUrl, sourceRect = null, worker = null, canvas = null, fixedCanvasSize = false,
+        alsoTryWithoutSourceRect = false) {
         let createdNewWorker = false;
         let promise = new Promise((resolve, reject) => {
             if (!worker) {
@@ -167,31 +167,31 @@ export default class QrScanner {
         return promise;
     }
 
-    setGrayscaleWeights(red, green, blue, useIntegerApproximation = true) {
+    setGrayscaleWeights (red, green, blue, useIntegerApproximation = true) {
         this._qrWorker.postMessage({
             type: 'grayscaleWeights',
             data: { red, green, blue, useIntegerApproximation }
         });
     }
 
-    setInversionMode(inversionMode) {
+    setInversionMode (inversionMode) {
         this._qrWorker.postMessage({
             type: 'inversionMode',
             data: inversionMode
         });
     }
 
-    _onCanPlay() {
+    _onCanPlay () {
         this._updateSourceRect();
         this.$video.play();
     }
 
-    _onPlay() {
+    _onPlay () {
         this._updateSourceRect();
         this._scanFrame();
     }
 
-    _onVisibilityChange() {
+    _onVisibilityChange () {
         if (document.hidden) {
             this.pause();
         } else if (this._active) {
@@ -199,7 +199,7 @@ export default class QrScanner {
         }
     }
 
-    _updateSourceRect() {
+    _updateSourceRect () {
         const smallestDimension = Math.min(this.$video.videoWidth, this.$video.videoHeight);
         const sourceRectSize = Math.round(2 / 3 * smallestDimension);
         this._sourceRect.width = this._sourceRect.height = sourceRectSize;
@@ -207,7 +207,7 @@ export default class QrScanner {
         this._sourceRect.y = (this.$video.videoHeight - sourceRectSize) / 2;
     }
 
-    _scanFrame() {
+    _scanFrame () {
         if (!this._active || this.$video.paused || this.$video.ended) return false;
         // using requestAnimationFrame to avoid scanning if tab is in background
         requestAnimationFrame(() => {
@@ -221,7 +221,7 @@ export default class QrScanner {
         });
     }
 
-    _getCameraStream(facingMode, exact = false) {
+    _getCameraStream (facingMode, exact = false) {
         const constraintsToTry = [{
             width: { min: 1024 }
         }, {
@@ -237,7 +237,7 @@ export default class QrScanner {
         return this._getMatchingCameraStream(constraintsToTry);
     }
 
-    _getMatchingCameraStream(constraintsToTry) {
+    _getMatchingCameraStream (constraintsToTry) {
         if (constraintsToTry.length === 0) {
             return Promise.reject('Camera not found.');
         }
@@ -246,18 +246,18 @@ export default class QrScanner {
         }).catch(() => this._getMatchingCameraStream(constraintsToTry));
     }
 
-    _setVideoMirror(facingMode) {
+    _setVideoMirror (facingMode) {
         // in user facing mode mirror the video to make it easier for the user to position the QR code
-        const scaleFactor = facingMode==='user'? -1 : 1;
+        const scaleFactor = facingMode === 'user' ? -1 : 1;
         this.$video.style.transform = 'scaleX(' + scaleFactor + ')';
     }
 
-    static _getImageData(image, sourceRect=null, canvas=null, fixedCanvasSize=false) {
+    static _getImageData (image, sourceRect = null, canvas = null, fixedCanvasSize = false) {
         canvas = canvas || document.createElement('canvas');
-        const sourceRectX = sourceRect && sourceRect.x? sourceRect.x : 0;
-        const sourceRectY = sourceRect && sourceRect.y? sourceRect.y : 0;
-        const sourceRectWidth = sourceRect && sourceRect.width? sourceRect.width : image.width || image.videoWidth;
-        const sourceRectHeight = sourceRect && sourceRect.height? sourceRect.height : image.height || image.videoHeight;
+        const sourceRectX = sourceRect && sourceRect.x ? sourceRect.x : 0;
+        const sourceRectY = sourceRect && sourceRect.y ? sourceRect.y : 0;
+        const sourceRectWidth = sourceRect && sourceRect.width ? sourceRect.width : image.width || image.videoWidth;
+        const sourceRectHeight = sourceRect && sourceRect.height ? sourceRect.height : image.height || image.videoHeight;
         if (!fixedCanvasSize && (canvas.width !== sourceRectWidth || canvas.height !== sourceRectHeight)) {
             canvas.width = sourceRectWidth;
             canvas.height = sourceRectHeight;
@@ -269,7 +269,7 @@ export default class QrScanner {
     }
 
     /* async */
-    static _loadImage(imageOrFileOrUrl) {
+    static _loadImage (imageOrFileOrUrl) {
         if (imageOrFileOrUrl instanceof HTMLCanvasElement || imageOrFileOrUrl instanceof HTMLVideoElement
             || window.ImageBitmap && imageOrFileOrUrl instanceof window.ImageBitmap
             || window.OffscreenCanvas && imageOrFileOrUrl instanceof window.OffscreenCanvas) {
@@ -277,7 +277,7 @@ export default class QrScanner {
         } else if (imageOrFileOrUrl instanceof Image) {
             return QrScanner._awaitImageLoad(imageOrFileOrUrl).then(() => imageOrFileOrUrl);
         } else if (imageOrFileOrUrl instanceof File || imageOrFileOrUrl instanceof URL
-            ||  typeof(imageOrFileOrUrl)==='string') {
+            || typeof (imageOrFileOrUrl) === 'string') {
             const image = new Image();
             if (imageOrFileOrUrl instanceof File) {
                 image.src = URL.createObjectURL(imageOrFileOrUrl);
@@ -296,9 +296,9 @@ export default class QrScanner {
     }
 
     /* async */
-    static _awaitImageLoad(image) {
+    static _awaitImageLoad (image) {
         return new Promise((resolve, reject) => {
-            if (image.complete && image.naturalWidth!==0) {
+            if (image.complete && image.naturalWidth !== 0) {
                 // already loaded
                 resolve();
             } else {

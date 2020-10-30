@@ -23,79 +23,70 @@
 </template>
 
 <script>
-
 export default {
-  components: {
-    
-  },
+  components: {},
   data() {
     return {
       height: 200,
       splitterModel: 50,
       splitter: 50,
       grayscale: 100,
-      imageUrl: 'https://cdn.quasar.dev/img/parallax1.jpg',
+      imageUrl: "https://cdn.quasar.dev/img/parallax1.jpg",
       topIn: 0,
       bottom: 0,
       heightEl: 0,
-      scrollGrayscale: 0
+      scrollGrayscale: 0,
     };
   },
 
   computed: {
-    splitterStyle () {
+    splitterStyle() {
       return {
-        width: '600px',//Math.min(1000, 0.66 * this.height) + 'px',
-        height: this.height + 'px'
-      }
-    }
+        width: "600px", //Math.min(1000, 0.66 * this.height) + 'px',
+        height: this.height + "px",
+      };
+    },
   },
-  
+
   methods: {
-    scrollHandlerSplitter(e){
-      let distance = document.getElementById("photos").getBoundingClientRect()
-      let heightEl = distance.bottom - distance.top
-      let topIn = distance.top > 0
-      let bottomIn = distance.bottom < window.innerHeight
-      let top = distance.top
-      let bottom = distance.bottom
+    scrollHandlerSplitter(e) {
+      let distance = document.getElementById("photos").getBoundingClientRect();
+      let heightEl = distance.bottom - distance.top;
+      let topIn = distance.top > 0;
+      let bottomIn = distance.bottom < window.innerHeight;
+      let top = distance.top;
+      let bottom = distance.bottom;
 
-      if(topIn && bottomIn){
+      if (topIn && bottomIn) {
         // stay
-      }
-      else if(topIn && !bottomIn){
-        this.splitterModel = bottom + heightEl
-      }
-      else if(bottomIn && !topIn){
-        this.splitterModel = top + heightEl
+      } else if (topIn && !bottomIn) {
+        this.splitterModel = bottom + heightEl;
+      } else if (bottomIn && !topIn) {
+        this.splitterModel = top + heightEl;
       }
     },
 
-    scrollHandler(e){
-      var trigger = 200
+    scrollHandler(e) {
+      var trigger = 200;
 
-      let distance = document.getElementById("example").getBoundingClientRect()
-      let topIn = distance.top > trigger
-      let bottomIn = distance.bottom < (window.innerHeight - trigger)
-      if(topIn && bottomIn){
-        this.scrollGrayscale = 0
-      }
-      else {
-        this.scrollGrayscale = 100
+      let distance = document.getElementById("example").getBoundingClientRect();
+      let topIn = distance.top > trigger;
+      let bottomIn = distance.bottom < window.innerHeight - trigger;
+      if (topIn && bottomIn) {
+        this.scrollGrayscale = 0;
+      } else {
+        this.scrollGrayscale = 100;
       }
     },
 
-    onResize ({ height }) {
-      this.height = height
-      this.splitter = '' + splitterModel
-    }
-  },
-  mounted () {
-    
+    onResize({ height }) {
+      this.height = height;
+      this.splitter = "" + splitterModel;
+    },
   },
 
-  mounted(){
-      this.$store.commit('setPage', 'Spielplatz')
-  }
-}
+  mounted() {
+    this.$store.commit("setPage", "Spielplatz");
+  },
+};
 </script>

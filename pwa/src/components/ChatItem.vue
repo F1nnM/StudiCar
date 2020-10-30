@@ -1,7 +1,7 @@
 <template>
   <div>
     <q-slide-item @left="onLeft" @right="onRight">
-      <q-separator inset="item" v-if="!firstItem" />
+      <q-separator v-if="!firstItem" inset="item" />
       <template v-slot:left>
         <q-icon name="delete_outline" backgroundColor="red" />
       </template>
@@ -14,29 +14,28 @@
         v-ripple
         :id="message.liftId"
         clickable
-        @click="$emit('openLift', message.liftId)"
         class="q-py-sm q-px-xs"
+        @click="$emit('open', message.liftId)"
       >
-        <q-item-section avatar>
+        <!-- <q-item-section avatar>
           <q-avatar>
             <img src="~assets/sad.svg" />
           </q-avatar>
-        </q-item-section>
+        </q-item-section>-->
 
         <q-item-section>
           <q-item-label lines="1">
-            {{message.start}}
-            <span class="text-h6">→</span>
-            {{message.destination}}
+            {{ message.start }}
+            <span class="text-subtitle1 q-px-sm">&rsaquo;</span>
+            {{ message.destination }}
           </q-item-label>
           <q-item-label caption lines="3">
-            <span class="text-weight-bold">{{message.nameOfUser}}:</span>
-
-            <q-icon
-              v-if="message.type != 1"
-              :name="message.type == 2 ? 'keyboard_voice' : 'image'"
-            />
-            {{message.type == 1 ? message.content : ''}}
+            <span class="text-weight-bold q-mr-xs">{{ message.sentBy }}:</span>
+            <span v-if="message.type != 1">
+              <q-icon :name="message.type == 2 ? 'keyboard_voice' : 'image'" />
+              {{ (message.content.length / 1000).toFixed(2) }} KB
+            </span>
+            <span v-else>{{ message.content }}</span>
           </q-item-label>
         </q-item-section>
 
@@ -45,114 +44,99 @@
           top
           class="text-right"
           style="max-width: 30vw;"
-        >{{generate_time_string(message.timestamp)}}</q-item-section>
+        >{{ generateTimeString(message.timestamp) }}</q-item-section>
       </q-item>
     </q-slide-item>
+    <audio></audio>
   </div>
 </template>
 
 <script>
-
-import { date } from 'quasar'
+import { date } from "quasar";
 
 export default {
-  name: 'chat_item',
+  name: "chat_item",
   props: {
-		message:{
-			type: Object,
-			required: true
-			},
-		firstItem: {
-			type: Boolean
-		}
+    message: {
+      type: Object,
+      required: true,
+    },
+    firstItem: Boolean,
+  },
+
+  data() {
+    return {};
+  },
+
+  methods: {
+    onLeft({ reset }) {
+      this.$emit("left", this.message.liftId);
+
+      this.finalize(reset);
     },
 
-    methods: {
-			onLeft ({ reset }) {
-				alert("SWIPED LEFT")
-			
-			this.finalize(reset)
-			},
+    onRight({ reset }) {
+      this.$emit("right", this.message.liftId);
 
-			onRight ({ reset }) {
-				alert("SWIPED RIGHT")
-			
-			this.finalize(reset)
-			},
+      this.finalize(reset);
+    },
 
-			long_tab({e}){
-				alert('LONG TAPPED')
-			},
+    generateTimeString(time) {
+      var display_text;
+      time = new Date(time); // conversion to JS Date Object we can work with
+      if (diff("minutes") <= 2) {
+        display_text = "gerade eben";
+      } else if (diff("minutes") <= 30) {
+        display_text = "vor " + diff("minutes") + " Minuten";
+      } else if (wasToday()) {
+        // checks whether message was still today
+        display_text = date.formatDate(time, "HH:mm");
+      } else if (diff("days") == 1) {
+        // else checks whether message was yesterday
+        display_text = "gestern um " + date.formatDate(time, "HH:mm");
+      } else if (diff("days") == 2) {
+        // else checks whether message was the day before yesterday
+        display_text = "vorgestern um " + date.formatDate(time, "HH:mm");
+      } else if (diff("days") < 7) {
+        display_text = "vor " + diff("days") + " Tagen";
+      } else {
+        display_text = "Vor über einer Woche";
+      }
 
-			generate_time_string(time){
-				var display_text;
-				time = new Date(time) // conversion to JS Date Object we can work with
-				if(diff('minutes') <= 2){
-					display_text = 'gerade eben'
-				}
-				else if(diff('minutes') <= 30){
-					display_text = 'vor ' + diff('minutes') + ' Minuten'
-				}
-				else if(was_today()){ // checks whether message was still today
-					display_text = date.formatDate(time, 'HH:mm')
-				}
-				else if(diff('days') == 1){ // else checks whether message was yesterday
-					display_text = 'gestern um ' + date.formatDate(time, 'HH:mm')
-				}
-				else if(diff('days') == 2){ // else checks whether message was the day before yesterday
-					display_text = 'vorgestern um ' + date.formatDate(time, 'HH:mm')
-				}
-				else if(diff('days') < 7){
-					display_text = 'vor ' + diff('days') + ' Tagen'
-				}
-				else{
-					display_text = 'Vor über einer Woche'
-				}
+      return display_text;
 
-				return display_text
+      function diff(unit) {
+        //console.warn(date.getDateDiff(new Date(), time, unit))
+        return date.getDateDiff(new Date(), time, unit);
+      }
 
-				function diff(unit){
-					//console.warn(date.getDateDiff(new Date(), time, unit))
-					return date.getDateDiff(new Date(), time, unit)
-				}
+      function wasToday() {
+        var this_day = date.isSameDate(time, new Date(), "day");
+        var this_month = date.isSameDate(time, new Date(), "month");
+        var this_year = date.isSameDate(time, new Date(), "year");
+        return this_day && this_month && this_year;
+      }
+    },
 
-				function was_today(){
-					var this_day = date.isSameDate(time, new Date(), 'day')
-					var this_month = date.isSameDate(time, new Date(), 'month')
-					var this_year = date.isSameDate(time, new Date(), 'year')
-					if(this_day && this_month && this_year){
-						return true
-					}
-					else{
-						return false
-					}
-				}
-			},
+    finalize(reset) {
+      this.timer = setTimeout(() => {
+        reset();
+      }, 200);
+    },
 
-			finalize (reset) {
-			this.timer = setTimeout(() => {
-							reset()
-					}, 1000)
-			},
+    quickLiftInfo(info) {
+      // now begins a long journey: getting the liftId of the ChatItem the user has presses his finger on
+      var path = info.evt.path;
+      var el = path.find((item) => {
+        return item.id != "";
+      });
+      var liftId = el.id; // at construction all chatItems got her liftId as id attribute. So we had to follow the DOM path up until we got an id.
+      // of course it is very buggy, but pretty easy way and not that unsafe, since all items in the path before it are generated by system,
+      // therefore will be generated the same way every time and are not controlled via id, so none of them will have an id.
+      this.$emit("shortLiftInfo", liftId);
+    },
+  },
 
-			quickLiftInfo(info){
-				// now begins a long journey: getting the liftId of the ChatItem the user has presses his finger on
-				var path = info.evt.path
-				var el = path.find(item => {
-					return item.id != ''
-				})
-				var liftId = el.id // at construction all chatItems got her liftId as id attribute. So we had to follow the DOM path up until we got an id.
-				// of course it is very buggy, but pretty easy way and not that unsafe, since all items in the path before it are generated by system,
-				// therefore will be generated the same way every time and are not controlled via id, so none of them will have an id.
-				this.$emit('shortLiftInfo', liftId)
-			}
-	},
-	data(){
-		return{
-			
-		}
-	}
-    
-  }
-
+  mounted() {},
+};
 </script>

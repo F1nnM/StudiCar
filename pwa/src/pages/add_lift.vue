@@ -303,206 +303,212 @@
 
 <script>
 import { sendApiRequest, SQL_ADD_LIFT } from "../ApiAccess";
-import extHR from 'components/extended_hr'
-import { date } from 'quasar'
+import extHR from "components/ExtendedHr";
+import { date } from "quasar";
 
 export default {
-
-  components: {extHR},
+  components: { extHR },
 
   data() {
     return {
       lift: {
-        destination: 'school', // default set to school, user selects first home/school, then exact address
+        destination: "school", // default set to school, user selects first home/school, then exact address
         destinationAddressId: 0,
         startAddressId: 0,
         carId: null,
-				seats: 0, // just to avoid error when rendering slider
-				stops: [
-					{
-						addressId: 31,
-						time: 1593684157000
-					},
-					{
-						addressId: 34,
-						time: 1593684175000
-					}
-				]
+        seats: 0, // just to avoid error when rendering slider
+        stops: [
+          {
+            addressId: 31,
+            time: 1593684157000,
+          },
+          {
+            addressId: 34,
+            time: 1593684175000,
+          },
+        ],
       },
       step: 1,
       openAddLiftConfirm: false,
-			flipAddLiftConfirm: true,
-			overviewExpanded: false,
-			uploading: 0 // 0 means not uploading, 1 means upload in progress, 2 means upload successful and -1 means error
-    }
+      flipAddLiftConfirm: true,
+      overviewExpanded: false,
+      uploading: 0, // 0 means not uploading, 1 means upload in progress, 2 means upload successful and -1 means error
+    };
   },
   computed: {
     carOptions() {
       let cars = [];
-      for(let car of this.$store.getters["auth/user"].cars) {
-        cars.push(car.licensePlate+" - "+car.brand +" "+ car.model)
+      for (let car of this.$store.getters["auth/user"].cars) {
+        cars.push(car.licensePlate + " - " + car.brand + " " + car.model);
       }
       return cars;
     },
 
-    userCars(){
-      return this.$store.getters["auth/user"].cars
+    userCars() {
+      return this.$store.getters["auth/user"].cars;
     },
 
-    getCarData(){ // returns data of selected car, so that user for example can see how many seats would be default
-      let cars = this.$store.getters["auth/user"].cars
-      let obj = cars.find(item => {
-        return item.carId == this.lift.carId
-      })
-      return obj ? obj : {
-				seats: 0,
-				color: 'white'
-			 } // fallback when no car has been selected yet
+    getCarData() {
+      // returns data of selected car, so that user for example can see how many seats would be default
+      let cars = this.$store.getters["auth/user"].cars;
+      let obj = cars.find((item) => {
+        return item.carId == this.lift.carId;
+      });
+      return obj
+        ? obj
+        : {
+            seats: 0,
+            color: "white",
+          }; // fallback when no car has been selected yet
     },
 
     liftValue: {
-      get(){
-        return this.lift
+      get() {
+        return this.lift;
       },
-      set(value){
-        this.lift = value
-        this.step+=1
-      }
+      set(value) {
+        this.lift = value;
+        this.step += 1;
+      },
     },
 
-    getExactAddresses(){
-      if(this.lift.destination == 'school'){
-        return this.$store.getters["auth/user"].addresses.filter(item => {
-          return item.id < 4 // filter only the schools, which have IDs 1 to 3
-        })
-        
+    getExactAddresses() {
+      if (this.lift.destination == "school") {
+        return this.$store.getters["auth/user"].addresses.filter((item) => {
+          return item.id < 4; // filter only the schools, which have IDs 1 to 3
+        });
+
         // a[0].imagePath = require(pathBegin + 'HDH_cube.jpg')
         // a[1].imagePath = require(pathBegin + 'HDH_old.jpg')
         // a[2].imagePath = require(pathBegin + 'WIB_ext.jpg')
+      } else if (this.lift.destination == "home") {
+        return this.$store.getters["auth/user"].addresses.filter((item) => {
+          return item.id > 3; // filter only private adresses, IDs 1 to 3 are reserved for schools
+        });
       }
-      else if(this.lift.destination == 'home'){
-        return this.$store.getters["auth/user"].addresses.filter(item => {
-          return item.id > 3 // filter only private adresses, IDs 1 to 3 are reserved for schools
-        })
-      }
-      return null
+      return null;
     },
 
-    getExactStartingPoints(){
-      if(this.lift.destination != 'school'){
-        return this.$store.getters["auth/user"].addresses.filter(item => {
-          return item.id < 4 // filter only the schools, which have IDs 1 to 3
-        })
-        
+    getExactStartingPoints() {
+      if (this.lift.destination != "school") {
+        return this.$store.getters["auth/user"].addresses.filter((item) => {
+          return item.id < 4; // filter only the schools, which have IDs 1 to 3
+        });
+      } else if (this.lift.destination != "home") {
+        return this.$store.getters["auth/user"].addresses.filter((item) => {
+          return item.id > 3; // filter only private adresses, IDs 1 to 3 are reserved for schools
+        });
       }
-      else if(this.lift.destination != 'home'){
-        return this.$store.getters["auth/user"].addresses.filter(item => {
-          return item.id > 3 // filter only private adresses, IDs 1 to 3 are reserved for schools
-        })
-      }
-      return null
-    }
+      return null;
+    },
   },
 
   mounted() {
-    this.$store.commit('setPage', '')
-    this.$store.commit('setPageTrans', 'slide-up')
+    this.$store.commit("setPage", "");
+    this.$store.commit("setPageTrans", "slide");
   },
 
   methods: {
-    addLift(){
-      new Promise(_ => {
-        this.flipAddLiftConfirm = false
-      }).then(_ => {
-        this.openAddLiftConfirm = false
-      }).then(_ => {
-        this.flipAddLiftConfirm = true
-      }) // this is just to get a cool effect, flip when process is canceled and swipe up when lift shall be published.
+    addLift() {
+      new Promise((_) => {
+        this.flipAddLiftConfirm = false;
+      })
+        .then((_) => {
+          this.openAddLiftConfirm = false;
+        })
+        .then((_) => {
+          this.flipAddLiftConfirm = true;
+        }); // this is just to get a cool effect, flip when process is canceled and swipe up when lift shall be published.
 
-      if(this.lift.seats == 0){ // case when user didn't want to change number of seats at this lift
-        this.lift.seats = this.getCarData.seats
-			}
-			this.step = 0
-			this.uploading = 1
-      sendApiRequest(
-        SQL_ADD_LIFT, {
-          id: this.$store.getters["auth/user"].id,
-          lift: this.lift
-        },
-        _ => {
-          // here comes your success code
-          this. lift = {
-              destination: 'school', // default set to school, user selects first home/school, then exact address
-              destinationAddressId: 0,
-              startingPoint: 0,
-              car: null,
-              seats: 0 // just to avoid error when rendering slider
-					}
-					this.step = 0
-					this.openAddLiftConfirm = false
-					this.uploading = 2
-					
-        },
-        error => {
-					alert(error)
-					this.step = 1
-					this.uploading = -1
-        }
-			)
-		},
-		
-		resetFields(){
-			location.reload();
-		},
-
-    getImagePath(id){
-      let pathBegin = '../assets/school_images/'
-      switch(id){
-        case 1: return require('../assets/school_images/HDH_cube_resized.jpg')
-        break
-        case 2: return require('../assets/school_images/HDH_old_resized.jpg')
-        break
-        case 3: return require('../assets/school_images/WIB_ext_resized.jpg')
-        break
-        
-        default: return false // this computed property is being called by school adresses and home adresses. When returning false, no image is shown.
+      if (this.lift.seats == 0) {
+        // case when user didn't want to change number of seats at this lift
+        this.lift.seats = this.getCarData.seats;
       }
-		},
-		
-		getDataFromAddressId(id){
-			let data = this.$store.getters["auth/user"].addresses.find(item => {
-				return item.id == id
-			})
-			if(data){
-				if(!data.nickname){ // when no nickname saved, use city as nickname
-					data.nickname = data.city
-				}
-				return data
-			}
-			return {
-				nickname: null,
-				street: null,
-				city: null // cases when no id has been set yet though method has been called
-			}
-		},
+      this.step = 0;
+      this.uploading = 1;
+      sendApiRequest(
+        SQL_ADD_LIFT,
+        {
+          id: this.$store.getters["auth/user"].id,
+          lift: this.lift,
+        },
+        (_) => {
+          // here comes your success code
+          this.lift = {
+            destination: "school", // default set to school, user selects first home/school, then exact address
+            destinationAddressId: 0,
+            startingPoint: 0,
+            car: null,
+            seats: 0, // just to avoid error when rendering slider
+          };
+          this.step = 0;
+          this.openAddLiftConfirm = false;
+          this.uploading = 2;
+        },
+        (error) => {
+          alert(error);
+          this.step = 1;
+          this.uploading = -1;
+        }
+      );
+    },
 
-		getCarFromId(id){
-			let data = this.userCars.find(item => {
-				return item.carId == id
-			})
-			if(data) return data
-			return {
-				brand: null,
-				model: null // similar case to above method
-			}
-		},
+    resetFields() {
+      location.reload();
+    },
 
-		getStopTime(stamp){
-			return date.formatDate(stamp, 'H:mm')
-		}
-  }
-}
+    getImagePath(id) {
+      let pathBegin = "../assets/school_images/";
+      switch (id) {
+        case 1:
+          return require("../assets/school_images/HDH_cube_resized.jpg");
+          break;
+        case 2:
+          return require("../assets/school_images/HDH_old_resized.jpg");
+          break;
+        case 3:
+          return require("../assets/school_images/WIB_ext_resized.jpg");
+          break;
 
+        default:
+          return false; // this computed property is being called by school adresses and home adresses. When returning false, no image is shown.
+      }
+    },
+
+    getDataFromAddressId(id) {
+      let data = this.$store.getters["auth/user"].addresses.find((item) => {
+        return item.id == id;
+      });
+      if (data) {
+        if (!data.nickname) {
+          // when no nickname saved, use city as nickname
+          data.nickname = data.city;
+        }
+        return data;
+      }
+      return {
+        nickname: null,
+        street: null,
+        city: null, // cases when no id has been set yet though method has been called
+      };
+    },
+
+    getCarFromId(id) {
+      let data = this.userCars.find((item) => {
+        return item.carId == id;
+      });
+      if (data) return data;
+      return {
+        brand: null,
+        model: null, // similar case to above method
+      };
+    },
+
+    getStopTime(stamp) {
+      return date.formatDate(stamp, "H:mm");
+    },
+  },
+};
 </script>
 
 <style scoped lang="scss">

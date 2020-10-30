@@ -38,6 +38,7 @@ src/statics/icons
 
 #exclude my own files
 /src/guides/
+/src/js/damnLongSrc.js
 
 server.pem
 server.key

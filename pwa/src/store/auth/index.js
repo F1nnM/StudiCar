@@ -69,8 +69,25 @@ export default {
       })
     },
 
-    SET_SIGNIN_LOADED (state) {
-      state.signinLoaded = true
+    SET_USER_DATA_LOADING (state, payload) {
+      state.signinLoaded = payload
+    },
+
+    RESPOND_LIFT_REQUEST (state, payload) {
+      var dayShort = payload.dayShort,
+        liftId = payload.liftId,
+        userFbId = payload.user.fbId,
+        requestsOfThatLift = state.user.liftRequests[dayShort][liftId]
+      requestsOfThatLift = requestsOfThatLift.filter(request => request.requestingUser.fbId != userFbId) // sort out user with given fbId
+      state.user.liftRequests[dayShort][liftId] = requestsOfThatLift // if lift is still there, overwrite it
+
+      if (!state.user.liftRequests[dayShort][liftId].length) {
+        delete state.user.liftRequests[dayShort][liftId]
+        if (!Object.keys(state.user.liftRequests[dayShort]).length) {
+          delete state.user.liftRequests[dayShort]
+        }
+      }
+      if (payload.accepted == true) state.user.chatLifts[liftId].passengers.push(payload.user) // user object is structured like other passengers
     }
   },
 
@@ -220,6 +237,10 @@ export default {
         _ => commit('UPDATE_LIFT_MAX_DISTANCE', payload),
         error => alert(error)
       );
+    },
+
+    async respondLiftRequest ({ commit }, payload) {
+      commit('RESPOND_LIFT_REQUEST', payload)
     }
   }
 }
