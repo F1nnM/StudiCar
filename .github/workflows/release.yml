@@ -22,8 +22,9 @@ jobs:
         local-dir: ./pwa/dist/pwa
   api:
     runs-on: ubuntu-latest
-    
+
     steps:
+    - uses: actions/checkout@v2
     - uses: SamKirkland/FTP-Deploy-Action@3.1.1
       with:
         ftp-server: ftp://mfinn.de/httpdocs/studicar/live/api
