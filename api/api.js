@@ -6,7 +6,7 @@ const newsPath = 'news/postillon/ticker.txt',
   longQueries = require('./longQueries'),
   apiResponseSimulation = require('./simulation/apiResponse')
 
-function isOptionMissing (data, needed, res) {
+function isOptionMissing(data, needed, res) {
   return needed.some(key => {
     if (typeof data[key] == "undefined") {
       res.writeHead(400);
@@ -18,9 +18,22 @@ function isOptionMissing (data, needed, res) {
   });
 }
 
-async function getUserId (fb_id) {
-  let result = await runQuery("SELECT ID FROM users WHERE FB_ID = ?", [fb_id]).result[0]
-  return result.ID
+function generateJdenticon(seed) {
+  var jdenticon = require("jdenticon")
+  jdenticon.config = {
+    lightness: {
+      color: [0.31, 0.81],
+      grayscale: [0.26, 0.90]
+    },
+    saturation: {
+      color: 0.60,
+      grayscale: 0.00
+    },
+    backColor: "#ffffffff"
+  };
+
+  let size = 300
+  return jdenticon.toPng(seed, size);
 }
 
 module.exports = {
@@ -259,21 +272,7 @@ module.exports = {
       if (!isOptionMissing(options, ['secretFbId', 'name', 'mail'], res)) {
         let users = (await runQuery("SELECT ID FROM `users` WHERE users.FB_ID = ?", [options.secretFbId])).result[0];
         if (!users) {
-          var jdenticon = require("jdenticon")
-          jdenticon.config = {
-            lightness: {
-              color: [0.31, 0.81],
-              grayscale: [0.26, 0.90]
-            },
-            saturation: {
-              color: 0.60,
-              grayscale: 0.00
-            },
-            backColor: "#ffffffff"
-          };
-
-          let size = 300
-          let png = jdenticon.toPng(options.name, size);
+          let png = generateJdenticon(options.name);
 
           await runQuery(
             "INSERT INTO `users` (`ID`, `FB_ID`, `NAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKING`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`)" +
@@ -314,20 +313,27 @@ module.exports = {
     },
     '/updateProfilePicture': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'imageData'], res)) {
-        console.log(options.imageData.substr(22).substr(0, 50))
-        console.log(options.imageData.substr(0, 50))
         var img = Buffer.from(options.imageData.substr(22), 'base64');
         var dimensions = require('image-size')(img);
         if (!(dimensions.width == 300 && dimensions.height == 300)) {
           res.writeHead(400);
           res.end("Image must be 300x300");
         }
-        let blob = Buffer.from(options.imageData, "base64")
         await runQuery(
-          "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?", [blob, options.secretFbId]).catch(error => {
+          "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?", [img, options.secretFbId]).catch(error => {
             throw error;
           });
-        res.end();
+        res.end()
+      }
+    },
+    '/resetProfilePicture': async (req, res, options) => {
+      if (!isOptionMissing(options, ['secretFbId'], res)) {
+        var name = (await runQuery("SELECT NAME FROM `users` WHERE users.FB_ID = ?", [options.fbid])).result[0].NAME
+        await runQuery(
+          "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?", [generateJdenticon(name), options.secretFbId]).catch(error => {
+            throw error;
+          });
+        res.end()
       }
     },
     '/updatePrefs': async (req, res, options) => {
@@ -436,7 +442,7 @@ module.exports = {
             break
         }
 
-        function dataURItoBlob (dataURI) {
+        function dataURItoBlob(dataURI) {
           // convert base64 to raw binary data held in a string
           // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
           var byteString = atob(dataURI.split(',')[1]);
