@@ -7,20 +7,41 @@
             <div>
               <q-img spinner-color="primary" spinner-size="82px" :src="ppPath">
                 <template v-slot:error>
-                  <div
-                    class="absolute-full flex flex-center text-white"
-                  >Wir konnten dein Bild nicht laden. Bitte stelle eine Internetverbindung her, um dein Profilbild zu sehen.</div>
+                  <div class="absolute-full flex flex-center text-white">
+                    Wir konnten dein Bild nicht laden. Bitte stelle eine
+                    Internetverbindung her, um dein Profilbild zu sehen.
+                  </div>
                 </template>
               </q-img>
-              <q-badge floating class="q-pa-none" style="background-color: transparent;">
-                <q-btn round color="black" size="sm" icon="edit" @click="openUpload = true" />
+              <q-badge
+                floating
+                class="q-pa-none"
+                style="background-color: transparent"
+              >
+                <q-btn
+                  round
+                  color="black"
+                  size="sm"
+                  icon="delete"
+                  @click="resetPP()"
+                  class="q-mr-sm"
+                />
+                <q-btn
+                  round
+                  color="black"
+                  size="sm"
+                  icon="edit"
+                  @click="openUpload = true"
+                />
               </q-badge>
             </div>
 
             <q-card-section class="row q-pb-none">
               <div
                 class="col-8 text-h5 text-weight-light text-left q-mt-none q-mb-xs custom-overline c-o-1 c-o-l c-o-sm"
-              >{{ username }}</div>
+              >
+                {{ username }}
+              </div>
               <p class="col-4">
                 <q-btn icon="select_all" @click="shareProfileQR = true" flat />
               </p>
@@ -35,8 +56,8 @@
               toggle-color="primary"
               color="grey-5"
               :options="[
-                {value: 'stats', slot: 'stats' },
-                {value: 'friends', slot: 'friends'}
+                { value: 'stats', slot: 'stats' },
+                { value: 'friends', slot: 'friends' },
               ]"
             >
               <template v-slot:stats>
@@ -62,19 +83,32 @@
               <q-item-label
                 header
                 class="q-pt-xs q-pb-xs text-uppercase text-caption"
-              >Fahrtenstatistik</q-item-label>
+                >Fahrtenstatistik</q-item-label
+              >
               <q-tabs v-model="statsTimeTab" dense class="bg-white text-grey-7">
                 <q-tab name="previous" icon="query_builder" />
                 <q-tab name="current" icon="check_circle_outline" />
               </q-tabs>
               <q-tab-panels v-model="statsTimeTab">
                 <q-tab-panel
-                  v-for="t in [{
-                  name: 'previous', label: 'Früher', lifts: {all: stats.liftsAll, driver: stats.liftsOffered }
-                  },
-                  {
-                  name: 'current', label: 'Aktuell', lifts: {all: stats.liftCount, driver: stats.driverCount }
-                }]"
+                  v-for="t in [
+                    {
+                      name: 'previous',
+                      label: 'Früher',
+                      lifts: {
+                        all: stats.liftsAll,
+                        driver: stats.liftsOffered,
+                      },
+                    },
+                    {
+                      name: 'current',
+                      label: 'Aktuell',
+                      lifts: {
+                        all: stats.liftCount,
+                        driver: stats.driverCount,
+                      },
+                    },
+                  ]"
                   :key="t.name"
                   :name="t.name"
                 >
@@ -112,9 +146,9 @@
                     :minInput="0"
                     :maxInput="1"
                   >
-                    <p
-                      class="text-h6 text-weight-light q-pt-md"
-                    >{{ t.lifts.driver }} / {{ t.lifts.all }}</p>
+                    <p class="text-h6 text-weight-light q-pt-md">
+                      {{ t.lifts.driver }} / {{ t.lifts.all }}
+                    </p>
                   </ColoredMeter>
                   <br />
                   <q-separator />
@@ -151,11 +185,21 @@
           </q-tab-panel>
           <q-tab-panel name="friends">
             <q-list>
-              <q-item-label header class="q-pt-xs q-pb-xs text-uppercase text-caption">Dabei seit</q-item-label>
+              <q-item-label
+                header
+                class="q-pt-xs q-pb-xs text-uppercase text-caption"
+                >Dabei seit</q-item-label
+              >
               <q-item>{{ since }}</q-item>
-              <q-item-label header class="q-pt-xs q-pb-xs text-uppercase text-caption">Freunde</q-item-label>
+              <q-item-label
+                header
+                class="q-pt-xs q-pb-xs text-uppercase text-caption"
+                >Freunde</q-item-label
+              >
               <q-item>
-                <p class="text-caption">Du hast noch keine Nutzer als Freunde markiert</p>
+                <p class="text-caption">
+                  Du hast noch keine Nutzer als Freunde markiert
+                </p>
               </q-item>
             </q-list>
           </q-tab-panel>
@@ -194,7 +238,9 @@
       >
         <q-tab-panel name="data" class="q-mt-sm q-pt-none">
           <div class="q-pa-sm shadow-1">
-            <p class="text-uppercase text-caption q-mt-none q-mb-xs">Über Mich</p>
+            <p class="text-uppercase text-caption q-mt-none q-mb-xs">
+              Über Mich
+            </p>
 
             <q-select
               v-model="gender"
@@ -205,9 +251,17 @@
               behavior="menu"
             />
             <div class="row q-pt-md">
-              <span class="text-caption text-grey-7 q-mb-none col-10">Kurzbeschreibung</span>
+              <span class="text-caption text-grey-7 q-mb-none col-10"
+                >Kurzbeschreibung</span
+              >
               <div class="col-2">
-                <q-btn size="sm" flat color="black" icon="edit" @click="toggleOpenEditDescription" />
+                <q-btn
+                  size="sm"
+                  flat
+                  color="black"
+                  icon="edit"
+                  @click="toggleOpenEditDescription"
+                />
               </div>
               <div class>{{ description }}</div>
             </div>
@@ -220,17 +274,32 @@
                 <div class="text-uppercase text-caption q-mt-none q-mb-xs">
                   Präferenzen
                   <br />im Auto
-                  <q-btn size="sm" flat @click="toggleOpenEditPrefs()" icon="edit" />
+                  <q-btn
+                    size="sm"
+                    flat
+                    @click="toggleOpenEditPrefs()"
+                    icon="edit"
+                  />
                 </div>
                 <div class="row">
                   <div class="col-9">Redseligkeit</div>
-                  <div :class="'col-3 text-' + betterPrefColor(prefs.talk)">●</div>
+                  <div :class="'col-3 text-' + betterPrefColor(prefs.talk)">
+                    ●
+                  </div>
                   <div class="col-9">... am Morgen</div>
-                  <div :class="'col-3 text-' + betterPrefColor(prefs.talkMorning)">●</div>
+                  <div
+                    :class="'col-3 text-' + betterPrefColor(prefs.talkMorning)"
+                  >
+                    ●
+                  </div>
                   <div class="col-9">Rauchen</div>
-                  <div :class="'col-3 text-' + betterPrefColor(prefs.smoking)">●</div>
+                  <div :class="'col-3 text-' + betterPrefColor(prefs.smoking)">
+                    ●
+                  </div>
                   <div class="col-9">Musik</div>
-                  <div :class="'col-3 text-' + betterPrefColor(prefs.music)">●</div>
+                  <div :class="'col-3 text-' + betterPrefColor(prefs.music)">
+                    ●
+                  </div>
                 </div>
               </div>
               <div class="col-6">
@@ -242,7 +311,12 @@
 
                   <div class="col-12 text-h5 text-right">
                     {{ liftMaxDistance }} km
-                    <q-btn size="sm" flat @click="toggleEditLiftMaxDistance" icon="edit" />
+                    <q-btn
+                      size="sm"
+                      flat
+                      @click="toggleEditLiftMaxDistance"
+                      icon="edit"
+                    />
                   </div>
                 </div>
               </div>
@@ -254,7 +328,9 @@
         <q-tab-panel name="reservoir">
           <div class="q-mt-sm q-pa-sm shadow-1">
             <div class="row">
-              <p class="col-5 text-uppercase text-caption q-mt-none q-mb-xs">Meine Adressen</p>
+              <p class="col-5 text-uppercase text-caption q-mt-none q-mb-xs">
+                Meine Adressen
+              </p>
               <div class="col-5">
                 <q-btn
                   flat
@@ -271,7 +347,7 @@
                 :size="openEditAddresses ? 'md' : 'sm'"
                 :color="openEditAddresses ? 'primary' : 'black'"
                 flat
-                style="transition: .1s"
+                style="transition: 0.1s"
                 @click="openEditAddresses = !openEditAddresses"
                 :icon="openEditAddresses ? 'done' : 'edit'"
               />
@@ -281,12 +357,14 @@
                 v-show="openEditAddresses"
                 dense
                 class="q-ma-none text-caption"
-              >Hinweis: Deine Aktionen werden sofort synchronisiert, der Haken blendet nur die Knöpfe aus.</p>
+              >
+                Hinweis: Deine Aktionen werden sofort synchronisiert, der Haken
+                blendet nur die Knöpfe aus.
+              </p>
             </q-slide-transition>
-            <div
-              v-if="!addresses.length"
-              class="text-weight-light"
-            >Du hast noch keine Adressen hinzugefügt</div>
+            <div v-if="!addresses.length" class="text-weight-light">
+              Du hast noch keine Adressen hinzugefügt
+            </div>
             <q-list>
               <div class="row" v-for="item in addresses" :key="item.id">
                 <q-item class="col-10">
@@ -296,15 +374,19 @@
                       class="q-pl-md col-5"
                       style="border-left: 1px solid lightgray"
                     >
-                      <p class="text-overline text-weight-light">{{ item.nickname }}</p>
+                      <p class="text-overline text-weight-light">
+                        {{ item.nickname }}
+                      </p>
                     </q-item-section>
                     <q-item-section class="q-pl-md col-7 overflow-hidden">
-                      <q-item-label>{{ item.street }} {{ item.number }}</q-item-label>
+                      <q-item-label
+                        >{{ item.street }} {{ item.number }}</q-item-label
+                      >
                       <q-item-label caption>
                         {{ item.postcode }}
-                        <span
-                          style="display: inline-block; max-width: 70%;"
-                        >{{ item.city }}</span>
+                        <span style="display: inline-block; max-width: 70%">{{
+                          item.city
+                        }}</span>
                       </q-item-label>
                     </q-item-section>
                   </div>
@@ -326,7 +408,9 @@
           </div>
           <div class="q-mt-sm q-pa-sm shadow-1">
             <div class="row">
-              <p class="text-uppercase text-caption q-mt-none q-mb-xs col-5">Meine Fahrzeuge</p>
+              <p class="text-uppercase text-caption q-mt-none q-mb-xs col-5">
+                Meine Fahrzeuge
+              </p>
               <div class="col-5">
                 <q-btn
                   flat
@@ -338,18 +422,23 @@
                 />
               </div>
               <p class="col-2">
-                <q-btn size="sm" flat @click="openEditCars = !openEditCars" icon="edit" />
+                <q-btn
+                  size="sm"
+                  flat
+                  @click="openEditCars = !openEditCars"
+                  icon="edit"
+                />
               </p>
               <q-slide-transition>
                 <p v-show="openEditCars" dense class="q-ma-none text-caption">
-                  Hinweis: Deine Aktionen werden sofort synchronisiert, der Haken blendet nur die Knöpfe aus.
+                  Hinweis: Deine Aktionen werden sofort synchronisiert, der
+                  Haken blendet nur die Knöpfe aus.
                   <br />
                 </p>
               </q-slide-transition>
-              <div
-                v-if="!cars.length"
-                class="text-weight-light"
-              >Du hast noch keine Autos hinzugefügt</div>
+              <div v-if="!cars.length" class="text-weight-light">
+                Du hast noch keine Autos hinzugefügt
+              </div>
               <q-card
                 class="col-6 q-pa-xs no-shadow relative"
                 v-for="item in cars"
@@ -358,7 +447,7 @@
                 <q-slide-transition>
                   <div
                     class="bg-white absolute z-fullscreen"
-                    style="top: 0; right: 0; border-bottom-left-radius: 5px;"
+                    style="top: 0; right: 0; border-bottom-left-radius: 5px"
                     v-show="openEditCars"
                   >
                     <q-btn
@@ -371,12 +460,17 @@
                     />
                   </div>
                 </q-slide-transition>
-                <q-img src="~assets/app-logo.svg" style="height: 15vh;">
+                <q-img src="~assets/app-logo.svg" style="height: 15vh">
                   <div class="absolute-bottom">
                     <div class="text-h6">{{ item.brand }}</div>
                     <div class="text-caption">
                       {{ item.model }}
-                      <q-btn icon="info" @click="showCarInfo(item)" flat size="md" />
+                      <q-btn
+                        icon="info"
+                        @click="showCarInfo(item)"
+                        flat
+                        size="md"
+                      />
                     </div>
                   </div>
                 </q-img>
@@ -404,7 +498,13 @@
               autofocus
               @keyup.enter="prompt = false"
             />
-            <q-btn class="col-2" icon="clear" flat size="sm" @click="newDescription = ''" />
+            <q-btn
+              class="col-2"
+              icon="clear"
+              flat
+              size="sm"
+              @click="newDescription = ''"
+            />
           </q-card-section>
 
           <q-card-actions align="right" class="text-primary">
@@ -431,7 +531,11 @@
                   <q-file
                     @input="loadFile"
                     accept="image/*"
-                    :hint="file ? '...und noch auf das Icon tippen' : 'noch kein Bild ausgewählt'"
+                    :hint="
+                      file
+                        ? '...und noch auf das Icon tippen'
+                        : 'noch kein Bild ausgewählt'
+                    "
                     class="full-width"
                   />
                 </div>
@@ -443,7 +547,7 @@
                     <canvas
                       id="newImage"
                       class="shadow-11 rounded-borders"
-                      style="object-fit: contain; max-height: 20vh;"
+                      style="object-fit: contain; max-height: 20vh"
                     />
                   </div>
                   <div class="col-4">
@@ -461,13 +565,16 @@
                 </div>
               </q-slide-transition>
               <br />
-              <p
-                v-if="!file"
-                class="text-caption"
-              >Bitte stelle sicher, dass du auf dem Bild gut zu sehen bist. Vergewissere dich außerdem, dass du berechtigt bist, dieses Bild hochzuladen.</p>
+              <p v-if="!file" class="text-caption">
+                Bitte stelle sicher, dass du auf dem Bild gut zu sehen bist.
+                Vergewissere dich außerdem, dass du berechtigt bist, dieses Bild
+                hochzuladen.
+              </p>
               <p v-if="file" class="text-caption">
-                Wir haben dein Bild etwas zugeschnitten, damit es den Abmessungen für Profilbilder entspricht.
-                Aktuell kannst du den Ausschnitt noch nicht selbst einstellen, wir arbeiten aber daran.
+                Wir haben dein Bild etwas zugeschnitten, damit es den
+                Abmessungen für Profilbilder entspricht. Aktuell kannst du den
+                Ausschnitt noch nicht selbst einstellen, wir arbeiten aber
+                daran.
               </p>
             </div>
           </q-card-section>
@@ -481,9 +588,13 @@
           </q-card-section>
           <q-card-section>
             <p class="text-caption">
-              Wie weit soll deine Mitfahrgelegenheit maximal von dir entfernt sein?
+              Wie weit soll deine Mitfahrgelegenheit maximal von dir entfernt
+              sein?
               <br />
-              <small>Bitte hab Verständnis, dass wir noch mit Luftlinien rechnen. Echte Routen sollen aber bald kommen.</small>
+              <small
+                >Bitte hab Verständnis, dass wir noch mit Luftlinien rechnen.
+                Echte Routen sollen aber bald kommen.</small
+              >
             </p>
 
             <q-slider
@@ -493,14 +604,19 @@
               :step="5"
               snap
               label-always
-              :label-value="newLiftMaxDistance+' km'"
+              :label-value="newLiftMaxDistance + ' km'"
               color="primary"
             />
-            <div style="min-height: 30vh;"></div>
+            <div style="min-height: 30vh"></div>
           </q-card-section>
           <q-card-actions align="right" class="text-primary">
             <q-btn flat label="Abbrechen" v-close-popup />
-            <q-btn flat label="Speichern" @click="toggleEditLiftMaxDistance" v-close-popup />
+            <q-btn
+              flat
+              label="Speichern"
+              @click="toggleEditLiftMaxDistance"
+              v-close-popup
+            />
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -508,7 +624,9 @@
       <q-dialog v-model="carInfoOpen" position="bottom">
         <q-card>
           <q-card-section class="row items-center q-pb-none">
-            <div class="text-h6 custom-underline c-u-4 c-u-l c-u-md">Infos zum Fahrzeug</div>
+            <div class="text-h6 custom-underline c-u-4 c-u-l c-u-md">
+              Infos zum Fahrzeug
+            </div>
             <q-space />
             <q-btn icon="close" flat round dense v-close-popup />
           </q-card-section>
@@ -520,7 +638,7 @@
                   spinner-color="primary"
                   spinner-size="82px"
                   class="full-height full-width"
-                  style="max-height: 20vh;"
+                  style="max-height: 20vh"
                 />
               </div>
               <div class="col-7 q-pa-lg">
@@ -529,29 +647,37 @@
               </div>
             </div>
           </q-card-section>
-          <extHR :color="carInfo.color ? carInfo.color : 'black'" hex size="xs" />
+          <extHR
+            :color="carInfo.color ? carInfo.color : 'black'"
+            hex
+            size="xs"
+          />
           <q-card-section class="q-pt-sm">
             <div class="q-pa-lg row">
               <div
-                v-for="data in [{
-                prop: 'type',
-                label: 'Fahrzeugtyp'
-              },
-              {
-                prop: 'seats',
-                label: 'Freie Sitze'
-              },
-              {
-                prop: 'licensePlate',
-                label: 'Kennzeichen'
-              },
-              {
-                prop: 'year',
-                label: 'Baujahr'
-              }]"
+                v-for="data in [
+                  {
+                    prop: 'type',
+                    label: 'Fahrzeugtyp',
+                  },
+                  {
+                    prop: 'seats',
+                    label: 'Freie Sitze',
+                  },
+                  {
+                    prop: 'licensePlate',
+                    label: 'Kennzeichen',
+                  },
+                  {
+                    prop: 'year',
+                    label: 'Baujahr',
+                  },
+                ]"
                 :key="data.prop"
               >
-                <p class="text-uppercase text-caption col-7">{{ data.label }}</p>
+                <p class="text-uppercase text-caption col-7">
+                  {{ data.label }}
+                </p>
                 <p class="col-5">{{ carInfo[data.prop] }}</p>
               </div>
             </div>
@@ -579,7 +705,7 @@
                 <q-tab name="music" icon="music_note" />
               </q-tabs>
             </template>
-            <template v-slot:after style="height: 300px;">
+            <template v-slot:after style="height: 300px">
               <q-tab-panels
                 v-model="openEditPrefsTab"
                 swipeable
@@ -587,25 +713,27 @@
                 vertical
                 transition-prev="jump-down"
                 transition-next="jump-up"
-                style="height: 400px;"
+                style="height: 400px"
               >
                 <q-tab-panel
-                  v-for="cat in [{
-                prop: 'talk',
-                label: 'Redseligkeit'
-              },
-              {
-                prop: 'talkMorning',
-                label: '... am Morgen'
-              },
-              {
-                prop: 'smoking',
-                label: 'Rauchen im Auto'
-              },
-              {
-                prop: 'music',
-                label: 'Musik im Auto'
-              }]"
+                  v-for="cat in [
+                    {
+                      prop: 'talk',
+                      label: 'Redseligkeit',
+                    },
+                    {
+                      prop: 'talkMorning',
+                      label: '... am Morgen',
+                    },
+                    {
+                      prop: 'smoking',
+                      label: 'Rauchen im Auto',
+                    },
+                    {
+                      prop: 'music',
+                      label: 'Musik im Auto',
+                    },
+                  ]"
                   :key="cat.prop"
                   :name="cat.prop"
                 >
@@ -649,7 +777,9 @@
       <q-dialog v-model="openNewAddress" position="bottom" persistent>
         <q-card>
           <q-form @submit="addAddress" class="q-gutter-md">
-            <q-card-section class="text-h6 text-weight-light">Eine Adresse hinzufügen</q-card-section>
+            <q-card-section class="text-h6 text-weight-light"
+              >Eine Adresse hinzufügen</q-card-section
+            >
 
             <q-card-section>
               <div class="row">
@@ -660,7 +790,10 @@
                     type="text"
                     label="Straße"
                     lazy-rules
-                    :rules="[ val => val && val.length > 0 || 'Bitte gib eine Straße ein']"
+                    :rules="[
+                      (val) =>
+                        (val && val.length > 0) || 'Bitte gib eine Straße ein',
+                    ]"
                   />
                 </div>
                 <div class="col-5">
@@ -671,9 +804,10 @@
                     label="Hausnummer"
                     lazy-rules
                     :rules="[
-         
-          val => val > 0 && val < 1000 || 'Hausnummern können von 1 bis 999 gehen'
-        ]"
+                      (val) =>
+                        (val > 0 && val < 1000) ||
+                        'Hausnummern können von 1 bis 999 gehen',
+                    ]"
                   />
                 </div>
 
@@ -685,7 +819,10 @@
                   type="number"
                   label="Postleitzahl"
                   lazy-rules
-                  :rules="[ val => val && ('' + val).length == 5 || 'Fünf Stellen bitte']"
+                  :rules="[
+                    (val) =>
+                      (val && ('' + val).length == 5) || 'Fünf Stellen bitte',
+                  ]"
                 />
 
                 <q-input
@@ -696,8 +833,10 @@
                   label="Ort"
                   lazy-rules
                   :rules="[
-          val => val !== null && val !== '' || 'Ohne Stadt können wir lange suchen...'
-        ]"
+                    (val) =>
+                      (val !== null && val !== '') ||
+                      'Ohne Stadt können wir lange suchen...',
+                  ]"
                 />
                 <q-input
                   class="col-12"
@@ -705,9 +844,7 @@
                   v-model="newAddress.nickname"
                   label="Beschreibung"
                   lazy-rules
-                  :rules="[
-          val => val.length <= 10 || 'Maximal 10 Zeichen'
-        ]"
+                  :rules="[(val) => val.length <= 10 || 'Maximal 10 Zeichen']"
                   hint="Optional, wird groß vor der Adresse angezeigt."
                 />
               </div>
@@ -715,15 +852,19 @@
             <q-card-section>
               <p class="text-caption">
                 Falls du nochmal nachlesen willst:
-                <a
-                  href="https://mi.com"
-                  class="block"
-                >Info zu unserer Datenverarbeitung</a>
+                <a href="https://mi.com" class="block"
+                  >Info zu unserer Datenverarbeitung</a
+                >
               </p>
             </q-card-section>
 
             <q-card-actions align="right">
-              <q-btn flat label="Abbrechen" @click="openNewAddress = false" color="primary" />
+              <q-btn
+                flat
+                label="Abbrechen"
+                @click="openNewAddress = false"
+                color="primary"
+              />
               <q-btn
                 flat
                 label="Hinzufügen"
@@ -737,7 +878,13 @@
         </q-card>
       </q-dialog>
 
-      <q-dialog v-model="openAddCar" full-height full-width position="bottom" persistent>
+      <q-dialog
+        v-model="openAddCar"
+        full-height
+        full-width
+        position="bottom"
+        persistent
+      >
         <q-card>
           <q-card-section
             clickable
@@ -750,8 +897,18 @@
           </q-card-section>
 
           <q-card-section class="overflow-auto">
-            <q-stepper v-model="openNewCarTab" ref="stepper" color="primary" animated>
-              <q-step :name="1" title="Marke" icon="home" :done="openNewCarTab > 1">
+            <q-stepper
+              v-model="openNewCarTab"
+              ref="stepper"
+              color="primary"
+              animated
+            >
+              <q-step
+                :name="1"
+                title="Marke"
+                icon="home"
+                :done="openNewCarTab > 1"
+              >
                 <q-select
                   v-model="newCar.brand"
                   label="Marke auswählen"
@@ -766,10 +923,19 @@
                 </p>
               </q-step>
 
-              <q-step :name="2" title="Modell" icon="rv_hookup" :done="openNewCarTab > 2">
+              <q-step
+                :name="2"
+                title="Modell"
+                icon="rv_hookup"
+                :done="openNewCarTab > 2"
+              >
                 <q-select
                   v-model="newCar.model"
-                  :label="newCar.brand ? 'Modell auswählen' : 'Wähle zuerst deine Marke aus'"
+                  :label="
+                    newCar.brand
+                      ? 'Modell auswählen'
+                      : 'Wähle zuerst deine Marke aus'
+                  "
                   hint="Und welches Modell?"
                   :options="newCar.brand ? newCarOptions[newCar.brand] : []"
                   behavior="menu"
@@ -780,25 +946,52 @@
                   <a href="#/contact">schreib uns</a> bitte das fehlende Modell.
                 </p>
               </q-step>
-              <q-step :name="3" title="Typ" icon="rv_hookup" :done="openNewCarTab > 3">
+              <q-step
+                :name="3"
+                title="Typ"
+                icon="rv_hookup"
+                :done="openNewCarTab > 3"
+              >
                 <q-select
                   v-model="newCar.type"
                   label="Typ auswählen"
                   hint="Versuche, dein Auto einzuordnen"
-                  :options="['Kompaktwagen','Kombi','Limousine','Cabrio','SUV','Sportwagen','Transporter']"
+                  :options="[
+                    'Kompaktwagen',
+                    'Kombi',
+                    'Limousine',
+                    'Cabrio',
+                    'SUV',
+                    'Sportwagen',
+                    'Transporter',
+                  ]"
                   behavior="menu"
                   @input="$refs.stepper.next()"
                 />
               </q-step>
 
-              <q-step :name="4" title="Farbe" icon="brush" :done="openNewCarTab > 4">
-                <div
-                  class="text-caption"
-                >Anhand der Autofarbe können andere Nutzer dein Auto besser erkennen</div>
-                <ImageColorPicker imageSrc="app-icon_color_preview.png" v-model="newCar.color" />
+              <q-step
+                :name="4"
+                title="Farbe"
+                icon="brush"
+                :done="openNewCarTab > 4"
+              >
+                <div class="text-caption">
+                  Anhand der Autofarbe können andere Nutzer dein Auto besser
+                  erkennen
+                </div>
+                <ImageColorPicker
+                  imageSrc="app-icon_color_preview.png"
+                  v-model="newCar.color"
+                />
               </q-step>
 
-              <q-step :name="5" title="Baujahr" icon="query_builder" :done="openNewCarTab > 5">
+              <q-step
+                :name="5"
+                title="Baujahr"
+                icon="query_builder"
+                :done="openNewCarTab > 5"
+              >
                 <q-select
                   v-model="newCar.year"
                   label="Baujahr auswählen"
@@ -809,7 +1002,12 @@
                 />
               </q-step>
 
-              <q-step :name="6" title="Nummernschild" icon="money" :done="openNewCarTab > 6">
+              <q-step
+                :name="6"
+                title="Nummernschild"
+                icon="money"
+                :done="openNewCarTab > 6"
+              >
                 <q-input
                   type="text"
                   placeholder="HDH DH 2020"
@@ -818,30 +1016,40 @@
                   hint="Das können Nutzer nur dann sehen, wenn sie mit dir mitfahren."
                 />
                 <q-slide-transition>
-                  <p
-                    class="text-negative q-mt-md"
-                    v-show="!validNumberPlate()"
-                  >Noch keine gültige Eingabe</p>
+                  <p class="text-negative q-mt-md" v-show="!validNumberPlate()">
+                    Noch keine gültige Eingabe
+                  </p>
                 </q-slide-transition>
               </q-step>
 
-              <q-step :name="7" title="Sitze" icon="supervisor_account" :done="openNewCarTab > 7">
+              <q-step
+                :name="7"
+                title="Sitze"
+                icon="supervisor_account"
+                :done="openNewCarTab > 7"
+              >
                 <q-select
                   @input="$refs.stepper.next()"
                   v-model="newCar.seats"
                   label="Freie Plätze"
-                  :options="[1,2,3,4,5,6,7]"
+                  :options="[1, 2, 3, 4, 5, 6, 7]"
                   hint="Wie viele Leute kannst du normalerweise noch mitnehmen?"
                 />
-                <p
-                  class="text-caption q-mt-lg"
-                >Wir werden dich vor jeder Fahrt fragen, ob es dabei bleibt.</p>
+                <p class="text-caption q-mt-lg">
+                  Wir werden dich vor jeder Fahrt fragen, ob es dabei bleibt.
+                </p>
               </q-step>
 
               <template v-slot:navigation>
                 <q-stepper-navigation>
                   <q-btn
-                    @click="if(openNewCarTab < 7) { $refs.stepper.next() } else { openAddCarConfirm = true}"
+                    @click="
+                      if (openNewCarTab < 7) {
+                        $refs.stepper.next();
+                      } else {
+                        openAddCarConfirm = true;
+                      }
+                    "
                     color="primary"
                     :label="openNewCarTab == 7 ? 'Hinzufügen' : 'Weiter'"
                   />
@@ -860,10 +1068,8 @@
           <q-card-section>
             <p class="text-caption">
               Beim Hinzufügen eines Autos erklärst du dich mit unserer
-              <a
-                href="/#/legal"
-                class="block text-dark"
-              >Datenverarbeitung</a> einverstanden.
+              <a href="/#/legal" class="block text-dark">Datenverarbeitung</a>
+              einverstanden.
             </p>
           </q-card-section>
         </q-card>
@@ -887,23 +1093,31 @@
               caption="Bitte lies sie dir durch, wenn du sie noch nicht kennst"
             >
               <p class="text-caption">
-                Bitte stelle sicher, dass deine Angaben korrekt und vollständig sind.
+                Bitte stelle sicher, dass deine Angaben korrekt und vollständig
+                sind.
                 <br />
-                <br />Und falls noch nicht geschehen: Schau dir bitte noch unsere
-                <a
-                  href="https://mi.com"
-                >Datenverarbeitung</a> an.
+                <br />Und falls noch nicht geschehen: Schau dir bitte noch
+                unsere <a href="https://mi.com">Datenverarbeitung</a> an.
               </p>
             </q-expansion-item>
           </q-card-section>
 
           <q-card-section class="row">
             <div class="col-7 text-h5">{{ newCar.brand }}</div>
-            <div class="col-5 text-h6 text-weight-light">{{ newCar.model }}</div>
+            <div class="col-5 text-h6 text-weight-light">
+              {{ newCar.model }}
+            </div>
             <p
-              v-show="newCar.brand ? (newCarOptions[newCar.brand].indexOf(newCar.model) == -1) : false"
+              v-show="
+                newCar.brand
+                  ? newCarOptions[newCar.brand].indexOf(newCar.model) == -1
+                  : false
+              "
               class="text-red"
-            >Anscheinend hast du deine Marke geändert, ohne das Modell anzupassen. Bitte korrigiere deine Eingaben.</p>
+            >
+              Anscheinend hast du deine Marke geändert, ohne das Modell
+              anzupassen. Bitte korrigiere deine Eingaben.
+            </p>
           </q-card-section>
 
           <q-card-section>
@@ -920,10 +1134,9 @@
 
               <p class="col-5">{{ newCar.licensePlate }}</p>
 
-              <p
-                v-show="!validNumberPlate()"
-                class="text-negative col-12"
-              >Das angegebene Kennzeichen hat eine ungültige Syntax.</p>
+              <p v-show="!validNumberPlate()" class="text-negative col-12">
+                Das angegebene Kennzeichen hat eine ungültige Syntax.
+              </p>
 
               <p class="text-uppercase text-caption col-7">Baujahr</p>
               <p class="col-5">{{ newCar.year }}</p>
@@ -931,7 +1144,12 @@
           </q-card-section>
 
           <q-card-actions align="right">
-            <q-btn flat label="Bearbeiten" @click="openAddCarConfirm = false" v-close-popup />
+            <q-btn
+              flat
+              label="Bearbeiten"
+              @click="openAddCarConfirm = false"
+              v-close-popup
+            />
             <q-btn
               color="primary"
               label="Auto hinzufügen"
@@ -959,7 +1177,7 @@ import {
   sendApiRequest,
   SQL_UPDATE_PROFILE_PICTURE,
   GET_CAR_MODELS,
-  // SQL_SET_USER_PROFILE_PICTURE
+  SQL_RESET_PROFILE_PICTURE,
 } from "../ApiAccess";
 
 export default {
@@ -1368,19 +1586,25 @@ export default {
     },
 
     uploadProfilePicture() {
-        if (this.newPPictureBase64)
-          sendApiRequest(
-            SQL_UPDATE_PROFILE_PICTURE,
-            {
-              imageData: this.newPPictureBase64
-            },
-            _=> {
-              this.ppPath += "&timestamp="+Date.now()
-              this.openUpload = false
-              this.file = null
-              this.newPPictureBase64 = ""
-            }
-          );
+      if (this.newPPictureBase64)
+        sendApiRequest(
+          SQL_UPDATE_PROFILE_PICTURE,
+          {
+            imageData: this.newPPictureBase64,
+          },
+          (_) => {
+            this.ppPath += "&timestamp=" + Date.now();
+            this.openUpload = false;
+            this.file = null;
+            this.newPPictureBase64 = "";
+          }
+        );
+    },
+
+    resetPP() {
+      sendApiRequest(SQL_RESET_PROFILE_PICTURE, {}, (_) => {
+        this.ppPath += "&timestamp=" + Date.now();
+      });
     },
 
     capitalize(string) {
