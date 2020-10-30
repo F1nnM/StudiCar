@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
     - run: npm install -g @quasar/cli
-    - run: quasar ext add @quasar/icon-genie
+    - run: npm install -g @quasar/icongenie
     - run: npm ci
     - run: npm run build
     - uses: SamKirkland/FTP-Deploy-Action@3.1.1
