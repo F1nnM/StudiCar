@@ -95,6 +95,26 @@
                   icon="info"
                 />
               </q-item-label>
+              <div class="row justify-evenly">
+                <div
+                  class="text-center col-6 q-mb-sm"
+                  v-for="(pref) in [{
+val: 'talk', icon: 'record_voice_over'
+                    },
+                    {
+val: 'talkMorning', icon: 'alarm'
+                    },
+                    {
+val: 'smoking', icon: 'smoking_rooms'
+                    },
+                    {
+val: 'music', icon: 'music_note'
+                    }]"
+                  :key="pref.val"
+                >
+                  <q-icon :name="pref.icon" :color="betterPrefColor(pref.val)" size="sm" />
+                </div>
+              </div>
 
               <div
                 class="row full-width q-pb-xs q-pl-md"

@@ -18,13 +18,14 @@
       />
     </TitleButtonAnchor>
     <q-tab-panels
+      swipeable
       animated
       v-model="liftTab"
       transition-prev="jump-right"
       transition-next="jump-left"
       class="text-caption text-right q-pa-none"
     >
-      <q-tab-panel class="q-pa-none" name="current">Bestehend</q-tab-panel>
+      <q-tab-panel class="q-pa-none" name="current"></q-tab-panel>
       <q-tab-panel class="q-pa-none row justify-between" name="requests">
         <TextPagination
           :options="Object.keys(liftRequests)"
@@ -42,6 +43,7 @@
     </q-tab-panels>
     <q-tab-panels
       animated
+      swipeable
       v-model="liftTab"
       transition-prev="jump-right"
       transition-next="jump-left"
@@ -113,7 +115,6 @@
                   </q-tabs>
                   <q-tab-panels
                     animated
-                    swipeable
                     transition-prev="slide-right"
                     class="q-pa-none"
                     transition-next="slide-left"

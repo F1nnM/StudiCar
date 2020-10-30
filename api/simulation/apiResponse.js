@@ -56,12 +56,12 @@ module.exports = {
 					sentBy: 1
 				}
 			],
-			qr: 1 //'l501cd12fb282713d2f52ec56393f1309'
+			qr: 'l501cd12fb282713d2f52ec56393f1309'
 		},
 		2: {
 			car: {
-				brand: "HEHEHE",
-				model: "Golf",
+				brand: "Audi",
+				model: "A8",
 				color: "#FF00FF",
 				allSeats: 7,
 				licensePlate: "HH-BJ-88",
@@ -128,12 +128,12 @@ module.exports = {
 					sentBy: 1
 				}
 			],
-			qr: 2// 'lcc7fb9185dcf1535b4211d661b6a0572'
+			qr: 'lcc7fb9185dcf1535b4211d661b6a0572'
 		},
 		3: {
 			car: {
-				brand: "HEHEHE",
-				model: "Golf",
+				brand: "Mazda",
+				model: "Touran",
 				color: "#FF00FF",
 				allSeats: 7,
 				licensePlate: "HH-BJ-88",
@@ -161,6 +161,24 @@ module.exports = {
 					fbId: 'wG3cG4M7NFMJzJYhfzFjLrJC9Q23',
 					name: "Alicia",
 					surname: "Müller"
+				},
+				{
+					id: 60,
+					fbId: 'wG3cG4M7NFMJzJYhfzFjLrJC9Q23',
+					name: "Robert",
+					surname: "Paulauer"
+				},
+				{
+					id: 61,
+					fbId: 'wG3cG4M7NFMJzJYhfzFjLrJC9Q23',
+					name: "Günther",
+					surname: "Vielschneider"
+				},
+				{
+					id: 63,
+					fbId: 'wG3cG4M7NFMJzJYhfzFjLrJC9Q23',
+					name: "Jacob",
+					surname: "Nießen"
 				}
 			],
 			messages: [
@@ -200,7 +218,7 @@ module.exports = {
 					sentBy: 1
 				}
 			],
-			qr: 3// 'lcc7fb9185dcf1535b4211d661b6a0572'
+			qr: 'lcc7fb9185dcf1535b4211d661b6a0572'
 		}
 	},
 	marketplaceOffers:

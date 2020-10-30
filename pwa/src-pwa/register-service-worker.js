@@ -45,7 +45,7 @@ register(process.env.SERVICE_WORKER_FILE, {
 
     if (process.env.DEV) {
       console.log('New content is available; please refresh.')
-      Notify.create({
+      if (false) Notify.create({
         message: "Neue Version verfügbar",
         caption: "Bitte führe zeitnah ein Update durch",
         test: 'ff',

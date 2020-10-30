@@ -43,6 +43,10 @@ const store = new Vuex.Store({
     setLegal (state, legal_) {
       state.legal = legal_
     },
+
+    setAskAgainWhenAppreciatingNewPassenger (state, askAgain) {
+      state.settings.askAgainWhenAppreciatingNewPassenger = askAgain
+    }
   },
   actions: {
 
@@ -67,9 +71,8 @@ const store = new Vuex.Store({
     faq: [],
     scroll: 0,
     message: 'Hello',
-    systemInfo: {
-      usersAll: 226,
-      about: {}
+    settings: {
+      askAgainWhenAppreciatingNewPassenger: true // when true, user has to confirm action at appreciating new passenger
     },
     liftDriverRatioGradient: `linear-gradient(90deg, rgba(255,0,0,1) 0%, rgba(236,255,0,1) 17%, 
     rgba(0,255,0,1) 35%, rgba(81,255,0,1) 60%, rgba(236,255,0,1) 87%, rgba(255,0,0,1) 100%)`,
