@@ -328,7 +328,7 @@ module.exports = {
     },
     '/resetProfilePicture': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId'], res)) {
-        var name = (await runQuery("SELECT NAME FROM `users` WHERE users.FB_ID = ?", [options.fbid])).result[0].NAME
+        var name = (await runQuery("SELECT NAME FROM `users` WHERE users.FB_ID = ?", [options.secretFbId])).result[0].NAME
         await runQuery(
           "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?", [generateJdenticon(name), options.secretFbId]).catch(error => {
             throw error;
