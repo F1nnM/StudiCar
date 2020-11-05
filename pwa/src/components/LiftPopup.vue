@@ -3,12 +3,12 @@
     <div class="q-ma-none q-pa-none">
       <!-- <span v-if="isLayoutOpen"></span> -->
       <q-dialog
-        v-model="open"
+        :value="open"
         persistent
         maximized
         transition-show="slide-up"
         transition-hide="slide-down"
-        @input="emitAndClose"
+        @input="emit"
       >
         <q-layout v-if="lift" view="hHh lpR fFr" class="bg-white q-pa-none">
           <q-header reveal elevated class="bg-primary text-white">
@@ -40,7 +40,7 @@
               <div class="col-2 bg-white text-primary">
                 <q-toolbar>
                   <q-toolbar-title>
-                    <q-btn v-ripple icon="close" flat round dense @click="emitAndClose()" />
+                    <q-btn v-ripple icon="close" flat round dense @click="emit" />
                   </q-toolbar-title>
                 </q-toolbar>
               </div>
@@ -58,7 +58,7 @@
             <div class="q-pa-md">
               <p class="text-h6 row items-center">
                 Info
-                <q-btn flat class="q-ml-sm" icon="select_all" size="md" @click="showQR = !showQR" />
+                <!-- <q-btn flat class="q-ml-sm" icon="select_all" size="md" @click="showQR = !showQR" /> -->
 
                 <q-space />
                 <q-btn icon="close" flat round dense @click="openLiftInfo = false" />
@@ -209,6 +209,7 @@
           <q-page-container>
             <div class="q-pa-md bg-white scroll overflow-hidden">
               <!-- v-touch-swipe.mouse.right="goBack" -->
+
               <q-page-scroller
                 reverse
                 position="bottom-right"
@@ -217,7 +218,7 @@
                 :offset="[10, 18]"
               >
                 <q-page-sticky position="bottom-right" :offset="[18, 18]">
-                  <q-btn fab icon="add" color="accent" />
+                  <q-btn fab icon="keyboard_arrow_down" color="accent" />
                 </q-page-sticky>
               </q-page-scroller>
 
@@ -502,6 +503,10 @@
 </template>
 
 <script>
+import VueRecord from "@codekraft-studio/vue-record";
+import Vue from "vue";
+Vue.use(VueRecord);
+
 import { openURL, date, copyToClipboard, Notify } from "quasar";
 import ExtHr from "components/ExtendedHr";
 import VueQrcode from "vue-qrcode";
@@ -551,6 +556,7 @@ export default {
       // },
       loading: 0, // as always: 0 means not loading, 1 means in progress, 2 means success and -1 error.
       endOfPage: null,
+      bottomReached: false,
     };
   },
   model: {
@@ -637,7 +643,14 @@ export default {
             }
           : null
       );
-      console.warn("scrolled");
+    },
+
+    pageScrolled(e) {
+      if (!this.open) return;
+      const limit = 100;
+      var done = e.position <= limit;
+      console.warn(done);
+      this.bottomReached = done;
     },
 
     getImageOfUser(id) {
@@ -652,7 +665,7 @@ export default {
       }).name;
     },
 
-    emitAndClose(val) {
+    emit(val) {
       this.$emit("input", val);
     },
 

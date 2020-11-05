@@ -5,7 +5,7 @@
         <div class="text-h6 col-10 text-weight-light">{{ greeting.full }}</div>
         <q-icon size="sm" class="col-2" :name="greetingIcon" />
       </div>
-      <div v-if="caption" class="full-width absolute-bottom-left text-caption">
+      <div v-if="caption && showTicker" class="full-width absolute-bottom-left text-caption">
         {{ caption }}
         <small>
           <br />bezogen von
@@ -25,6 +25,11 @@ export default {
       required: true,
     },
     caption: String,
+  },
+  data() {
+    return {
+      showTicker: this.$store.state.settings.enablePostillonNewsFeed,
+    };
   },
 
   computed: {

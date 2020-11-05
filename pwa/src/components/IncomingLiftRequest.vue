@@ -104,7 +104,7 @@ import ColoredMeter from "components/ColoredMeter";
 import { sendApiRequest } from "../ApiAccess";
 
 export default {
-  name: "UserLiftRequest",
+  name: "IncomingLiftRequest",
   components: {
     ColoredMeter,
   },

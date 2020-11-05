@@ -44,16 +44,27 @@ const store = new Vuex.Store({
       state.legal = legal_
     },
 
+    setInfo (state, info_) {
+      state.info = info_
+    },
+
     setAskAgainWhenAppreciatingNewPassenger (state, askAgain) {
       state.settings.askAgainWhenAppreciatingNewPassenger = askAgain
+    },
+
+    setEnablePostillonNewsFeed (state, show) {
+      state.settings.enablePostillonNewsFeed = show
     }
   },
   actions: {
-
   },
   getters: {
     getFAQ (state) {
       return state.faq
+    },
+
+    getStudiCarInfo (state) {
+      return state.info
     },
 
     getLegal (state) {
@@ -69,13 +80,15 @@ const store = new Vuex.Store({
     testValue: 10,
     legal: '',
     faq: [],
+    info: null,
     scroll: 0,
     message: 'Hello',
     settings: {
-      askAgainWhenAppreciatingNewPassenger: true // when true, user has to confirm action at appreciating new passenger
+      askAgainWhenAppreciatingNewPassenger: true, // when true, user has to confirm action at appreciating new passenger
+      enablePostillonNewsFeed: true // when true, postillon ticker is displayed in left drawer
     },
-    liftDriverRatioGradient: `linear-gradient(90deg, rgba(255,0,0,1) 0%, rgba(236,255,0,1) 17%, 
-    rgba(0,255,0,1) 35%, rgba(81,255,0,1) 60%, rgba(236,255,0,1) 87%, rgba(255,0,0,1) 100%)`,
+    liftDriverRatioGradient: `linear-gradient(90deg, rgba(255,0,0,1) 0%, rgba(236,255,0,1) 8%, 
+    rgba(0,255,0,1) 21%, rgba(81,255,0,1) 41%, rgba(236,255,0,1) 66%, rgba(255,0,0,1) 100%);`,
     prefsDocu: { // legend for preferences, needed for info at registration profiles
       talk: {
         red: 'Ich hab während der Fahrt gern meine Ruhe',

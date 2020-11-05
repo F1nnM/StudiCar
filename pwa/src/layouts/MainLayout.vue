@@ -101,7 +101,7 @@
         <router-view />
       </transition>
     </q-page-container>
-    <QRLiftDisplay v-model="liftQrId" />
+    <QrLiftDisplay v-model="liftQrId" />
 
     <q-footer elevated v-show="!(scannerOpen)">
       <q-tabs
@@ -117,8 +117,8 @@
         align="center"
       >
         <q-route-tab exact icon="home" to="/" label="Marktplatz" replace />
-        <q-route-tab icon="add_circle_outline" to="/chats/lift/add" replace label="Neue Fahrt" />
-        <q-route-tab icon="directions_car" to="/chats" replace label="Chats" />
+        <q-route-tab icon="add_circle_outline" to="/chats/lift/add" replace label="Anbieten" />
+        <q-route-tab icon="directions_car" to="/chats" replace label="Fahrten" />
         <q-route-tab icon="account_box" to="/profil" replace label="Profil" />
       </q-tabs>
     </q-footer>
@@ -133,7 +133,7 @@ import { scroll } from "quasar";
 import EssentialLink from "components/EssentialLink";
 import GetUserDataLoading from "components/GetUserDataLoading";
 import DrawerWelcomeImage from "components/DrawerWelcomeImage";
-import QRLiftDisplay from "components/QRLiftDisplay";
+import QrLiftDisplay from "components/QrLiftDisplay";
 import ExtHr from "components/ExtendedHr";
 
 import { sendApiRequest, GET_NEWSTICKER } from "../ApiAccess";
@@ -146,7 +146,7 @@ export default {
     QrScanner,
     DrawerWelcomeImage,
     GetUserDataLoading,
-    QRLiftDisplay,
+    QrLiftDisplay,
     ExtHr,
   },
 

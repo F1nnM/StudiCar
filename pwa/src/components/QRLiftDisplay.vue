@@ -1,33 +1,31 @@
 <template>
-  <div>
-    <q-dialog v-model="isOpen" @input="emit()" full-width square position="bottom">
-      <q-card>
-        <q-card-section>
-          <div v-if="lift">
-            <p class="text-subtitle1">Du wurdest zu dieser Fahrgelegenheit eingeladen:</p>
-            <p
-              v-if="lift.requested"
-              class="text-caption text-red"
-            >Du hast hier schon angefragt, Antwort steht noch aus</p>
-            <LiftOffer :lift="lift" />
-          </div>
-          <div v-else>
-            <q-item>
-              <q-item-section avatar>
-                <q-circular-progress indeterminate size="lg" color="primary" class="q-ma-md" />
-              </q-item-section>
-              <q-item-section>
-                <p class="text-subtitle1">Daten werden geladen</p>
-              </q-item-section>
-            </q-item>
-          </div>
-          <div v-if="err">
-            <p class="text-red text-caption">Ein Fehler ist aufgetreten: {{ err }}</p>
-          </div>
-        </q-card-section>
-      </q-card>
-    </q-dialog>
-  </div>
+  <q-dialog :value="value" @input="emit" full-width square position="bottom">
+    <q-card>
+      <q-card-section>
+        <div v-if="lift">
+          <p class="text-subtitle1">Du wurdest zu dieser Fahrgelegenheit eingeladen:</p>
+          <p
+            v-if="lift.requested"
+            class="text-caption text-red"
+          >Du hast hier schon angefragt, Antwort steht noch aus</p>
+          <LiftOffer :lift="lift" />
+        </div>
+        <div v-else>
+          <q-item>
+            <q-item-section avatar>
+              <q-circular-progress indeterminate size="lg" color="primary" class="q-ma-md" />
+            </q-item-section>
+            <q-item-section>
+              <p class="text-subtitle1">Daten werden geladen</p>
+            </q-item-section>
+          </q-item>
+        </div>
+        <div v-if="err">
+          <p class="text-red text-caption">Ein Fehler ist aufgetreten: {{ err }}</p>
+        </div>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script>
@@ -41,12 +39,9 @@ export default {
   components: {
     LiftOffer,
   },
-  model: {
-    prop: "liftQrId",
-    event: "input",
-  },
   props: {
     liftQrId: Number,
+    value: Boolean,
   },
   data() {
     return {
@@ -55,23 +50,9 @@ export default {
       err: null,
     };
   },
-  computed: {
-    isOpen: {
-      get() {
-        return !!this.liftQrId;
-      },
-      set(value) {
-        if (!value) {
-          this.liftQrId = 0;
-          this.emit();
-        }
-      },
-    },
-  },
   watch: {
-    liftQrId: function (val) {
-      if (false)
-        sendApiRequest(
+    value: function (val) {
+      /* sendApiRequest(
           SQL_GET_LIFT_INFO,
           {
             qrId: val, // here comes the scanned qr content without the type letter, is encrypted lift id
@@ -82,20 +63,19 @@ export default {
           (err_) => {
             this.err = err_;
           }
-        );
-      else {
-        if (val) {
-          const allLifts = this.$store.getters['auth/user'].marketplaceOffers;
-          this.lift = allLifts.find((item) => {
-            return item.id == this.liftQrId;
-          });
-        }
+        ); */
+      if (val) {
+        const allLifts = this.$store.getters["auth/user"].marketplaceOffers;
+        this.lift = allLifts.find((item) => {
+          return item.id == this.liftQrId;
+        });
       }
     },
   },
   methods: {
-    emit() {
-      this.$emit("input", this.isOpen);
+    emit(val) {
+      if (!val) this.liftQrId = "";
+      this.$emit("input", val);
     },
   },
 };

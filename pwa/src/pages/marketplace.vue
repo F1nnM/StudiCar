@@ -181,7 +181,7 @@ export default {
     },
 
     getFilteredAndSortedOffers() {
-      var offers = this.allOffers;
+      var offers = JSON.parse(JSON.stringify(this.allOffers));
 
       // filter code
       if (this.filter.length) {
@@ -189,9 +189,7 @@ export default {
           item = item.value;
           switch (item) {
             case "notRequested":
-              offers = offers.filter((offer) => {
-                return !offer.requested;
-              });
+              offers = offers.filter((offer) => !offer.requested);
               break;
             case "gender":
               offers.filter((offer) => {

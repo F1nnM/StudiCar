@@ -99,6 +99,11 @@ export const SQL_GET_ALL_FAQ = {
   method: "GET"
 }
 
+export const SQL_GET_TEAM = {
+  path: "/getTeamInfo",
+  method: "GET"
+}
+
 export const SQL_UPDATE_FAQ_QUESTION = {
   path: "/updateQuestion",
   method: "POST"

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-dialog v-model="open" @input="emit" full-width position="bottom" style="min-height: 50vh">
+    <q-dialog :value="open" @input="emit" full-width position="bottom" style="min-height: 50vh">
       <q-card v-if="open">
         <q-card-section class="q-pl-sm">
           <q-splitter :value="9" disable>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-dialog v-model="show" @input="emit()" transition-show="slide-up" transition-hide="jump-down">
+    <q-dialog :value="value" @input="emit" transition-show="slide-up" transition-hide="jump-down">
       <q-card>
         <q-toolbar>
           <!-- <q-avatar>
@@ -15,7 +15,7 @@
         </q-toolbar>
 
         <q-card-section class="text-center overflow-hidden-y q-pa-none q-ma-md">
-          <div :class="'relative-position studicar-code' + (show ? ' show' : '')">
+          <div :class="'relative-position studicar-code' + (value ? ' show' : '')">
             <VueQrcode :width="200" :color="color" errorCorrectionLevel="H" :value="input" />
             <q-img src="~assets/app-icon_from_web_filled.png" class="absolute-center qrcode-image" />
           </div>
@@ -49,13 +49,9 @@ export default {
       type: String,
       required: true,
     },
-    show: Boolean,
+    value: Boolean,
     primColor: Boolean,
     text: String,
-  },
-  model: {
-    prop: "show",
-    event: "input",
   },
 
   data() {
@@ -68,8 +64,8 @@ export default {
   },
 
   methods: {
-    emit() {
-      this.$emit("input", this.show);
+    emit(val) {
+      this.$emit("input", val);
     },
   },
 };

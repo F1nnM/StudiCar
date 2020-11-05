@@ -22,22 +22,21 @@ export default {
     options: Array,
     color: String,
     labelCapitalized: Boolean,
-  },
-  model: {
-    prop: "value",
-    event: "click",
+    specialLabel: Boolean,
   },
   methods: {
     emit(val) {
-      this.$emit("click", val);
+      this.$emit("input", val);
     },
-
-    change(val) {},
 
     pageLabel(page) {
       var text = page.label || page;
-      if (this.labelCapitalized)
-        text = text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+      if (this.specialLabel) {
+        text = text.replace("/", ".") + "."; // special label, needed for this use
+      } else {
+        if (this.labelCapitalized)
+          text = text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+      }
       return text;
     },
   },

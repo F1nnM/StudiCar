@@ -6,7 +6,7 @@
         <q-tab name="matrix" label="Bereiche" />
       </q-tabs>
     </TitleButton>
-    <q-card class="bg-white q-px-none">
+    <q-card class="bg-white q-px-none" v-if="teamLoading == 2">
       <q-tab-panels
         v-model="viewTab"
         animated
@@ -16,7 +16,7 @@
       >
         <q-tab-panel name="matrix" class="q-px-sm">
           <div class="row">
-            <q-list class="col-6 q-mb-xl" v-for="m in team" :key="m.id">
+            <q-list class="col-6 q-mb-xl" v-for="m in info.team" :key="m.id">
               <q-item dense>
                 <q-badge floating color="white">
                   <q-btn
@@ -58,13 +58,12 @@
           </div>
         </q-tab-panel>
         <q-tab-panel name="altogether">
-          <p class="text-subtitle1">StudiCar stellt sich vor</p>
-          <q-parallax :height="250" :speed="0.2">
+          <q-parallax :height="250">
             <template v-slot:media>
               <img src="https://cdn.quasar.dev/img/parallax1.jpg" />
             </template>
           </q-parallax>
-          <p class="text-caption">Hier steht dann der Text</p>
+          <p class="text-caption" id="anchor"></p>
         </q-tab-panel>
       </q-tab-panels>
     </q-card>
@@ -119,17 +118,29 @@
 <script>
 import ExtHr from "components/ExtendedHr";
 import TitleButton from "components/TitleButtonAnchor";
-import { sendApiRequest } from "../ApiAccess";
+import { sendApiRequest, SQL_GET_TEAM } from "../ApiAccess";
 
 export default {
   name: "team",
   components: { ExtHr, TitleButton },
   data() {
     return {
-      team: this.$store.getters["auth/user"].team,
+      info: this.$store.getters["getStudiCarInfo"],
+      htmlText: "",
       viewTab: "matrix",
       showMember: null,
+      teamLoading: 0,
     };
+  },
+  watch: {
+    viewTab: function (newv) {
+      if (newv != "matrix") {
+        setTimeout(
+          (_) => (document.getElementById("anchor").innerHTML = this.htmlText),
+          100
+        );
+      }
+    },
   },
   computed: {
     dialogShowTransition() {
@@ -164,12 +175,33 @@ export default {
     this.$store.commit("setPage", "Das Team");
     this.$store.commit("setPageTrans", "slide");
 
-    var loc = document.location.href;
-    if (loc.includes("?orgaId=")) {
-      var id = loc.split("?orgaId=")[1];
-      this.showMember = this.team.find((m) => {
-        return m.id + "" == id;
-      });
+    if (!this.$store.getters["getStudiCarInfo"]) {
+      this.teamLoading = 1;
+      sendApiRequest(
+        SQL_GET_TEAM,
+        {},
+        (data) => {
+          this.$store.commit("setInfo", data);
+          this.info = data;
+          this.teamLoading = 2;
+
+          var loc = document.location.href; // check whether specific member should be visited
+          if (loc.includes("?orgaId=")) {
+            var id = loc.split("?orgaId=")[1];
+            this.showMember = this.team.find((m) => {
+              return m.id + "" == id;
+            });
+          }
+
+          this.htmlText = data.about.text;
+        },
+        (error) => {
+          this.teamLoading = -1;
+        }
+      );
+    } else {
+      this.info = this.$store.getters["getStudiCarInfo"];
+      this.teamLoading = 2; // just to be sure
     }
   },
 };

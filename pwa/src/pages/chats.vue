@@ -9,11 +9,12 @@
         unelevated
         outline
         toggle-color="primary"
-        color="white"
         text-color="grey-5"
+        color="white"
         :options="[
+          {value: 'incoming', icon: 'ion-arrow-down'},
           {value: 'current', icon: 'done'},
-          {value: 'requests', icon: 'search'}
+          {value: 'outgoing', icon: 'ion-trending-up'}
         ]"
       />
     </TitleButtonAnchor>
@@ -25,10 +26,13 @@
       transition-next="jump-left"
       class="text-caption text-right q-pa-none"
     >
-      <q-tab-panel class="q-pa-none" name="current"></q-tab-panel>
-      <q-tab-panel class="q-pa-none row justify-between" name="requests">
+      <q-tab-panel class="q-pa-none" name="current">
+        <p class="q-mb-none text-overline text-grey-7">Bestehend</p>
+      </q-tab-panel>
+      <q-tab-panel class="q-pa-none row justify-between" name="incoming">
         <TextPagination
           :options="Object.keys(liftRequests)"
+          specialLabel
           labelCapitalized
           v-model="liftRequestDayTab"
         />
@@ -48,23 +52,7 @@
       transition-prev="jump-right"
       transition-next="jump-left"
     >
-      <q-tab-panel name="current">
-        <q-list>
-          <ChatItem
-            v-for="(m, index) in lastMessages"
-            :key="m.timestamp"
-            :message="m"
-            :firstItem="index == 0"
-            @left="onLeft"
-            @right="onRight"
-            @open="openTheLift"
-            @shortLiftInfo="openShortLiftInfo"
-          />
-        </q-list>
-        <LiftPopup v-model="chatPopup.isOpen" :lift="chatPopup.data" />
-        <ShortLiftInfo v-model="shortLiftPopup.isOpen" :lift="shortLiftPopup.data" />
-      </q-tab-panel>
-      <q-tab-panel name="requests" class="q-px-none">
+      <q-tab-panel name="incoming" class="q-px-none">
         <q-list>
           <div v-if="totalRequests">
             <!-- <q-splitter :value="18" disable>
@@ -160,7 +148,7 @@
                           :bar-style="barStyle"
                           style="height: 40vh"
                       >-->
-                      <UserLiftRequest
+                      <IncomingLiftRequest
                         v-for="r in lift"
                         :key="r.id"
                         :request="r"
@@ -182,6 +170,23 @@
           </div>
         </q-list>
       </q-tab-panel>
+      <q-tab-panel name="current">
+        <q-list>
+          <ChatItem
+            v-for="(m, index) in lastMessages"
+            :key="m.timestamp"
+            :message="m"
+            :firstItem="index == 0"
+            @left="onLeft"
+            @right="onRight"
+            @open="openTheLift"
+            @shortLiftInfo="openShortLiftInfo"
+          />
+        </q-list>
+        <LiftPopup v-model="chatPopup.isOpen" :lift="chatPopup.data" />
+        <ShortLiftInfo v-model="shortLiftPopup.isOpen" :lift="shortLiftPopup.data" />
+      </q-tab-panel>
+      <q-tab-panel name="outgoing">Hier kommen dann die ausgehenden</q-tab-panel>
     </q-tab-panels>
   </div>
 </template>
@@ -191,7 +196,7 @@ import ChatItem from "components/ChatItem";
 import LiftPopup from "components/LiftPopup";
 import ShortLiftInfo from "components/ShortLiftInfo";
 import TitleButtonAnchor from "components/TitleButtonAnchor";
-import UserLiftRequest from "components/UserLiftRequest";
+import IncomingLiftRequest from "components/IncomingLiftRequest";
 import TextPagination from "components/TextPagination";
 
 import { date } from "quasar";
@@ -202,7 +207,7 @@ export default {
     LiftPopup,
     ShortLiftInfo,
     TitleButtonAnchor,
-    UserLiftRequest,
+    IncomingLiftRequest,
     TextPagination,
   },
 

@@ -6,7 +6,7 @@ const newsPath = 'news/postillon/ticker.txt',
   longQueries = require('./longQueries'),
   apiResponseSimulation = require('./simulation/apiResponse')
 
-function isOptionMissing(data, needed, res) {
+function isOptionMissing (data, needed, res) {
   return needed.some(key => {
     if (typeof data[key] == "undefined") {
       res.writeHead(400);
@@ -18,7 +18,7 @@ function isOptionMissing(data, needed, res) {
   });
 }
 
-function generateJdenticon(seed) {
+function generateJdenticon (seed) {
   var jdenticon = require("jdenticon")
   jdenticon.config = {
     lightness: {
@@ -166,21 +166,13 @@ module.exports = {
       if (!isOptionMissing(options, [], res)) {
         var html = ''
         fs.readFile('legal/legal.md', 'utf8', (err, data) => {
-          if (err) {
-            // error
-          } else {
-            // console.log('success')
-            try {
-              var converter = new showdown.Converter()
-              // console.log('data:')
-              // console.log(data)
-              html = converter.makeHtml(data)
-              // console.log('html:')
-              // console.log(html)
-            } catch (e) {
-              // convertion error
-            }
-          }
+
+          try {
+            var converter = new showdown.Converter()
+
+            html = converter.makeHtml(data)
+
+          } catch (e) { }
           res.end(html)
         })
       }
@@ -256,6 +248,29 @@ module.exports = {
             lastChange: item.LAST_CHANGE
           })
         })
+
+        res.end(JSON.stringify(obj))
+      }
+    },
+    '/getTeamInfo': async (req, res, options) => {
+      if (!isOptionMissing(options, [], res)) {
+        const team = apiResponseSimulation.team,
+          about = apiResponseSimulation.info
+
+        var html = ''
+        fs.readFile('legal/about.md', 'utf8', (err, data) => {
+
+          try {
+            var converter = new showdown.Converter()
+
+            html = converter.makeHtml(data)
+            about.text = html
+          } catch (e) { }
+        })
+        var obj = {
+          team: team,
+          about: about
+        }
 
         res.end(JSON.stringify(obj))
       }
@@ -442,7 +457,7 @@ module.exports = {
             break
         }
 
-        function dataURItoBlob(dataURI) {
+        function dataURItoBlob (dataURI) {
           // convert base64 to raw binary data held in a string
           // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
           var byteString = atob(dataURI.split(',')[1]);

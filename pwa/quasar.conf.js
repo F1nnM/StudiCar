@@ -3,10 +3,10 @@
 
 const fs = require('fs')
 
-function tryReadFile(file){
-  try{
+function tryReadFile (file) {
+  try {
     return fs.readFileSync(file);
-  }catch(e){
+  } catch (e) {
     console.log(e);
   }
 }
@@ -20,8 +20,7 @@ module.exports = function (ctx) {
       'auth',
       'axios',
       'firebase',
-      'boot',
-      'vue_record',
+      'boot'
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
@@ -42,7 +41,8 @@ module.exports = function (ctx) {
       // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
 
       'roboto-font', // optional, you are not bound to it
-      'material-icons' // optional, you are not bound to it
+      'material-icons', // optional, you are not bound to it
+      'ionicons-v4'
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework

@@ -343,6 +343,9 @@ module.exports = {
 				qr: 'l9dc9ec941d0673fcc299db0dbcad4e21'
 			},
 		],
+	info: {
+		imageUrl: 'https://cdn.quasar.dev/img/parallax1.jpg'
+	},
 	team: [
 		{
 			id: 10,
