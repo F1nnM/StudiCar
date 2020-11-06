@@ -107,8 +107,8 @@
                               </q-item-label>
                             </q-item-section>
                           </q-item>
-                          <q-item dense>
-                            <q-item-section class="text-center">
+                          <q-item dense class="q-mt-md">
+                            <q-item-section class="row justify-end">
                               <q-knob
                                 show-value
                                 readonly
@@ -147,7 +147,10 @@
                     >
                       <VueQrcode
                         :width="200"
-                        color="primary"
+                        :color="{
+                          dark: '#000000',
+                          light: '#FFFFFF'
+                          }"
                         errorCorrectionLevel="H"
                         :value="'l' + lift.qr"
                       />

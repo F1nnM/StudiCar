@@ -162,7 +162,7 @@ export default {
       tab: "home",
       chats: "Main",
       show: true,
-      liftQrId: null,
+      liftQrId: "",
     };
   },
 

@@ -40,7 +40,7 @@
               <div class="col-2 bg-white text-primary">
                 <q-toolbar>
                   <q-toolbar-title>
-                    <q-btn v-ripple icon="close" flat round dense @click="emit" />
+                    <q-btn v-ripple icon="close" flat round dense @click="emit(false)" />
                   </q-toolbar-title>
                 </q-toolbar>
               </div>
@@ -68,7 +68,10 @@
                   <div class="relative-position text-center">
                     <VueQrcode
                       class="full-width"
-                      color="primary"
+                      :color="{
+                          dark: '#000000',
+                          light: '#FFFFFF'
+                          }"
                       errorCorrectionLevel="H"
                       :value="'l' + lift.qr"
                     />

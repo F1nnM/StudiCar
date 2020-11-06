@@ -1,58 +1,75 @@
 <template>
   <div class="q-pa-md">
     <TitleButtonAnchor>
-      <q-btn-toggle
-        v-model="liftTab"
-        no-caps
-        rounded
-        dense
-        unelevated
-        outline
-        toggle-color="primary"
-        text-color="grey-5"
-        color="white"
-        :options="[
-          {value: 'incoming', icon: 'ion-arrow-down'},
-          {value: 'current', icon: 'done'},
-          {value: 'outgoing', icon: 'ion-trending-up'}
-        ]"
-      />
-    </TitleButtonAnchor>
-    <q-tab-panels
-      swipeable
-      animated
-      v-model="liftTab"
-      transition-prev="jump-right"
-      transition-next="jump-left"
-      class="text-caption text-right q-pa-none"
-    >
-      <q-tab-panel class="q-pa-none" name="current">
-        <p class="q-mb-none text-overline text-grey-7">Bestehend</p>
-      </q-tab-panel>
-      <q-tab-panel class="q-pa-none row justify-between" name="incoming">
-        <TextPagination
-          :options="Object.keys(liftRequests)"
-          specialLabel
-          labelCapitalized
-          v-model="liftRequestDayTab"
+      <div class="row justify-end">
+        <q-tab-panels
+          animated
+          v-model="liftTab"
+          transition-prev="jump-right"
+          transition-next="jump-left"
+          class="text-caption text-right q-pa-none"
+        >
+          <q-tab-panel
+            class="text-caption text-right q-pa-none q-pr-sm q-pt-sm"
+            v-for="item in bigTabOptions"
+            :key="item.value"
+            :name="item.value"
+          >
+            <q-badge
+              v-if="item.value == 'pending'"
+              class="q-mx-xs"
+              :color="totalRequests ? 'primary' : 'dark'"
+            >{{ totalRequests }}</q-badge>
+            {{ item.label }}
+          </q-tab-panel>
+        </q-tab-panels>
+        <q-btn-toggle
+          v-model="liftTab"
+          no-caps
+          rounded
+          dense
+          unelevated
+          outline
+          toggle-color="primary"
+          text-color="grey-5"
+          color="white"
+          :options="bigTabOptionsWithoutLabel"
         />
-        <div>
-          <q-badge class="q-mx-xs" :color="totalRequests ? 'primary' : 'dark'">{{ totalRequests }}</q-badge>
-          <span>
-            Anfragen
-            <br />eingehend
-          </span>
-        </div>
-      </q-tab-panel>
-    </q-tab-panels>
+        <!-- 
+          {value: 'outgoing', icon: 'ion-trending-up'}
+
+        -->
+      </div>
+    </TitleButtonAnchor>
+
     <q-tab-panels
       animated
-      swipeable
       v-model="liftTab"
       transition-prev="jump-right"
       transition-next="jump-left"
     >
-      <q-tab-panel name="incoming" class="q-px-none">
+      <q-tab-panel name="pending" class="q-px-none">
+        <q-tab-panels
+          swipeable
+          animated
+          v-model="liftTab"
+          transition-prev="jump-right"
+          transition-next="jump-left"
+          class="text-caption text-right q-pa-none"
+        >
+          <q-tab-panel class="q-pa-none" name="current">
+            <p class="q-mb-none text-overline text-grey-7">Bestehend</p>
+          </q-tab-panel>
+          <q-tab-panel class="q-pa-none q-mb-sm row justify-between" name="pending">
+            <span>Angebote für Tag anzeigen</span>
+            <TextPagination
+              :options="Object.keys(liftRequests)"
+              specialLabel
+              labelCapitalized
+              v-model="liftRequestDayTab"
+            />
+          </q-tab-panel>
+        </q-tab-panels>
         <q-list>
           <div v-if="totalRequests">
             <!-- <q-splitter :value="18" disable>
@@ -170,7 +187,7 @@
           </div>
         </q-list>
       </q-tab-panel>
-      <q-tab-panel name="current">
+      <q-tab-panel name="current" class="q-pa-none">
         <q-list>
           <ChatItem
             v-for="(m, index) in lastMessages"
@@ -240,6 +257,22 @@ export default {
   },
 
   computed: {
+    bigTabOptions() {
+      return [
+        { value: "current", icon: "playlist_add_check", label: "Bestehend" },
+        {
+          value: "pending",
+          icon: "call_received",
+          label: "Eingehende Anfragen",
+        },
+      ];
+    },
+    bigTabOptionsWithoutLabel() {
+      return JSON.parse(JSON.stringify(this.bigTabOptions)).map((item) => {
+        delete item.label;
+        return item;
+      });
+    },
     lastMessages() {
       var returnedArray = [];
       for (let liftId in this.lifts) {
@@ -390,7 +423,7 @@ export default {
   },
 
   mounted() {
-    this.$store.commit("setPage", "Mitfahrgelegenheiten");
+    this.$store.commit("setPage", "Fahrten");
     this.$store.commit("setPageTrans", "slide");
 
     this.liftRequestDayTab = Object.keys(this.liftRequests)[0];
