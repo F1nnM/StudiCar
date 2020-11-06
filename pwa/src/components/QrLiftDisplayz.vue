@@ -1,5 +1,5 @@
 <template>
-  <q-dialog :value="value" @input="emit" full-width square position="bottom">
+  <q-dialog :value="!!value" @input="emit" full-width square position="bottom">
     <q-card>
       <q-card-section>
         <div v-if="lift">
@@ -40,8 +40,7 @@ export default {
     LiftOffer,
   },
   props: {
-    liftQrId: Number,
-    value: Boolean,
+    value: String,
   },
   data() {
     return {
@@ -74,8 +73,7 @@ export default {
   },
   methods: {
     emit(val) {
-      if (!val) this.liftQrId = "";
-      this.$emit("input", val);
+      this.$emit("input", val ? this.value : ""); // model is string
     },
   },
 };
