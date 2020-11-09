@@ -171,6 +171,12 @@ export default {
           icon: "insert_emoticon",
         },
         {
+          label: "Zeit",
+          caption: "Sortiert aufsteigend nach Zeit der Fahrt",
+          value: "timeDiff",
+          icon: "departure_board",
+        },
+        {
           label: "Geringste Zeit zum Unterricht",
           caption: "Möglichst geringe Wartezeit bis Beginn der Veranstaltung",
           value: "time",
@@ -262,14 +268,21 @@ export default {
           case "time":
             // API not implemented yet
             break;
+          case "timeDiff":
+            offers.sort((a, b) => {
+              var aTime = a.departAt ? a.departAt : a.arriveBy,
+                bTime = b.departAt ? b.departAt : b.arriveBy;
+              return (
+                new Date(aTime).getUTCMilliseconds() -
+                new Date(bTime).getUTCMilliseconds()
+              );
+            });
         }
       }
 
       return offers;
     },
-  },
 
-  methods: {
     genderName() {
       switch (this.$store.getters["auth/user"].gender) {
         case "M":
@@ -288,6 +301,8 @@ export default {
       }
     },
   },
+
+  methods: {},
 
   mounted() {
     this.$store.commit("setPage", this.title);

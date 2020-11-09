@@ -224,82 +224,7 @@ module.exports = {
 	marketplaceOffers:
 		[
 			{
-				id: 1,
-				driver: {
-					fbid: "wG3cG4M7NFMJzJYhfzFjLrJC9Q23",
-					name: "Ipsum",
-					imageUrl: 'https://cdn.pixabay.com/photo/2017/02/15/20/22/animal-2069717_960_720.png',
-					prefs: {
-						talk: "GREEN",
-						talkMorning: "GREEN",
-						smoking: "GREEN",
-						music: "GREEN",
-					},
-				},
-				day_pattern: null,
-				next_drive: [new Date(), new Date()],
-				postcode: 70182,
-				city: "Stuttgart",
-				distance: 35,
-				seatsOffered: 4,
-				seatsOccupied: 2,
-				requested: true,
-				qr: 'lf6b9fde87097ad72c08d91fa9cc32754'
-			},
-			{
-				id: 2,
-				driver: {
-					fbid: "QTs2vuk6O0RHjr8uDyLBwb9DZ5G3",
-					name: "Finn",
-					imageUrl: 'https://cdn.pixabay.com/photo/2017/02/25/23/50/animal-2099057_960_720.png',
-					prefs: {
-						talk: "RED",
-						talkMorning: "RED",
-						smoking: "RED",
-						music: "RED",
-					},
-				},
-				day_pattern: null,
-				next_drive: [new Date("2-2-2020"), new Date()],
-				postcode: 70182,
-				city: "Stuttgart",
-				distance: 30,
-				seatsOffered: 3,
-				seatsOccupied: 1,
-				qr: 'l7aa0bb70783505b942fda3277be8b7cb'
-			},
-			{
-				id: 3,
-				driver: {
-					fbid: "lhlhugljhljlublib",
-					name: "Lorem",
-					imageUrl: 'https://cdn.pixabay.com/photo/2016/10/29/20/25/beard-1781443_960_720.png',
-					prefs: {
-						talk: "YELLOW",
-						talkMorning: "YELLOW",
-						smoking: "YELLOW",
-						music: "YELLOW",
-					},
-				},
-				day_pattern: {
-					Montag: [true, true],
-					Dienstag: [false, true],
-					Mittwoch: [true, false],
-					Donnerstag: [true, true],
-					Freitag: [false, true],
-					Samstag: [false, false],
-					Sonntag: [false, false],
-				},
-				next_drive: null,
-				postcode: 70182,
-				city: "Stuttgart",
-				distance: 20,
-				seatsOffered: 2,
-				seatsOccupied: 0,
-				qr: 'l1cfcc168ce73625da23dadebd027030d'
-			},
-			{
-				id: 4, // this offer always has preferences of visiting user, perfect for testing prefs filter
+				id: 1, // this offer always has preferences of visiting user, perfect for testing prefs filter
 				driver: {
 					fbid: "wG3cG4M7NFMJzJYcreFjLrJC9Q23",
 					name: "Bernd",
@@ -311,37 +236,106 @@ module.exports = {
 						music: "YELLOW"
 					},
 				},
-				day_pattern: null,
-				next_drive: [new Date("2-2-2020"), new Date()],
-				postcode: 86653,
-				city: "Daiting",
+				departAt: '2020-11-15T06:15:08.000Z',
+
+				destination: {
+					id: 1,
+					name: "Würfel"
+				},
+				start: {
+					id: 6,
+					name: "Stuttgart"
+				},
 				distance: 15,
 				seatsOffered: 3,
 				seatsOccupied: 1,
 				qr: 'l9dc9ec941d0673fcc299db0dbcad4e21'
 			},
 			{
-				id: 5,
+				id: 4, // this offer always has preferences of visiting user, perfect for testing prefs filter
+				driver: {
+					fbid: "lhlhugljhljlublib",
+					name: "Lorem",
+					imageUrl: 'https://cdn.pixabay.com/photo/2016/10/18/18/49/witch-1751025_960_720.png',
+					prefs: {
+						talk: "GREEN", // this.$store.getters["auth/user"].prefs.talk,
+						talkMorning: "YELLOW",
+						smoking: "RED",
+						music: "RED"
+					},
+				},
+				arriveBy: '2020-07-02T06:15:08.000Z',
+
+				destination: {
+					id: 1,
+					name: "Zweiter Würfel"
+				},
+				start: {
+					id: 6,
+					name: "Stuttgart"
+				},
+				distance: 30,
+				requested: true,
+				seatsOffered: 3,
+				seatsOccupied: 1,
+				qr: 'l9dc9ec941d067cc299db0dbcad4e21'
+			},
+			{
+				id: 12, // this offer always has preferences of visiting user, perfect for testing prefs filter
+				driver: {
+					fbid: "QTs2vuk6O0RHjr8uDyLBwb9DZ5G3",
+					name: "Finn",
+					imageUrl: 'https://cdn.pixabay.com/photo/2016/10/18/18/49/witch-1751025_960_720.png',
+					prefs: {
+						talk: "RED", // this.$store.getters["auth/user"].prefs.talk,
+						talkMorning: "RED",
+						smoking: "RED",
+						music: "RED"
+					},
+				},
+				departAt: '2020-07-02T06:15:08.000Z',
+
+				destination: {
+					id: 1,
+					name: "Dritter Würfel"
+				},
+				start: {
+					id: 6,
+					name: "Stuttgart"
+				},
+				distance: 50,
+				seatsOffered: 3,
+				seatsOccupied: 1,
+				qr: 'l9dc9ec941d0673fcc9db0dbcad4e21'
+			},
+			{
+				id: 90, // this offer always has preferences of visiting user, perfect for testing prefs filter
 				driver: {
 					fbid: "wG3cG4M7NFMhIgYcreFjLrJC9Q23",
 					name: "Alicia",
-					imageUrl: 'http://photos.modelmayhem.com/photos/080925/19/48dc225344d65_m.jpg',
+					imageUrl: 'https://cdn.pixabay.com/photo/2016/10/18/18/49/witch-1751025_960_720.png',
 					prefs: {
-						talk: "GREEN",
+						talk: "YELLOW", // this.$store.getters["auth/user"].prefs.talk,
 						talkMorning: "YELLOW",
-						smoking: "RED",
-						music: "GREEN"
+						smoking: "YELLOW",
+						music: "YELLOW"
 					},
 				},
-				day_pattern: null,
-				next_drive: [new Date("2-2-2020"), new Date()],
-				postcode: 86653,
-				city: "Daiting",
-				distance: 40,
+				arriveBy: '2020-07-02T06:15:08.000Z',
+
+				destination: {
+					id: 1,
+					name: "Alicias Würfel"
+				},
+				start: {
+					id: 6,
+					name: "Stuttgart"
+				},
+				distance: 5,
 				seatsOffered: 3,
 				seatsOccupied: 1,
-				qr: 'l9dc9ec941d0673fcc299db0dbcad4e21'
-			},
+				qr: 'l9dc9ec941d0673f299db0dbcad4e21'
+			}
 		],
 	info: {
 		imageUrl: 'https://cdn.quasar.dev/img/parallax1.jpg'
