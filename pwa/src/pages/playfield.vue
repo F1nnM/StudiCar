@@ -2,20 +2,27 @@
   <div class="q-pa-md">
     <q-btn label="Feuer" @click="go" />
     <q-btn label="Variablenfeuer" @click="open = !open" />
-    <DialogTemplate v-model="open" :lift="{}" />
+    <q-item>
+      <q-item-section avatar>
+        <q-avatar size="100px">
+          <TeamPicture />
+        </q-avatar>
+      </q-item-section>
+    </q-item>
+
     <p v-for="n in 20" :key="n">Lorem</p>
   </div>
 </template>
 
 <script>
 import { scroll } from "quasar";
-import DialogTemplate from "components/DialogTemplate";
+import TeamPicture from "components/TeamPicture";
 
 import { sendApiRequest } from "../ApiAccess";
 
 export default {
   components: {
-    DialogTemplate,
+    TeamPicture,
   },
   data() {
     return {

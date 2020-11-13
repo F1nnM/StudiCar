@@ -11,10 +11,9 @@ import { date } from "quasar";
 import ExtHR from "components/ExtendedHr";
 
 export default {
-  name: "DialogTemplate",
+  name: "a_DialogTemplate",
   components: {},
   props: {
-    lift: Object,
     value: Boolean,
   },
   data() {

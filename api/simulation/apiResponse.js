@@ -364,8 +364,8 @@ module.exports = {
 			id: 11,
 			name: 'Timo',
 			surname: 'Preißing',
-			function: 'Dokumentation & Qualitätssicherung',
-			funcShort: 'Dok & Quali',
+			function: 'Qualitätssicherung',
+			funcShort: 'Qualität',
 			bio: `Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner
 		 test Lorem ipsum dolor sit ein kleiner test`
 		},
@@ -395,17 +395,18 @@ module.exports = {
 		},
 		{
 			id: 13,
-			name: 'Dave',
-			surname: 'Deininger',
-			function: 'was anderes',
+			name: 'Jannis',
+			surname: 'Rigl',
+			function: 'Dokumentation',
 			bio: `Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner
 		 test Lorem ipsum dolor sit ein kleiner test`
 		},
 		{
 			id: 17,
-			name: 'Platz',
-			surname: 'Halter',
-			function: 'nochmal was anderes',
+			name: 'Jochen',
+			surname: 'King',
+			function: 'Prozessmanagement',
+			funcShort: 'Prozesse',
 			bio: `Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner
 		 test Lorem ipsum dolor sit ein kleiner test`
 		},
@@ -413,7 +414,7 @@ module.exports = {
 			id: 1,
 			name: 'Bernd',
 			surname: 'Mayinger',
-			function: 'Frontend, Layout & UX Developer',
+			function: 'Layout & UX Developer',
 			funcShort: 'UX & Design',
 			bio: `Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner
 		 test Lorem ipsum dolor sit ein kleiner test`

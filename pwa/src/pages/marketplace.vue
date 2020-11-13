@@ -98,7 +98,12 @@
       </q-slide-transition>
 
       <!-- <p>Der Marktplatz ist so etwas wie das Schwarze Brett von StudiCar. Hier siehst du alle aktuellen Mitfahrgelegenheiten, aufsteigend nach Entfernung geordnet.</p> -->
-      <LiftOffer v-for="lift in getFilteredAndSortedOffers" :key="lift.index" v-bind:lift="lift" />
+      <LiftOffer
+        v-for="lift in getFilteredAndSortedOffers"
+        :key="lift.index"
+        v-bind:lift="lift"
+        @request="triggerLiftRequest"
+      />
       <div
         class="text-caption"
         v-show="!(getFilteredAndSortedOffers.length || filter.length)"
@@ -302,17 +307,21 @@ export default {
     },
   },
 
-  methods: {},
+  methods: {
+    triggerLiftRequest(liftId){
+      this.$store.dispatch('auth/requestToLift', liftId)
+    }
+  },
 
   mounted() {
     this.$store.commit("setPage", this.title);
     this.$store.commit("setPageTrans", "slide");
 
     this.filterOptions.push({
-      label: "Nur reine " + this.genderName() + "-Autos",
+      label: "Nur reine " + this.genderName + "-Autos",
       value: "gender",
       caption:
-        "Nur Autos anzeigen, bei denen nur " + this.genderName() + " mitfahren",
+        "Nur Autos anzeigen, bei denen nur " + this.genderName + " mitfahren",
       icon: "wc",
       disabled: true, // genderCarsAvaiable ? this.$store.getters['auth/user'].gender == 'X'
     });

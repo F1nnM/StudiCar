@@ -200,8 +200,15 @@
             @shortLiftInfo="openShortLiftInfo"
           />
         </q-list>
-        <LiftPopup v-model="chatPopup.isOpen" :lift="chatPopup.data" />
-        <ShortLiftInfo v-model="shortLiftPopup.isOpen" :lift="shortLiftPopup.data" />
+        <LiftPopup
+          @shortLiftInfo="openShortLiftInfo"
+          v-model="chatPopup.isOpen"
+          :lift="chatPopup.data"
+        />
+        <LiftQr
+          v-model="shortLiftPopup.isOpen"
+          :input="'l' + (shortLiftPopup.data ? shortLiftPopup.data.qr : '')"
+        />
       </q-tab-panel>
       <q-tab-panel name="outgoing">Hier kommen dann die ausgehenden</q-tab-panel>
     </q-tab-panels>
@@ -211,7 +218,7 @@
 <script>
 import ChatItem from "components/ChatItem";
 import LiftPopup from "components/LiftPopup";
-import ShortLiftInfo from "components/ShortLiftInfo";
+import LiftQr from "components/LiftQr";
 import TitleButtonAnchor from "components/TitleButtonAnchor";
 import IncomingLiftRequest from "components/IncomingLiftRequest";
 import TextPagination from "components/TextPagination";
@@ -222,7 +229,7 @@ export default {
   components: {
     ChatItem,
     LiftPopup,
-    ShortLiftInfo,
+    LiftQr,
     TitleButtonAnchor,
     IncomingLiftRequest,
     TextPagination,
@@ -390,7 +397,6 @@ export default {
     openShortLiftInfo(liftId) {
       var lift = this.lifts[liftId];
       this.shortLiftPopup.data = lift;
-      this.chatPopup.isOpen = false; // just to be sure
       this.shortLiftPopup.isOpen = true;
     },
 

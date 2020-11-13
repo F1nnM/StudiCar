@@ -1,7 +1,7 @@
 <template>
-  <div class="bg-grey-4 q-pa-sm full-height">
+  <div class="q-pa-sm full-height bg-white">
     <TitleButton>
-      <q-tabs v-model="viewTab" dense no-caps inline-label class="bg-white text-dark">
+      <q-tabs v-model="viewTab" dense no-caps inline-label class="text-dark">
         <q-tab name="altogether" label="Wir als Team" />
         <q-tab name="matrix" label="Bereiche" />
       </q-tabs>
@@ -14,11 +14,11 @@
         transition-next="scale"
         class="q-px-none"
       >
-        <q-tab-panel name="matrix" class="q-px-sm">
-          <div class="row">
+        <q-tab-panel name="matrix" class="q-pa-none">
+          <div class="row q-px-sm q-pt-sm shadow-up-5">
             <q-list class="col-6 q-mb-xl" v-for="m in info.team" :key="m.id">
-              <q-item dense>
-                <q-badge floating color="white">
+              <q-item dense clickable @click="showMember = m" class="q-pl-sm">
+                <q-badge floating transparent color="white">
                   <q-btn
                     dense
                     outline
@@ -29,13 +29,10 @@
                     @click="showMember = m"
                   />
                 </q-badge>
-                <q-item-section avatar class="q-ml-none">
-                  <!-- <q-avatar> -->
-                  <q-img
-                    contain
-                    :src="m.imageUrl ? m.imageUrl : 'https://cdn.pixabay.com/photo/2016/10/29/20/25/beard-1781443_960_720.png'"
-                  />
-                  <!-- </q-avatar> -->
+                <q-item-section avatar class="q-ml-none column justify-top">
+                  <q-avatar size="60px">
+                    <TeamPicture headFocused :imageUrl="m.name + ' ' + m.surname" />
+                  </q-avatar>
                 </q-item-section>
 
                 <q-item-section>
@@ -90,10 +87,9 @@
               </span>
             </div>
             <div class="col-5 flex flex-center">
-              <q-img
-                class="rounded-borders"
-                :src="showMember.imageUrl ? showMember.imageUrl : 'https://cdn.pixabay.com/photo/2016/10/29/20/25/beard-1781443_960_720.png'"
-              />
+              <q-avatar size="35vw">
+                <TeamPicture :imageUrl="showMember.name + ' ' + showMember.surname" />
+              </q-avatar>
             </div>
           </div>
         </q-card-section>
@@ -118,11 +114,12 @@
 <script>
 import ExtHr from "components/ExtendedHr";
 import TitleButton from "components/TitleButtonAnchor";
+import TeamPicture from "components/TeamPicture";
 import { sendApiRequest, SQL_GET_TEAM } from "../ApiAccess";
 
 export default {
   name: "team",
-  components: { ExtHr, TitleButton },
+  components: { ExtHr, TitleButton,TeamPicture },
   data() {
     return {
       info: this.$store.getters["getStudiCarInfo"],
@@ -146,7 +143,7 @@ export default {
     dialogShowTransition() {
       if (true) return "jump-up";
       if (this.showMember) {
-        if (this.team.indexOf(this.showMember) % 2 == 0) return "jump-right";
+        if (this.info.team.indexOf(this.showMember) % 2 == 0) return "jump-right";
         // even index, so left side
         else return "jump-left";
       } else return "fade"; // actually wanted even the show transition to be dynamic, but didn't work. Left it anyway in code.
@@ -154,7 +151,7 @@ export default {
 
     dialogHideTransition() {
       if (this.showMember) {
-        if (this.team.indexOf(this.showMember) % 2 == 0) return "jump-left";
+        if (this.info.team.indexOf(this.showMember) % 2 == 0) return "jump-left";
         // even index, so left side
         else return "jump-right";
       } else return "fade";

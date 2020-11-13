@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="!viewedUser">
-      <q-splitter v-model="splitterPos.current" style="height: 60vh;">
+      <!-- <q-splitter v-model="splitterPos.current" style="height: 60vh;">
         <template v-slot:before>
           <q-skeleton square type="QAvatar" class="other-user-image" width="100%" height="50%" />
 
@@ -16,7 +16,22 @@
         </template>
       </q-splitter>
       <q-skeleton type="text" width="30%" class="text-h4" />
-      <q-skeleton type="text" width="70%" height="2em" class="text-h3" />
+      <q-skeleton type="text" width="70%" height="2em" class="text-h3" />-->
+      <div style="height: 40vh" class="text-center column justify-center">
+        <p>
+          <q-circular-progress
+            show-value
+            indeterminate
+            size="15vw"
+            :thickness="0.05"
+            color="primary"
+            class="q-ma-md full-width"
+          >
+            <q-icon name="person_outline" color="dark" size="md" />
+          </q-circular-progress>
+          <span class="text-subtitle1">Profil wird geladen</span>
+        </p>
+      </div>
     </div>
     <div v-else>
       <q-splitter v-model="splitterPos.current" disable>
@@ -84,20 +99,20 @@
         <div class="row">
           <div class="col-6">
             <div class="q-mb-xs">
-              <q-item-label header class="q-pt-xs q-pb-md text-uppercase text-caption">
+              <q-item-label header caption class="q-pt-xs q-pb-xs text-uppercase">
                 Präferenzen
-                <q-btn
+                <!-- <q-btn
                   dense
                   flat
                   color="grey-7"
                   size="sm"
                   @click="prefInfo = !prefInfo"
                   icon="info"
-                />
+                />-->
               </q-item-label>
-              <div class="row justify-evenly">
-                <div
-                  class="text-center col-6 q-mb-sm"
+              <q-item-label caption class="q-pl-md q-pt-xs q-pb-md">Tippe lang für Info</q-item-label>
+              <div class="text-center q-mt-sm q-px-md row justify-around">
+                <q-btn
                   v-for="(pref) in [{
 val: 'talk', icon: 'record_voice_over'
                     },
@@ -111,44 +126,24 @@ val: 'smoking', icon: 'smoking_rooms'
 val: 'music', icon: 'music_note'
                     }]"
                   :key="pref.val"
+                  outline
+                  dense
+                  class="q-pa-xs col-5 q-mb-lg"
+                  :icon="pref.icon"
+                  :color="betterPrefColor(pref.val)"
+                  size="sm"
                 >
-                  <q-icon :name="pref.icon" :color="betterPrefColor(pref.val)" size="sm" />
-                </div>
-              </div>
-
-              <div
-                class="row full-width q-pb-xs q-pl-md"
-                v-for="pref in [{
-              name: 'talk',
-              label: 'Redseligkeit',
-              icon: 'record_voice_over'
-            },
-            {
-              name: 'talkMorning',
-              label: '... am Morgen',
-              icon: 'alarm'
-            },
-            {
-              name: 'smoking',
-              label: 'Rauchen',
-              icon: 'smoking_rooms'
-            },
-            {
-              name: 'music',
-              label: 'Musik',
-               icon: 'music_note'
-            }]"
-                :key="pref.name"
-              >
-                <div class="col-9">{{ pref.label }}</div>
-                <div :class="'col-3 text-left text-' + betterPrefColor(pref.name)">●</div>
-                <q-slide-transition>
-                  <small class="col-12 text-caption text-grey-7" v-if="prefInfo">
-                    <!-- <q-icon :name="pref.icon" :color="betterPrefColor(pref.name)" size="sm" /> -->
-                    {{ prefsDocu[pref.name][betterPrefColor(pref.name)] }}
-                    <br />
-                  </small>
-                </q-slide-transition>
+                  <!-- <q-badge transparent color="white">
+                    <q-icon name="help_outline" color="dark" size="xs" />
+                  </q-badge>-->
+                  <q-tooltip
+                    anchor="top middle"
+                    :content-class="`bg-white text-dark`"
+                    :content-style="'border-bottom: 1px solid ' + betterPrefColor(pref.val)"
+                    self="bottom middle"
+                    :offset="[10, 10]"
+                  >{{ prefsDocu[pref.val][viewedUser.prefs[pref.val].toLowerCase()]}}</q-tooltip>
+                </q-btn>
               </div>
             </div>
           </div>
@@ -268,7 +263,7 @@ val: 'music', icon: 'music_note'
 </template>
 
 <script>
-import { date } from "quasar";
+import { date, colors } from "quasar";
 import ColoredMeter from "components/ColoredMeter";
 import {
   sendApiRequest,
@@ -276,6 +271,7 @@ import {
   GET_USER_PROFILE_PIC,
   buildGetRequestUrl,
 } from "../ApiAccess";
+const { lighten } = colors;
 export default {
   components: {
     ColoredMeter,
@@ -289,7 +285,7 @@ export default {
         normal: 46,
         big: 98,
       },
-      viewedUser: {},
+      viewedUser: null,
       imageUrl: "",
       friended: false,
     };
@@ -352,6 +348,11 @@ export default {
       var color = this.viewedUser.prefs[prefName].toLowerCase();
       if (color == "yellow") return "orange";
       else return color;
+    },
+
+    lightenColor(color) {
+      var a = lighten(color, 80);
+      return a;
     },
 
     makeImageBig(e) {

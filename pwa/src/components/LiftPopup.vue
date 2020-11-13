@@ -24,7 +24,7 @@
                     <div class="col-3 text-right">
                       <!-- <q-btn flat round dense icon="search" /> -->
                       <q-btn
-                        @click="openLiftInfo = true"
+                        @click="infoDrawerOpen = true"
                         icon="info"
                         flat
                         v-ripple
@@ -46,244 +46,98 @@
               </div>
             </div>
           </q-header>
-          <q-drawer
-            v-model="openLiftInfo"
-            :width="300"
-            :breakpoint="500"
-            overlay
-            side="right"
-            bordered
-            show-if-above
-          >
-            <div class="q-pa-md">
-              <p class="text-h6 row items-center">
-                Info
-                <!-- <q-btn flat class="q-ml-sm" icon="select_all" size="md" @click="showQR = !showQR" /> -->
 
-                <q-space />
-                <q-btn icon="close" flat round dense @click="openLiftInfo = false" />
-              </p>
-              <q-slide-transition>
-                <div v-if="showQR">
-                  <div class="relative-position text-center">
-                    <VueQrcode
-                      class="full-width"
-                      :color="{
-                          dark: '#000000',
-                          light: '#FFFFFF'
-                          }"
-                      errorCorrectionLevel="H"
-                      :value="'l' + lift.qr"
-                    />
-                    <q-img
-                      src="~assets/app-icon_from_web_filled.png"
-                      class="absolute-center qrcode-image"
-                    />
-                  </div>
-                  <p
-                    class="text-center text-caption"
-                  >Vergrößerte Ansicht, geeignet für kleine und dunkle Bildschirme</p>
-                </div>
-              </q-slide-transition>
-
-              <ExtHr color="grey-5" size="xs" />
-              <q-timeline color="primary" class="q-mt-xl">
-                <!-- <q-item-label header>Fahrtverlauf</q-item-label> -->
-                <q-timeline-entry>
-                  <template v-slot:title>
-                    <p>
-                      {{ lift.start.name }}
-                      <span
-                        class="q-ml-md text-subtitle1"
-                      >{{ formatAsTime(lift.departAt) }}</span>
-                    </p>
-                  </template>
-                </q-timeline-entry>
-                <q-timeline-entry>
-                  <template v-slot:title>
-                    <p>
-                      {{ lift.destination.name }}
-                      <span
-                        class="q-ml-md text-subtitle1"
-                      >{{ formatAsTime(lift.arriveBy) }}</span>
-                      <!-- <q-badge floating v-if="lift.destination.id < 4">
-                            <q-icon color="dark" name="school" size="xs" />
-                      </q-badge>-->
-                    </p>
-                  </template>
-                </q-timeline-entry>
-              </q-timeline>
-              <div class="shadow-9 q-pa-md">
-                <div class="row">
-                  <div class="col-6">
-                    <div class="text-subtitle1">{{ lift.car.brand }} {{ lift.car.model }}</div>
-                    <div class="text-caption">{{ lift.car.type }}</div>
-                  </div>
-                  <div class="col-5">
-                    <q-avatar>
-                      <div :style="`background-color: ${ lift.car.color }`" class="full-width">
-                        <q-img src="~assets/app-icon_color_preview.png" />
-                      </div>
-                    </q-avatar>
-                    <q-btn color="grey-7" round flat dense icon="help_outline">
-                      <q-menu cover auto-close>
-                        <q-btn flat no-caps clickable @click="viewCar()">Modell online ansehen</q-btn>
-                      </q-menu>
-                    </q-btn>
-                  </div>
-                </div>
-                <ExtHr :color="lift.car.color" hex size="xs" class="q-my-sm" />
-                <p
-                  class="text-grey-7 q-mb-none"
-                >{{ lift.car.licensePlate }} - Baujahr {{ lift.car.built }}</p>
-              </div>
-
-              <q-list bordered class="q-mt-md">
-                <q-item-label header>Fahrer</q-item-label>
-                <q-item>
-                  <q-item-section top avatar>
-                    <q-avatar>
-                      <img :src="getImageOfUser(lift.driver.id)" />
-                    </q-avatar>
-                  </q-item-section>
-                  <q-item-section>
-                    <p>
-                      {{ lift.driver.name }}
-                      <br />
-                      <small>{{ lift.driver.surname }}</small>
-                    </p>
-                  </q-item-section>
-                </q-item>
-                <q-item-label header>
-                  <p v-if="lift.passengers.length">
-                    Mitfahrer
-                    <span class="text-caption float-right">
-                      {{ lift.passengers.length + 1 }} / {{ lift.car.allSeats }}
-                      <q-icon name="airline_seat_recline_normal" size="xs" />
-                    </span>
-                  </p>
-                  <p
-                    v-if="!lift.passengers.length"
-                    class="text-center q-pt-sm text-gray"
-                  >Bis jetzt hast du noch keine Mitfahrer.</p>
-                  <p
-                    class="text-right text-primary text-caption"
-                    v-if="lift.passengers.length == lift.seats"
-                  >Volles Auto. Wow!</p>
-                </q-item-label>
-                <q-item v-for="item in lift.passengers" :key="item.id">
-                  <q-item-section top avatar>
-                    <q-avatar>
-                      <img :src="getImageOfUser(item.id)" />
-                    </q-avatar>
-                  </q-item-section>
-
-                  <q-item-section>
-                    <q-item-label>
-                      {{ item.name }}
-                      <br />
-                      <small>{{ item.surname }}</small>
-                    </q-item-label>
-                    <q-item-label caption>
-                      <!-- <div class="row">
-                          <div class="col-3">
-                            <p :class="'text-' + pref.talk.toLowerCase()">●</p>
-                          </div>
-                          <div class="col-3">
-                            <p :class="'text-' + pref.talkMorning.toLowerCase()">●</p>
-                          </div>
-                          <div class="col-3">
-                            <p :class="'text-' + pref.smoking.toLowerCase()">●</p>
-                          </div>
-                          <div class="col-3">
-                            <p :class="'text-' + pref.music.toLowerCase()">●</p>
-                          </div>
-                      </div>-->
-                    </q-item-label>
-                  </q-item-section>
-
-                  <q-item-section side top>
-                    <q-icon name="directions_car" v-if="item.id == user" size="sm" />
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </div>
-          </q-drawer>
           <q-page-container>
-            <div class="q-pa-md bg-white scroll overflow-hidden">
-              <!-- v-touch-swipe.mouse.right="goBack" -->
+            <LiftInfoDialog v-model="infoDrawerOpen" @input="infoDrawerOpen = false" :lift="lift" />
+            <q-tab-panels
+              v-model="infoDrawerOpen"
+              animated
+              transition-next="jump-left"
+              class="q-pa-none"
+            >
+              <q-tab-panel :name="true"></q-tab-panel>
+              <q-tab-panel :name="false" class="q-pa-none">
+                <div class="q-pa-md bg-white scroll overflow-hidden">
+                  <!-- v-touch-swipe.mouse.right="goBack" -->
 
-              <q-page-scroller
-                reverse
-                position="bottom-right"
-                :scroll-offset="1000"
-                :duration="50"
-                :offset="[10, 18]"
-              >
-                <q-page-sticky position="bottom-right" :offset="[18, 18]">
-                  <q-btn fab icon="keyboard_arrow_down" color="accent" />
-                </q-page-sticky>
-              </q-page-scroller>
+                  <q-page-scroller
+                    reverse
+                    position="bottom-right"
+                    :scroll-offset="1000"
+                    :duration="50"
+                    :offset="[10, 18]"
+                  >
+                    <q-page-sticky position="bottom-right" :offset="[18, 18]">
+                      <q-btn fab icon="keyboard_arrow_down" color="accent" />
+                    </q-page-sticky>
+                  </q-page-scroller>
 
-              <div
-                v-for="(m, messageIndex) in lift.messages"
-                :key="m.timestamp"
-                :ref="messageIndex == lift.messages.length - 1 ? 'last_message': ''"
-              >
-                <p
-                  class="custom-chat-label text-caption text-center q-mt-xl text-grey-7"
-                  v-if="checkDayBreak(m) != ''"
-                >{{ checkDayBreak(m) }}</p>
-                <div>
-                  <q-menu touch-position context-menu transition-show="fade" transition-hide="none">
-                    <q-list class="q-pa-xs">
-                      <q-item
-                        :disable="m.type != 1"
-                        clickable
-                        @click="customCopyToClipboard(m.content)"
-                        v-ripple
-                        dense
+                  <div
+                    v-for="(m, messageIndex) in lift.messages"
+                    :key="m.timestamp"
+                    :ref="messageIndex == lift.messages.length - 1 ? 'last_message': ''"
+                  >
+                    <p
+                      class="custom-chat-label text-caption text-center q-mt-xl text-grey-7"
+                      v-if="checkDayBreak(m) != ''"
+                    >{{ checkDayBreak(m) }}</p>
+                    <div>
+                      <q-menu
+                        touch-position
+                        context-menu
+                        transition-show="fade"
+                        transition-hide="none"
                       >
-                        <q-item-section avatar>
-                          <q-icon name="content_copy" size="sm" />
-                        </q-item-section>
-                        <q-item-section>Kopieren</q-item-section>
-                      </q-item>
-                      <q-separator class="q-my-sm" />
+                        <q-list class="q-pa-xs">
+                          <q-item
+                            :disable="m.type != 1"
+                            clickable
+                            @click="customCopyToClipboard(m.content)"
+                            v-ripple
+                            dense
+                          >
+                            <q-item-section avatar>
+                              <q-icon name="content_copy" size="sm" />
+                            </q-item-section>
+                            <q-item-section>Kopieren</q-item-section>
+                          </q-item>
+                          <q-separator class="q-my-sm" />
 
-                      <q-item
-                        dense
-                        clickable
-                        @click="_=> { showMoreMessageOptions = {
+                          <q-item
+                            dense
+                            clickable
+                            @click="_=> { showMoreMessageOptions = {
                         message: m,
                         open: true
                        }
                        }"
+                          >
+                            <q-item-section avatar>
+                              <q-icon name="more_horiz" size="sm" />
+                            </q-item-section>
+                            <q-item-section>Mehr</q-item-section>
+                          </q-item>
+                        </q-list>
+                      </q-menu>
+                      <q-chat-message
+                        :name="m.sentBy == user ? '' : getNameFromId(m.sentBy)"
+                        :sent="m.sentBy == user"
+                        size="8"
+                        text-sanitize
+                        :text="m.type == 2 ? [] : [m.content]"
+                        :stamp="formatAsTime(m.timestamp)"
+                        :bg-color="getColor(m.id)"
                       >
-                        <q-item-section avatar>
-                          <q-icon name="more_horiz" size="sm" />
-                        </q-item-section>
-                        <q-item-section>Mehr</q-item-section>
-                      </q-item>
-                    </q-list>
-                  </q-menu>
-                  <q-chat-message
-                    :name="m.sentBy == user ? '' : getNameFromId(m.sentBy)"
-                    :sent="m.sentBy == user"
-                    size="8"
-                    text-sanitize
-                    :text="m.type == 2 ? [] : [m.content]"
-                    :stamp="formatAsTime(m.timestamp)"
-                    :bg-color="getColor(m.id)"
-                  >
-                    <div v-if="m.type == 2">
-                      <AudioPlayer :src="m.content" />
+                        <div v-if="m.type == 2">
+                          <AudioPlayer :src="m.content" />
+                        </div>
+                      </q-chat-message>
                     </div>
-                  </q-chat-message>
+                  </div>
+                  <span ref="endOfPage" id="endOfPage"></span>
                 </div>
-              </div>
-              <span ref="endOfPage" id="endOfPage"></span>
-            </div>
+              </q-tab-panel>
+            </q-tab-panels>
             <q-dialog position="top" v-model="showMoreMessageOptions.open">
               <q-toolbar class="bg-primary text-white">
                 <q-toolbar-title class="text-subtitle1">Nachrichteninfos</q-toolbar-title>
@@ -513,7 +367,7 @@ Vue.use(VueRecord);
 import { openURL, date, copyToClipboard, Notify } from "quasar";
 import ExtHr from "components/ExtendedHr";
 import VueQrcode from "vue-qrcode";
-import LiftInfoDrawer from "components/LiftInfoDrawer";
+import LiftInfoDialog from "components/LiftInfoDialog";
 import AudioPlayer from "components/AudioPlayer";
 
 import {
@@ -525,8 +379,7 @@ import {
 export default {
   name: "LiftPopup",
   components: {
-    ExtHr,
-    VueQrcode,
+    LiftInfoDialog,
     AudioPlayer,
   },
   data() {
@@ -535,7 +388,7 @@ export default {
       showQR: false,
       coloredIDs: {},
       recording: false,
-      openLiftInfo: false,
+      infoDrawerOpen: false,
       messageText: "",
       showQuickMessages: false,
       showPassengersToBeMentioned: false,
@@ -577,7 +430,7 @@ export default {
           this.scrollToEnd();
         });
       }
-      // this.focusTextInput()
+      else this.infoDrawerOpen = false
     },
 
     messageText: function (newText) {
@@ -670,6 +523,10 @@ export default {
 
     emit(val) {
       this.$emit("input", val);
+    },
+
+    emitShortLiftInfo() {
+      this.$emit("shortLiftInfo");
     },
 
     getColor(userId) {
@@ -886,13 +743,6 @@ export default {
 
       this.messageText = "";
       setTimeout(() => window.scrollTo(0, 1000000), 100);
-    },
-
-    viewCar() {
-      var car = this.lift.car;
-      var search =
-        car.brand + "+" + car.model.replace(" ", "") + "+" + car.type;
-      openURL("https://www.ecosia.org/images?q=" + search); // easiest way, otherwise we would have to store a image of each model (!)
     },
 
     viewUserFromId(userId) {

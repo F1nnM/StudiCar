@@ -13,16 +13,45 @@
           </q-badge>-->
         </span>
       </q-toolbar-title>
-      <q-icon v-if="lift.requested" name="mark_chat_read" size="xs" color="dark" />
+      <q-icon v-if="lift.requested" name="mark_chat_read" size="xs" color="dark">
+        <q-tooltip
+          anchor="top middle"
+          :content-class="`bg-white text-dark`"
+          content-style="border: 1px solid darkgrey"
+          self="bottom middle"
+          :offset="[10, 10]"
+        >Du hast hier schon angefragt</q-tooltip>
+      </q-icon>
+      <q-btn flat @click="requestLift" v-else dense icon="touch_app" size="md" color="primary">
+        <q-tooltip
+          anchor="top middle"
+          :content-class="`bg-white text-dark`"
+          content-style="border: 1px solid darkgrey"
+          self="bottom middle"
+          :offset="[10, 10]"
+        >Eine Anfrage senden</q-tooltip>
+      </q-btn>
     </q-toolbar>
     <q-list>
       <q-item dense>
         <q-item-section>
-          <q-item-label caption>{{ dateText }}</q-item-label>
+          <q-item-label caption>{{ dateText.firstLine }}</q-item-label>
+          <q-item-label caption>{{ dateText.secondLine }}</q-item-label>
         </q-item-section>
         <q-item-section side>
-          <span>{{ lift.seatsOccupied }}/{{ lift.seatsOffered }}</span>
-          <q-icon style="display: inline" id="seats" size="xs" name="person" />
+          <q-knob
+            size="lg"
+            show-value
+            :thickness="0.05"
+            readonly
+            track-color="white"
+            color="primary"
+            text-color="dark"
+            :value="lift.seatsOccupied / lift.seatsOffered * 100"
+          >
+            <span>{{ lift.seatsOccupied }}/{{ lift.seatsOffered }}</span>
+            <q-icon style="display: inline" id="seats" size="12px" name="person" />
+          </q-knob>
         </q-item-section>
       </q-item>
       <!-- <q-item>
@@ -64,9 +93,17 @@ val: 'music', icon: 'music_note'
                     style="border: 1px solid lightgray"
                     class="rounded-borders q-pa-md"
                     :name="pref.icon"
-                    :color="betterPrefColor(lift.driver.prefs[pref.val])"
+                    :color="betterPrefColor(pref.val)"
                     size="sm"
-                  />
+                  >
+                    <q-tooltip
+                      anchor="top middle"
+                      :content-class="`bg-white text-dark`"
+                      :content-style="'border-bottom: 1px solid ' + betterPrefColor(pref.val)"
+                      self="bottom middle"
+                      :offset="[10, 10]"
+                    >{{ prefsDocu[pref.val][lift.driver.prefs[pref.val].toLowerCase()] }}</q-tooltip>
+                  </q-icon>
                 </div>
               </q-toolbar-title>
               <q-btn
@@ -124,23 +161,22 @@ export default {
           date.getDateDiff(new Date(), dateObj, "days") < 7 ? "kommenden " : "",
         directionText = this.lift.departAt ? "Abfahrt" : "Ankunft";
 
-      return (
-        "Fahrt ist am " +
-        isNextText +
-        dateFormatted +
-        "\nAngestrebte " +
-        directionText +
-        ": " +
-        timeFormatted +
-        " Uhr"
-      );
+      return {
+        firstLine: "Fahrt ist am " + isNextText + dateFormatted,
+        secondLine:
+          "Angestrebte " + directionText + ": " + timeFormatted + " Uhr",
+      };
+    },
+
+    prefsDocu() {
+      return this.$store.state.prefsDocu;
     },
   },
   methods: {
-    betterPrefColor(color) {
-      if (color == "GREEN") return "green-8";
-      else if (color == "YELLOW") return "orange";
-      else return color.toLowerCase();
+    betterPrefColor(prefName) {
+      var color = this.lift.driver.prefs[prefName].toLowerCase();
+      if (color == "yellow") return "orange";
+      else return color;
     },
 
     changePrefView() {
@@ -163,18 +199,38 @@ export default {
     formatAsTime(dateString) {
       return date.formatDate(new Date(dateString), "H:mm");
     },
+
+    requestLift(){
+      this.$q
+              .dialog({
+                title: "Anfragen",
+                message: `${this.lift.driver.name} fragen, ob du mitfahren kannst?`,
+                ok: {
+                  color: "positive",
+                },
+                cancel: {
+                  color: "white",
+                },
+                cancel: true,
+                persistent: true,
+              })
+              .onOk((data) => {
+                this.$emit('request', this.lift.id)
+              })
+              .onCancel();
+    }
   },
   mounted() {},
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .link-border {
   border-radius: 4px;
-  border: 1px solid rgba(19, 70, 21, 0.671);
+  border-top: 1px solid rgba(19, 70, 21, 0.671);
 }
 
 .primary-border {
-  border: 1px solid rgba(19, 70, 21, 0.671);
+  border: 1px solid rgba(19, 70, 21, 0.24);
 }
 </style>

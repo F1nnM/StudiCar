@@ -88,6 +88,10 @@ export default {
         }
       }
       if (payload.accepted == true) state.user.chatLifts[liftId].passengers.push(payload.user) // user object is structured like other passengers
+    },
+
+    REQUEST_TO_LIFT (state, liftId) {
+      state.user.marketplaceOffers.find(offer => offer.id == liftId).requested = true
     }
   },
 
@@ -241,6 +245,10 @@ export default {
 
     async respondLiftRequest ({ commit }, payload) {
       commit('RESPOND_LIFT_REQUEST', payload)
+    },
+
+    async requestToLift ({ commit }, payload) {
+      commit('REQUEST_TO_LIFT', payload)
     }
   }
 }
