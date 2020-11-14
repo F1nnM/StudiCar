@@ -174,7 +174,7 @@
                     <q-item
                       class="col-6"
                       clickable
-                      @click="viewUserFromId(showMoreMessageOptions.message.sentBy)"
+                      @click="viewUserFromFbId(showMoreMessageOptions.message.sentBy)"
                       v-ripple
                       dense
                       v-if="showMoreMessageOptions.message.sentBy != user"
@@ -388,7 +388,7 @@ export default {
       showQR: false,
       coloredIDs: {},
       recording: false,
-      infoDrawerOpen: false,
+      infoDrawerOpen: true,
       messageText: "",
       showQuickMessages: false,
       showPassengersToBeMentioned: false,
@@ -745,8 +745,8 @@ export default {
       setTimeout(() => window.scrollTo(0, 1000000), 100);
     },
 
-    viewUserFromId(userId) {
-      window.location.href = "/#/benutzerinfo?slId=" + userId;
+    viewUserFromFbId(fbId) {
+      window.location.href = "/#/benutzerinfo?userFbId=" + fbId;
     },
 
     customCopyToClipboard(obj) {

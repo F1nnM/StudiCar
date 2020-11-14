@@ -58,7 +58,7 @@
                   <q-btn
                     label="zum Profil"
                     outline
-                    :to="'benutzerinfo?slId=' + request.requestingUser.fbId"
+                    :to="'benutzerinfo?userFbId=' + request.requestingUser.fbId"
                     no-caps
                     class="q-px-xs q-mt-md"
                     color="dark"

@@ -362,7 +362,7 @@ export default {
 
   mounted() {
     let loc = document.location.href;
-    let otherFbId = loc.split("?slId=")[1];
+    let otherFbId = loc.split("?userFbId=")[1];
 
     buildGetRequestUrl(GET_USER_PROFILE_PIC, { fbid: otherFbId }, (url) => {
       this.imageUrl = url;

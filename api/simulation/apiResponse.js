@@ -23,7 +23,13 @@ module.exports = {
 			driver: {
 				id: 1,
 				name: "Bernd",
-				surname: "Mayinger"
+				surname: "Mayinger",
+				prefs: {
+					talk: "RED",
+					talkMorning: "YELLOW",
+					smoking: "GREEN",
+					music: "RED"
+				},
 			},
 			passengers: [
 				{
@@ -81,7 +87,13 @@ module.exports = {
 			driver: {
 				id: 1,
 				name: "Bernd",
-				surname: "Mayinger"
+				surname: "Mayinger",
+				prefs: {
+					talk: "RED",
+					talkMorning: "YELLOW",
+					smoking: "GREEN",
+					music: "RED"
+				},
 			},
 			passengers: [
 				{
@@ -150,10 +162,21 @@ module.exports = {
 				id: 6,
 				name: "Stuttgart"
 			},
+			stations: [{
+				id: 6,
+				name: "Stuttgart",
+				passenger: 'Tobias'
+			}],
 			driver: {
 				id: 1,
 				name: "Bernd",
-				surname: "Mayinger"
+				surname: "Mayinger",
+				prefs: {
+					talk: "RED",
+					talkMorning: "YELLOW",
+					smoking: "GREEN",
+					music: "RED"
+				},
 			},
 			passengers: [
 				{

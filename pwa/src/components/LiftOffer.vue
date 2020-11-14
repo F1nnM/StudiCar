@@ -107,7 +107,7 @@ val: 'music', icon: 'music_note'
                 </div>
               </q-toolbar-title>
               <q-btn
-                :to="'benutzerinfo?slId='+lift.driver.fbid"
+                :to="'benutzerinfo?userFbId='+lift.driver.fbid"
                 outline
                 class="rounded-borders"
                 color="dark"

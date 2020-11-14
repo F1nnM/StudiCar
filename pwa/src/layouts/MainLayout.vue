@@ -242,7 +242,7 @@ export default {
       this.scannerOpen = false;
       switch (e.type) {
         case "u":
-          window.location.href = "#/benutzerinfo?slId=" + e.res;
+          window.location.href = "#/benutzerinfo?userFbId=" + e.res;
           break;
         case "l":
           this.liftQrId = e.res;

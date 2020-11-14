@@ -2,13 +2,31 @@
   <div class="q-pa-md">
     <q-btn label="Feuer" @click="go" />
     <q-btn label="Variablenfeuer" @click="open = !open" />
-    <q-item>
-      <q-item-section avatar>
-        <q-avatar size="100px">
-          <TeamPicture />
-        </q-avatar>
-      </q-item-section>
-    </q-item>
+    <ExpansionLiftTimeline
+      color="dark"
+      :entries="[{
+      title: 'Test',
+      subtitle: 'Subtitle',
+      text: 'dw',
+      icon: 'school'
+    },
+    {
+      title: 'Test',
+      subtitle: 'Subtitle',
+      text: 'dw',
+      icon: 'school'
+    },
+    {
+      title: 'Test',
+      subtitle: 'Subtitle',
+      text: 'dw',
+      icon: 'home'
+    }]"
+    >
+      <!-- <template v-slot:header>Test</template>
+      <template v-slot:content>Test</template>
+      <template v-slot:footer>Test</template>-->
+    </ExpansionLiftTimeline>
 
     <p v-for="n in 20" :key="n">Lorem</p>
   </div>
@@ -16,13 +34,13 @@
 
 <script>
 import { scroll } from "quasar";
-import TeamPicture from "components/TeamPicture";
+import ExpansionLiftTimeline from "components/ExpansionLiftTimeline";
 
 import { sendApiRequest } from "../ApiAccess";
 
 export default {
   components: {
-    TeamPicture,
+    ExpansionLiftTimeline,
   },
   data() {
     return {

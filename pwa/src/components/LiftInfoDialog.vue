@@ -21,60 +21,62 @@
       </div>
       <div class="bg-white full-height q-pa-md">
         <p class="text-h6">Fahrtdetails</p>
-        <q-timeline color="primary" class="q-mt-xl">
-          <!-- <q-item-label header>Fahrtverlauf</q-item-label> -->
-          <q-timeline-entry>
-            <template v-slot:title>
-              <p>
-                {{ lift.start.name }}
-                <span
-                  class="q-ml-md text-subtitle1"
-                >{{ formatAsTime(lift.departAt) }}</span>
-              </p>
-            </template>
-          </q-timeline-entry>
-          <q-timeline-entry>
-            <template v-slot:title>
-              <p>
-                {{ lift.destination.name }}
-                <span
-                  class="q-ml-md text-subtitle1"
-                >{{ formatAsTime(lift.arriveBy) }}</span>
-                <!-- <q-badge floating v-if="lift.destination.id < 4">
-                            <q-icon color="dark" name="school" size="xs" />
-                </q-badge>-->
-              </p>
-            </template>
-          </q-timeline-entry>
-        </q-timeline>
-        <div class="shadow-9 q-pa-md">
-          <div class="row">
-            <div class="col-6">
-              <div class="text-subtitle1">{{ lift.car.brand }} {{ lift.car.model }}</div>
-              <div class="text-caption">{{ lift.car.type }}</div>
-            </div>
-            <div class="col-5">
-              <q-avatar>
-                <div :style="`background-color: ${ lift.car.color }`" class="full-width">
-                  <q-img src="~assets/app-icon_color_preview.png" />
-                </div>
-              </q-avatar>
-              <q-btn color="grey-7" round flat dense icon="help_outline">
-                <q-menu cover auto-close>
-                  <q-btn flat no-caps clickable @click="viewCar()">Modell online ansehen</q-btn>
-                </q-menu>
-              </q-btn>
-            </div>
-          </div>
-          <ExtHr :color="lift.car.color" hex size="xs" class="q-my-sm" />
-          <p
-            class="text-grey-7 q-mb-none"
-          >{{ lift.car.licensePlate }} - Baujahr {{ lift.car.built }}</p>
-        </div>
 
-        <q-list bordered class="q-mt-md">
-          <q-item-label header>Fahrer</q-item-label>
+        <q-list class="q-mt-md">
+          <q-item-label header>
+            Verlauf
+            <q-badge
+              v-if="(courseStations.length > 2)"
+              class="q-ml-md"
+            >noch {{ courseStations.length - 2 }} Zwischenstopp{{ courseStations.length > 3 ? 's' : '' }}</q-badge>
+          </q-item-label>
+          <ExpansionLiftTimeline color="dark" :entries="courseStations"></ExpansionLiftTimeline>
+          <q-item-label header>Auto</q-item-label>
           <q-item>
+            <q-item-section avatar>
+              <q-avatar :style="'border: 1px solid ' + lift.car.color">
+                <q-icon name="directions_car" size="sm" />
+              </q-avatar>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>
+                <span class="text-subtitle1">
+                  <span class="text-bold">{{ lift.car.brand }}</span>
+                  {{ lift.car.model}}
+                </span>
+                <span class="q-ml-sm">
+                  <q-badge color="dark" class="q-ml-sm" transparent>{{ lift.car.type }}</q-badge>
+                </span>
+              </q-item-label>
+              <q-item-label
+                caption
+                class="q-pt-xs"
+                :style="'border-top: 1px solid ' + lift.car.color"
+              >
+                Baujahr {{ lift.car.built }}
+                <span class="q-mx-md">-</span>
+                {{ lift.car.licensePlate }}
+              </q-item-label>
+            </q-item-section>
+            <q-item-section side top>
+              <q-btn icon="help_outline" flat @click="showModelFrame = true" />
+            </q-item-section>
+          </q-item>
+          <q-item-label header>
+            <p v-if="lift.passengers.length">
+              Menschen
+              <span class="text-caption float-right">
+                {{ lift.passengers.length + 1 }} / {{ lift.car.allSeats }}
+                <q-icon name="person" size="xs" />
+              </span>
+            </p>
+            <p v-else class="text-center q-pt-sm text-gray">Bis jetzt hast du noch keine Mitfahrer.</p>
+            <p
+              class="text-right text-primary text-caption"
+              v-if="lift.passengers.length == lift.seats"
+            >Volles Auto. Wow!</p>
+          </q-item-label>
+          <q-item v-ripple clickable @click="viewUserFromFbId(lift.driver.fbid)">
             <q-item-section top avatar>
               <q-avatar>
                 <img :src="getImageOfUser(lift.driver.id)" />
@@ -83,50 +85,82 @@
             <q-item-section>
               <p>
                 {{ lift.driver.name }}
+                <q-badge class="q-ml-md" color="primary">Fahrer</q-badge>
                 <br />
                 <small>{{ lift.driver.surname }}</small>
               </p>
             </q-item-section>
-          </q-item>
-          <q-item-label header>
-            <p v-if="lift.passengers.length">
-              Mitfahrer
-              <span class="text-caption float-right">
-                {{ lift.passengers.length + 1 }} / {{ lift.car.allSeats }}
-                <q-icon name="airline_seat_recline_normal" size="xs" />
-              </span>
-            </p>
-            <p
-              v-if="!lift.passengers.length"
-              class="text-center q-pt-sm text-gray"
-            >Bis jetzt hast du noch keine Mitfahrer.</p>
-            <p
-              class="text-right text-primary text-caption"
-              v-if="lift.passengers.length == lift.seats"
-            >Volles Auto. Wow!</p>
-          </q-item-label>
-          <q-item v-for="item in lift.passengers" :key="item.id">
-            <q-item-section top avatar>
-              <q-avatar>
-                <img :src="getImageOfUser(item.id)" />
-              </q-avatar>
-            </q-item-section>
-
-            <q-item-section>
-              <q-item-label>
-                {{ item.name }}
-                <br />
-                <small>{{ item.surname }}</small>
-              </q-item-label>
-              <q-item-label caption></q-item-label>
-            </q-item-section>
-
-            <q-item-section side top>
-              <q-icon name="directions_car" v-if="item.id == user" size="sm" />
+            <q-item-section side>
+              <div class="row justify-around">
+                <q-btn
+                  v-for="(pref) in [{
+val: 'talk', icon: 'record_voice_over'
+                    },
+                    {
+val: 'talkMorning', icon: 'alarm'
+                    },
+                    {
+val: 'smoking', icon: 'smoking_rooms'
+                    },
+                    {
+val: 'music', icon: 'music_note'
+                    }]"
+                  :key="pref.val"
+                  outline
+                  rounded
+                  dense
+                  :icon="pref.icon"
+                  class="q-pa-xs"
+                  :color="betterPrefColor(pref.val)"
+                  size="sm"
+                />
+                <!-- <q-btn icon="arrow_forward_ios" outline dense rounded size="sm" /> -->
+              </div>
             </q-item-section>
           </q-item>
+          <q-separator />
+          <div class="row justify-between">
+            <q-item
+              clickable
+              v-ripple
+              @click="viewUserFromFbId(item.fbId)"
+              class="col-6"
+              v-for="item in lift.passengers"
+              :key="item.id"
+            >
+              <q-item-section top avatar>
+                <q-avatar>
+                  <img :src="getImageOfUser(item.id)" />
+                </q-avatar>
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>
+                  {{ item.name }}
+                  <br />
+                  <small>{{ item.surname }}</small>
+                </q-item-label>
+                <q-item-label caption></q-item-label>
+              </q-item-section>
+
+              <!-- <q-item-section side>
+                <q-btn icon="arrow_forward_ios" outline dense rounded size="sm" />
+              </q-item-section>-->
+            </q-item>
+          </div>
         </q-list>
       </div>
+      <q-dialog v-model="showModelFrame" full-height full-width>
+        <q-card class="bg-white">
+          <q-card-section style="height: 70vh">
+            <q-item-label class="q-mb-sm">
+              Modell online ansehen
+              <q-badge>BETA</q-badge>
+            </q-item-label>
+            <vue-friendly-iframe style="height: 70vh" :src="modelUrl" />
+          </q-card-section>
+        </q-card>
+      </q-dialog>
     </div>
   </q-dialog>
 </template>
@@ -135,12 +169,17 @@
 <script>
 import { openURL, date } from "quasar";
 import ExtHr from "components/ExtendedHr";
+import Vue from 'vue';
+import VueFriendlyIframe from 'vue-friendly-iframe';
+Vue.use(VueFriendlyIframe);
+
+import ExpansionLiftTimeline from "components/ExpansionLiftTimeline";
 /* import { sendApiRequest } from "../ApiAccess"; */
 
 export default {
   name: "LiftInfoDialog",
   components: {
-    ExtHr
+    ExpansionLiftTimeline
   },
   props: {
     value: Boolean,
@@ -150,13 +189,52 @@ export default {
     return {
       open: false,
       user: this.$store.getters["auth/user"].id,
-      ntc: null
+      ntc: null,
+      showModelFrame: false
     };
   },
   watch: {
    
   },
-  computed: {},
+  computed: {
+    modelUrl(){
+      var car = this.lift.car;
+      var humanColor = ''
+      /* if(!this.ntc) this.ntc = require('../js/ntc')
+      humanColor = this.ntc.name(car.color)[1] */
+      
+      var search = 
+        `${car.brand}+${car.model.replace(" ", "")}+${car.type}+${humanColor}`;
+        search = search.replace('+', '%20')
+        return "https://www.pexels.com/search/" + search
+    },
+
+    courseStations(){
+      var arr = [],
+      start = this.lift.start,
+      dest = this.lift.destination,
+      arriveBy = this.lift.arriveBy,
+      departAt = this.lift.departAt
+      addToCourse(start.name, start.id > 3 ? 'home' : 'school', (start.id > 3 ? 'bei ' + this.lift.driver.name : ''), departAt)
+      if(this.lift.stations) this.lift.stations.forEach(station => {
+        addToCourse(station.name, 'person_outline', 'bei ' + station.passenger, '- ? -') 
+        })
+      addToCourse(dest.name, dest.id > 3 ? 'home' : 'school', (dest.id > 3 ? 'bei ' + this.lift.driver.name : ''), arriveBy)
+
+
+      function addToCourse(title, icon, text, time){
+            arr.push({
+              title: title,
+              subtitle: time ? date.formatDate(new Date(time), "H:mm") : '- ? -',
+              icon: icon,
+              text: text
+            })
+      }
+
+      return arr
+
+    }
+  },
   methods: {
     emit(val){
       this.$emit('input', val)
@@ -169,14 +247,21 @@ export default {
     },
 
     viewCar() {
-      var car = this.lift.car;
-      var humanColor = ''
-      /* if(!this.ntc) this.ntc = require('../js/ntc')
-      humanColor = this.ntc.name(car.color)[1] */
-      
-      var search = 
-        `${car.brand}+${car.model.replace(" ", "")}+${car.type}+${humanColor}`;
-      openURL("https://www.ecosia.org/images?q=" + search); // easiest way, otherwise we would have to store a image of each model (!)
+      openURL(this.modelUrl); // easiest way, otherwise we would have to store a image of each model (!)
+    },
+    
+    formatAsTime(timeObj) {
+      return date.formatDate(timeObj, "H:mm");
+    },
+
+    betterPrefColor(prefName) {
+      var color = this.lift.driver.prefs[prefName].toLowerCase();
+      if (color == "yellow") return "orange";
+      else return color;
+    },
+
+    viewUserFromFbId(fbId) {
+      window.location.href = "/#/benutzerinfo?userFbId=" + fbId;
     },
   }
 };
