@@ -28,7 +28,6 @@ jobs:
         ftp-server: ftp://mfinn.de/httpdocs/studicar/dev
         ftp-username: ${{ secrets.FTP_USERNAME }}
         ftp-password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: .
   api:
     runs-on: ubuntu-latest
 
