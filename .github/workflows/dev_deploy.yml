@@ -23,9 +23,7 @@ jobs:
     - run: npm install -g @quasar/icongenie
     - run: cd ./pwa && npm ci
     - run: cd ./pwa && npm run build
-    - run: pwd
-    - run: ls -l
-    - run: cd pwa && ls -l
+    - run: cd pwa/dist && ls -l
     - uses: SamKirkland/FTP-Deploy-Action@3.1.1
       with:
         ftp-server: ftp://mfinn.de/httpdocs/studicar/dev
