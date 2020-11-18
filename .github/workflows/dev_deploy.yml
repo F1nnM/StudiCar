@@ -29,7 +29,8 @@ jobs:
         ftp-username: ${{ secrets.FTP_USERNAME }}
         ftp-password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./pwa
-        dangerous-clean-slate: true
+    - run: cd ./pwa && ls -l && cd ./dist/pwa && ls -l
+    - run: cd ./api && ls -l
   api:
     runs-on: ubuntu-latest
 
