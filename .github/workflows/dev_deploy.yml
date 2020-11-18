@@ -28,9 +28,7 @@ jobs:
         ftp-server: ftp://mfinn.de/httpdocs/studicar/dev
         ftp-username: ${{ secrets.FTP_USERNAME }}
         ftp-password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./pwa
-    - run: cd ./pwa && ls -l && cd ./dist/pwa && ls -l
-    - run: cd ./api && ls -l
+        local-dir: ./pwa/dist/pwa
   api:
     runs-on: ubuntu-latest
 
