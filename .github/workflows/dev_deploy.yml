@@ -23,11 +23,14 @@ jobs:
     - run: npm install -g @quasar/icongenie
     - run: cd ./pwa && npm ci
     - run: cd ./pwa && npm run build
+    - run: pwd
+    - run: ls -l
     - uses: SamKirkland/FTP-Deploy-Action@3.1.1
       with:
         ftp-server: ftp://mfinn.de/httpdocs/studicar/dev
         ftp-username: ${{ secrets.FTP_USERNAME }}
         ftp-password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./pwa
   api:
     runs-on: ubuntu-latest
 
