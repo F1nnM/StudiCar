@@ -25,9 +25,9 @@ jobs:
     - run: cd ./pwa && npm run build
     - uses: SamKirkland/FTP-Deploy-Action@4.0.0
       with:
-        ftp-server: ftp://mfinn.de/httpdocs/studicar/dev
-        ftp-username: ${{ secrets.FTP_USERNAME }}
-        ftp-password: ${{ secrets.FTP_PASSWORD }}
+        server: ftp://mfinn.de/httpdocs/studicar/dev
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./pwa/dist/pwa
         server-dir: ./pwa
   api:
@@ -37,7 +37,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: SamKirkland/FTP-Deploy-Action@4.0.0
       with:
-        ftp-server: ftp://mfinn.de/httpdocs/studicar/dev
-        ftp-username: ${{ secrets.FTP_USERNAME }}
-        ftp-password: ${{ secrets.FTP_PASSWORD }}
+        server: ftp://mfinn.de/httpdocs/studicar/dev
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./api
