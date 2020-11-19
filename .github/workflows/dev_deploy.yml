@@ -40,4 +40,5 @@ jobs:
         server: ftp://mfinn.de
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: /dev/api/
+        local-dir: ./api/
+        server-dir: /dev/api
