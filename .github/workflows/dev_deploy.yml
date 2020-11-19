@@ -44,3 +44,4 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./api/
         server-dir: /dev/api/
+        exclude: .git* .git*/**
