@@ -28,8 +28,8 @@ jobs:
         server: ftp://mfinn.de
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: ./pwa/dist/pwa/
-        local-dir: /dev/pwa/
+        local-dir: ./pwa/dist/pwa/
+        server-dir: /dev/pwa/
   api:
     runs-on: ubuntu-latest
 
