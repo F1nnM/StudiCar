@@ -46,4 +46,4 @@ jobs:
         local_source_dir: ./api/
         dist_target: /dev/api/
         delete: true
-        exclude: 'dbConfig.js' 'firebaseAccountKey.json'
+        exclude: "'dbConfig.js' 'firebaseAccountKey.json'"
