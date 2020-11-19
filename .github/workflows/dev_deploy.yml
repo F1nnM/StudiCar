@@ -36,7 +36,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
-    - run: cd ./api && npm ci && cd node_modules %% ls -l
+    - run: cd ./api && npm ci && cd node_modules && ls -l
     - uses: SamKirkland/FTP-Deploy-Action@4.0.0
       with:
         server: mfinn.de
