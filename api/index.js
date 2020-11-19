@@ -79,7 +79,7 @@ server.on('request', async (req, res) => {
         res.end();
         break;
       }
-      res.end("TEST")
+      
       let buffer = []
       req.on('data', chunk => {
         buffer.push(chunk)
