@@ -2,31 +2,6 @@
   <div class="q-pa-md">
     <q-btn label="Feuer" @click="go" />
     <q-btn label="Variablenfeuer" @click="open = !open" />
-    <ExpansionLiftTimeline
-      color="dark"
-      :entries="[{
-      title: 'Test',
-      subtitle: 'Subtitle',
-      text: 'dw',
-      icon: 'school'
-    },
-    {
-      title: 'Test',
-      subtitle: 'Subtitle',
-      text: 'dw',
-      icon: 'school'
-    },
-    {
-      title: 'Test',
-      subtitle: 'Subtitle',
-      text: 'dw',
-      icon: 'home'
-    }]"
-    >
-      <!-- <template v-slot:header>Test</template>
-      <template v-slot:content>Test</template>
-      <template v-slot:footer>Test</template>-->
-    </ExpansionLiftTimeline>
 
     <p v-for="n in 20" :key="n">Lorem</p>
   </div>
@@ -34,13 +9,13 @@
 
 <script>
 import { scroll } from "quasar";
-import ExpansionLiftTimeline from "components/ExpansionLiftTimeline";
+/* import ExpansionLiftTimeline from "components/ExpansionLiftTimeline"; */
 
 import { sendApiRequest } from "../ApiAccess";
 
 export default {
   components: {
-    ExpansionLiftTimeline,
+    
   },
   data() {
     return {
@@ -51,7 +26,16 @@ export default {
   computed: {},
   methods: {
     go() {
-      alert("fired");
+      navigator.geolocation.getCurrentPosition(pos=> {
+        var apiUrl = `https://geocode.xyz/${pos.coords.latitude},${pos.coords.longitude}?json=1`
+        this.$axios.get(apiUrl).then(result => {
+          var obj = {
+            city: result.data.city,
+            type: result.data.osmtags.name_prefix,
+            postcode: result.data.poi.addr_postcode
+          }
+        })
+      })
     },
   },
 

@@ -14,6 +14,7 @@ export default {
     comClass(){
       var c = ''
       if(this.headFocused) c += ' head-focused'
+      else c += ' body-focused'
       if(this.cutBackground) c += ' cut'
       return c
     },
@@ -31,6 +32,12 @@ export default {
   transform: scale(2);
   transform-origin: center 8%;
   animation: all 0.2s ease-out;
+}
+
+.body-focused {
+  transform: scale(0.8);
+  border-radius: 10px;
+  transform-origin: center top;
 }
 
 .cut {

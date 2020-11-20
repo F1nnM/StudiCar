@@ -2,6 +2,11 @@ import { register } from 'register-service-worker'
 
 import { Notify } from 'quasar'
 
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+import store from '../src/store'
+
 // The ready(), registered(), cached(), updatefound() and updated()
 // events passes a ServiceWorkerRegistration instance in their arguments.
 // ServiceWorkerRegistration: https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration
@@ -16,12 +21,15 @@ register(process.env.SERVICE_WORKER_FILE, {
   ready (/* registration */) {
     if (process.env.DEV) {
       console.log('Service worker is active.')
+
     }
   },
 
-  registered (/* registration */) {
+  registered (registration) {
     if (process.env.DEV) {
       console.log('Service worker has been registered.')
+      /* alert('will be updated') */
+      registration.update()
     }
   },
 
@@ -38,36 +46,11 @@ register(process.env.SERVICE_WORKER_FILE, {
   },
 
   updated (registration) {
-    function finalReload (reg) {
-      reg.waiting.postMessage('skipWaiting');
-      window.location.reload(true);
-    }
 
     if (process.env.DEV) {
       console.log('New content is available; please refresh.')
-      if (false) Notify.create({
-        message: "Neue Version verfügbar",
-        caption: "Bitte führe zeitnah ein Update durch",
-        test: 'ff',
-        color: "dark",
-        progress: true,
-        actions: [
-          {
-            label: "Später",
-            color: "white",
-            handler: () => {
-
-            },
-          },
-          {
-            label: "Aktualisieren",
-            color: "primary",
-            handler: () => {
-              finalReload(registration)
-            },
-          },
-        ],
-      })
+      /* alert('please refresh') */
+      store.commit('setOldVersionRunning', true)
     }
     // else finalReload(registration)
   },
@@ -84,3 +67,10 @@ register(process.env.SERVICE_WORKER_FILE, {
     }
   }
 })
+
+function hardReload () {
+  /* var script = document.createElement("script");
+  script.src = "SCRIPT.js?ver=" + (new Date()).getTime();
+  document.body.appendChild(script); */
+  /* location.reload() */
+}

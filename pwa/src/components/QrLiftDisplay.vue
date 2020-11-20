@@ -3,12 +3,12 @@
     <q-card>
       <q-card-section>
         <div v-if="lift">
-          <p class="text-subtitle1">Du wurdest zu dieser Fahrgelegenheit eingeladen:</p>
+          <p class="text-subtitle2">Du wurdest zu dieser Fahrgelegenheit eingeladen:</p>
           <p
             v-if="lift.requested"
             class="text-caption text-red"
           >Du hast hier schon angefragt, Antwort steht noch aus</p>
-          <LiftOffer :lift="lift" />
+          <LiftOffer :lift="lift" noShadow />
         </div>
         <div v-else>
           <q-item>
@@ -64,10 +64,7 @@ export default {
           }
         ); */
       if (val) {
-        const allLifts = this.$store.getters["auth/user"].marketplaceOffers;
-        this.lift = allLifts.find((item) => {
-          return item.id == this.liftQrId;
-        });
+        this.lift = this.$store.getters["auth/user"].chatLifts[1];
       }
     },
   },

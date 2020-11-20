@@ -193,6 +193,8 @@
 
     <QrGen
       v-model="shareProfileQR"
+      :label="username"
+      linearProgress
       :input="qrInput"
       text="Über diesen Code können auch Nutzer außerhalb von Fahrgemeinschaften dein Profil besuchen."
     />
@@ -249,9 +251,7 @@
             </p>
             <p v-if="file" class="text-caption">
               Wir haben dein Bild etwas zugeschnitten, damit es den
-              Abmessungen für Profilbilder entspricht. Aktuell kannst du den
-              Ausschnitt noch nicht selbst einstellen, wir arbeiten aber
-              daran.
+              Abmessungen für Profilbilder entspricht.
             </p>
           </div>
         </q-card-section>

@@ -33,7 +33,8 @@
             <span class="text-weight-bold q-mr-xs">{{ message.sentBy }}:</span>
             <span v-if="message.type != 1">
               <q-icon :name="message.type == 2 ? 'keyboard_voice' : 'image'" />
-              {{ (message.content.length / 1000).toFixed(2) }} KB
+              <!-- {{ message.content.length }}
+              Zeichen-->
             </span>
             <span v-else>{{ message.content }}</span>
           </q-item-label>

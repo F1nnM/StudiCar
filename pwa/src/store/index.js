@@ -48,6 +48,10 @@ const store = new Vuex.Store({
       state.info = info_
     },
 
+    setOldVersionRunning (state, running_) {
+      state.oldVersionRunning = running_
+    },
+
     setAskAgainWhenAppreciatingNewPassenger (state, askAgain) {
       state.settings.askAgainWhenAppreciatingNewPassenger = askAgain
     },
@@ -83,6 +87,7 @@ const store = new Vuex.Store({
     info: null,
     scroll: 0,
     message: 'Hello',
+    oldVersionRunning: false,
     settings: {
       askAgainWhenAppreciatingNewPassenger: true, // when true, user has to confirm action at appreciating new passenger
       enablePostillonNewsFeed: true // when true, postillon ticker is displayed in left drawer
@@ -112,9 +117,9 @@ const store = new Vuex.Store({
       }
     },
     emojis: [[
-      '😄', '😁', '😆', '😅', '🙂', '😊', '😇', '🙃', '😌', '😘', '😜', '🤓', '😎', '🤔', '😶', '😬'],
+      '😄', '😁', '😆', '😅', '🙂', '😊', '😇', '🙃', '😌', '😘', '😜', '🤓', '😎', '🤔', '😶', '😬'], // arrays represent nameless categories
     ['👏🏼', '👍🏼', '👊🏼', '✌🏼', '👌🏼', '👋🏼', '☝', '👀'],
-    ['❤', '🌍', '🔝', '❗', '🏁', '🌱', '🍀', '🌍']],
+    ['❤', '🌍', '🔝', '❗', '🏁', '🌱', '🍀']],
     recentMessages: [{
       icon: 'thumb_up_alt',
       text: 'Ok, bis dann'

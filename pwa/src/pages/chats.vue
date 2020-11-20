@@ -205,9 +205,13 @@
           v-model="chatPopup.isOpen"
           :lift="chatPopup.data"
         />
-        <LiftQr
+        <QrGen
+          position="bottom"
           v-model="shortLiftPopup.isOpen"
+          :label="shortLiftPopup.data ? shortLiftPopup.data.start.name + '  ›  ' + shortLiftPopup.data.destination.name : ''"
+          linearProgress
           :input="'l' + (shortLiftPopup.data ? shortLiftPopup.data.qr : '')"
+          text="Über diesen Code können auch Nutzer außerhalb von Fahrgemeinschaften dein Profil besuchen."
         />
       </q-tab-panel>
       <q-tab-panel name="outgoing">Hier kommen dann die ausgehenden</q-tab-panel>
@@ -218,7 +222,7 @@
 <script>
 import ChatItem from "components/ChatItem";
 import LiftPopup from "components/LiftPopup";
-import LiftQr from "components/LiftQr";
+import QrGen from "components/QrGenerator";
 import TitleButtonAnchor from "components/TitleButtonAnchor";
 import IncomingLiftRequest from "components/IncomingLiftRequest";
 import TextPagination from "components/TextPagination";
@@ -229,7 +233,7 @@ export default {
   components: {
     ChatItem,
     LiftPopup,
-    LiftQr,
+    QrGen,
     TitleButtonAnchor,
     IncomingLiftRequest,
     TextPagination,

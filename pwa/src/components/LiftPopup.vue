@@ -154,8 +154,8 @@
                     <q-item-section>{{ formatAsLongTime(showMoreMessageOptions.message.timestamp) }} Uhr</q-item-section>
                   </q-item>
                   <q-item dense>
-                    <q-item-section>Größe</q-item-section>
-                    <q-item-section>{{ (showMoreMessageOptions.message.content.length / 1000).toFixed(2) }} KB</q-item-section>
+                    <q-item-section>Länge</q-item-section>
+                    <q-item-section>{{ showMoreMessageOptions.message.content.length }} Zeichen</q-item-section>
                   </q-item>
                   <q-separator class="q-mt-sm" />
                   <div class="q-mt-sm row">
@@ -221,7 +221,7 @@
                         <q-tab-panel name="emoji">
                           <q-list>
                             <q-item-label header>Emojis</q-item-label>
-                            <div v-for="cat in emojis" :key="cat">
+                            <div v-for="cat in emojis" :key="cat + Math.random()">
                               <q-btn
                                 v-for="icon in cat"
                                 :key="icon"
@@ -388,7 +388,7 @@ export default {
       showQR: false,
       coloredIDs: {},
       recording: false,
-      infoDrawerOpen: true,
+      infoDrawerOpen: false,
       messageText: "",
       showQuickMessages: false,
       showPassengersToBeMentioned: false,
@@ -763,10 +763,10 @@ export default {
       }
       copyToClipboard(toBeCopied)
         .then((_) => {
-          this.$q.notify({
+         /*  this.$q.notify({
             message: "Inhalt wurde kopiert",
             color: "white",
-          });
+          }); */
         })
         .catch((e) => alert("Fehler beim Kopieren: " + e));
     },

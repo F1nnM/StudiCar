@@ -62,7 +62,7 @@ module.exports = {
 					sentBy: 1
 				}
 			],
-			qr: 'l501cd12fb282713d2f52ec56393f1309'
+			qr: '501cd12fb282713d2f52ec56393f1309'
 		},
 		2: {
 			car: {
@@ -140,7 +140,7 @@ module.exports = {
 					sentBy: 1
 				}
 			],
-			qr: 'lcc7fb9185dcf1535b4211d661b6a0572'
+			qr: 'cc7fb9185dcf1535b4211d661b6a0572'
 		},
 		3: {
 			car: {
@@ -241,7 +241,7 @@ module.exports = {
 					sentBy: 1
 				}
 			],
-			qr: 'lcc7fb9185dcf1535b4211d661b6a0572'
+			qr: 'cc7fb9185dcf1535b4211d661b6a0572'
 		}
 	},
 	marketplaceOffers:

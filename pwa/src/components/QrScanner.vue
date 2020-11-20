@@ -112,13 +112,15 @@ export default {
     },
 
     decoded(res) {
-      var type = res.slice(0, 1),
-        res = res.slice(1);
+      res = JSON.parse(res).q // decode fake data, qr data is sth like: {"q": "iehiq3f3i3q", "f": "64"} , qr prop is only important data
+      const type = res.slice(0, 1),
+       key = res.slice(1);
+
 
       if ("ul".includes(type))
         this.$emit("result", {
           type: type,
-          res: res,
+          res: key,
         });
       else {
         this.otherQR = true;

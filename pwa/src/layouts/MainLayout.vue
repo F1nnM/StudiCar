@@ -12,6 +12,7 @@
             aria-label="Menu"
             @click="leftDrawerOpen = !leftDrawerOpen"
           />
+          <!--  <q-btn label="refresh" @click="hardReload" /> -->
 
           <q-toolbar-title class="row">
             <div class="text-weight-light q-pt-xs col-xs-10 col-md-11">
@@ -32,6 +33,13 @@
                   >
                     <q-tab-panel class="bg-primary q-pa-none text-white" :name="false">
                       StudiCar
+                      <q-chip
+                        dense
+                        v-if="oldVersionRunning"
+                        color="deep-orange"
+                        text-color="white"
+                        icon="new_releases"
+                      >ältere Version</q-chip>
                       <!-- {{ pageTrans }} -->
                     </q-tab-panel>
                     <q-tab-panel
@@ -81,7 +89,7 @@
       <div class="q-pa-md text-grey-7 row">
         <div class="col-7">StudiCar v1.0</div>
         <div class="col-5 text-right">
-          <q-btn flat @click="hardReload()" icon="refresh" size="sm" />
+          <q-btn flat @click="hardReload" icon="refresh" size="sm" />
         </div>
       </div>
     </q-drawer>
@@ -187,6 +195,10 @@ export default {
       return this.$store.state.pageTrans;
     },
 
+    runningOldVersion(){
+      return this.$store.state.oldVersionRunning
+    },
+
     essentialLinks() {
       return [
         {
@@ -230,6 +242,11 @@ export default {
   },
 
   methods: {
+    hardReload(e){
+      document.location.reload(true)
+      /* return false */
+    },
+
     scannerSwiped(e) {
       alert(e);
     },
@@ -284,10 +301,6 @@ export default {
           this.newsticker = "Fehler aufgetreten";
         }
       );
-    },
-
-    hardReload() {
-      window.location.reload(true);
     },
   },
 

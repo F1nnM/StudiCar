@@ -71,7 +71,9 @@ module.exports = {
         var userData = (await runQuery("SELECT ID, NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, LIFTS_OFFERED, LIFTS_ALL, PREF_SMOKING, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `users` WHERE users.FB_ID = ?", [options.fbid])).result[0],
           liftCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS LIFT_COUNT FROM `lift_map` WHERE `USER_ID` = ? ", [options.fbid])).result[0].LIFT_COUNT,
           driverCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS DRIVER_COUNT FROM `lift_map` WHERE `IS_DRIVER` = true AND `USER_ID` = ? ", [options.fbid])).result[0].DRIVER_COUNT,
-          uid = userData.ID
+          uid
+        if (userData) uid = userData.ID
+        else res.end(404) // case when wrong fbId has been transmitted
 
         let data = {
           id: userData.ID,
@@ -79,7 +81,7 @@ module.exports = {
           name: userData.NAME,
           gender: userData.GENDER,
           course: userData.COURSE,
-          description: userData.DESCRIPTION,
+          bio: userData.DESCRIPTION,
           stats: {
             createdAt: userData.CREATED_DATE,
             liftCount: liftCount,

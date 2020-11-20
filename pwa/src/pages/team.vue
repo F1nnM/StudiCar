@@ -87,7 +87,7 @@
               </span>
             </div>
             <div class="col-5 flex flex-center">
-              <q-avatar size="35vw">
+              <q-avatar rounded size="35vw">
                 <TeamPicture :imageUrl="showMember.name + ' ' + showMember.surname" />
               </q-avatar>
             </div>

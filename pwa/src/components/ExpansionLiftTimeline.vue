@@ -1,7 +1,7 @@
 <template>
   <div>
-    <q-timeline :color="color || 'primary'" layout="comfortable">
-      <div :style="borderLeft" clickable @click="value = !value">
+    <q-timeline clickable @click="value = !value" :color="color || 'primary'" layout="comfortable">
+      <div :style="borderLeft">
         <q-timeline-entry :avatar="entries[0].avatar" :icon="entries[0].icon" v-if="entries[0]">
           <template v-slot:title>{{ entries[0].title }}</template>
           <template v-slot:subtitle>{{ entries[0].subtitle }}</template>
@@ -9,7 +9,6 @@
           <div v-if="entries[0].text">{{ entries[0].text }}</div>
         </q-timeline-entry>
 
-        <!--   <slot name="header"></slot> -->
         <q-slide-transition>
           <div v-if="value">
             <q-timeline-entry

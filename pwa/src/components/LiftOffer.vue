@@ -1,5 +1,5 @@
 <template>
-  <div class="shadow-5 q-pa-sm primary-border" style="border-radius: 7px">
+  <div :class="`${noShadow ? '' : 'shadow-5 '} q-pa-sm primary-border`" style="border-radius: 7px">
     <q-toolbar>
       <q-toolbar-title>
         <!-- <q-icon :name="lift.start.id > 3 ? 'home' : 'school'" size="sm" /> -->
@@ -136,6 +136,7 @@ export default {
   components: {},
   props: {
     lift: Object,
+    noShadow: Boolean
   },
   data() {
     return {
