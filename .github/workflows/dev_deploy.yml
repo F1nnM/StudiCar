@@ -23,20 +23,25 @@ jobs:
     - run: npm install -g @quasar/icongenie
     - run: cd ./pwa && npm ci
     - run: cd ./pwa && npm run build
-    - uses: SamKirkland/FTP-Deploy-Action@3.1.1
+    - uses: SamKirkland/FTP-Deploy-Action@4.0.0
       with:
-        ftp-server: ftp://mfinn.de/httpdocs/studicar/dev/pwa
-        ftp-username: ${{ secrets.FTP_USERNAME }}
-        ftp-password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./pwa/dist/pwa
+        server: mfinn.de
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./pwa/dist/pwa/
+        server-dir: /dev/pwa/
   api:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
-    - uses: SamKirkland/FTP-Deploy-Action@3.1.1
+    - uses: actions/setup-node@v1
+    - run: cd ./api && npm ci && mkdir tmp && date > ./tmp/restart.txt
+    - uses: SamKirkland/FTP-Deploy-Action@4.0.0
       with:
-        ftp-server: ftp://mfinn.de/httpdocs/studicar/dev/api
-        ftp-username: ${{ secrets.FTP_USERNAME }}
-        ftp-password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./api
+        server: mfinn.de
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./api/
+        server-dir: /dev/api/
+        exclude: .git* .git*/**

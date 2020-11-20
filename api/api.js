@@ -288,9 +288,9 @@ module.exports = {
     '/createUserIfNotExisting': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'name', 'mail'], res)) {
         let users = (await runQuery("SELECT ID FROM `users` WHERE users.FB_ID = ?", [options.secretFbId])).result[0];
+        res.end("TEST4")
         if (!users) {
           let png = generateJdenticon(options.name);
-
           await runQuery(
             "INSERT INTO `users` (`ID`, `FB_ID`, `NAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKING`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`)" +
             "VALUES (NULL, ?, ?, 'X', '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED')", [options.secretFbId, options.name, png, options.mail]).catch(error => {
