@@ -1,18 +1,25 @@
 <template>
   <div class="q-pa-md">
     <div class="q-gutter-y-md">
-      <div class="text-h4 q-mt-xl custom-underline c-u-l c-u-2 c-u-md q-mb-xl">Registrierung</div>
-      <span>Bitte erstelle einen Account, damit wir dich in unser System aufnehmen können.</span>
-      <br />
-      <p>
-        <a href="/#/auth/anmeldung">Du hast einen Google-Account oder bist bereits registriert?</a>
-      </p>
+      <div class="text-h4 q-mt-xl custom-underline c-u-l c-u-2 c-u-md q-mb-xl">
+        Registrierung
+        <q-btn
+          icon="first_page"
+          to="/auth/anmeldung"
+          class="float-right"
+          label="Anmeldung"
+          dense
+          no-caps
+          outline
+          rounded
+        />
+      </div>
+      <span>Erstelle einen Account, damit wir dich in unser System aufnehmen können.</span>
     </div>
-    <q-separator />
-    <div>
+    <div class="q-mt-xl">
       <q-form @submit="onSubmit" class="q-gutter-md">
         <q-input
-          hint="Gib einen Namen ein, unter dich andere kennen. Tipp: Dein Vorname eignet sich dafür ziemlich gut..."
+          hint="Gib deinen Vornamen ein"
           lazy-rules
           :rules="[ val => val && val.length > 0 || 'Du bist nicht niemand...']"
           v-model="name"
@@ -20,11 +27,19 @@
         />
 
         <q-input
+          hint="Bitte gib auch deinen Nachnamen ein, damit dich andere erkennen können."
+          lazy-rules
+          :rules="[ val => val && val.length > 0 || 'Du hast sicher einen Nachnamen.']"
+          v-model="surname"
+          label="Name"
+        />
+
+        <q-input
           hint="Unter welcher Email können wir dich erreichen?"
           lazy-rules
-          :rules="[ val => val && val.length > 0 || 'Deine Email ist ein Schlüssel fürs System...']"
+          :rules="[ val => val && val.length > 0 || 'Deine Mail ist ein Schlüssel fürs System...']"
           v-model="email"
-          label="Email"
+          label="Mail"
         />
 
         <q-input
@@ -34,7 +49,7 @@
           hint="Gib ein sicheres Passwort ein"
           lazy-rules
           :rules="[
-          val => val !== null && val !== '' || 'Du musst deinen Account mit einem Passwort sichern.'
+          val => val !== null && val !== '' && val.length >= 6 || 'Dein Passwort muss mindestens 6 Zeichen lang sein.'
         ]"
         />
         <br />
@@ -143,9 +158,10 @@ import { Dialog } from "quasar";
 export default {
   data() {
     return {
-      email: null,
-      password: null,
-      name: null,
+      email: '',
+      password: '',
+      name: '',
+      surname: '',
       dialog: false,
       confirmDialog: false,
       step: 1
@@ -157,7 +173,8 @@ export default {
       let credentials = {
         email: this.email,
         password: this.password,
-        name: this.name
+        name: this.name,
+        surname: this.surname
       };
       this.$store
         .dispatch("auth/register", credentials)

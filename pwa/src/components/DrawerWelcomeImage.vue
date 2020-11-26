@@ -22,17 +22,19 @@ export default {
   props: {
     timeText: {
       type: String,
-      required: true,
+      required: true
     },
-    caption: String,
+    caption: String
   },
   data() {
-    return {
-      showTicker: this.$store.state.settings.enablePostillonNewsFeed,
-    };
+    return {};
   },
 
   computed: {
+    showTicker() {
+      return this.$store.state.settings.enablePostillonNewsFeed;
+    },
+
     randomImage() {
       if (this.$store.getters["auth/user"].dataSaver) {
         switch (this.timeText) {
@@ -84,7 +86,7 @@ export default {
           this.timeText +
           ", " +
           this.$store.getters["auth/user"].name.split(" ")[0],
-        time: this.timeText,
+        time: this.timeText
       };
     },
 
@@ -102,12 +104,12 @@ export default {
         default:
           return "report_problem";
       }
-    },
+    }
   },
   methods: {
     randomArrayItem(array) {
       return array[Math.floor(Math.random() * array.length)];
-    },
-  },
+    }
+  }
 };
 </script>

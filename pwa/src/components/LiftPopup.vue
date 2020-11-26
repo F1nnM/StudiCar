@@ -126,7 +126,7 @@
                         text-sanitize
                         :text="m.type == 2 ? [] : [m.content]"
                         :stamp="formatAsTime(m.timestamp)"
-                        :bg-color="getColor(m.id)"
+                        :bg-color="getColor(m.sentBy)"
                       >
                         <div v-if="m.type == 2">
                           <AudioPlayer :src="m.content" />
@@ -272,6 +272,7 @@
                     color="dark"
                     icon="notes"
                     @click="showQuickMessages = !showQuickMessages"
+                    v-touch-hold.mouse="reloadMessages"
                   />
                   <q-toolbar-title class="footer-toolbar-title-border">
                     <q-tab-panels
@@ -373,20 +374,20 @@ import AudioPlayer from "components/AudioPlayer";
 import {
   sendApiRequest,
   SQL_SEND_MESSAGE,
-  SQL_GET_LIFT_INFO,
+  SQL_GET_LIFT_INFO
 } from "../ApiAccess";
 
 export default {
   name: "LiftPopup",
   components: {
     LiftInfoDialog,
-    AudioPlayer,
+    AudioPlayer
   },
   data() {
     return {
       alreadyScrolledDown: false,
       showQR: false,
-      coloredIDs: {},
+      coloredIds: {},
       recording: false,
       infoDrawerOpen: false,
       messageText: "",
@@ -394,7 +395,7 @@ export default {
       showPassengersToBeMentioned: false,
       showMoreMessageOptions: {
         open: false,
-        message: null,
+        message: null
       },
       quickMessagesTab: "emoji",
       footerBgColor: "white",
@@ -411,35 +412,33 @@ export default {
       //   seats: 0, // all "empty" data just to avoid errors when calling variables
       // },
       loading: 0, // as always: 0 means not loading, 1 means in progress, 2 means success and -1 error.
-      endOfPage: null,
-      bottomReached: false,
+      bottomReached: false
     };
   },
   model: {
     prop: "open",
-    event: "input",
+    event: "input"
   },
   props: {
     open: Boolean,
-    lift: Object,
+    lift: Object
   },
   watch: {
-    open: function (newValue) {
+    open: function(newValue) {
       if (newValue) {
-        setTimeout((_) => {
+        setTimeout(_ => {
           this.scrollToEnd();
         });
-      }
-      else this.infoDrawerOpen = false
+      } else this.infoDrawerOpen = false;
     },
 
-    messageText: function (newText) {
+    messageText: function(newText) {
       if (newText.slice(-1) == "@") {
         this.showPassengersToBeMentioned = true;
       } else {
         this.showPassengersToBeMentioned = false;
       }
-    },
+    }
   },
   computed: {
     showRecorder() {
@@ -466,39 +465,69 @@ export default {
       // return ["Günther", "Robert", "Alicia", "Sebastian", "Jonas", "Merdan"];
       var all = [],
         nameOfThisUser = this.$store.getters["auth/user"].name.split(" ")[0];
-      this.lift.passengers.forEach((p) => all.push(p.name));
+      this.lift.passengers.forEach(p => all.push(p.name));
       all.push(this.lift.driver.name);
-      all = all.filter((name) => name != nameOfThisUser);
+      all = all.filter(name => name != nameOfThisUser);
       return all;
     },
-  },
 
-  mounted() {
-    //  document.getElementById("recordButton").onmousedown = (event) => {
-    //    event.preventDefault()
-    //    this.recordAudio()
-    //  }
-    //  document.getElementById("recordButton").onmouseup = (event) => {
-    //    event.preventDefault()
-    //    this.sendAudio()
-    //  }
+    messageColors() {
+      return {
+        user: {
+          light: "green-3",
+          dark: "dark"
+        },
+        light: [
+          "blue-1",
+          "grey-5",
+          "indigo-3",
+          "brown-12",
+          "grey-13",
+          "blue-grey-11",
+          "brown-4",
+          "grey-6",
+          "blue-grey-4"
+        ],
+        dark: [
+          /* just some standard colors from the quasar palette */
+          "deep-purple-10",
+          "indigo-10",
+          "teal-10",
+          "lime-10",
+          "brown",
+          "grey-10",
+          "red-14",
+          "blue-grey-10"
+        ] // dark/colorful selection
+      };
+    }
   },
 
   methods: {
     async scrollToEnd(delay) {
       if (delay)
-        await new Promise((res) => {
+        await new Promise(res => {
           setTimeout(res, delay);
         });
-      var endOfPage = document.getElementById("endOfPage");
-      endOfPage.scrollIntoView(
-        delay
-          ? {
-              behavior: "smooth",
-              block: "start",
-            }
-          : null
-      );
+      try {
+        var endOfPage =
+          /* await new Promise((res) => {
+            setTimeout(_=> {
+              var a =  */ this
+            .$refs.endOfPage || document.getElementById("endOfPage");
+        /* 
+           res(a)
+        }, 50);
+      }) */
+        endOfPage.scrollIntoView(
+          delay
+            ? {
+                behavior: "smooth",
+                block: "start"
+              }
+            : null
+        );
+      } catch (e) {}
     },
 
     pageScrolled(e) {
@@ -515,10 +544,8 @@ export default {
 
     getNameFromId(userId) {
       var people = JSON.parse(JSON.stringify(this.lift.passengers)); // deep copy, otherwise passengers would be overwritten
-      people.push(this.lift.driver);
-      return people.find((p) => {
-        return p.id == userId;
-      }).name;
+      people.push(JSON.parse(JSON.stringify(this.lift.driver)));
+      return people.find(p => p.id == userId).name;
     },
 
     emit(val) {
@@ -530,39 +557,17 @@ export default {
     },
 
     getColor(userId) {
-      if (userId == this.user) return "light-blue-2";
+      const colorCollection = "light"; // configure here which colors shall be taken
+
+      if (userId == this.user) return this.messageColors.user[colorCollection];
       // Sent messages have special color
       else {
-        /* just some standard colors from the quasar palette: */
-        var dark = [
-          "deep-purple-10",
-          "indigo-10",
-          "teal-10",
-          "lime-10",
-          "brown",
-          "grey-10",
-          "red-14",
-          "blue-grey-10",
-        ]; // dark/colorful selection
-        var light = [
-          "red-3",
-          "indigo-3",
-          "purple-2",
-          "blue-1",
-          "green-3",
-          "yellow-3",
-          "orange-4",
-          "deep-orange-2",
-          "brown-4",
-          "grey-6",
-        ];
-        if (!this.coloredIDs[userId]) {
+        if (!this.coloredIds[userId]) {
           // userId hasn't been colored so far, we have to assign new color
-          // colors are assigned one after another. So we just have to get the numbers of properties of coloredIDs and know, which color will be assigned next
-          var next = Object.keys(this.coloredIDs).length;
-          this.coloredIDs[userId] = light[next];
+          var next = Object.keys(this.coloredIds).length;
+          this.coloredIds[userId] = this.messageColors[colorCollection][next];
         }
-        return this.coloredIDs[userId];
+        return this.coloredIds[userId];
       }
     },
 
@@ -575,38 +580,21 @@ export default {
 
       if (!this.open) return;
 
-      if (pos > 0) {
-        var preceder = messages[pos - 1]; // preceder is the older message
+      var messageDate = new Date(messageItem.timestamp);
 
-        var sameDay = date.isSameDate(
-          new Date(messageItem.timestamp),
-          new Date(preceder.timestamp),
-          "day"
-        ); // always newest time first at this function
-        var sameMonth = date.isSameDate(
-          new Date(messageItem.timestamp),
-          new Date(preceder.timestamp),
-          "month"
-        );
+      if (pos > 0) {
+        var preceder = messages[pos - 1], // preceder is the older message
+          precederDate = new Date(preceder.timestamp);
+
+        var sameDay = date.isSameDate(messageDate, precederDate, "day"); // always newest time first at this function
+        var sameMonth = date.isSameDate(messageDate, precederDate, "month");
       } else if (pos == 0) {
         // though check timestamp of message
-        var sameDay = date.isSameDate(
-          new Date(messageItem.timestamp),
-          new Date(),
-          "day"
-        );
-        var sameMonth = date.isSameDate(
-          new Date(messageItem.timestamp),
-          new Date(),
-          "month"
-        );
+        var sameDay = date.isSameDate(messageDate, new Date(), "day");
+        var sameMonth = date.isSameDate(messageDate, new Date(), "month");
       }
 
-      var diff = date.getDateDiff(
-        new Date(),
-        new Date(messageItem.timestamp),
-        "days"
-      );
+      var diff = date.getDateDiff(new Date(), messageDate, "days");
 
       // if you have the order the other way round (newest on top of list and oldest on bottom), then just swap the two params
 
@@ -623,7 +611,7 @@ export default {
             label = "Vorgestern";
             break;
           default:
-            label = "Vor " + diff + " Tagen";
+            label = date.formatDate(messageDate, "DD.MM.YYYY");
         }
       }
       return label;
@@ -651,8 +639,8 @@ export default {
           "September",
           "Oktober",
           "November",
-          "Dezember",
-        ],
+          "Dezember"
+        ]
       });
     },
 
@@ -661,7 +649,7 @@ export default {
     },
 
     focusTextInput() {
-      setTimeout((_) => {
+      setTimeout(_ => {
         (
           this.$refs.messageInput || document.getElementById("messageInput")
         ).focus();
@@ -672,6 +660,9 @@ export default {
       this.messageText += p + " ";
       this.showPassengersToBeMentioned = false;
       this.focusTextInput();
+      var a = this.messageText;
+      this.messageText = "";
+      setTimeout(_ => (this.messageText = a), 10);
       this.scrollToEnd(50);
     },
 
@@ -692,7 +683,7 @@ export default {
       var msgObj = {
         type: 0, // 1 means raw text, 2 means audio, 3 will mean image when implemented in future
         liftId: this.lift.messages[0].id, // all from same lift, doesn't matter which one is taken
-        timestamp: Date.now(),
+        timestamp: Date.now()
       };
       switch (type) {
         case 1: // only text
@@ -705,7 +696,7 @@ export default {
           await new Promise((res, rej) => {
             var reader = new FileReader();
             reader.readAsDataURL(blob);
-            reader.onloadend = (_) => {
+            reader.onloadend = _ => {
               msgObj.content = reader.result;
               haha = reader.result;
               alert(reader.result);
@@ -758,19 +749,39 @@ export default {
         toBeCopied = JSON.stringify({
           text: obj.content,
           timestamp: obj.timestamp,
-          sentByName: this.getNameFromId(obj.sentBy),
+          sentByName: this.getNameFromId(obj.sentBy)
         });
       }
       copyToClipboard(toBeCopied)
-        .then((_) => {
-         /*  this.$q.notify({
+        .then(_ => {
+          /*  this.$q.notify({
             message: "Inhalt wurde kopiert",
             color: "white",
           }); */
         })
-        .catch((e) => alert("Fehler beim Kopieren: " + e));
+        .catch(e => alert("Fehler beim Kopieren: " + e));
     },
+    reloadMessages() {
+      alert("got newest");
+
+      /* sendApiRequest({
+        path: 'getNewestMessages',
+        method: 'GET'
+      }, data => {
+      }) */
+    }
   },
+
+  mounted() {
+    //  document.getElementById("recordButton").onmousedown = (event) => {
+    //    event.preventDefault()
+    //    this.recordAudio()
+    //  }
+    //  document.getElementById("recordButton").onmouseup = (event) => {
+    //    event.preventDefault()
+    //    this.sendAudio()
+    //  }
+  }
 };
 </script>
 

@@ -1,27 +1,112 @@
 <template>
   <div class="q-ma-md">
-    <q-btn-toggle
+    <q-tabs
       v-model="tab"
-      spread
       dense
-      no-caps
       @click="loadFAQ"
-      rounded
-      class="tab-border"
-      unelevated
       toggle-color="primary"
       color="white"
+      inline-label
       text-color="primary"
-      :options="[
-          {label: 'Frage stellen', value: 'question'},
-          {label: 'FAQ', value: 'faq'}
+    >
+      <q-tab
+        v-for="item in [
+          {label: 'FAQ', value: 'faq', icon: 'playlist_add_check'},
+          {label: 'Frage', value: 'question', icon: 'help'},
+          {label: 'Tutorials', value: 'tutorials', icon: 'slideshow'}
         ]"
-    />
+        :key="item.value"
+        :label="item.label"
+        :name="item.value"
+        :icon="item.icon"
+      />
+    </q-tabs>
     <q-tab-panels v-model="tab" animated transition-prev="jump-right" transition-next="jump-left">
+      <q-tab-panel name="faq">
+        <q-expansion-item dense class="q-my-md">
+          <template v-slot:header>
+            <q-item dense class="q-px-none">
+              <q-item-section class="text-h5">Häufige Fragen</q-item-section>
+              <q-item-section side>
+                <q-icon name="help_outline" size="sm" />
+              </q-item-section>
+            </q-item>
+          </template>
+          <q-card>
+            <q-card-section
+              class="text-caption"
+            >Hier findest du alle Fragen beantwortet, die häufig gestellt wurden.</q-card-section>
+          </q-card>
+        </q-expansion-item>
+        <LoadingDisplay
+          v-model="FAQloading"
+          errorText="Beim Laden der Daten ist ein Fehler aufgetreten."
+          loadingText="Fragen werden geladen, bitte hab einen Moment Geduld..."
+        />
+        <div v-if="faq.length">
+          <q-expansion-item
+            style="border-radius: 30px"
+            class="bg-red-1 overflow-hidden q-mb-sm"
+            v-for="q in faq"
+            :key="q.id"
+            expand-separator
+            :icon="q.icon"
+            :label="q.question"
+            :caption="q.category"
+          >
+            <q-card class="bg-red-1 q-pb-none">
+              <q-card-section class="q-pb-none q-pl-md">
+                {{ q.answer }}
+                <small>
+                  <q-expansion-item
+                    dense
+                    expand-separator
+                    dense-toggle
+                    class="text-right full-width"
+                  >
+                    <template v-slot:header>
+                      <q-item class="text-right full-width">
+                        <q-item-section>
+                          <q-item-label caption>Antwort von {{ q.answeredBy.name }}</q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                    <q-item-label caption class="text-right q-pb-sm">
+                      <p>({{ q.answeredBy.function }})</p>
+                      <q-btn
+                        :to="'/das-team?orgaId=' + q.answeredBy.id"
+                        dense
+                        outline
+                        class="q-px-sm"
+                        no-caps
+                        label="Wer ist das?"
+                      />
+                    </q-item-label>
+                  </q-expansion-item>
+                </small>
+              </q-card-section>
+            </q-card>
+          </q-expansion-item>
+        </div>
+      </q-tab-panel>
       <q-tab-panel name="question">
-        <br />
-        <div class="text-h4 q-mb-md">Eine Frage stellen</div>
-        <br />
+        <q-expansion-item dense class="q-my-md">
+          <template v-slot:header>
+            <q-item dense class="q-px-none">
+              <q-item-section>
+                <div class="text-h5">Eine Frage stellen</div>
+              </q-item-section>
+              <q-item-section side>
+                <q-icon name="help_outline" size="sm" />
+              </q-item-section>
+            </q-item>
+          </template>
+          <q-card>
+            <q-card-section
+              class="text-caption"
+            >Wenn du deine Frage in den FAQ nicht gefunden hast, kannst du hier selber fragen.</q-card-section>
+          </q-card>
+        </q-expansion-item>
         <div v-if="sendProgress == 1">
           <q-card-section>
             <p>Deine Anfrage wird hochgeladen, bitte hab einen Moment Geduld</p>
@@ -93,73 +178,37 @@
           </div>
         </q-form>
       </q-tab-panel>
-
-      <q-tab-panel name="faq">
-        <br />
-        <div class="q-mb-md row">
-          <p class="text-h4 col-6">FAQ</p>
-          <p class="col-6 text-right">
-            <q-btn
-              v-if="_=> {
-                return true // $store.getters['auth/userData'].perms.includes('support')
-                }"
-              icon="edit"
-              label="Bearbeiten"
-              to="/hilfe/bearbeiten"
-            />
-          </p>
-        </div>
-        <br />
-        <LoadingDisplay
-          v-model="FAQloading"
-          errorText="Beim Laden der Daten ist ein Fehler aufgetreten."
-          loadingText="Fragen werden geladen, bitte hab einen Moment Geduld..."
+      <q-tab-panel name="tutorials">
+        <q-expansion-item dense class="q-my-md">
+          <template v-slot:header>
+            <q-item dense class="q-px-none">
+              <q-item-section class="text-h5">Video-Tutorials</q-item-section>
+              <q-item-section side>
+                <q-icon name="help_outline" size="sm" />
+              </q-item-section>
+            </q-item>
+          </template>
+          <q-card>
+            <q-card-section
+              class="text-caption"
+            >Wir haben zu allen wichtigen Sachen Video-Tutorials erstellt.</q-card-section>
+          </q-card>
+        </q-expansion-item>
+        <q-video
+          v-for="v in [{
+          src: 'https://www.youtube.com/embed/k3_tw44QsZQ?rel=0'
+        },
+        {
+          src: 'https://www.youtube.com/embed/k3_tw44QsZQ?rel=0'
+        },
+        {
+          src: 'https://www.youtube.com/embed/k3_tw44QsZQ?rel=0'
+        }]"
+          :key="v.src"
+          :ratio="v.ratio || 16/9"
+          :src="v.src"
+          class="q-mb-lg rounded-borders"
         />
-        <div v-if="faq.length">
-          <q-expansion-item
-            style="border-radius: 30px"
-            class="bg-red-1 overflow-hidden q-mb-sm"
-            v-for="q in faq"
-            :key="q.id"
-            expand-separator
-            :icon="q.icon"
-            :label="q.question"
-            :caption="q.category"
-          >
-            <q-card class="bg-red-1 q-pb-none">
-              <q-card-section class="q-pb-none q-pl-md">
-                {{ q.answer }}
-                <small>
-                  <q-expansion-item
-                    dense
-                    expand-separator
-                    dense-toggle
-                    class="text-right full-width"
-                  >
-                    <template v-slot:header>
-                      <q-item class="text-right full-width">
-                        <q-item-section>
-                          <q-item-label caption>Antwort von {{ q.answeredBy.name }}</q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                    <q-item-label caption class="text-right q-pb-sm">
-                      <p>({{ q.answeredBy.function }})</p>
-                      <q-btn
-                        :to="'/das-team?orgaId=' + q.answeredBy.id"
-                        dense
-                        outline
-                        class="q-px-sm"
-                        no-caps
-                        label="Wer ist das?"
-                      />
-                    </q-item-label>
-                  </q-expansion-item>
-                </small>
-              </q-card-section>
-            </q-card>
-          </q-expansion-item>
-        </div>
       </q-tab-panel>
     </q-tab-panels>
   </div>
@@ -172,15 +221,11 @@ import LoadingDisplay from "components/LoadingDisplay";
 export default {
   name: "Support",
   components: {
-    LoadingDisplay,
-  },
-  mounted() {
-    this.$store.commit("setPage", "");
-    this.$store.commit("setPageTrans", "slide");
+    LoadingDisplay
   },
   data() {
     return {
-      tab: "question",
+      tab: "faq",
       publicAccepted: false,
       FAQloading: 1,
       question: "",
@@ -189,17 +234,17 @@ export default {
         {
           label: "Bedienung",
           icon: "smartphone",
-          description: "Alles, was mit der Benutzeroberfläche zu tun hat",
+          description: "Alles, was mit der Benutzeroberfläche zu tun hat"
         },
         {
           label: "Sonstiges",
           icon: "help_outline",
-          description: "Wenn du partout nicht einordnen kannst",
-        },
+          description: "Wenn du partout nicht einordnen kannst"
+        }
       ],
       faqLoaded: 0, // as always: 0 is neutral, 1 is loading, 2 means success and -1 means error
       faq: this.$store.getters["getFAQ"],
-      sendProgress: 0, // same procedure as above
+      sendProgress: 0 // same procedure as above
     };
   },
   methods: {
@@ -210,12 +255,12 @@ export default {
         {
           question: this.question,
           category: this.category.label,
-          fbid: this.$store.getters["auth/user"].uid,
+          fbid: this.$store.getters["auth/user"].uid
         },
-        (_) => {
+        _ => {
           this.sendProgress = 2;
         },
-        (_) => {
+        _ => {
           this.sendProgress = -1;
         }
       );
@@ -226,9 +271,9 @@ export default {
         sendApiRequest(
           SQL_GET_FAQ,
           {},
-          (data) => {
-            data.forEach((item) => {
-              item.icon = this.categories.find((el) => {
+          data => {
+            data.forEach(item => {
+              item.icon = this.categories.find(el => {
                 return el.label == item.category;
               }).icon;
             });
@@ -249,15 +294,21 @@ export default {
             this.$store.commit("setFAQ", newFAQ);
             this.FAQloading = 2;
           },
-          (error) => {
+          error => {
             this.FAQloading = -1;
           }
         );
       } else {
         this.FAQloading = 0; // just to be sure
       }
-    },
+    }
   },
+  mounted() {
+    this.$store.commit("setPage", {
+      name: "Support",
+      onlyInNav: true
+    });
+  }
 };
 </script>
 

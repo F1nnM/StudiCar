@@ -189,26 +189,22 @@
 </template>
 
 <script>
+import { dom } from "quasar";
 
-import {dom } from 'quasar'
+import { openURL } from "quasar";
 
-import { openURL } from 'quasar'
-
-import { date } from 'quasar'
-
-
+import { date } from "quasar";
 
 export default {
-  computed: {
-    
-  },
+  computed: {},
 
-  mounted(){
-     if(document.location.href.includes('lift')){
-       setTimeout(() => window.scrollTo(0,1000000), 200)
-       this.$store.commit('setPage', '')
-       this.$store.commit('setPageTrans', 'expand')
-     }
+  mounted() {
+    if (document.location.href.includes("lift")) {
+      setTimeout(() => window.scrollTo(0, 1000000), 200);
+      this.$store.commit("setPage", {
+        name: "Irgendwas"
+      });
+    }
 
     //  document.getElementById("recordButton").onmousedown = (event) => {
     //    event.preventDefault()
@@ -219,14 +215,12 @@ export default {
     //    event.preventDefault()
     //    this.sendAudio()
     //  }
-     
   },
-  data(){
-    
-    return{
+  data() {
+    return {
       recorderBig: false,
       lift_info: false,
-      messageText: '',
+      messageText: "",
       user: 61668646,
       lift: {
         id: 64165,
@@ -245,204 +239,262 @@ export default {
           {
             uid: 61565165
           }
-            
         ],
         car: {
-            brand: "Audi",
-            model: "A3",
-            color: "grün",
-            type: "Limousine",
-            number_plate: "B-HU-569",
-            seats: 4
+          brand: "Audi",
+          model: "A3",
+          color: "grün",
+          type: "Limousine",
+          number_plate: "B-HU-569",
+          seats: 4
         },
         messages: [
-            {
-                sender: 61668646,
-                timestamp: 1580778889523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },
-            {
-                sender: 65163163,
-                timestamp: 1581778889523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },{
-                sender: 61565165,
-                timestamp: 1582778889523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus','Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },
-            {
-                sender: 61668646,
-                timestamp: 1583778889523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },
-            {
-                sender: 65163163,
-                timestamp: 1584778889523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },{
-                sender: 61668646,
-                timestamp: 1585778889523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },
-            {
-                sender: 65163163,
-                timestamp: 1586210889523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus','Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },
-            {
-                sender: 611655814,
-                timestamp: 1586297289523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },{
-                sender: 65163163,
-                timestamp: 1586470089523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus','Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },
-            {
-                sender: 61668646,
-                timestamp: 1586642889523,
-                content: ['Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus']
-            },
-            {
-                sender: 65163163,
-                timestamp: 1586646489523,
-                content: ['Kein Content'],
-            }
+          {
+            sender: 61668646,
+            timestamp: 1580778889523,
+            content: [
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
+            ]
+          },
+          {
+            sender: 65163163,
+            timestamp: 1581778889523,
+            content: [
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
+            ]
+          },
+          {
+            sender: 61565165,
+            timestamp: 1582778889523,
+            content: [
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus",
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
+            ]
+          },
+          {
+            sender: 61668646,
+            timestamp: 1583778889523,
+            content: [
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
+            ]
+          },
+          {
+            sender: 65163163,
+            timestamp: 1584778889523,
+            content: [
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
+            ]
+          },
+          {
+            sender: 61668646,
+            timestamp: 1585778889523,
+            content: [
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
+            ]
+          },
+          {
+            sender: 65163163,
+            timestamp: 1586210889523,
+            content: [
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus",
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
+            ]
+          },
+          {
+            sender: 611655814,
+            timestamp: 1586297289523,
+            content: [
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
+            ]
+          },
+          {
+            sender: 65163163,
+            timestamp: 1586470089523,
+            content: [
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus",
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
+            ]
+          },
+          {
+            sender: 61668646,
+            timestamp: 1586642889523,
+            content: [
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
+            ]
+          },
+          {
+            sender: 65163163,
+            timestamp: 1586646489523,
+            content: ["Kein Content"]
+          }
         ]
       }
-    }
+    };
   },
 
-
   methods: {
-    makeBLOB(data){
-      try{
-        return window.URL.createObjectURL(data)
-      }
-      catch(e){
-        console.error('---')
-        console.error('could not make BLOB')
-        console.error('---')
-        return null
+    makeBLOB(data) {
+      try {
+        return window.URL.createObjectURL(data);
+      } catch (e) {
+        console.error("---");
+        console.error("could not make BLOB");
+        console.error("---");
+        return null;
       }
     },
 
-    alert(){
-      alert('köb')
+    alert() {
+      alert("köb");
     },
 
-    getColor(user){
-      if(user == this.user){ // Sent messages have special color
-        return 'light-blue-2'
-      }
-      else{
+    getColor(user) {
+      if (user == this.user) {
+        // Sent messages have special color
+        return "light-blue-2";
+      } else {
         /* just some standard colors from the quasar palette: */
-        var dark = ['deep-purple-10', 'indigo-10', 'teal-10', 'lime-10', 'brown', 'grey-10', 'red-14', 'blue-grey-10'] // dark/colorful selection
-        var light = ['red-3', 'indigo-3', 'purple-2', 'blue-1', 'green-3', 'yellow-3', 'orange-4', 'deep-orange-2', 'brown-4', 'grey-6']
+        var dark = [
+          "deep-purple-10",
+          "indigo-10",
+          "teal-10",
+          "lime-10",
+          "brown",
+          "grey-10",
+          "red-14",
+          "blue-grey-10"
+        ]; // dark/colorful selection
+        var light = [
+          "red-3",
+          "indigo-3",
+          "purple-2",
+          "blue-1",
+          "green-3",
+          "yellow-3",
+          "orange-4",
+          "deep-orange-2",
+          "brown-4",
+          "grey-6"
+        ];
 
-        var colors = light
-        
-        var obj = this.lift.users.find(o => o.uid == user)
-        var pos = this.lift.users.indexOf(obj)
+        var colors = light;
+
+        var obj = this.lift.users.find(o => o.uid == user);
+        var pos = this.lift.users.indexOf(obj);
         //console.log(user + ': ' + pos)
-        var color = 'black'
-        try{
-        color = colors[pos];
-        } catch(e){
-          console.warn('Error at selecting color for user ' + user)
+        var color = "black";
+        try {
+          color = colors[pos];
+        } catch (e) {
+          console.warn("Error at selecting color for user " + user);
         }
-        return color
+        return color;
       }
     },
 
-    checkDayBreak(item){ // when a parameter is given, return true or false. When no parameter is given, returns the text of the label
-      var pos = this.lift.messages.indexOf(item)
-      
-      var label = ''
-      
-      if(pos > 0){
-        var preceder = this.lift.messages[pos-1]
-        
-        var same_day = date.isSameDate(new Date(item.timestamp), new Date(preceder.timestamp), 'day') // immer neuerer Zeitpunkt zuerst
-        var same_month = date.isSameDate(new Date(item.timestamp), new Date(preceder.timestamp), 'month') // immer neuerer Zeitpunkt zuerst
+    checkDayBreak(item) {
+      // when a parameter is given, return true or false. When no parameter is given, returns the text of the label
+      var pos = this.lift.messages.indexOf(item);
+
+      var label = "";
+
+      if (pos > 0) {
+        var preceder = this.lift.messages[pos - 1];
+
+        var same_day = date.isSameDate(
+          new Date(item.timestamp),
+          new Date(preceder.timestamp),
+          "day"
+        ); // immer neuerer Zeitpunkt zuerst
+        var same_month = date.isSameDate(
+          new Date(item.timestamp),
+          new Date(preceder.timestamp),
+          "month"
+        ); // immer neuerer Zeitpunkt zuerst
 
         //console.warn('item: ' + item.sender + ', Vorgänger: ' + preceder.sender + ' is? : ' + (same_day && same_month))
-          var diff = date.getDateDiff(new Date(), new Date(item.timestamp), 'days')
-          if(!(same_day && same_month)){ // checks whether the item and its preceder are not the same day (and not the same month)
-            if(diff == 0){
-              label = 'Heute'
-            }
-            else if(diff == 1){
-              label = 'Gestern'
-            }
-            else if(diff == 2){
-              label = 'Vorgestern'
-            }
-            else{
-              label = 'Vor ' + diff + ' Tagen'
-            }
+        var diff = date.getDateDiff(
+          new Date(),
+          new Date(item.timestamp),
+          "days"
+        );
+        if (!(same_day && same_month)) {
+          // checks whether the item and its preceder are not the same day (and not the same month)
+          if (diff == 0) {
+            label = "Heute";
+          } else if (diff == 1) {
+            label = "Gestern";
+          } else if (diff == 2) {
+            label = "Vorgestern";
+          } else {
+            label = "Vor " + diff + " Tagen";
           }
+        }
       }
 
       //console.warn(label)
 
-      return label
-      
+      return label;
     },
 
-    formatDate(item){
+    formatDate(item) {
       // var fullDate = date.formatDate(item.timestamp, 'DD.MM.YYYY - H:mm')
-      var normalDate = date.formatDate(item.timestamp, 'H:mm')
-      return normalDate
+      var normalDate = date.formatDate(item.timestamp, "H:mm");
+      return normalDate;
     },
 
-    false(){
-      return false
+    false() {
+      return false;
     },
 
-    preventDefault(e){
-      e.preventDefault()
+    preventDefault(e) {
+      e.preventDefault();
     },
 
-    sendMessage(data){
-      this.recorderBig = false
-      var json = JSON.stringify(data)
-      var blob = new Blob([json], {type: "application/json"})
-      console.log(blob)
-      console.log(JSON.stringify(blob))
+    sendMessage(data) {
+      this.recorderBig = false;
+      var json = JSON.stringify(data);
+      var blob = new Blob([json], { type: "application/json" });
+      console.log(blob);
+      console.log(JSON.stringify(blob));
 
       // check whether last message was from this user
-      var lastMsg = this.lift.messages[this.lift.messages.length - 1]
-      if(lastMsg.sender == this.user && !data){
+      var lastMsg = this.lift.messages[this.lift.messages.length - 1];
+      if (lastMsg.sender == this.user && !data) {
         // yes, last message was from this user
-        lastMsg.content.push(this.messageText)
-      }
-      else{
+        lastMsg.content.push(this.messageText);
+      } else {
         var newMsg = {
           sender: this.user,
-          timestamp: (new Date()).getTime(),
-          content: data? [] : [this.messageText],
-          audio: data // when no data, 
-        }
-        this.lift.messages.push(newMsg)
+          timestamp: new Date().getTime(),
+          content: data ? [] : [this.messageText],
+          audio: data // when no data,
+        };
+        this.lift.messages.push(newMsg);
       }
-      this.messageText = ''
-      setTimeout(() => window.scrollTo(0,1000000), 100)
+      this.messageText = "";
+      setTimeout(() => window.scrollTo(0, 1000000), 100);
     },
 
-    viewCar(){
-      var car = this.lift.car
-      var search = car.brand + '+' + car.model.replace(' ', '') + '+' + car.type + '+' + this.lift.car.color
-      openURL('https://www.ecosia.org/images?q=' + search)
+    viewCar() {
+      var car = this.lift.car;
+      var search =
+        car.brand +
+        "+" +
+        car.model.replace(" ", "") +
+        "+" +
+        car.type +
+        "+" +
+        this.lift.car.color;
+      openURL("https://www.ecosia.org/images?q=" + search);
     },
 
-    goBack(){
-      this.$emit('pagetrans_slide')
-      this.chatOpen = false
-      this.$store.commit('setPageTrans', 'collapse')
-      window.location.href = '/#/chats'
-      
+    goBack() {
+      this.$emit("pagetrans_slide");
+      this.chatOpen = false;
+
+      window.location.href = "/#/chats";
     }
   }
-}
+};
 </script>

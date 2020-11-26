@@ -9,26 +9,20 @@ export default {
   name: "ExtendedHr",
   computed: {
     classAttr() {
-      var text = "to-hr to-hr-" + this.size;
-      if (!this.hex) text += " bg-" + this.color;
+      var text = "to-hr to-hr-" + (this.size || 'xs');
+      if (!this.hex) text += " bg-" + (this.color || 'primary');
       return text;
     },
     style() {
       var style = "";
       if (this.borderRadius) style += "; border-radius: " + this.borderRadius;
-      if (this.hex) style += "; background-color: " + this.color;
+      if (this.hex) style += "; background-color: " + (this.color || 'green');
       return style;
     },
   },
   props: {
-    color: {
-      required: true,
-      type: String,
-    },
-    size: {
-      required: true,
-      type: String,
-    },
+    color: String,
+    size: String,
     borderRadius: String,
     hex: Boolean,
   },

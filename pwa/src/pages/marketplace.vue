@@ -97,13 +97,15 @@
         </div>
       </q-slide-transition>
 
-      <!-- <p>Der Marktplatz ist so etwas wie das Schwarze Brett von StudiCar. Hier siehst du alle aktuellen Mitfahrgelegenheiten, aufsteigend nach Entfernung geordnet.</p> -->
-      <LiftOffer
-        v-for="lift in getFilteredAndSortedOffers"
-        :key="lift.index"
-        v-bind:lift="lift"
-        @request="triggerLiftRequest"
-      />
+      <div :key="offerIndexToRefresh">
+        <!-- key is to re-render component -->
+        <LiftOffer
+          v-for="lift in getFilteredAndSortedOffers"
+          :key="lift.index"
+          v-bind:lift="lift"
+          @request="triggerLiftRequest"
+        />
+      </div>
       <div
         class="text-caption"
         v-show="!(getFilteredAndSortedOffers.length || filter.length)"
@@ -126,7 +128,6 @@ export default {
     return {
       openEditSort: false,
       sort: { value: "distance", label: "niedrigste Entfernung" }, //default sorting order
-      allOffers: this.$store.getters["auth/user"].marketplaceOffers,
       filter: [],
       filterOptions: [
         {
@@ -134,17 +135,19 @@ export default {
           caption:
             "Nur Fahrten anzeigen, bei denen du noch nicht um Mitnahme gebeten hast",
           value: "notRequested",
-          icon: "device_unknown",
+          icon: "device_unknown"
         },
         {
           label: "Meine Präferenzen streng berücksichtigen",
           caption:
             "Nur Fahrten mit absolut denselben (!) Präferenzen werden angezeigt",
           value: "prefs",
-          icon: "face",
-        },
+          icon: "face"
+        }
         // here an additional option will be dynamically generated in mounted()
       ],
+      allOffers: this.$store.getters["auth/user"].marketplaceOffers,
+      offerIndexToRefresh: 1
     };
   },
 
@@ -161,57 +164,57 @@ export default {
           label: "niedrigste Entfernung",
           caption: "Sortiert aufsteigend nach Luftlinie",
           icon: "location_on",
-          value: "distance",
+          value: "distance"
         },
         {
           label: "wenigste Sitze belegt",
           caption: "Sortiert nach wenigsten Sitzen",
           value: "seats",
-          icon: "airline_seat_recline_normal",
+          icon: "airline_seat_recline_normal"
         },
         {
           label: "Toleranz",
           caption: "Sortiert nach Präferenzen, alle gleichwertig",
           value: "prefs",
-          icon: "insert_emoticon",
+          icon: "insert_emoticon"
         },
         {
           label: "Zeit",
           caption: "Sortiert aufsteigend nach Zeit der Fahrt",
           value: "timeDiff",
-          icon: "departure_board",
+          icon: "departure_board"
         },
         {
           label: "Geringste Zeit zum Unterricht",
           caption: "Möglichst geringe Wartezeit bis Beginn der Veranstaltung",
           value: "time",
           icon: "timer",
-          disabled: true,
-        },
+          disabled: true
+        }
       ];
     },
 
     getFilteredAndSortedOffers() {
-      var offers = JSON.parse(JSON.stringify(this.allOffers));
+      var offers = this.allOffers;
 
       // filter code
       if (this.filter.length) {
-        this.filter.forEach((item) => {
+        this.filter.forEach(item => {
           item = item.value;
           switch (item) {
             case "notRequested":
-              offers = offers.filter((offer) => !offer.requested);
+              offers = offers.filter(offer => !offer.requested);
               break;
             case "gender":
-              offers.filter((offer) => {
+              offers.filter(offer => {
                 return true; // API not implemented yet
               });
               break;
             case "prefs":
               var userPrefs = this.$store.getters["auth/user"].prefs;
-              offers = offers.filter((offer) => {
+              offers = offers.filter(offer => {
                 var prefValues = Object.keys(offer.driver.prefs);
-                var atLeastOneDifferent = prefValues.some((pref) => {
+                var atLeastOneDifferent = prefValues.some(pref => {
                   if (userPrefs[pref] != offer.driver.prefs[pref]) return true;
                 });
 
@@ -240,9 +243,9 @@ export default {
           case "prefs":
             var prefScores = [];
             var userPrefs = this.$store.getters["auth/user"].prefs;
-            offers.forEach((lift) => {
+            offers.forEach(lift => {
               let offerscore = 0;
-              Object.keys(lift.driver.prefs).forEach((prefName) => {
+              Object.keys(lift.driver.prefs).forEach(prefName => {
                 // get the prefs by themself
                 let liftPref = lift.driver.prefs[prefName];
                 let userPref = userPrefs[prefName];
@@ -304,18 +307,20 @@ export default {
         default:
           return "Fehlermenschen";
       }
-    },
+    }
   },
 
   methods: {
-    triggerLiftRequest(liftId){
-      this.$store.dispatch('auth/requestToLift', liftId)
+    triggerLiftRequest(liftId) {
+      this.$store.dispatch("auth/requestToLift", liftId);
+      this.offerIndexToRefresh++; // to re-render component, wasn't working otherwise
     }
   },
 
   mounted() {
-    this.$store.commit("setPage", this.title);
-    this.$store.commit("setPageTrans", "slide");
+    this.$store.commit("setPage", {
+      name: this.title
+    });
 
     this.filterOptions.push({
       label: "Nur reine " + this.genderName + "-Autos",
@@ -323,10 +328,10 @@ export default {
       caption:
         "Nur Autos anzeigen, bei denen nur " + this.genderName + " mitfahren",
       icon: "wc",
-      disabled: true, // genderCarsAvaiable ? this.$store.getters['auth/user'].gender == 'X'
+      disabled: true // genderCarsAvaiable ? this.$store.getters['auth/user'].gender == 'X'
     });
 
-    this.filter.push(this.filterOptions[0]); // only show not yet requested offers by default
-  },
+    // this.filter.push(this.filterOptions[0]); // only show not yet requested offers by default
+  }
 };
 </script>

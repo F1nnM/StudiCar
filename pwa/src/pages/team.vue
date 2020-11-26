@@ -119,31 +119,32 @@ import { sendApiRequest, SQL_GET_TEAM } from "../ApiAccess";
 
 export default {
   name: "team",
-  components: { ExtHr, TitleButton,TeamPicture },
+  components: { ExtHr, TitleButton, TeamPicture },
   data() {
     return {
       info: this.$store.getters["getStudiCarInfo"],
       htmlText: "",
       viewTab: "matrix",
       showMember: null,
-      teamLoading: 0,
+      teamLoading: 0
     };
   },
   watch: {
-    viewTab: function (newv) {
+    viewTab: function(newv) {
       if (newv != "matrix") {
         setTimeout(
-          (_) => (document.getElementById("anchor").innerHTML = this.htmlText),
+          _ => (document.getElementById("anchor").innerHTML = this.htmlText),
           100
         );
       }
-    },
+    }
   },
   computed: {
     dialogShowTransition() {
       if (true) return "jump-up";
       if (this.showMember) {
-        if (this.info.team.indexOf(this.showMember) % 2 == 0) return "jump-right";
+        if (this.info.team.indexOf(this.showMember) % 2 == 0)
+          return "jump-right";
         // even index, so left side
         else return "jump-left";
       } else return "fade"; // actually wanted even the show transition to be dynamic, but didn't work. Left it anyway in code.
@@ -151,7 +152,8 @@ export default {
 
     dialogHideTransition() {
       if (this.showMember) {
-        if (this.info.team.indexOf(this.showMember) % 2 == 0) return "jump-left";
+        if (this.info.team.indexOf(this.showMember) % 2 == 0)
+          return "jump-left";
         // even index, so left side
         else return "jump-right";
       } else return "fade";
@@ -163,21 +165,22 @@ export default {
       },
       set() {
         this.showMember = null;
-      },
-    },
+      }
+    }
   },
   methods: {},
 
   mounted() {
-    this.$store.commit("setPage", "Das Team");
-    this.$store.commit("setPageTrans", "slide");
+    this.$store.commit("setPage", {
+      name: "Das Team"
+    });
 
     if (!this.$store.getters["getStudiCarInfo"]) {
       this.teamLoading = 1;
       sendApiRequest(
         SQL_GET_TEAM,
         {},
-        (data) => {
+        data => {
           this.$store.commit("setInfo", data);
           this.info = data;
           this.teamLoading = 2;
@@ -185,14 +188,14 @@ export default {
           var loc = document.location.href; // check whether specific member should be visited
           if (loc.includes("?orgaId=")) {
             var id = loc.split("?orgaId=")[1];
-            this.showMember = this.team.find((m) => {
+            this.showMember = this.team.find(m => {
               return m.id + "" == id;
             });
           }
 
           this.htmlText = data.about.text;
         },
-        (error) => {
+        error => {
           this.teamLoading = -1;
         }
       );
@@ -200,7 +203,7 @@ export default {
       this.info = this.$store.getters["getStudiCarInfo"];
       this.teamLoading = 2; // just to be sure
     }
-  },
+  }
 };
 </script>
 

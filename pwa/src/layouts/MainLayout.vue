@@ -89,7 +89,7 @@
       <div class="q-pa-md text-grey-7 row">
         <div class="col-7">StudiCar v1.0</div>
         <div class="col-5 text-right">
-          <q-btn flat @click="hardReload" icon="refresh" size="sm" />
+          <!-- <q-btn flat @click="hardReload" icon="refresh" size="sm" /> -->
         </div>
       </div>
     </q-drawer>
@@ -98,11 +98,9 @@
       <div v-if="pageName">
         <q-scroll-observer @scroll="scrollHandler" />
 
-        <div class="text-h5 q-pl-md q-pt-md">
+        <div class="text-h5 q-pl-md q-py-md" v-if="!titleOnlyInNav">
           <span class="custom-underline c-u-l c-u-2 c-u-md" transition="slide-left">{{ pageName }}</span>
         </div>
-
-        <br />
       </div>
 
       <transition :name="pageTrans" mode="out-in">
@@ -155,7 +153,7 @@ export default {
     DrawerWelcomeImage,
     GetUserDataLoading,
     QrLiftDisplay,
-    ExtHr,
+    ExtHr
   },
 
   data() {
@@ -170,7 +168,7 @@ export default {
       tab: "home",
       chats: "Main",
       show: true,
-      liftQrId: "",
+      liftQrId: ""
     };
   },
 
@@ -195,8 +193,12 @@ export default {
       return this.$store.state.pageTrans;
     },
 
-    runningOldVersion(){
-      return this.$store.state.oldVersionRunning
+    titleOnlyInNav() {
+      return this.$store.state.onlyInNav;
+    },
+
+    runningOldVersion() {
+      return this.$store.state.oldVersionRunning;
     },
 
     essentialLinks() {
@@ -205,45 +207,45 @@ export default {
           title: "Marktplatz",
           caption: "Zur Übersicht",
           icon: "home",
-          link: "/#/",
+          link: "/#/"
         },
         {
           title: "Einstellungen",
           caption: "Personalisiere die App",
           icon: "settings",
-          link: "/#/einstellungen",
+          link: "/#/einstellungen"
         },
         {
           title: "Spielwiese",
           caption: "Endlich wieder Kind sein",
           icon: "toys",
-          link: "/#/spielwiese",
+          link: "/#/spielwiese"
         },
         {
           title: "Rechtliches",
           caption: "Muss auch sein",
           icon: "policy",
-          link: "/#/rechtliches",
+          link: "/#/rechtliches"
         },
         {
           title: "Team",
           caption: "Wer hinter dem Projekt steckt",
           icon: "emoji_people",
-          link: "/#/das-team",
+          link: "/#/das-team"
         },
         {
           title: "Support",
           caption: "Wie können wir dir helfen?",
           icon: "accessibility_new",
-          link: "/#/hilfe",
-        },
+          link: "/#/hilfe"
+        }
       ];
-    },
+    }
   },
 
   methods: {
-    hardReload(e){
-      document.location.reload(true)
+    hardReload(e) {
+      document.location.reload(true);
       /* return false */
     },
 
@@ -294,18 +296,18 @@ export default {
       sendApiRequest(
         GET_NEWSTICKER,
         {},
-        (data) => {
+        data => {
           this.newsticker = data;
         },
-        (err) => {
+        err => {
           this.newsticker = "Fehler aufgetreten";
         }
       );
-    },
+    }
   },
 
   mounted() {
     setTimeout(this.reloadNews(), 300); // simple call was buggy, no idea why
-  },
+  }
 };
 </script>

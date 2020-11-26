@@ -153,18 +153,21 @@
                 >Du hast noch keine Fahrzeuge eingestellt, aus denen du auswählen könntest.</p>
                 <q-item tag="label" v-for="car in userCars" :key="car.carId" class="q-pr-none">
                   <q-radio v-model="lift.carId" :val="car.carId" />
-                  <q-item-section avatar>
+                  <!-- <q-item-section avatar>
                     <q-avatar rounded>
                       <img class="shadow-3 q-ma-none" src="~assets/loremimage.jpg" />
                     </q-avatar>
-                  </q-item-section>
+                  </q-item-section>-->
 
                   <q-item-section>
-                    <q-item-label>{{car.brand}} {{car.model}}</q-item-label>
-                    <extHR class="q-my-sm" :color="car.color" size="1px" />
+                    <q-item-label>
+                      {{car.brand}} {{car.model}}
+                      <ExtHr class="q-my-sm q-pr-xl" hex :color="car.color" size="1px" />
+                    </q-item-label>
                     <q-item-label caption>
-                      {{car.licensePlate}} ({{car.seats}}
-                      <q-icon name="airline_seat_recline_normal" size="xs" />frei)
+                      <q-icon name="person" size="xs" />
+                      {{car.seats}}
+                      weitere Plätze
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -176,20 +179,23 @@
             </q-step>
 
             <q-step :name="5" title="Sitze bearbeiten" icon="person_add" :done="step > 5">
-              <p
-                class="text-caption"
-              >Wie viele Leute nimmst du diesmal mit? (Hinweis: Wenn du hier 0 beibehältst, übernehmen wir {{getCarData.seats}} Mitfahrer wie sonst auch)</p>
+              <p class="text-caption">
+                Willst du die Anzahl an Mitfahrern für diese Fahrt ändern?
+                (Hinweis: Wenn du hier 0 beibehältst, speichern wir {{ getCarData.seats }} Mitfahrer wie sonst auch)
+              </p>
               <q-item>
                 <q-item-section avatar>
                   <q-icon
-                    :color="lift.seats ? 'primary' : 'grey-4'"
-                    name="airline_seat_recline_normal"
+                    color="primary"
+                    name="edit"
+                    v-if="lift.seats || getCarData.seats == lift.seats"
                   />
+                  <q-icon color="primary" name="how_to_reg" v-else />
                 </q-item-section>
                 <q-item-section>
                   <q-slider
                     markers
-                    thumb-path="M7.59 5.41c-.78-.78-.78-2.05 0-2.83.78-.78 2.05-.78 2.83 0 .78.78.78 2.05 0 2.83-.79.79-2.05.79-2.83 0zM6 16V7H4v9c0 2.76 2.24 5 5 5h6v-2H9c-1.66 0-3-1.34-3-3zm14 4.07L14.93 15H11.5v-3.68c1.4 1.15 3.6 2.16 5.5 2.16v-2.16c-1.66.02-3.61-.87-4.67-2.04l-1.4-1.55c-.19-.21-.43-.38-.69-.5-.29-.14-.62-.23-.96-.23h-.03C8.01 7 7 8.01 7 9.25V15c0 1.66 1.34 3 3 3h5.07l3.5 3.5L20 20.07z"
+                    :thumb-path="''/* M7.59 5.41c-.78-.78-.78-2.05 0-2.83.78-.78 2.05-.78 2.83 0 .78.78.78 2.05 0 2.83-.79.79-2.05.79-2.83 0zM6 16V7H4v9c0 2.76 2.24 5 5 5h6v-2H9c-1.66 0-3-1.34-3-3zm14 4.07L14.93 15H11.5v-3.68c1.4 1.15 3.6 2.16 5.5 2.16v-2.16c-1.66.02-3.61-.87-4.67-2.04l-1.4-1.55c-.19-.21-.43-.38-.69-.5-.29-.14-.62-.23-.96-.23h-.03C8.01 7 7 8.01 7 9.25V15c0 1.66 1.34 3 3 3h5.07l3.5 3.5L20 20.07z*/"
                     v-model="lift.seats"
                     :min="0"
                     :max="9"
@@ -200,6 +206,24 @@
                   />
                 </q-item-section>
               </q-item>
+
+              <q-stepper-navigation>
+                <q-btn color="primary" @click="step --" label="Zurück" flat />
+                <q-btn @click="step++" color="primary" label="Weiter" class="q-ml-sm" />
+              </q-stepper-navigation>
+            </q-step>
+            <q-step :name="6" title="Zeit festlegen" icon="person_add" :done="step > 6">
+              <p class="text-caption">Wähle aus, wann du planst zu fahren.</p>
+              <q-tabs
+                v-model="departAtText"
+                dense
+                no-caps
+                inline-label
+                class="bg-white text-grey-9"
+              >
+                <q-tab name="true" icon="time_to_leave" label="Abfahrt ab" />
+                <q-tab name="a" icon="keyboard_tab" label="Ankunft bis" />
+              </q-tabs>
 
               <q-stepper-navigation>
                 <q-btn color="primary" @click="step --" label="Zurück" flat />
@@ -237,45 +261,23 @@
               <q-card>
                 <q-card-section>
                   <div class="text-h6">Überprüfe deine Angaben</div>
-                  <q-expansion-item
-                    expand-separator
-                    icon="error_outline"
-                    label="Wichtige Hinweise"
-                    caption="Bitte lies sie dir durch, wenn du sie noch nicht kennst"
-                  >
-                    <p class="text-caption">
-                      Bitte wirf nochmal einen Blick auf deine Angaben, bevor wir dein Angebot veröffentlichen.
-                      <br />
-                      <br />Und falls noch nicht geschehen: Lies bitte noch kurz unsere
-                      <a
-                        href="https://mi.com"
-                      >Datenverarbeitung</a>.
-                    </p>
-                  </q-expansion-item>
-                </q-card-section>
-
-                <q-card-section>
-                  <extHR color="primary" size="xs" />
-                </q-card-section>
-
-                <q-card-section>
                   <div class="row overview">
                     <div class="col-6">
                       <p class="text-subtitle1 q-mb-sm">
-                        {{getDataFromAddressId(lift.startAddressId).nickname}}
+                        {{ getDataFromAddressId(lift.startAddressId).nickname }}
                         <span
                           class="text-caption q-ml-sm"
-                        >{{getDataFromAddressId(lift.startAddressId).city}}</span>
+                        >{{ getDataFromAddressId(lift.startAddressId).city }}</span>
                       </p>
                     </div>
                     <div class="col-6 text-right">
                       <q-item>
                         <q-item-section>
                           <q-item-label>{{getCarFromId(lift.carId).brand}} {{getCarFromId(lift.carId).model}}</q-item-label>
-                          <extHR class="q-my-sm" :color="getCarData.color" size="1px" />
+                          <ExtHr class="q-my-sm" :color="getCarData.color" size="1px" />
                           <q-item-label caption>
                             {{lift.seats ? lift.seats : getCarData.seats}}
-                            <q-icon name="airline_seat_recline_normal"></q-icon>frei
+                            <q-icon name="person"></q-icon>frei
                           </q-item-label>
                         </q-item-section>
                       </q-item>
@@ -343,11 +345,11 @@
 
 <script>
 import { sendApiRequest, SQL_ADD_LIFT } from "../ApiAccess";
-import extHR from "components/ExtendedHr";
+import ExtHr from "components/ExtendedHr";
 import { date } from "quasar";
 
 export default {
-  components: { extHR },
+  components: { ExtHr },
 
   data() {
     return {
@@ -356,23 +358,25 @@ export default {
         destinationAddressId: 0,
         startAddressId: 0,
         carId: null,
+        departAt: true,
+        stamp: "",
         seats: 0, // just to avoid error when rendering slider
         stops: [
           {
             addressId: 31,
-            time: 1593684157000,
+            time: 1593684157000
           },
           {
             addressId: 34,
-            time: 1593684175000,
-          },
-        ],
+            time: 1593684175000
+          }
+        ]
       },
-      step: 1,
+      step: 6,
       openAddLiftConfirm: false,
       flipAddLiftConfirm: true,
       overviewExpanded: false,
-      uploading: 0, // 0 means not uploading, 1 means upload in progress, 2 means upload successful and -1 means error
+      uploading: 0 // 0 means not uploading, 1 means upload in progress, 2 means upload successful and -1 means error
     };
   },
   computed: {
@@ -391,14 +395,14 @@ export default {
     getCarData() {
       // returns data of selected car, so that user for example can see how many seats would be default
       let cars = this.$store.getters["auth/user"].cars;
-      let obj = cars.find((item) => {
+      let obj = cars.find(item => {
         return item.carId == this.lift.carId;
       });
       return obj
         ? obj
         : {
             seats: 0,
-            color: "white",
+            color: "white"
           }; // fallback when no car has been selected yet
     },
 
@@ -409,12 +413,21 @@ export default {
       set(value) {
         this.lift = value;
         this.step += 1;
+      }
+    },
+
+    departAtText: {
+      get() {
+        return this.lift.departAt ? "true" : "a";
       },
+      set(value) {
+        this.lift.departAt = value.length > 1; // '.' is false, any longer string true
+      }
     },
 
     getExactAddresses() {
       if (this.lift.destination == "school") {
-        return this.$store.getters["auth/user"].addresses.filter((item) => {
+        return this.$store.getters["auth/user"].addresses.filter(item => {
           return item.id < 4; // filter only the schools, which have IDs 1 to 3
         });
 
@@ -422,7 +435,7 @@ export default {
         // a[1].imagePath = require(pathBegin + 'HDH_old.jpg')
         // a[2].imagePath = require(pathBegin + 'WIB_ext.jpg')
       } else if (this.lift.destination == "home") {
-        return this.$store.getters["auth/user"].addresses.filter((item) => {
+        return this.$store.getters["auth/user"].addresses.filter(item => {
           return item.id > 3; // filter only private adresses, IDs 1 to 3 are reserved for schools
         });
       }
@@ -431,21 +444,23 @@ export default {
 
     getExactStartingPoints() {
       if (this.lift.destination != "school") {
-        return this.$store.getters["auth/user"].addresses.filter((item) => {
+        return this.$store.getters["auth/user"].addresses.filter(item => {
           return item.id < 4; // filter only the schools, which have IDs 1 to 3
         });
       } else if (this.lift.destination != "home") {
-        return this.$store.getters["auth/user"].addresses.filter((item) => {
+        return this.$store.getters["auth/user"].addresses.filter(item => {
           return item.id > 3; // filter only private adresses, IDs 1 to 3 are reserved for schools
         });
       }
       return null;
-    },
+    }
   },
 
   mounted() {
-    this.$store.commit("setPage", "");
-    this.$store.commit("setPageTrans", "slide");
+    this.$store.commit("setPage", {
+      name: "Fahrt hinzufügen",
+      onlyInNav: true
+    });
   },
 
   methods: {
@@ -453,13 +468,13 @@ export default {
       window.location.href = "/#/";
     },
     addLift() {
-      new Promise((_) => {
+      new Promise(_ => {
         this.flipAddLiftConfirm = false;
       })
-        .then((_) => {
+        .then(_ => {
           this.openAddLiftConfirm = false;
         })
-        .then((_) => {
+        .then(_ => {
           this.flipAddLiftConfirm = true;
         }); // this is just to get a cool effect, flip when process is canceled and swipe up when lift shall be published.
 
@@ -473,22 +488,22 @@ export default {
         SQL_ADD_LIFT,
         {
           id: this.$store.getters["auth/user"].id,
-          lift: this.lift,
+          lift: this.lift
         },
-        (_) => {
+        _ => {
           // here comes your success code
           this.lift = {
             destination: "school", // default set to school, user selects first home/school, then exact address
             destinationAddressId: 0,
             startingPoint: 0,
             car: null,
-            seats: 0, // just to avoid error when rendering slider
+            seats: 0 // just to avoid error when rendering slider
           };
           this.step = 0;
           this.openAddLiftConfirm = false;
           this.uploading = 2;
         },
-        (error) => {
+        error => {
           alert(error);
           this.step = 1;
           this.uploading = -1;
@@ -519,7 +534,7 @@ export default {
     },
 
     getDataFromAddressId(id) {
-      let data = this.$store.getters["auth/user"].addresses.find((item) => {
+      let data = this.$store.getters["auth/user"].addresses.find(item => {
         return item.id == id;
       });
       if (data) {
@@ -532,25 +547,25 @@ export default {
       return {
         nickname: null,
         street: null,
-        city: null, // cases when no id has been set yet though method has been called
+        city: null // cases when no id has been set yet though method has been called
       };
     },
 
     getCarFromId(id) {
-      let data = this.userCars.find((item) => {
+      let data = this.userCars.find(item => {
         return item.carId == id;
       });
       if (data) return data;
       return {
         brand: null,
-        model: null, // similar case to above method
+        model: null // similar case to above method
       };
     },
 
     getStopTime(stamp) {
       return date.formatDate(stamp, "H:mm");
-    },
-  },
+    }
+  }
 };
 </script>
 

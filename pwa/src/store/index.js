@@ -17,8 +17,6 @@ const store = new Vuex.Store({
     auth
   },
   computed: {
-
-
     buildInfo (type) {
       switch (type) {
         case 'general': return 'Zur Nutzung deines Accounts musst du einen Benutzernamen und ein Passwort vergeben. Wie das gespeichert und verarbeitet wird, kannst du gleich beim Datenschutz lesen. Der Benutzername ist ein Schlüssel im System.Solltest du ihn nicht mehr wissen, kannst du nicht mehr auf deinen Account zugreifen.Merke ihn dir daher gut oder schreib ihn dir am besten irgendwo auf. Dein Passwort benötigst du, um dich in der App anzumelden.Solltest du es vergessen haben, kannst du in den Einstellungen dein Passwort zurücksetzen lassen, allerdings senden wir dir dein neues, automatisch generiertes Passwort per Mail zu, du musst deine Mailadresse also im Voraus in der App eingegeben haben. Sollte dies nicht der Fall sein, wirst du dir leider einen neuen Account erstellen müssen.'
@@ -28,12 +26,10 @@ const store = new Vuex.Store({
     }
   },
   mutations: {
-    setPageTrans (state, trans_) {
-      state.pageTrans = trans_
-    },
-
-    setPage (state, pageName_) {
-      state.pageName = pageName_
+    setPage (state, obj) {
+      state.pageName = obj.name
+      state.pageTrans = obj.transition || 'slide'
+      state.onlyInNav = obj.onlyInNav || false
     },
 
     setFAQ (state, faq_) {
@@ -81,6 +77,7 @@ const store = new Vuex.Store({
     greeting: getGreeting(),
     pageTrans: 'slide',
     pageName: 'Willkommen', // needed for scroll-relative Header
+    onlyInNav: false,
     testValue: 10,
     legal: '',
     faq: [],

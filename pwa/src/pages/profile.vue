@@ -452,7 +452,7 @@
                     lazy-rules
                     :rules="[
                       (val) =>
-                        (val && val.length > 0) || 'Bitte gib eine Straße ein',
+                        (val && val.length > 0 && val.length <= 52) || 'Bitte gib eine Straße ein',
                     ]"
                   />
                 </div>
@@ -511,7 +511,7 @@
             </q-card-section>
             <q-card-section>
               <p class="text-caption">
-                Falls du nochmal nachlesen willst:
+                Bitte stelle sicher, dass du darüber Bescheid weißt:
                 <a
                   href="https://mi.com"
                   class="block"
@@ -695,28 +695,8 @@
         transition-hide="flip-up"
       >
         <q-card>
-          <q-card-section>
-            <div class="text-h6">Überprüfe deine Angaben</div>
-            <q-expansion-item
-              expand-separator
-              icon="error_outline"
-              label="Wichtige Hinweise"
-              caption="Bitte lies sie dir durch, wenn du sie noch nicht kennst"
-            >
-              <p class="text-caption">
-                Bitte stelle sicher, dass deine Angaben korrekt und vollständig
-                sind.
-                <br />
-                <br />Und falls noch nicht geschehen: Schau dir bitte noch
-                unsere
-                <a
-                  href="https://mi.com"
-                >Datenverarbeitung</a> an.
-              </p>
-            </q-expansion-item>
-          </q-card-section>
-
           <q-card-section class="row">
+            <div class="text-h6">Überprüfe deine Angaben</div>
             <div class="col-7 text-h5">{{ newCar.brand }}</div>
             <div class="col-5 text-h6 text-weight-light">{{ newCar.model }}</div>
             <p
@@ -726,10 +706,7 @@
                   : false
               "
               class="text-red"
-            >
-              Anscheinend hast du deine Marke geändert, ohne das Modell
-              anzupassen. Bitte korrigiere deine Eingaben.
-            </p>
+            >Ausgewählte Marke und Modell passen nicht zueinander. Bitte korrigiere deine Eingaben.</p>
           </q-card-section>
 
           <q-card-section>
@@ -744,16 +721,18 @@
 
               <p class="text-uppercase text-caption col-7">Kennzeichen</p>
 
-              <p class="col-5">{{ newCar.licensePlate }}</p>
-
-              <p
-                v-show="!validNumberPlate()"
-                class="text-negative col-12"
-              >Das angegebene Kennzeichen hat eine ungültige Syntax.</p>
+              <div class="col-5">
+                <div v-if="newCar.licensePlate">
+                  <p v-if="validNumberPlate" class="col-5">{{ newCar.licensePlate }}</p>
+                  <div v-else class="text-negative">- ungültig -</div>
+                </div>
+                <p v-else class="text-negative">- fehlt noch -</p>
+              </div>
 
               <p class="text-uppercase text-caption col-7">Baujahr</p>
               <p class="col-5">{{ newCar.year }}</p>
             </div>
+            <q-toggle v-model="agbAccepted" label="Datenschutzerklärung akzeptieren" />
           </q-card-section>
 
           <q-card-actions align="right">
@@ -761,8 +740,8 @@
             <q-btn
               color="primary"
               label="Auto hinzufügen"
-              :disabled="false"
-              @click="addCar()"
+              :disabled="!newCarInfoComplete"
+              @click="addCar"
               v-close-popup
             />
           </q-card-actions>
@@ -787,7 +766,7 @@ import {
   sendApiRequest,
   SQL_UPDATE_PROFILE_PICTURE,
   GET_CAR_MODELS,
-  SQL_RESET_PROFILE_PICTURE,
+  SQL_RESET_PROFILE_PICTURE
 } from "../ApiAccess";
 
 export default {
@@ -795,7 +774,7 @@ export default {
     ExtHr,
     ImageColorPicker,
     ProfileTopSection,
-    CarInfo,
+    CarInfo
   },
 
   data() {
@@ -814,7 +793,7 @@ export default {
         talk: "",
         talkMorning: "",
         smoking: "",
-        music: "",
+        music: ""
       },
       prefsDocu: this.$store.state.prefsDocu,
 
@@ -825,7 +804,7 @@ export default {
         street: "",
         number: "",
         postcode: "",
-        city: "",
+        city: ""
       },
 
       carInfo: {
@@ -835,7 +814,7 @@ export default {
         type: "",
         color: "",
         licensePlate: "",
-        seats: 0,
+        seats: 0
       },
       carInfoOpen: false,
       newCar: {
@@ -845,15 +824,16 @@ export default {
         color: "",
         year: "XXXX",
         seats: 3,
-        licensePlate: "",
+        licensePlate: ""
       },
+      agbAccepted: false,
       newCarOptions: {},
       openNewCarTab: 1,
       openEditCars: false,
       openAddCar: false,
       openAddCarConfirm: false,
 
-      tab: "data", // vue models which doesn't belong to specific function
+      tab: "data" // vue models which doesn't belong to specific function
     };
   },
   computed: {
@@ -874,7 +854,7 @@ export default {
       },
       set(value) {
         this.$store.dispatch("auth/updateGender", value);
-      },
+      }
     },
 
     liftMaxDistance: {
@@ -883,16 +863,16 @@ export default {
       },
       set(value) {
         this.$store.dispatch("auth/updateLiftMaxDistance", value);
-      },
+      }
     },
 
     description: {
       get() {
-        return this.$store.getters["auth/user"].description;
+        return this.$store.getters["auth/user"].bio;
       },
       set(value) {
         this.$store.dispatch("auth/updateDescription", value);
-      },
+      }
     },
 
     prefs: {
@@ -901,21 +881,21 @@ export default {
       },
       set(value) {
         this.$store.dispatch("auth/updatePrefs", value);
-      },
+      }
     },
 
     addresses: {
       get() {
-        return this.$store.getters["auth/user"].addresses.filter((item) => {
+        return this.$store.getters["auth/user"].addresses.filter(item => {
           return item.id > 3; // filter only private adresses, IDs 1 to 3 are reserved for schools
         });
-      },
+      }
     },
 
     cars: {
       get() {
         return this.$store.getters["auth/user"].cars;
-      },
+      }
     },
 
     dataSaver: {
@@ -924,7 +904,7 @@ export default {
       },
       set(value) {
         this.$store.dispatch("auth/updateDataSaver", value);
-      },
+      }
     },
 
     atLeastFiveWords() {
@@ -954,17 +934,18 @@ export default {
       return true;
     },
 
-    newCarFilled() {
+    newCarInfoComplete() {
       for (let key in this.newCar) {
         if (!this.newCar[key]) return false;
       }
+      if (!this.agbAccepted) return false;
       return true;
     },
 
     meterModelBefore() {
       var a = this.stats;
       return a.liftsOffered / a.liftsAll;
-    },
+    }
   },
   methods: {
     toggleOpenEditDescription() {
@@ -998,7 +979,7 @@ export default {
             talk: "",
             talkMorning: "",
             smoking: "",
-            music: "",
+            music: ""
           };
         } else {
           this.newPrefs = {
@@ -1006,7 +987,7 @@ export default {
             talk: "",
             talkMorning: "",
             smoking: "",
-            music: "",
+            music: ""
           };
         }
       } else {
@@ -1032,14 +1013,14 @@ export default {
     addAddress() {
       this.$store.dispatch("auth/addAddress", {
         id: this.$store.getters["auth/user"].id,
-        address: this.newAddress,
+        address: this.newAddress
       });
       this.newAddress = {
         nickname: "",
         street: "",
         number: "",
         postcode: "",
-        city: "",
+        city: ""
       };
     },
 
@@ -1063,7 +1044,7 @@ export default {
         JSON.parse(
           JSON.stringify({
             id: id,
-            car: car,
+            car: car
           })
         )
       );
@@ -1098,7 +1079,7 @@ export default {
         2018,
         2017,
         2016,
-        2015,
+        2015
       ]);
 
       let validPlate = true;
@@ -1112,22 +1093,23 @@ export default {
 
     randomItemFromArray(array) {
       return array[Math.floor(Math.random() * array.length)];
-    },
+    }
   },
   mounted() {
     sendApiRequest(
       GET_CAR_MODELS,
       {},
-      (data) => {
+      data => {
         this.newCarOptions = data;
       },
-      (error) => {
+      error => {
         throw error;
       }
     );
 
-    this.$store.commit("setPage", "Profil");
-    this.$store.commit("setPageTrans", "slide");
-  },
+    this.$store.commit("setPage", {
+      name: "Profil"
+    });
+  }
 };
 </script>

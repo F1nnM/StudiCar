@@ -34,7 +34,7 @@ export default {
     },
 
     UPDATE_DESCRIPTION (state, payload) {
-      state.user.description = payload
+      state.user.bio = payload
     },
 
     UPDATE_GENDER (state, payload) {
@@ -54,9 +54,7 @@ export default {
     },
 
     REMOVE_ADDRESS (state, payload) {
-      state.user.addresses = state.user.addresses.filter(item => {
-        return item.id != payload // filters the one with matching id
-      })
+      state.user.addresses = state.user.addresses.filter(item => item.id != payload) // filters the one with matching id
     },
 
     ADD_CAR (state, payload) {
@@ -64,9 +62,7 @@ export default {
     },
 
     REMOVE_CAR (state, payload) {
-      state.user.cars = state.user.cars.filter(item => {
-        return item.carId != payload // filters the one with matching id
-      })
+      state.user.cars = state.user.cars.filter(item => item.carId != payload) // filters the one with matching id
     },
 
     SET_USER_DATA_LOADING (state, payload) {
@@ -110,6 +106,7 @@ export default {
       let email = payload.email
       let password = payload.password
       let name = payload.name
+      let surname = payload.surname
 
       await Firebase.auth().createUserWithEmailAndPassword(email, password)
         .then(user => {

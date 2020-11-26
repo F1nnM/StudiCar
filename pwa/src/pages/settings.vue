@@ -53,7 +53,7 @@ export default {
     return {};
   },
   components: {
-    SignOutButton,
+    SignOutButton
   },
   computed: {
     allSettings() {
@@ -64,16 +64,16 @@ export default {
             "Im Moment musst du bestätigen, wenn du jemanden in eine Fahrgemeinschaft aufnimmst",
           disabledText:
             "Im Moment kannst du Anfragen mit einem Tippen direkt annehmen",
-          setterProp: "askAgainWhenAppreciatingNewPassenger",
-        },
-        {
+          setterProp: "askAgainWhenAppreciatingNewPassenger"
+        }
+        /* {
           title: "Ticker vom Postillon anzeigen",
           enabledText:
             "Im Moment wird der Ticker vom Postillon in der Seitenansicht angezeigt",
           disabledText:
             "Im Moment wird kein Ticker vom Postillon in der Seitenansicht angezeigt",
           setterProp: "enablePostillonNewsFeed",
-        },
+        }, */
       ];
     },
     test: {
@@ -82,7 +82,7 @@ export default {
       },
       set(value) {
         alert("New value: " + value);
-      },
+      }
     },
     dataSaver: {
       get() {
@@ -90,7 +90,7 @@ export default {
       },
       set(value) {
         this.$store.dispatch("dataSaver", value);
-      },
+      }
     },
 
     askAgainWhenAppreciatingNewPassenger: {
@@ -99,7 +99,7 @@ export default {
       },
       set(value) {
         this.$store.commit("setAskAgainWhenAppreciatingNewPassenger", value);
-      },
+      }
     },
 
     enablePostillonNewsFeed: {
@@ -108,8 +108,8 @@ export default {
       },
       set(value) {
         this.$store.commit("setEnablePostillonNewsFeed", value);
-      },
-    },
+      }
+    }
   },
   methods: {
     changeComputedProp(setterProp) {
@@ -118,11 +118,12 @@ export default {
 
     getValueOfProp(prop) {
       return this[prop];
-    },
+    }
   },
   mounted() {
-    this.$store.commit("setPage", "Einstellungen");
-    this.$store.commit("setPageTrans", "slide");
-  },
+    this.$store.commit("setPage", {
+      name: "Einstellungen"
+    });
+  }
 };
 </script>

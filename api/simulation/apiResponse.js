@@ -217,27 +217,34 @@ module.exports = {
 					type: 1,
 					content: "Neuere Testnachricht Neuere Testnachricht, extra lang to span multiple lines Neuere Testnachricht, extra lang to span multiple lines",
 					timestamp: "2020-09-21T06:17:08.000Z",
-					sentBy: 1
+					sentBy: 60
 				},
 				{
 					id: 59,
 					type: 1,
 					content: "Neuere Testnachricht Neuere Testnachricht, extra lang to span multiple lines Neuere Testnachricht, extra lang to span multiple lines",
 					timestamp: "2020-09-21T06:17:09.000Z",
-					sentBy: 1
+					sentBy: 61
 				},
 				{
 					id: 79,
 					type: 1,
 					content: "Neuere Testnachricht Neuere Testnachricht, extra lang to span multiple lines Neuere Testnachricht, extra lang to span multiple lines",
 					timestamp: "2020-09-21T06:17:18.000Z",
-					sentBy: 4
+					sentBy: 63
 				},
 				{
 					id: 100,
 					type: 1,
 					content: 'a newer message',
 					timestamp: "2020-10-22T14:18:08.000Z",
+					sentBy: 61
+				},
+				{
+					id: 101,
+					type: 1,
+					content: 'newest message',
+					timestamp: "2020-10-22T14:18:18.000Z",
 					sentBy: 1
 				}
 			],
@@ -536,5 +543,29 @@ module.exports = {
 				}
 			}]
 		}
-	}
+	},
+	topFriends: [{
+		id: 22,
+		fbId: 'wG3cG4M7NFMhIgYcreFjLrJC9Q23',
+		name: 'Alicia',
+		surname: 'Müller',
+		imageUrl: 'http://photos.modelmayhem.com/photos/080925/19/48dc225344d65_m.jpg',
+		lifts: 8
+	},
+	{
+		id: 10,
+		fbId: '7CaeLyHFi9VR4PGA78Rjt1TvLTR2',
+		name: 'Finn',
+		surname: 'Floruß',
+		imageUrl: 'http://photos.modelmayhem.com/photos/080925/19/48dc225344d65_m.jpg',
+		lifts: 6
+	},
+	{
+		id: 4,
+		fbId: 'lhlhugljhljlublib',
+		name: 'Herr',
+		surname: 'Lorem',
+		imageUrl: 'http://photos.modelmayhem.com/photos/080925/19/48dc225344d65_m.jpg',
+		lifts: 3
+	}]
 }

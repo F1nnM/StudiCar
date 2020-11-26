@@ -20,14 +20,14 @@
                   </template>
                 </q-img>
                 <q-badge floating class="q-pa-none" style="background-color: transparent">
-                  <q-btn
+                  <!-- <q-btn
                     round
                     color="black"
                     size="sm"
                     icon="delete"
                     @click="resetPP()"
                     class="q-mr-sm"
-                  />
+                  />-->
                   <q-btn round color="black" size="sm" icon="edit" @click="openUpload = true" />
                 </q-badge>
               </div>
@@ -177,32 +177,132 @@
               </q-tab-panels>
             </q-list>
           </q-tab-panel>
-          <q-tab-panel name="friends">
+          <q-tab-panel name="friends" class="q-pa-xs">
             <q-list>
               <q-item-label header class="q-pt-xs q-pb-xs text-uppercase text-caption">Dabei seit</q-item-label>
               <q-item>{{ since }}</q-item>
-              <q-item-label header class="q-pt-xs q-pb-xs text-uppercase text-caption">Freunde</q-item-label>
-              <q-item>
-                <p class="text-caption">Du hast noch keine Nutzer als Freunde markiert</p>
-              </q-item>
+              <q-item-label
+                header
+                class="q-pt-xs q-pb-xs text-uppercase text-caption row no-wrap justify-start"
+              >
+                <!-- <q-btn
+                  flat
+                  dense
+                  icon="keyboard_arrow_left"
+                  @click="friendsPage--"
+                  :disable="friendsPage == 0"
+                  color="primary"
+                />-->
+                <span class="self-center">Freunde</span>
+                <!--  <q-btn
+                  flat
+                  dense
+                  icon="keyboard_arrow_right"
+                  :disable="friendsPage + 1 == friendsGroup4.length"
+                  @click="friendsPage++"
+                  color="primary"
+                />-->
+                <q-btn icon="clear_all" flat dense color="primary" class="q-ml-sm" />
+                <!-- <small>
+                  <span
+                    class="q-ml-xs text-uppercase text-primary"
+                  >Seite {{ friendsPage + 1 }}/{{ friendsGroup4.length }}</span>
+                </small>-->
+                <!-- <div class="text-primary full-width text-center">
+                   
+                </div>-->
+              </q-item-label>
+              <q-item-label caption class="q-mt-none q-pl-md">Meiste Fahrten</q-item-label>
+              <div v-if="friends.length" class="q-mt-md">
+                <q-item
+                  v-for="friend in friends"
+                  :key="friend.fbId"
+                  dense
+                  class="q-px-xs"
+                  clickable
+                  :to="'benutzerinfo?userFbId=' + friend.fbId"
+                >
+                  <q-item-section avatar>
+                    <q-avatar size="md">
+                      <!-- friendInfoData = friend -->
+                      <q-img :src="friend.imageUrl" />
+                    </q-avatar>
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>{{ friend.name }}</q-item-label>
+                  </q-item-section>
+                  <q-item-section side class="text-bold">{{ friend.lifts }}</q-item-section>
+                </q-item>
+                <!-- <q-item dense>
+                    <q-item-section avatar>
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label>{{ f.name }}</q-item-label>
+                      <q-item-label caption>{{ f.surname }}</q-item-label>
+                    </q-item-section>
+                </q-item>-->
+              </div>
+              <div v-else class="text-caption">Du hast noch keine Nutzer als Freunde markiert</div>
             </q-list>
           </q-tab-panel>
         </q-tab-panels>
       </template>
     </q-splitter>
+    <q-dialog
+      :value="!!friendInfoData"
+      @input="e => friendInfoData = !!e"
+      position="right"
+      class="bg-white"
+      style="min-width: 45vw; min-height: 40vh"
+    >
+      <q-card v-if="!!friendInfoData">
+        <q-card-section class="q-pa-sm">
+          <q-list>
+            <q-item-label header>Details</q-item-label>
+            <q-item>
+              <q-item-section avatar>
+                <q-avatar>
+                  <q-img :src="friendInfoData.imageUrl" />
+                </q-avatar>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ friendInfoData.name }}</q-item-label>
+                <q-item-label caption>{{ friendInfoData.surname }}</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-expansion-item dense class="full-width">
+              <template v-slot:header>
+                <q-btn
+                  outline
+                  dense
+                  no-caps
+                  label="Profil"
+                  :to="'benutzerinfo?userFbId=' + friendInfoData.fbId"
+                />
+              </template>
+              <q-card>
+                <q-card-section>
+                  <q-btn outline no-caps dense class="q-px-sm" color="red" label="Entfernen" />
+                </q-card-section>
+              </q-card>
+            </q-expansion-item>
+          </q-list>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
 
     <QrGen
       v-model="shareProfileQR"
       :label="username"
       linearProgress
       :input="qrInput"
-      text="Über diesen Code können auch Nutzer außerhalb von Fahrgemeinschaften dein Profil besuchen."
+      text="Über diesen Code kannst du von jedem anderen Nutzer gefunden werden."
     />
 
     <q-dialog v-model="openUpload" full-width>
       <q-card>
         <q-card-section>
-          <div class="q-pa-md column items-start q-gutter-y-md">
+          <div class="column items-start q-gutter-y-md">
             <p class="text-h6">Lade dein neues Bild hoch</p>
             <q-slide-transition>
               <div v-if="!file" class="full-width">
@@ -232,29 +332,61 @@
                 <div class="col-4">
                   <q-btn
                     flat
-                    icon="backup"
-                    :disable="!this.newPPictureBase64"
-                    @click="uploadProfilePicture()"
-                    class="vertical-middle"
+                    icon="publish"
+                    label="Speichern"
+                    color="primary"
+                    dense
+                    no-caps
+                    :disable="!this.newPPictureBase64 || uploadingProfilePicture"
+                    @click="uploadProfilePicture"
                   />
                   <br />
                   <br />
-                  <q-btn flat icon="backspace" @click="file = null" />
+                  <q-btn
+                    flat
+                    color="negative"
+                    label="Entfernen"
+                    dense
+                    no-caps
+                    icon="delete"
+                    @click="file = null"
+                    :disable="uploadingProfilePicture"
+                  />
                 </div>
               </div>
             </q-slide-transition>
             <br />
-            <p v-if="!file" class="text-caption">
+            <div v-if="!file" class="text-caption">
               Bitte stelle sicher, dass du auf dem Bild gut zu sehen bist.
-              Vergewissere dich außerdem, dass du berechtigt bist, dieses Bild
+              Vergewissere dich außerdem, dass du die Rechte hast, dieses Bild
               hochzuladen.
-            </p>
-            <p v-if="file" class="text-caption">
+              <div v-if="!uploadingProfilePicture">
+                <ExtHr color="grey-7" class="q-my-md" />
+                <q-btn
+                  size="md"
+                  label="Bild zurücksetzen"
+                  icon="delete"
+                  color="negative"
+                  class="float-right q-pr-xs"
+                  dense
+                  outline
+                  @click="resetPP"
+                />
+              </div>
+            </div>
+            <div v-else class="text-caption">
               Wir haben dein Bild etwas zugeschnitten, damit es den
               Abmessungen für Profilbilder entspricht.
-            </p>
+            </div>
           </div>
         </q-card-section>
+        <q-linear-progress
+          class="q-mt-xs full-width"
+          indeterminate
+          size="sm"
+          track-color="white"
+          v-if="uploadingProfilePicture"
+        />
       </q-card>
     </q-dialog>
   </div>
@@ -262,7 +394,7 @@
 
 <script>
 import { date } from "quasar";
-import ExtendedHr from "components/ExtendedHr";
+import ExtHr from "components/ExtendedHr";
 import ColoredMeter from "components/ColoredMeter";
 import QrGen from "../components/QrGenerator";
 
@@ -278,6 +410,7 @@ export default {
   name: "ProfileTopSection",
   components: {
     ColoredMeter,
+    ExtHr,
     QrGen,
   },
   props: {
@@ -289,13 +422,34 @@ export default {
       ppPath: "",
       openUpload: false,
       shareProfileQR: false,
+      friendInfoData: null,
       statsFriendsTab: "stats",
       statsTimeTab: "current",
       file: null,
       newPPictureBase64: "",
+      friendsPage: 0,
+      uploadingProfilePicture: false
     };
   },
   computed: {
+    friends(){
+      return this.$store.getters['auth/user'].topFriends
+    },
+
+    friendsGroup4(){
+      const pageSize = 4
+
+      var arr = []
+
+      this.friends.forEach((f, index) => {
+        if(index % pageSize == 0){ // e.g. when pageSize is 4 then a new "page" will be generated at indices 4, 8, 12 ...
+          arr.push([f]) // directly push new page and this friend
+        }
+        else arr[Math.floor((index / pageSize))].push(f)
+      })
+      return arr
+    },
+    
     since() {
       return date.formatDate(
         // user statistics, cannot directly be changed by user
@@ -367,7 +521,8 @@ export default {
     },
 
     uploadProfilePicture() {
-      if (this.newPPictureBase64)
+      if (this.newPPictureBase64){
+        this.uploadingProfilePicture = true
         sendApiRequest(
           SQL_UPDATE_PROFILE_PICTURE,
           {
@@ -378,21 +533,31 @@ export default {
             this.openUpload = false;
             this.file = null;
             this.newPPictureBase64 = "";
+            this.uploadingProfilePicture = false
+          },
+          err => {
+            this.uploadingProfilePicture = false
           }
-        );
+        )
+      }
     },
 
     resetPP() {
       this.$q
         .dialog({
           title: "Bild zurücksetzen",
-          message: "Willst du dein Bild wirklich zurücksetzen?",
+          message: "Willst du dein Bild wirklich zurücksetzen? Wir speichern dann ein zufälliges Ersatzbild.",
           cancel: true,
           persistent: true,
         })
         .onOk(() => {
+          this.uploadingProfilePicture = true
           sendApiRequest(SQL_RESET_PROFILE_PICTURE, {}, (_) => {
             this.ppPath += "&timestamp=" + Date.now();
+            this.openUpload = false
+            this.uploadingProfilePicture = false
+          }, err => {
+            this.uploadingProfilePicture = false
           });
         })
         .onCancel(() => {});

@@ -19,10 +19,10 @@
           </q-toolbar>
         </div>
       </div>
-      <div class="bg-white full-height q-pa-md">
+      <div class="bg-white q-pa-md" style="min-height: 100vh">
         <p class="text-h6">Fahrtdetails</p>
 
-        <q-list class="q-mt-md">
+        <q-list class="q-mt-md bg-white">
           <q-item-label header>
             Verlauf
             <q-badge
@@ -40,13 +40,14 @@
             </q-item-section>
             <q-item-section>
               <q-item-label>
-                <span class="text-subtitle1">
-                  <span class="text-bold">{{ lift.car.brand }}</span>
-                  {{ lift.car.model}}
-                </span>
-                <span class="q-ml-sm">
-                  <q-badge color="dark" class="q-ml-sm" transparent>{{ lift.car.type }}</q-badge>
-                </span>
+                <p class="q-mb-none">
+                  <span class="text-subtitle1">
+                    <span class="text-bold">{{ lift.car.brand }}</span>
+                    {{ lift.car.model}}
+                  </span>
+
+                  <q-badge class="q-ml-sm" color="dark" transparent>{{ lift.car.type }}</q-badge>
+                </p>
               </q-item-label>
               <q-item-label
                 caption
@@ -54,7 +55,7 @@
                 :style="'border-top: 1px solid ' + lift.car.color"
               >
                 Baujahr {{ lift.car.built }}
-                <span class="q-mx-md">-</span>
+                <span class="q-mx-sm">-</span>
                 {{ lift.car.licensePlate }}
               </q-item-label>
             </q-item-section>
@@ -65,6 +66,11 @@
           <q-item-label header>
             <p v-if="lift.passengers.length">
               Menschen
+              <br />
+              <small
+                class="text-caption"
+                style="font-size: .7em;"
+              >Tippe, um zum jeweiligen Profil zu kommen</small>
               <span class="text-caption float-right">
                 {{ lift.passengers.length + 1 }} / {{ lift.car.allSeats }}
                 <q-icon name="person" size="xs" />
@@ -83,12 +89,14 @@
               </q-avatar>
             </q-item-section>
             <q-item-section>
-              <p>
+              <p class="q-mb-none">
                 {{ lift.driver.name }}
-                <q-badge class="q-ml-md" color="primary">Fahrer</q-badge>
-                <br />
-                <small>{{ lift.driver.surname }}</small>
+                <q-badge class="q-ml-sm" transparent color="white">
+                  <q-icon name="directions_car" size="xs" color="primary" />
+                </q-badge>
               </p>
+
+              <small>{{ lift.driver.surname }}</small>
             </q-item-section>
             <q-item-section side>
               <div class="row justify-around">

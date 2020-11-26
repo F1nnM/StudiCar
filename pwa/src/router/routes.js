@@ -26,11 +26,6 @@ const routes = [{
         import('pages/add_lift.vue')
     },
     {
-      path: '/willkommen',
-      component: () =>
-        import('pages/welcome.vue')
-    },
-    {
       path: '/profil',
       component: () =>
         import('pages/profile.vue')

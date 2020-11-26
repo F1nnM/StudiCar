@@ -159,19 +159,24 @@
                           </div>
                         </div>
                       </div>
-
-                      <!-- <q-scroll-area
+                      <div v-if="lifts[liftId].passengers.length < lifts[liftId].car.allSeats">
+                        <!-- <q-scroll-area
                           :thumb-style="thumbStyle"
                           :bar-style="barStyle"
                           style="height: 40vh"
-                      >-->
-                      <IncomingLiftRequest
-                        v-for="r in lift"
-                        :key="r.id"
-                        :request="r"
-                        :liftId="parseInt(liftId)"
-                        @respond="respondLiftRequest"
-                      />
+                        >-->
+                        <IncomingLiftRequest
+                          v-for="r in lift"
+                          :key="r.id"
+                          :request="r"
+                          :liftId="parseInt(liftId)"
+                          @respond="respondLiftRequest"
+                        />
+                      </div>
+                      <div
+                        v-else
+                        class="text-negative"
+                      >Das Auto ist voll, du kannst keine Angebote mehr annehmen.</div>
 
                       <!-- </q-scroll-area> -->
                     </q-tab-panel>
@@ -211,7 +216,7 @@
           :label="shortLiftPopup.data ? shortLiftPopup.data.start.name + '  ›  ' + shortLiftPopup.data.destination.name : ''"
           linearProgress
           :input="'l' + (shortLiftPopup.data ? shortLiftPopup.data.qr : '')"
-          text="Über diesen Code können auch Nutzer außerhalb von Fahrgemeinschaften dein Profil besuchen."
+          text="Über diesen Code kannst du eine Fahrgemeinschaft direkt teilen."
         />
       </q-tab-panel>
       <q-tab-panel name="outgoing">Hier kommen dann die ausgehenden</q-tab-panel>
@@ -236,7 +241,7 @@ export default {
     QrGen,
     TitleButtonAnchor,
     IncomingLiftRequest,
-    TextPagination,
+    TextPagination
   },
 
   data() {
@@ -246,25 +251,25 @@ export default {
       liftTab: "current",
       chatPopup: {
         isOpen: false,
-        data: null,
+        data: null
       },
       shortLiftPopup: {
         isOpen: false,
-        data: null,
+        data: null
       },
       liftRequests: this.$store.getters["auth/user"].liftRequests,
       liftRequestDayTab: null,
-      liftRequestTimeTab: null,
+      liftRequestTimeTab: null
     };
   },
 
   watch: {
-    liftRequestDayTab: function (newDay) {
+    liftRequestDayTab: function(newDay) {
       if (!this.liftRequests[newDay][this.liftRequestTimeTab]) {
         // if previous selected lift isn't present at that day, select first lift of that day
         this.liftRequestTimeTab = Object.keys(this.liftRequests[newDay])[0];
       }
-    },
+    }
   },
 
   computed: {
@@ -274,12 +279,12 @@ export default {
         {
           value: "pending",
           icon: "call_received",
-          label: "Eingehende Anfragen",
-        },
+          label: "Eingehende Anfragen"
+        }
       ];
     },
     bigTabOptionsWithoutLabel() {
-      return JSON.parse(JSON.stringify(this.bigTabOptions)).map((item) => {
+      return JSON.parse(JSON.stringify(this.bigTabOptions)).map(item => {
         delete item.label;
         return item;
       });
@@ -296,7 +301,7 @@ export default {
           sentBy: this.getNameFromId(liftId, lastMessage.sentBy),
           type: lastMessage.type,
           content: lastMessage.content,
-          timestamp: lastMessage.timestamp,
+          timestamp: lastMessage.timestamp
         });
         // if(firstItem) firstItem = false; // just not to have a gray line above top item
       }
@@ -324,7 +329,7 @@ export default {
         borderRadius: "5px",
         backgroundColor: "#027be3",
         width: "5px",
-        opacity: 0.75,
+        opacity: 0.75
       };
     },
 
@@ -334,19 +339,19 @@ export default {
         borderRadius: "9px",
         backgroundColor: "#027be3",
         width: "9px",
-        opacity: 0.2,
+        opacity: 0.2
       };
     },
 
     totalRequests() {
       var n = 0;
-      Object.values(this.liftRequests).forEach((day) => {
-        Object.values(day).forEach((lift) => {
+      Object.values(this.liftRequests).forEach(day => {
+        Object.values(day).forEach(lift => {
           n += lift.length;
         });
       });
       return n;
-    },
+    }
   },
 
   methods: {
@@ -366,7 +371,7 @@ export default {
       var lift = this.lifts[liftId],
         people = JSON.parse(JSON.stringify(lift.passengers)); // otherwise passengers would be overwritten
       people.push(lift.driver);
-      return people.find((p) => {
+      return people.find(p => {
         return p.id == userId;
       }).name;
     },
@@ -381,7 +386,7 @@ export default {
         if (this.alreadyTappedOnItem) this.openShortLiftInfo(liftId);
         else {
           this.alreadyTappedOnItem = true;
-          setTimeout((_) => {
+          setTimeout(_ => {
             if (!this.alreadyTappedOnItem) {
               this.openLiftPopup(liftId);
             }
@@ -421,7 +426,7 @@ export default {
 
     requestsOfDay(day) {
       var a = 0;
-      Object.values(day).forEach((lift) => (a += lift.length));
+      Object.values(day).forEach(lift => (a += lift.length));
       return a;
     },
 
@@ -429,17 +434,18 @@ export default {
       // here comes dispatching code then
       eventObj.dayShort = this.liftRequestDayTab; // add missing information to object
       this.$store.dispatch("auth/respondLiftRequest", eventObj);
-    },
+    }
   },
 
   mounted() {
-    this.$store.commit("setPage", "Fahrten");
-    this.$store.commit("setPageTrans", "slide");
+    this.$store.commit("setPage", {
+      name: "Fahrten"
+    });
 
     this.liftRequestDayTab = Object.keys(this.liftRequests)[0];
     this.liftRequestTimeTab = Object.keys(
       this.liftRequests[this.liftRequestDayTab]
     )[0];
-  },
+  }
 };
 </script>

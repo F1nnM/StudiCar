@@ -6,7 +6,7 @@
       @input="emit"
       full-width
       transition-show="slide-up"
-      transition-hide="jump-down"
+      :transition-hide="position == 'bottom' ? 'slide-down' : 'jump-down'"
     >
       <!-- <q-toolbar class="text-right">
             <q-btn flat round dense icon="close" v-close-popup />

@@ -23,17 +23,18 @@ export default {
   name: "legal",
   components: {
     LoadingDisplay,
-    TitleButtonAnchor,
+    TitleButtonAnchor
   },
   mounted() {
-    this.$store.commit("setPage", "Rechtliches");
-    this.$store.commit("setPageTrans", "slide");
+    this.$store.commit("setPage", {
+      name: "Rechtliches"
+    });
     this.getContent();
   },
   data() {
     return {
       downloading: 0, // 0 means not downloading, 1 means downloading, 2 means success and -1 means error
-      converter: null,
+      converter: null
     };
   },
   methods: {
@@ -48,18 +49,18 @@ export default {
         sendApiRequest(
           GET_LEGAL,
           {},
-          (html_) => {
+          html_ => {
             document.getElementById("text_anchor").innerHTML = html_;
             this.$store.commit("setLegal", html_);
             this.downloading = 2;
           },
-          (err) => {
+          err => {
             alert("Fehler: " + err);
             this.downloading = -1;
           }
         );
       }
-    },
-  },
+    }
+  }
 };
 </script>

@@ -96,11 +96,11 @@ module.exports = {
             talkMorning: userData.PREF_TALK_MORNING
           }
         }
-        if (options.secretFbId = options.fbid) {
+        if (options.secretFbId = options.fbid) { // NOT ACCESSING PUBLIC PROFILE
           data.settings = {
             liftMaxDistance: userData.LIFT_MAX_DISTANCE
           }
-          var addresses = await runQuery("SELECT adresses.* FROM adresses INNER JOIN users ON adresses.USER_ID = users.ID WHERE users.ID = ? AND adresses.ID > 3", [uid]);
+          var addresses = await runQuery("SELECT adresses.* FROM `adresses` LEFT JOIN users ON (users.ID = adresses.USER_ID) WHERE adresses.ID <= 3 OR adresses.USER_ID = 1", [uid]);
           data.addresses = []
 
           addresses.result.forEach(item => {
@@ -131,9 +131,11 @@ module.exports = {
             data.cars.push(obj)
           })
 
-          data.chatLifts = apiResponseSimulation.chatLifts,
-            data.marketplaceOffers = apiResponseSimulation.marketplaceOffers,
-            data.liftRequests = apiResponseSimulation.liftRequests
+          const simulationProps = ['chatLifts', 'marketplaceOffers', 'liftRequests', 'topFriends']
+
+          simulationProps.forEach(prop => {
+            data[prop] = apiResponseSimulation[prop]
+          })
         }
 
         res.end(JSON.stringify(data))

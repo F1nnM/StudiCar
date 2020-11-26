@@ -23,80 +23,80 @@
 </template>
 
 <script>
-
-import { QrcodeStream, QrcodeDropZone, QrcodeCapture } from 'vue-qrcode-reader'
-
+import { QrcodeStream, QrcodeDropZone, QrcodeCapture } from "vue-qrcode-reader";
 
 export default {
-components: { QrcodeStream },
+  components: { QrcodeStream },
 
-    mounted(){
-      this.$store.commit('setPageTrans', 'swipe-away')
-      this.$store.commit('setPage', '')
+  mounted() {
+    this.$store.commit("setPage", {
+      name: "Scanner",
+      onlyInNav: true,
+      transition: "swipe-away"
+    });
+  },
+
+  data() {
+    return {
+      code: "",
+      video: [],
+      result: "",
+      error: "",
+      built: false
+    };
+  },
+  methods: {
+    help() {
+      alert("BIG ");
     },
 
-    data(){
-        return {
-            code: '',
-            video: [],
-            result: '',
-            error: '',
-            built: false
+    async onInit(promise) {
+      this.built = true;
+      try {
+        await promise;
+      } catch (error) {
+        if (error.name === "NotAllowedError") {
+          this.error = "ERROR: you need to grant camera access permisson";
+        } else if (error.name === "NotFoundError") {
+          this.error = "ERROR: no camera on this device";
+        } else if (error.name === "NotSupportedError") {
+          this.error = "ERROR: secure context required (HTTPS, localhost)";
+        } else if (error.name === "NotReadableError") {
+          this.error = "ERROR: is the camera already in use?";
+        } else if (error.name === "OverconstrainedError") {
+          this.error = "ERROR: installed cameras are not suitable";
+        } else if (error.name === "StreamApiNotSupportedError") {
+          this.error = "ERROR: Stream API is not supported in this browser";
         }
+        this.message(error);
+      }
     },
-    methods: {
-        help(){
-            alert("BIG ")
-        },
-
-        async onInit (promise) {
-          this.built = true
-        try {
-          await promise
-        } catch (error) {
-          if (error.name === 'NotAllowedError') {
-            this.error = "ERROR: you need to grant camera access permisson"
-          } else if (error.name === 'NotFoundError') {
-            this.error = "ERROR: no camera on this device"
-          } else if (error.name === 'NotSupportedError') {
-            this.error = "ERROR: secure context required (HTTPS, localhost)"
-          } else if (error.name === 'NotReadableError') {
-            this.error = "ERROR: is the camera already in use?"
-          } else if (error.name === 'OverconstrainedError') {
-            this.error = "ERROR: installed cameras are not suitable"
-          } else if (error.name === 'StreamApiNotSupportedError') {
-            this.error = "ERROR: Stream API is not supported in this browser"
-          }
-          this.message(error)
-        }
-        
-      },
-      decoded(res){
-        this.result = res
-      },
-      message (error) {
-      this.$q.dialog({
-        dark: true,
-        title: 'Fehler',
-        message: '' + error
-      }).onOk(() => {
-        // console.log('OK')
-      }).onCancel(() => {
-        // console.log('Cancel')
-      }).onDismiss(() => {
-        // console.log('I am triggered on both OK and Cancel')
-      })
+    decoded(res) {
+      this.result = res;
+    },
+    message(error) {
+      this.$q
+        .dialog({
+          dark: true,
+          title: "Fehler",
+          message: "" + error
+        })
+        .onOk(() => {
+          // console.log('OK')
+        })
+        .onCancel(() => {
+          // console.log('Cancel')
+        })
+        .onDismiss(() => {
+          // console.log('I am triggered on both OK and Cancel')
+        });
     },
 
-    newScan(){
-      this.result = ''
+    newScan() {
+      this.result = "";
     }
-      
-    }
-}
-
-
-
+  }
+};
 </script>
 
 <style lang="scss">

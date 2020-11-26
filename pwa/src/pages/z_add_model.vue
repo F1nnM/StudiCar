@@ -36,31 +36,30 @@
 
 <script>
 export default {
-
-
   data() {
     return {
       car: {
-          brand: '',
-          model: '',
-          type: '',
-          color: '',
-          image: ''
+        brand: "",
+        model: "",
+        type: "",
+        color: "",
+        image: ""
       }
     };
   },
 
   computed: {
-    title(){
-      var greeting = this.$store.state.greeting
-      var name = this.$store.getters['auth/user'].name.split(' ')[0]
-      return greeting + ', ' + name
+    title() {
+      var greeting = this.$store.state.greeting;
+      var name = this.$store.getters["auth/user"].name.split(" ")[0];
+      return greeting + ", " + name;
     }
   },
 
-  mounted () {
-    this.$store.commit('setPage', 'Modell hinzufügen')
-    this.$store.commit('setPageTrans', 'slide')
+  mounted() {
+    this.$store.commit("setPage", {
+      name: "Modell hinzufügen"
+    });
   }
 };
 </script>

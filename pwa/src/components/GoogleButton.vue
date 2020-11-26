@@ -1,14 +1,23 @@
 <template>
-  <div class="google-btn" @click="doSignIn()">
-    <div class="google-icon-wrapper">
+  <div class="zgoogle-btn">
+    <div clickable v-ripple @click="doSignIn" class="box q-pa-xs row justify-around">
+      <q-avatar size="sm" class="self-center q-ml-xs">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" />
+      </q-avatar>
+      <span class="text-grey-7 text-subtitle2">
+        über
+        <br />Google
+      </span>
+    </div>
+    <!--  <div class="google-icon-wrapper">
       <img
         class="google-icon"
         src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
       />
     </div>
-    <p class="btn-text">
-      <b>Mit Google anmelden</b>
-    </p>
+    <div class="btn-text">
+      <p>Anmeldung</p>
+    </div>-->
   </div>
 </template>
 
@@ -42,6 +51,21 @@ $white: #fff;
 $google-blue: #4285f4;
 $button-active-blue: #1669f2;
 
+.box {
+  border: 1px solid;
+  border-image-source: conic-gradient(
+    rgba(255, 0, 0, 1) 17%,
+    rgba(0, 35, 255, 1) 25%,
+    rgba(45, 0, 255, 1) 32%,
+    rgba(0, 168, 33, 1) 49%,
+    rgba(0, 189, 19, 1) 67%,
+    rgba(231, 255, 5, 1) 72%,
+    rgba(250, 255, 0, 1) 78%,
+    rgba(255, 0, 0, 1) 88%
+  );
+  border-image-slice: 1;
+}
+
 .google-btn {
   width: 200px;
   height: 42px;
@@ -70,6 +94,7 @@ $button-active-blue: #1669f2;
     margin: 11px 11px 0 0;
     color: $white;
     font-size: 14px;
+    font-weight: 100;
     letter-spacing: 0.2px;
     font-family: "Roboto";
   }
