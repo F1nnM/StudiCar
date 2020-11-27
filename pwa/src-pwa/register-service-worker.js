@@ -28,7 +28,7 @@ register(process.env.SERVICE_WORKER_FILE, {
   registered (registration) {
     if (process.env.DEV) {
       console.log('Service worker has been registered.')
-      /* alert('will be updated') */
+
       registration.update()
     }
   },
@@ -47,12 +47,8 @@ register(process.env.SERVICE_WORKER_FILE, {
 
   updated (registration) {
 
-    if (process.env.DEV) {
-      console.log('New content is available; please refresh.')
-      /* alert('please refresh') */
-      store.commit('setOldVersionRunning', true)
-    }
-    // else finalReload(registration)
+    console.log('New content is available; please refresh.')
+    store.commit('setOldVersionRunning', true)
   },
 
   offline () {
@@ -68,9 +64,3 @@ register(process.env.SERVICE_WORKER_FILE, {
   }
 })
 
-function hardReload () {
-  /* var script = document.createElement("script");
-  script.src = "SCRIPT.js?ver=" + (new Date()).getTime();
-  document.body.appendChild(script); */
-  /* location.reload() */
-}

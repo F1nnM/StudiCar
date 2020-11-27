@@ -311,15 +311,25 @@ export default {
   },
 
   methods: {
+    async refreshContent(res, rej) {
+      res();
+    },
+
     triggerLiftRequest(liftId) {
       this.$store.dispatch("auth/requestToLift", liftId);
       this.offerIndexToRefresh++; // to re-render component, wasn't working otherwise
+    },
+
+    refresh(done) {
+      alert("new");
+      done();
     }
   },
 
   mounted() {
     this.$store.commit("setPage", {
-      name: this.title
+      name: this.title,
+      navTitle: "Marktplatz"
     });
 
     this.filterOptions.push({

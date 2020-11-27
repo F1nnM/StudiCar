@@ -30,6 +30,7 @@ const store = new Vuex.Store({
       state.pageName = obj.name
       state.pageTrans = obj.transition || 'slide'
       state.onlyInNav = obj.onlyInNav || false
+      state.navTitle = obj.navTitle || ''
     },
 
     setFAQ (state, faq_) {
@@ -78,6 +79,7 @@ const store = new Vuex.Store({
     pageTrans: 'slide',
     pageName: 'Willkommen', // needed for scroll-relative Header
     onlyInNav: false,
+    navTitle: '',
     testValue: 10,
     legal: '',
     faq: [],

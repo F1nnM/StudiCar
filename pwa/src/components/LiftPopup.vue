@@ -215,8 +215,8 @@
                         infinite
                         animated
                         vertical
-                        transition-prev="jump-up"
-                        transition-next="jump-down"
+                        transition-prev="jump-right"
+                        transition-next="jump-left"
                       >
                         <q-tab-panel name="emoji">
                           <q-list>
@@ -397,7 +397,7 @@ export default {
         open: false,
         message: null
       },
-      quickMessagesTab: "emoji",
+      quickMessagesTab: "text",
       footerBgColor: "white",
       user: this.$store.getters["auth/user"].id,
       // lift: {

@@ -68,7 +68,7 @@ const routes = [{
   ]
 },
 {
-  path: '/spielwiese',
+  path: '/spielwisese',
   component: () =>
     import('layouts/custom_layout.vue'),
   children: [{
@@ -115,5 +115,3 @@ if (process.env.MODE !== 'ssr') {
 }
 
 export default routes
-
-/* alert('ja') */

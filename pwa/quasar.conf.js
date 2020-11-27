@@ -120,7 +120,9 @@ module.exports = function (ctx) {
     // https://quasar.dev/quasar-cli/developing-pwa/configuring-pwa
     pwa: {
       workboxPluginMode: 'GenerateSW', // 'GenerateSW' or 'InjectManifest'
-      workboxOptions: {}, // only for GenerateSW
+      workboxOptions: {
+        skipWaiting: true // found in https://forum.quasar-framework.org/topic/2560/solved-pwa-force-refresh-when-new-version-released/28
+      }, // only for GenerateSW
       manifest: {
         name: 'StudiCar',
         short_name: 'StudiCar',

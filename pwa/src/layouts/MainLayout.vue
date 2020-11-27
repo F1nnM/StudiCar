@@ -12,7 +12,6 @@
             aria-label="Menu"
             @click="leftDrawerOpen = !leftDrawerOpen"
           />
-          <!--  <q-btn label="refresh" @click="hardReload" /> -->
 
           <q-toolbar-title class="row">
             <div class="text-weight-light q-pt-xs col-xs-10 col-md-11">
@@ -34,8 +33,10 @@
                     <q-tab-panel class="bg-primary q-pa-none text-white" :name="false">
                       StudiCar
                       <q-chip
+                        clickable
+                        @click="hideUpdateField = false"
                         dense
-                        v-if="oldVersionRunning"
+                        v-if="oldVersionRunning && hideUpdateField"
                         color="deep-orange"
                         text-color="white"
                         icon="new_releases"
@@ -48,7 +49,10 @@
                     >Scanvorgang läuft</q-tab-panel>
                   </q-tab-panels>
                 </q-tab-panel>
-                <q-tab-panel class="q-pa-none bg-primary text-white" :name="true">{{ pageName }}</q-tab-panel>
+                <q-tab-panel
+                  class="q-pa-none bg-primary text-white"
+                  :name="true"
+                >{{ navTitle || pageName }}</q-tab-panel>
               </q-tab-panels>
             </div>
             <div class="col-xs-2 col-md-1">
@@ -93,23 +97,61 @@
         </div>
       </div>
     </q-drawer>
+    <q-pull-to-refresh ref="refresher" @refresh="refresh">
+      <div>
+        <q-page-container>
+          <div v-if="pageName">
+            <q-scroll-observer @scroll="scrollHandler" />
 
-    <q-page-container>
-      <div v-if="pageName">
-        <q-scroll-observer @scroll="scrollHandler" />
-
-        <div class="text-h5 q-pl-md q-py-md" v-if="!titleOnlyInNav">
-          <span class="custom-underline c-u-l c-u-2 c-u-md" transition="slide-left">{{ pageName }}</span>
-        </div>
+            <div class="text-h5 q-pl-md q-py-md" v-if="!titleOnlyInNav">
+              <span
+                class="custom-underline c-u-l c-u-2 c-u-md"
+                transition="slide-left"
+              >{{ pageName }}</span>
+            </div>
+          </div>
+          <transition :name="pageTrans" mode="out-in">
+            <router-view ref="pageContent" />
+          </transition>
+        </q-page-container>
       </div>
-
-      <transition :name="pageTrans" mode="out-in">
-        <router-view />
-      </transition>
-    </q-page-container>
+    </q-pull-to-refresh>
     <QrLiftDisplay v-model="liftQrId" />
 
+    <q-dialog
+      :value="!hideUpdateField && oldVersionRunning"
+      transition-show="fade"
+      transition-hide="fade"
+    >
+      <q-card class="bg-dark text-white">
+        <q-toolbar>
+          <q-toolbar-title>
+            <q-icon name="info_outline" class="q-mr-sm" size="sm" />
+            <span>Neue Version verfügbar</span>
+          </q-toolbar-title>
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-toolbar>
+
+        <q-card-section>Bitte lade die Seite neu, um auf dem neuesten Stand zu sein.</q-card-section>
+        <q-card-actions align="around" class="q-mt-sm">
+          <q-btn flat color="white" label="Später" @click="hideUpdateField = true" />
+          <q-btn color="primary" label="Ok" @click="reloadPage" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
     <q-footer elevated v-show="!(scannerOpen)">
+      <q-slide-transition>
+        <div v-if="!!refreshErr">
+          <q-banner inline-actions class="text-white bg-negative">
+            Fehler: {{ refreshErr }}
+            <template v-slot:action>
+              <q-btn flat color="white" label="Nochmal" @click="refreshAgain" />
+              <q-btn flat color="white" label="Ok" @click="refreshErr = null" />
+            </template>
+          </q-banner>
+        </div>
+      </q-slide-transition>
       <q-tabs
         full-width
         no-caps
@@ -168,7 +210,9 @@ export default {
       tab: "home",
       chats: "Main",
       show: true,
-      liftQrId: ""
+      liftQrId: "",
+      refreshErr: null,
+      hideUpdateField: false
     };
   },
 
@@ -179,6 +223,10 @@ export default {
 
     loadingScreenVisible() {
       return this.$store.getters["auth/signinLoaded"];
+    },
+
+    navTitle() {
+      return this.$store.state.navTitle;
     },
 
     pageName() {
@@ -197,7 +245,7 @@ export default {
       return this.$store.state.onlyInNav;
     },
 
-    runningOldVersion() {
+    oldVersionRunning() {
       return this.$store.state.oldVersionRunning;
     },
 
@@ -244,9 +292,29 @@ export default {
   },
 
   methods: {
-    hardReload(e) {
-      document.location.reload(true);
-      /* return false */
+    reloadPage() {
+      location.reload(true);
+    },
+
+    async refresh(done) {
+      var pageRefresh = new Promise((res, rej) => {
+        try {
+          this.$refs.pageContent.refreshContent(res, rej);
+        } catch (e) {
+          res();
+        }
+      })
+        .then()
+        .catch(res => {
+          this.refreshErr = res;
+        })
+        .finally(done);
+    },
+
+    refreshAgain() {
+      this.refreshErr = null;
+      this.$refs.refresher.trigger();
+      // this.refresh();
     },
 
     scannerSwiped(e) {
