@@ -71,74 +71,79 @@ module.exports = {
         var userData = (await runQuery("SELECT ID, NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, LIFTS_OFFERED, LIFTS_ALL, PREF_SMOKING, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `users` WHERE users.FB_ID = ?", [options.fbid])).result[0],
           liftCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS LIFT_COUNT FROM `lift_map` WHERE `USER_ID` = ? ", [options.fbid])).result[0].LIFT_COUNT,
           driverCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS DRIVER_COUNT FROM `lift_map` WHERE `IS_DRIVER` = true AND `USER_ID` = ? ", [options.fbid])).result[0].DRIVER_COUNT,
-          uid
-        if (userData) uid = userData.ID
-        else res.end(404) // case when wrong fbId has been transmitted
-
-        let data = {
-          id: userData.ID,
-          uid: options.fbid,
-          name: userData.NAME,
-          gender: userData.GENDER,
-          course: userData.COURSE,
-          bio: userData.DESCRIPTION,
-          stats: {
-            createdAt: userData.CREATED_DATE,
-            liftCount: liftCount,
-            driverCount: driverCount,
-            liftsOffered: userData.LIFTS_OFFERED,
-            liftsAll: userData.LIFTS_ALL,
-          },
-          prefs: {
-            smoking: userData.PREF_SMOKING,
-            music: userData.PREF_MUSIC,
-            talk: userData.PREF_TALK,
-            talkMorning: userData.PREF_TALK_MORNING
-          }
+          uid = options.fbid
+        if (!userData) {
+          res.writeHead(204) // case when wrong fbId has been transmitted
+          res.end()
+          return
         }
-        if (options.secretFbId = options.fbid) { // NOT ACCESSING PUBLIC PROFILE
-          data.settings = {
-            liftMaxDistance: userData.LIFT_MAX_DISTANCE
+        else {
+
+          let data = {
+            id: userData.ID,
+            uid: options.fbid,
+            name: userData.NAME,
+            gender: userData.GENDER,
+            course: userData.COURSE,
+            bio: userData.DESCRIPTION,
+            stats: {
+              createdAt: userData.CREATED_DATE,
+              liftCount: liftCount,
+              driverCount: driverCount,
+              liftsOffered: userData.LIFTS_OFFERED,
+              liftsAll: userData.LIFTS_ALL,
+            },
+            prefs: {
+              smoking: userData.PREF_SMOKING,
+              music: userData.PREF_MUSIC,
+              talk: userData.PREF_TALK,
+              talkMorning: userData.PREF_TALK_MORNING
+            }
           }
-          var addresses = await runQuery("SELECT adresses.* FROM `adresses` LEFT JOIN users ON (users.ID = adresses.USER_ID) WHERE adresses.ID <= 3 OR adresses.USER_ID = 1", [uid]);
-          data.addresses = []
-
-          addresses.result.forEach(item => {
-            let obj = {
-              id: item.ID,
-              nickname: item.NICKNAME,
-              postcode: item.POSTCODE,
-              city: item.CITY,
-              street: item.STREET,
-              number: item.NUMBER
+          if (options.secretFbId = options.fbid) { // NOT ACCESSING PUBLIC PROFILE
+            data.settings = {
+              liftMaxDistance: userData.LIFT_MAX_DISTANCE
             }
-            data.addresses.push(obj)
-          })
-          var cars = await runQuery("SELECT car.*, car_models.BRAND, car_models.MODEL FROM car_models JOIN car ON car.MODEL_ID = car_models.ID WHERE car.USER_ID = ?", [uid]);
-          data.cars = []
-          cars.result.forEach(item => {
-            let obj = {
-              modelId: item.MODEL_ID,
-              carId: item.ID,
-              brand: item.BRAND,
-              model: item.MODEL,
-              type: item.TYPE,
-              licensePlate: item.LICENSE_PLATE,
-              year: item.YEAR,
-              seats: item.SEATS,
-              color: '#' + item.COLOR
-            }
-            data.cars.push(obj)
-          })
+            var addresses = await runQuery("SELECT adresses.* FROM `adresses` LEFT JOIN users ON (users.ID = adresses.USER_ID) WHERE adresses.ID <= 3 OR adresses.USER_ID = 1", [uid]);
+            data.addresses = []
 
-          const simulationProps = ['chatLifts', 'marketplaceOffers', 'liftRequests', 'topFriends']
+            addresses.result.forEach(item => {
+              let obj = {
+                id: item.ID,
+                nickname: item.NICKNAME,
+                postcode: item.POSTCODE,
+                city: item.CITY,
+                street: item.STREET,
+                number: item.NUMBER
+              }
+              data.addresses.push(obj)
+            })
+            var cars = await runQuery("SELECT car.*, car_models.BRAND, car_models.MODEL FROM car_models JOIN car ON car.MODEL_ID = car_models.ID WHERE car.USER_ID = ?", [uid]);
+            data.cars = []
+            cars.result.forEach(item => {
+              let obj = {
+                modelId: item.MODEL_ID,
+                carId: item.ID,
+                brand: item.BRAND,
+                model: item.MODEL,
+                type: item.TYPE,
+                licensePlate: item.LICENSE_PLATE,
+                year: item.YEAR,
+                seats: item.SEATS,
+                color: '#' + item.COLOR
+              }
+              data.cars.push(obj)
+            })
 
-          simulationProps.forEach(prop => {
-            data[prop] = apiResponseSimulation[prop]
-          })
+            const simulationProps = ['chatLifts', 'marketplaceOffers', 'liftRequests', 'topFriends']
+
+            simulationProps.forEach(prop => {
+              data[prop] = apiResponseSimulation[prop]
+            })
+          }
+
+          res.end(JSON.stringify(data))
         }
-
-        res.end(JSON.stringify(data))
       }
     },
     '/getCarModels': async (req, res, options) => {

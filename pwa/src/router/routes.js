@@ -68,7 +68,7 @@ const routes = [{
   ]
 },
 {
-  path: '/spielwisese',
+  path: '/spielwiese',
   component: () =>
     import('layouts/custom_layout.vue'),
   children: [{

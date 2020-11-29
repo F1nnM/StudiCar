@@ -60,7 +60,7 @@
               <img src="https://cdn.quasar.dev/img/parallax1.jpg" />
             </template>
           </q-parallax>
-          <p class="text-caption" id="anchor"></p>
+          <p class="text-caption" ref="anchor"></p>
         </q-tab-panel>
       </q-tab-panels>
     </q-card>
@@ -132,10 +132,9 @@ export default {
   watch: {
     viewTab: function(newv) {
       if (newv != "matrix") {
-        setTimeout(
-          _ => (document.getElementById("anchor").innerHTML = this.htmlText),
-          100
-        );
+        setTimeout(_ => {
+          this.$refs.anchor.$el.innerHTML = this.htmlText;
+        }, 100);
       }
     }
   },

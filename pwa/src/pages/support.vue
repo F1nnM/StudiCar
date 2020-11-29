@@ -3,7 +3,6 @@
     <q-tabs
       v-model="tab"
       dense
-      @click="loadFAQ"
       toggle-color="primary"
       color="white"
       inline-label
@@ -53,6 +52,7 @@
             :icon="q.icon"
             :label="q.question"
             :caption="q.category"
+            :ref="'answer' + q.id"
           >
             <q-card class="bg-red-1 q-pb-none">
               <q-card-section class="q-pb-none q-pl-md">
@@ -244,8 +244,18 @@ export default {
       ],
       faqLoaded: 0, // as always: 0 is neutral, 1 is loading, 2 means success and -1 means error
       faq: this.$store.getters["getFAQ"],
-      sendProgress: 0 // same procedure as above
+      sendProgress: 0, // same procedure as above
+      wantedId: null
     };
+  },
+  watch: {
+    tab: function(newValue) {
+      switch (newValue) {
+        case "faq":
+          this.loadFAQ();
+          break;
+      }
+    }
   },
   methods: {
     sendQuestion() {
@@ -268,6 +278,7 @@ export default {
     loadFAQ() {
       if (this.tab == "faq" && !this.$store.getters["getFAQ"].length) {
         this.FAQloading = 1;
+
         sendApiRequest(
           SQL_GET_FAQ,
           {},
@@ -292,6 +303,21 @@ export default {
             });
             this.faq = newFAQ;
             this.$store.commit("setFAQ", newFAQ);
+
+            const arr = document.location.href.split("faq-id=");
+            if (arr.length > 0) {
+              this.tab = "faq"; // just to be sure
+              setTimeout(_ => {
+                const vueRef = "answer" + parseInt(arr[1]),
+                  vueEl = this.$refs[vueRef][0];
+                setTimeout(_ => {
+                  vueEl.$el.scrollIntoView();
+                  vueEl.$el.classList.add("mark-item");
+                  vueEl.show();
+                }, 100);
+              }, 100); // wait 100ms until rendered
+            }
+
             this.FAQloading = 2;
           },
           error => {
@@ -304,6 +330,7 @@ export default {
     }
   },
   mounted() {
+    if (this.tab == "faq") this.loadFAQ();
     this.$store.commit("setPage", {
       name: "Support",
       onlyInNav: true

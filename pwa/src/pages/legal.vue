@@ -3,7 +3,7 @@
     <TitleButtonAnchor>
       <q-btn @click="getContent(true)" icon="refresh" size="md" flat />
     </TitleButtonAnchor>
-    <div v-show="downloading == 2" class="overflow-hidden" id="text_anchor">
+    <div v-show="downloading == 2" class="overflow-hidden" ref="text_anchor">
       <!-- content goes here after downloading -->
     </div>
     <LoadingDisplay
@@ -42,7 +42,7 @@ export default {
       const currentLegal = this.$store.getters["getLegal"];
       if (currentLegal != "" && !force) {
         // already some content
-        document.getElementById("text_anchor").innerHTML = currentLegal;
+        this.$refs.text_anchor.innerHTML = currentLegal;
         this.downloading = 2;
       } else {
         this.downloading = 1;
@@ -50,7 +50,7 @@ export default {
           GET_LEGAL,
           {},
           html_ => {
-            document.getElementById("text_anchor").innerHTML = html_;
+            this.$refs.text_anchor.innerHTML = html_;
             this.$store.commit("setLegal", html_);
             this.downloading = 2;
           },

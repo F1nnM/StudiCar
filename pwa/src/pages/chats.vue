@@ -42,156 +42,54 @@
       </div>
     </TitleButtonAnchor>
 
-    <q-tab-panels
-      animated
-      v-model="liftTab"
-      transition-prev="jump-right"
-      transition-next="jump-left"
-    >
+    <q-tab-panels animated v-model="liftTab" transition-prev="fade" transition-next="fade">
       <q-tab-panel name="pending" class="q-px-none">
-        <q-tab-panels
-          swipeable
-          animated
-          v-model="liftTab"
-          transition-prev="jump-right"
-          transition-next="jump-left"
-          class="text-caption text-right q-pa-none"
-        >
-          <q-tab-panel class="q-pa-none" name="current">
-            <p class="q-mb-none text-overline text-grey-7">Bestehend</p>
-          </q-tab-panel>
-          <q-tab-panel class="q-pa-none q-mb-sm row justify-between" name="pending">
-            <span>Angebote für Tag anzeigen</span>
-            <TextPagination
-              :options="Object.keys(liftRequests)"
-              specialLabel
-              labelCapitalized
-              v-model="liftRequestDayTab"
-            />
-          </q-tab-panel>
-        </q-tab-panels>
-        <q-list>
-          <div v-if="totalRequests">
-            <!-- <q-splitter :value="18" disable>
-              <template v-slot:before>
-                <q-tabs  vertical>
-                  <div v-for="(day, dayShortName) in liftRequests" :key="dayShortName">
-                    <q-tab
-                      v-if="requestsOfDay(day)"
-                      align="left"
-                      no-caps
-                      :name="dayShortName"
-                      :label="getDayLabel(dayShortName)"
-                    >
-                      <q-badge floating transparent color="grey-7">{{ requestsOfDay(day) }}</q-badge>
-                    </q-tab>
-                  </div>
-                </q-tabs>
-              </template>
-
-            <template v-slot:after>-->
+        <div v-if="totalRequests" class="row">
+          <!-- <p class="text-caption">Du hast Anfragen für die folgenden Mitfahrgelegenheiten:</p> -->
+          <div class="order-last q-ml-md" style="border-left: 6px dotted gray"></div>
+          <div class="col-11">
             <q-tab-panels
-              class="q-pa-none"
-              v-model="liftRequestDayTab"
-              animated
+              swipeable
               vertical
-              transition-prev="jump-right"
-              transition-next="jump-left"
+              animated
+              v-model="pendingRequestTab"
+              transition-prev="slide-down"
+              transition-next="slide-up"
+              class="text-caption q-pa-none"
             >
               <q-tab-panel
-                v-for="(day, dayShort) in liftRequests"
-                :key="dayShort"
-                class="q-pt-none q-px-none"
-                :name="dayShort"
+                v-for="(lift, index) in liftRequests"
+                :key="lift.liftId"
+                class="q-pa-none"
+                :name="index"
               >
-                <div v-if="requestsOfDay(day)">
-                  <q-tabs spread v-model="liftRequestTimeTab">
-                    <div v-for="(lift, liftId) in day" :key="liftId">
-                      <q-tab
-                        align="justify"
-                        dense
-                        v-if="lift.length"
-                        :name="liftId"
-                        no-caps
-                        content-class="text-caption"
-                        :label="`› ${ lifts[liftId].destination.name }`"
-                      />
-                    </div>
-                  </q-tabs>
-                  <q-tab-panels
-                    animated
-                    transition-prev="slide-right"
-                    class="q-pa-none"
-                    transition-next="slide-left"
-                    v-model="liftRequestTimeTab"
-                  >
-                    <q-tab-panel
-                      :name="liftId"
-                      class="q-pl-md q-pr-none"
-                      v-for="(lift, liftId) in day"
-                      :key="liftId"
-                    >
-                      <div class="row" v-if="lift.length">
-                        <div class="col-8">
-                          <q-item-label>
-                            {{ lifts[liftId].start.name }}
-                            <span
-                              class="text-subtitle1 q-px-sm"
-                            >&rsaquo;</span>
-                            {{ lifts[liftId].destination.name }}
-                          </q-item-label>
-                          <q-item-label class="row">
-                            <div class="col-6">von da bis da halt</div>
-                            <div class="col-6">von da bis da halt</div>
-                          </q-item-label>
-                        </div>
-                        <div class="col-4">
-                          <div
-                            class="q-ma-md"
-                            :style="`background-color: ${lifts[liftId].car.color}`"
-                          >
-                            <q-img src="~assets/app-icon_color_preview.png" />
-                          </div>
-                          <div class="flex">
-                            {{ lifts[liftId].passengers.length }} /
-                            {{ lifts[liftId].car.allSeats }}
-                            <q-icon name="person_outline" class="q-pl-xs" size="xs" />
-                          </div>
-                        </div>
-                      </div>
-                      <div v-if="lifts[liftId].passengers.length < lifts[liftId].car.allSeats">
-                        <!-- <q-scroll-area
-                          :thumb-style="thumbStyle"
-                          :bar-style="barStyle"
-                          style="height: 40vh"
-                        >-->
-                        <IncomingLiftRequest
-                          v-for="r in lift"
-                          :key="r.id"
-                          :request="r"
-                          :liftId="parseInt(liftId)"
-                          @respond="respondLiftRequest"
-                        />
-                      </div>
-                      <div
-                        v-else
-                        class="text-negative"
-                      >Das Auto ist voll, du kannst keine Angebote mehr annehmen.</div>
-
-                      <!-- </q-scroll-area> -->
-                    </q-tab-panel>
-                  </q-tab-panels>
+                <LiftOfferForRequest
+                  :lift="getLiftFromId(lift.liftId)"
+                  :numberOfRequests="lift.requestingUsers.length"
+                />
+                <ExtHr color="dark" size="xs" />
+                <div v-if="seatsLeft(lift.liftId) > lift.requestingUsers.length" class="full-width">
+                  <IncomingLiftRequest
+                    v-for="r in lift.requestingUsers"
+                    :key="r.id"
+                    :requestingUser="r"
+                    :liftId="lift.liftId"
+                    @respond="respondLiftRequest"
+                  />
                 </div>
+                <div
+                  v-else
+                  class="text-negative"
+                >Das Auto ist voll, du kannst keine Angebote mehr annehmen.</div>
               </q-tab-panel>
             </q-tab-panels>
-            <!-- </template>
-            </q-splitter>-->
           </div>
-          <div v-else class="text-caption">
-            <q-item>Im Moment hast du keine Anfragen</q-item>
-          </div>
-        </q-list>
+        </div>
+        <div v-else class="text-caption">
+          <q-item>Im Moment hast du keine Anfragen</q-item>
+        </div>
       </q-tab-panel>
+
       <q-tab-panel name="current" class="q-pa-none">
         <q-list>
           <ChatItem
@@ -228,8 +126,10 @@
 import ChatItem from "components/ChatItem";
 import LiftPopup from "components/LiftPopup";
 import QrGen from "components/QrGenerator";
+import ExtHr from "components/ExtendedHr";
 import TitleButtonAnchor from "components/TitleButtonAnchor";
 import IncomingLiftRequest from "components/IncomingLiftRequest";
+import LiftOfferForRequest from "components/LiftOfferForRequest";
 import TextPagination from "components/TextPagination";
 
 import { date } from "quasar";
@@ -241,7 +141,8 @@ export default {
     QrGen,
     TitleButtonAnchor,
     IncomingLiftRequest,
-    TextPagination
+    LiftOfferForRequest,
+    ExtHr
   },
 
   data() {
@@ -249,6 +150,7 @@ export default {
       lifts: this.$store.getters["auth/user"].chatLifts,
       alreadyTappedOnItem: false,
       liftTab: "current",
+      pendingRequestTab: 0,
       chatPopup: {
         isOpen: false,
         data: null
@@ -345,10 +247,8 @@ export default {
 
     totalRequests() {
       var n = 0;
-      Object.values(this.liftRequests).forEach(day => {
-        Object.values(day).forEach(lift => {
-          n += lift.length;
-        });
+      Object.values(this.liftRequests).forEach(lift => {
+        n += lift.requestingUsers.length;
       });
       return n;
     }
@@ -374,6 +274,16 @@ export default {
       return people.find(p => {
         return p.id == userId;
       }).name;
+    },
+
+    getLiftFromId(liftId) {
+      return this.lifts.find(l => l.id == liftId);
+    },
+
+    seatsLeft(liftId) {
+      const lift = this.getLiftFromId(liftId);
+      var a = lift.car.allSeats - lift.passengers.length;
+      return a;
     },
 
     openTheLift(liftId) {

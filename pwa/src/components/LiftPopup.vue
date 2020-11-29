@@ -14,33 +14,69 @@
           <q-header reveal elevated class="bg-primary text-white">
             <div class="row">
               <div class="col-10 bg-primary">
-                <q-toolbar>
-                  <q-toolbar-title class="row">
-                    <div class="col-9 text-h6 text-weight-light">
-                      {{ lift.start.name }}
-                      <span class="q-mx-sm">&rsaquo;</span>
-                      {{ lift.destination.name }}
-                    </div>
-                    <div class="col-3 text-right">
-                      <!-- <q-btn flat round dense icon="search" /> -->
-                      <q-btn
-                        @click="infoDrawerOpen = true"
-                        icon="info"
-                        flat
-                        v-ripple
-                        round
-                        size="md"
-                        dense
-                        class="q-mr-sm"
-                      />
-                    </div>
+                <q-toolbar class="q-pr-xs">
+                  <q-toolbar-title>
+                    <q-item dense class="q-px-none" clickable @click="infoDrawerOpen = true">
+                      <q-item-section class="text-white">
+                        <q-item-label class="row no-wrap">
+                          <div class="col-auto text-h6 text-weight-light ellipsis">
+                            {{ lift.start.name }}
+                            <span class="q-mx-sm">&rsaquo;</span>
+                            {{ lift.destination.name }}
+                          </div>
+                        </q-item-label>
+                        <q-item-label caption class="q-mt-none q-mb-xs">
+                          <q-tab-panels
+                            class="q-pa-none bg-primary"
+                            v-model="showMembersInTitle"
+                            animated
+                            transition-next="fade"
+                            transition-prev="fade"
+                          >
+                            <q-tab-panel :name="true" class="q-pa-none row justify-between">
+                              <p class="q-mb-none">
+                                <span
+                                  class="text-grey-3 text-weight-thin"
+                                  v-for="(p, index) in lift.passengers"
+                                  :key="p.fbId"
+                                >{{ index > 0 ? ', ' : '' }}{{ p.name }}</span>
+                              </p>
+                              <q-btn
+                                @click="searchDialogOpen = true"
+                                icon="search"
+                                disable
+                                flat
+                                v-ripple
+                                round
+                                size="sm"
+                                color="white"
+                                dense
+                              />
+                              <!-- <q-btn flat round dense icon="search" /> -->
+                            </q-tab-panel>
+                            <q-tab-panel
+                              :name="false"
+                              class="q-pa-none text-grey-3 text-weight-thin"
+                            >Tippe für Info</q-tab-panel>
+                          </q-tab-panels>
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
                   </q-toolbar-title>
                 </q-toolbar>
               </div>
               <div class="col-2 bg-white text-primary">
                 <q-toolbar>
                   <q-toolbar-title>
-                    <q-btn v-ripple icon="close" flat round dense @click="emit(false)" />
+                    <q-btn
+                      v-ripple
+                      class="self-center"
+                      icon="close"
+                      flat
+                      round
+                      dense
+                      @click="emit(false)"
+                    />
                   </q-toolbar-title>
                 </q-toolbar>
               </div>
@@ -306,6 +342,7 @@
                           ref="messageInput"
                           @focus="scrollToEnd(350)"
                           type="text"
+                          autogrow
                           v-model="messageText"
                           placeholder="Nachricht..."
                         />
@@ -397,6 +434,7 @@ export default {
         open: false,
         message: null
       },
+      showMembersInTitle: false,
       quickMessagesTab: "text",
       footerBgColor: "white",
       user: this.$store.getters["auth/user"].id,
@@ -426,6 +464,10 @@ export default {
   watch: {
     open: function(newValue) {
       if (newValue) {
+        this.showMembersInTitle = false; // so that each time tap-for-info is displayed again
+        setTimeout(_ => {
+          this.showMembersInTitle = true;
+        }, 2000); // after that time, hide tap-for-info-hint and show members
         setTimeout(_ => {
           this.scrollToEnd();
         });
@@ -510,11 +552,10 @@ export default {
           setTimeout(res, delay);
         });
       try {
-        var endOfPage =
-          /* await new Promise((res) => {
+        var endOfPage = /* await new Promise((res) => {
             setTimeout(_=> {
               var a =  */ this
-            .$refs.endOfPage || document.getElementById("endOfPage");
+          .$refs.endOfPage.$el;
         /* 
            res(a)
         }, 50);
@@ -650,9 +691,7 @@ export default {
 
     focusTextInput() {
       setTimeout(_ => {
-        (
-          this.$refs.messageInput || document.getElementById("messageInput")
-        ).focus();
+        this.$refs.messageInput.$el.focus();
       });
     },
 

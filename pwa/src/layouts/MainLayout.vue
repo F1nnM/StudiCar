@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
+    <q-header>
       <div>
         <q-toolbar>
           <q-btn
@@ -32,6 +32,7 @@
                   >
                     <q-tab-panel class="bg-primary q-pa-none text-white" :name="false">
                       StudiCar
+                      <!-- <q-btn label="reg" to="/auth/registrierung" /> -->
                       <q-chip
                         clickable
                         @click="hideUpdateField = false"
@@ -122,6 +123,7 @@
       :value="!hideUpdateField && oldVersionRunning"
       transition-show="fade"
       transition-hide="fade"
+      class="z-top"
     >
       <q-card class="bg-dark text-white">
         <q-toolbar>
@@ -132,10 +134,19 @@
           <q-btn icon="close" flat round dense v-close-popup />
         </q-toolbar>
 
-        <q-card-section>Bitte lade die Seite neu, um auf dem neuesten Stand zu sein.</q-card-section>
+        <q-card-section>
+          Stelle sicher, dass du immer die neueste Version verwendest.
+          <q-btn
+            label="Warum ist das wichtig?"
+            outline
+            no-caps
+            class="q-mt-xs"
+            to="/hilfe?faq-id=30"
+          />
+        </q-card-section>
         <q-card-actions align="around" class="q-mt-sm">
           <q-btn flat color="white" label="Später" @click="hideUpdateField = true" />
-          <q-btn color="primary" label="Ok" @click="reloadPage" />
+          <q-btn color="primary" label="Aktualisieren" @click="reloadPage" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -285,7 +296,7 @@ export default {
           title: "Support",
           caption: "Wie können wir dir helfen?",
           icon: "accessibility_new",
-          link: "/#/hilfe"
+          link: "/#/hilfe?faq-id=30"
         }
       ];
     }

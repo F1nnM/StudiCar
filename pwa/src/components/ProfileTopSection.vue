@@ -42,32 +42,11 @@
               </p>
             </q-card-section>
           </q-card>
-          <br />
-          <div class="full-width text-right">
-            <q-btn-toggle
-              v-model="statsFriendsTab"
-              rounded
-              outline
-              toggle-color="primary"
-              color="grey-5"
-              :options="[
-                { value: 'stats', slot: 'stats' },
-                { value: 'friends', slot: 'friends' },
-              ]"
-            >
-              <template v-slot:stats>
-                <q-icon name="bar_chart" size="xs" />
-              </template>
-              <template v-slot:friends>
-                <q-icon name="people_alt" size="xs" />
-              </template>
-            </q-btn-toggle>
-          </div>
         </div>
       </template>
 
       <template v-slot:after>
-        <q-tab-panels
+        <!-- <q-tab-panels
           v-model="statsFriendsTab"
           animated
           transition-prev="jump-left"
@@ -108,31 +87,6 @@
                 >
                   <p>{{ t.label }}</p>
 
-                  <!-- <q-item class="q-pa-none">
-                    <q-item-section>
-                      <q-avatar
-                        color="white"
-                        class="text-weight-light"
-                        text-color="dark"
-                      >{{ t.lifts.all }}</q-avatar>
-                    </q-item-section>
-                    <q-item-section avatar>
-                      <q-circular-progress
-                        show-value
-                        font-size="16px"
-                        class="text-primary q-ma-sm"
-                        :value="Math.round(t.lifts.driver / t.lifts.all * 100)"
-                        size="xl"
-                        :thickness="0.05"
-                        color="primary"
-                        track-color="grey-3"
-                      >
-                        <q-icon name="emoji_people" color="dark" />
-                        {{ t.lifts.driver }}
-                      </q-circular-progress>
-                    </q-item-section>
-                  </q-item>-->
-
                   <p class="text-caption">Angebotsbilanz:</p>
                   <ColoredMeter
                     :angle="t.lifts.driver / t.lifts.all"
@@ -147,105 +101,39 @@
                   <br />
                   <q-separator />
                 </q-tab-panel>
-                <!-- <q-tab-panel name="current">
-                  <q-item class="q-pt-md">
-                    <q-item-section>
-                      im Moment
-                      <q-avatar
-                        color="white"
-                        class="text-weight-light"
-                        text-color="dark"
-                      >{{ stats.liftCount }}</q-avatar>
-                    </q-item-section>
-                    <q-item-section avatar>
-                      <q-circular-progress
-                        show-value
-                        font-size="16px"
-                        class="text-primary q-ma-sm"
-                        :value="Math.round(stats.driverCount / stats.liftCount * 100)"
-                        size="xl"
-                        :thickness="0.05"
-                        color="primary"
-                        track-color="grey-3"
-                      >
-                        <q-icon name="directions_car" color="dark" />
-                        {{ stats.driverCount }}
-                      </q-circular-progress>
-                    </q-item-section>
-                  </q-item>
-                </q-tab-panel>-->
               </q-tab-panels>
             </q-list>
           </q-tab-panel>
-          <q-tab-panel name="friends" class="q-pa-xs">
-            <q-list>
-              <q-item-label header class="q-pt-xs q-pb-xs text-uppercase text-caption">Dabei seit</q-item-label>
-              <q-item>{{ since }}</q-item>
-              <q-item-label
-                header
-                class="q-pt-xs q-pb-xs text-uppercase text-caption row no-wrap justify-start"
-              >
-                <!-- <q-btn
-                  flat
-                  dense
-                  icon="keyboard_arrow_left"
-                  @click="friendsPage--"
-                  :disable="friendsPage == 0"
-                  color="primary"
-                />-->
-                <span class="self-center">Freunde</span>
-                <!--  <q-btn
-                  flat
-                  dense
-                  icon="keyboard_arrow_right"
-                  :disable="friendsPage + 1 == friendsGroup4.length"
-                  @click="friendsPage++"
-                  color="primary"
-                />-->
-                <q-btn icon="clear_all" flat dense color="primary" class="q-ml-sm" />
-                <!-- <small>
-                  <span
-                    class="q-ml-xs text-uppercase text-primary"
-                  >Seite {{ friendsPage + 1 }}/{{ friendsGroup4.length }}</span>
-                </small>-->
-                <!-- <div class="text-primary full-width text-center">
-                   
-                </div>-->
-              </q-item-label>
-              <q-item-label caption class="q-mt-none q-pl-md">Meiste Fahrten</q-item-label>
-              <div v-if="friends.length" class="q-mt-md">
-                <q-item
-                  v-for="friend in friends"
-                  :key="friend.fbId"
-                  dense
-                  class="q-px-xs"
-                  clickable
-                  :to="'benutzerinfo?userFbId=' + friend.fbId"
-                >
-                  <q-item-section avatar>
-                    <q-avatar size="md">
-                      <!-- friendInfoData = friend -->
-                      <q-img :src="friend.imageUrl" />
-                    </q-avatar>
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>{{ friend.name }}</q-item-label>
-                  </q-item-section>
-                  <q-item-section side class="text-bold">{{ friend.lifts }}</q-item-section>
-                </q-item>
-                <!-- <q-item dense>
-                    <q-item-section avatar>
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>{{ f.name }}</q-item-label>
-                      <q-item-label caption>{{ f.surname }}</q-item-label>
-                    </q-item-section>
-                </q-item>-->
-              </div>
-              <div v-else class="text-caption">Du hast noch keine Nutzer als Freunde markiert</div>
-            </q-list>
-          </q-tab-panel>
-        </q-tab-panels>
+        <q-tab-panel name="friends" class="q-pa-xs">-->
+        <q-list>
+          <q-item-label header class="q-pt-xs q-pb-xs text-caption text-uppercase">Dabei seit</q-item-label>
+          <q-item>{{ since }}</q-item>
+          <q-item-label header class="text-caption text-uppercase">Meiste Fahrten</q-item-label>
+          <div v-if="friends.length">
+            <q-item
+              v-for="friend in friends"
+              :key="friend.fbId"
+              dense
+              class="q-px-xs q-ml-sm"
+              clickable
+              :to="'benutzerinfo?userFbId=' + friend.fbId"
+            >
+              <q-item-section avatar>
+                <q-avatar size="md">
+                  <!-- friendInfoData = friend -->
+                  <q-img :src="friend.imageUrl" />
+                </q-avatar>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ friend.name }}</q-item-label>
+              </q-item-section>
+              <q-item-section side class="text-bold q-mr-sm">{{ friend.lifts }}</q-item-section>
+            </q-item>
+          </div>
+          <div v-else class="text-caption">Du hast noch an keinen Fahrten teilgenommen</div>
+        </q-list>
+        <!--  </q-tab-panel>
+        </q-tab-panels>-->
       </template>
     </q-splitter>
     <q-dialog
@@ -396,26 +284,25 @@
 import { date } from "quasar";
 import ExtHr from "components/ExtendedHr";
 import ColoredMeter from "components/ColoredMeter";
-import QrGen from "../components/QrGenerator";
+import QrGen from "components/QrGenerator";
 
 import {
   buildGetRequestUrl,
   sendApiRequest,
   GET_USER_PROFILE_PIC,
   SQL_UPDATE_PROFILE_PICTURE,
-  SQL_RESET_PROFILE_PICTURE,
+  SQL_RESET_PROFILE_PICTURE
 } from "../ApiAccess";
 
 export default {
   name: "ProfileTopSection",
   components: {
-    ColoredMeter,
     ExtHr,
-    QrGen,
+    QrGen
   },
   props: {
     username: String,
-    stats: Object,
+    stats: Object
   },
   data() {
     return {
@@ -432,24 +319,24 @@ export default {
     };
   },
   computed: {
-    friends(){
-      return this.$store.getters['auth/user'].topFriends
+    friends() {
+      return this.$store.getters["auth/user"].topFriends;
     },
 
-    friendsGroup4(){
-      const pageSize = 4
+    friendsGroup4() {
+      const pageSize = 4;
 
-      var arr = []
+      var arr = [];
 
       this.friends.forEach((f, index) => {
-        if(index % pageSize == 0){ // e.g. when pageSize is 4 then a new "page" will be generated at indices 4, 8, 12 ...
-          arr.push([f]) // directly push new page and this friend
-        }
-        else arr[Math.floor((index / pageSize))].push(f)
-      })
-      return arr
+        if (index % pageSize == 0) {
+          // e.g. when pageSize is 4 then a new "page" will be generated at indices 4, 8, 12 ...
+          arr.push([f]); // directly push new page and this friend
+        } else arr[Math.floor(index / pageSize)].push(f);
+      });
+      return arr;
     },
-    
+
     since() {
       return date.formatDate(
         // user statistics, cannot directly be changed by user
@@ -468,17 +355,18 @@ export default {
             "September",
             "Oktober",
             "November",
-            "Dezember",
-          ],
+            "Dezember"
+          ]
         }
       );
     },
 
     qrInput() {
-      const id = this.$store.getters["auth/user"].uid;
+      const uid = this.$store.getters["auth/user"].uid,
+        host = process.env.DEV ? "localhost:3000" : "dev.pwa.studicar.mfinn.de";
 
-      return "u" + id;
-    },
+      return "https://" + host + "/#/benutzerinfo?userFbId=" + uid;
+    }
   },
   methods: {
     loadFile(file) {
@@ -489,9 +377,9 @@ export default {
       const width = size * ratio,
         fileName = file.name,
         reader = new FileReader();
-      reader.onerror = (error) => console.log(error);
+      reader.onerror = error => console.log(error);
       reader.readAsDataURL(file);
-      reader.onload = (event) => {
+      reader.onload = event => {
         var img = new Image();
         img.src = event.target.result;
 
@@ -514,31 +402,31 @@ export default {
           }
           this.newPPictureBase64 = elem.toDataURL();
         }),
-          (reader.onerror = (error) => {
+          (reader.onerror = error => {
             alert(error);
           });
       };
     },
 
     uploadProfilePicture() {
-      if (this.newPPictureBase64){
-        this.uploadingProfilePicture = true
+      if (this.newPPictureBase64) {
+        this.uploadingProfilePicture = true;
         sendApiRequest(
           SQL_UPDATE_PROFILE_PICTURE,
           {
-            imageData: this.newPPictureBase64,
+            imageData: this.newPPictureBase64
           },
-          (_) => {
+          _ => {
             this.ppPath += "&timestamp=" + Date.now();
             this.openUpload = false;
             this.file = null;
             this.newPPictureBase64 = "";
-            this.uploadingProfilePicture = false
+            this.uploadingProfilePicture = false;
           },
           err => {
-            this.uploadingProfilePicture = false
+            this.uploadingProfilePicture = false;
           }
-        )
+        );
       }
     },
 
@@ -546,32 +434,38 @@ export default {
       this.$q
         .dialog({
           title: "Bild zurücksetzen",
-          message: "Willst du dein Bild wirklich zurücksetzen? Wir speichern dann ein zufälliges Ersatzbild.",
+          message:
+            "Willst du dein Bild wirklich zurücksetzen? Wir speichern dann ein zufälliges Ersatzbild.",
           cancel: true,
-          persistent: true,
+          persistent: true
         })
         .onOk(() => {
-          this.uploadingProfilePicture = true
-          sendApiRequest(SQL_RESET_PROFILE_PICTURE, {}, (_) => {
-            this.ppPath += "&timestamp=" + Date.now();
-            this.openUpload = false
-            this.uploadingProfilePicture = false
-          }, err => {
-            this.uploadingProfilePicture = false
-          });
+          this.uploadingProfilePicture = true;
+          sendApiRequest(
+            SQL_RESET_PROFILE_PICTURE,
+            {},
+            _ => {
+              this.ppPath += "&timestamp=" + Date.now();
+              this.openUpload = false;
+              this.uploadingProfilePicture = false;
+            },
+            err => {
+              this.uploadingProfilePicture = false;
+            }
+          );
         })
         .onCancel(() => {});
-    },
+    }
   },
   mounted() {
     buildGetRequestUrl(
       GET_USER_PROFILE_PIC,
       { fbid: this.$store.getters["auth/user"].uid },
-      (url) => {
+      url => {
         this.ppPath = url;
       }
     );
-  },
+  }
 };
 </script>
 

@@ -66,7 +66,7 @@ server.on('request', async (req, res) => {
         break;
       }
       admin.auth().verifyIdToken(options.idtoken)
-        .then( async decodedToken => {
+        .then(async decodedToken => {
           options.secretFbId = decodedToken.uid;
           await api.GET[urlParts.pathname](req, res, options);
         })
@@ -79,7 +79,7 @@ server.on('request', async (req, res) => {
         res.end();
         break;
       }
-      
+
       let buffer = []
       req.on('data', chunk => {
         buffer.push(chunk)
@@ -95,7 +95,7 @@ server.on('request', async (req, res) => {
           return;
         }
         admin.auth().verifyIdToken(options.idtoken)
-          .then( async decodedToken => {
+          .then(async decodedToken => {
             options.secretFbId = decodedToken.uid;
             await api.POST[urlParts.pathname](req, res, options);
           })

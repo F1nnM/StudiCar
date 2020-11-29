@@ -312,17 +312,13 @@ export default {
 
   methods: {
     async refreshContent(res, rej) {
+      // check whether new LiftOffers can be loaded
       res();
     },
 
     triggerLiftRequest(liftId) {
       this.$store.dispatch("auth/requestToLift", liftId);
       this.offerIndexToRefresh++; // to re-render component, wasn't working otherwise
-    },
-
-    refresh(done) {
-      alert("new");
-      done();
     }
   },
 

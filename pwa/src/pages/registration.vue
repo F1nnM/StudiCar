@@ -21,7 +21,7 @@
         <q-input
           hint="Gib deinen Vornamen ein"
           lazy-rules
-          :rules="[ val => val && val.length > 0 || 'Du bist nicht niemand...']"
+          :rules="[ val => isValidName(val) || 'Bitte gib einen gültigen Vornamen ein.']"
           v-model="name"
           label="Name"
         />
@@ -29,15 +29,15 @@
         <q-input
           hint="Bitte gib auch deinen Nachnamen ein, damit dich andere erkennen können."
           lazy-rules
-          :rules="[ val => val && val.length > 0 || 'Du hast sicher einen Nachnamen.']"
+          :rules="[ val => isValidName(val) || 'Bitte gib einen gültigen Nachnamen ein.']"
           v-model="surname"
-          label="Name"
+          label="Nachname"
         />
 
         <q-input
           hint="Unter welcher Email können wir dich erreichen?"
           lazy-rules
-          :rules="[ val => val && val.length > 0 || 'Deine Mail ist ein Schlüssel fürs System...']"
+          :rules="[ val => val && val.length > 0 && val.length <= 255 || 'Wir brauchen deine Mailadresse, um dich ggf. erreichen zu können.']"
           v-model="email"
           label="Mail"
         />
@@ -49,9 +49,24 @@
           hint="Gib ein sicheres Passwort ein"
           lazy-rules
           :rules="[
-          val => val !== null && val !== '' && val.length >= 6 || 'Dein Passwort muss mindestens 6 Zeichen lang sein.'
+            val => val !== '' && val.length >= 6 || 'Dein Passwort muss mindestens 6 Zeichen lang sein.'
         ]"
         />
+
+        <q-slide-transition>
+          <div v-if="password.length">
+            <q-input
+              type="password"
+              v-model="passwordConfirm"
+              label="Passwort"
+              hint="Wiederhole das obige Passwort"
+              lazy-rules
+              :rules="[
+          val => val === password || 'Passwörter stimmen nicht überein.'
+        ]"
+            />
+          </div>/>
+        </q-slide-transition>
         <br />
 
         <q-dialog v-model="dialog" position="bottom" class="q-mx-sm">
@@ -107,7 +122,7 @@
               <p>
                 Da es ziemlich unmöglich ist, jene Menge an Informationen in diesen doch kleinen Bereich zu verpacken, verweisen wir an dieser Stelle auf die dafür eingerichtete
                 <a
-                  @click="viewAGBs()"
+                  @click="viewAGBs"
                   href="https://mi.com"
                 >Datenschutz-Seite</a>.
               </p>
@@ -119,7 +134,7 @@
                   v-close-popup
                   color="primary"
                   label="Ich akzeptiere die Nutzungsbedingungen"
-                  @click="onSubmit()"
+                  @click="onSubmit"
                 />
               </div>
             </div>
@@ -132,7 +147,7 @@
             </q-card-section>
 
             <q-card-actions align="right">
-              <q-btn flat label="AGBs ansehen" @click="viewAGBs()" color="primary" v-close-popup />
+              <q-btn flat label="AGBs ansehen" @click="viewAGBs" color="primary" v-close-popup />
               <q-btn
                 flat
                 label="Trotzdem zustimmen"
@@ -158,10 +173,11 @@ import { Dialog } from "quasar";
 export default {
   data() {
     return {
-      email: '',
-      password: '',
-      name: '',
-      surname: '',
+      email: "",
+      password: "",
+      passwordConfirm: "",
+      name: "",
+      surname: "",
       dialog: false,
       confirmDialog: false,
       step: 1
@@ -169,6 +185,12 @@ export default {
   },
 
   methods: {
+    isValidName(text) {
+      if (!(text.length > 0 && text.length <= 255)) return false;
+      const pattern = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u;
+      if (!text.match(pattern)) return false;
+      return true;
+    },
     onSubmit() {
       let credentials = {
         email: this.email,

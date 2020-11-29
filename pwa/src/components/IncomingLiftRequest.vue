@@ -1,95 +1,66 @@
 <template>
   <div>
     <q-list dense style="border: 1px solid gray" class="q-my-md rounded-borders">
-      <q-item dense>
+      <q-item dense class="q-pr-none">
         <q-item-section avatar>
           <q-avatar>
-            <q-img :src="request.requestingUser.imageUrl" />
+            <q-img :src="requestingUser.imageUrl" />
           </q-avatar>
         </q-item-section>
         <q-item-section>
-          <div class="text-subtitle1">{{ request.requestingUser.name }}</div>
-          <div>{{ request.requestingUser.surname }}</div>
+          <div class="text-subtitle1">{{ requestingUser.name }}</div>
+          <div>{{ requestingUser.surname }}</div>
           <div class="row full-width">
             <div
-              v-for="(p,index) in request.requestingUser.prefs"
+              v-for="(p,index) in requestingUser.prefs"
               :key="index"
               :class="`col-auto q-px-xs text-${ betterPrefColor(p) }`"
             >●</div>
           </div>
         </q-item-section>
-        <q-item-section side>
-          <q-btn-toggle
-            dense
-            outline
-            toggle-color="dark"
-            v-model="userViewTab"
-            :options="[{
-                                icon: 'info', value: 'info'
-                              },{
-                                icon: 'touch_app', value: 'response'
-                              }]"
-          />
+        <q-item-section side class="q-px-none">
+          <div class="row justify-between">
+            <q-btn
+              outline
+              icon="thumb_down"
+              @click="respondLiftRequest(false)"
+              no-caps
+              class="q-px-xs q-mr-md"
+              color="red"
+              dense
+            />
+            <q-btn
+              outline
+              icon="thumb_up"
+              @click="respondLiftRequest(true)"
+              no-caps
+              class="q-px-xs"
+              color="green"
+              dense
+            />
+          </div>
         </q-item-section>
       </q-item>
 
       <q-card>
         <q-card-section>
-          <q-tab-panels
-            class="q-pa-none"
-            v-model="userViewTab"
-            animated
-            transition-next="scale"
-            transition-prev="scale"
-          >
-            <q-tab-panel name="info" class="q-pa-xs">
-              <div class="row">
-                <div class="col-8">
-                  <p class="text-caption">Nachricht</p>
-                  <div class="text-caption text-grey-9">{{ request.requestingUser.bio }}</div>
-                </div>
-                <div class="col-4 text-center">
-                  <ColoredMeter
-                    width="15vw"
-                    :angle="request.requestingUser.stats.driverCount / request.requestingUser.stats.liftCount"
-                    :minInput="0"
-                    :maxInput="1"
-                  >{{ request.requestingUser.stats.driverCount }} / {{ request.requestingUser.stats.liftCount }}</ColoredMeter>
-                  <q-btn
-                    label="zum Profil"
-                    outline
-                    :to="'benutzerinfo?userFbId=' + request.requestingUser.fbId"
-                    no-caps
-                    class="q-px-xs q-mt-md"
-                    color="dark"
-                    dense
-                  />
-                </div>
-              </div>
-            </q-tab-panel>
-            <q-tab-panel name="response" class="row justify-between">
+          <q-item>
+            <q-item-section>
+              <q-item-label>Kurzbeschreibung</q-item-label>
+              <q-item-label caption>{{ requestingUser.bio }}</q-item-label>
+            </q-item-section>
+            <q-item-section side>
               <q-btn
-                label="Absagen"
+                label="zum Profil"
                 outline
-                icon="thumb_down"
-                @click="respondLiftRequest(false)"
+                :to="'benutzerinfo?userFbId=' + requestingUser.fbId"
                 no-caps
-                class="q-px-xs"
-                color="red"
+                class="q-px-xs q-mt-md"
+                color="dark"
                 dense
               />
-              <q-btn
-                label="Zusagen"
-                outline
-                icon="thumb_up"
-                @click="respondLiftRequest(true)"
-                no-caps
-                class="q-px-xs"
-                color="green"
-                dense
-              />
-            </q-tab-panel>
-          </q-tab-panels>
+            </q-item-section>
+          </q-item>
         </q-card-section>
       </q-card>
     </q-list>
@@ -105,21 +76,19 @@ import { sendApiRequest } from "../ApiAccess";
 
 export default {
   name: "IncomingLiftRequest",
-  components: {
-    ColoredMeter,
-  },
+  components: {},
   data() {
     return {
-      userViewTab: "info",
+      userViewTab: "info"
     };
   },
   model: {
     prop: "request",
-    event: "input",
+    event: "input"
   },
   props: {
-    request: Object,
-    liftId: Number,
+    requestingUser: Object,
+    liftId: Number
   },
   computed: {},
 
@@ -131,7 +100,7 @@ export default {
     },
 
     async respondLiftRequest(accepted) {
-      var user = this.request.requestingUser,
+      var user = this.requestingUser,
         responseReason = "";
       if (accepted == false)
         responseReason = await new Promise((res, rej) => {
@@ -141,10 +110,10 @@ export default {
               title: "Absagen",
               message: `Magst du ${user.name} mitteilen, warum du sie nicht mitnimmst?`,
               ok: {
-                color: "negative",
+                color: "negative"
               },
               cancel: {
-                color: "white",
+                color: "white"
               },
               options: {
                 type: "radio",
@@ -152,13 +121,13 @@ export default {
                 // inline: true
                 items: [
                   { label: "Präferenzen passen nicht", value: "prefs" },
-                  { label: "Nein, keine Mitteilung", value: "private" },
-                ],
+                  { label: "Nein, keine Mitteilung", value: "private" }
+                ]
               },
               cancel: true,
-              persistent: true,
+              persistent: true
             })
-            .onOk((data) => {
+            .onOk(data => {
               res(data);
             })
             .onCancel(rej);
@@ -173,21 +142,21 @@ export default {
                 title: "Zusagen",
                 message: `${user.name} in die Fahrgemeinschaft mit aufnehmen?`,
                 ok: {
-                  color: "positive",
+                  color: "positive"
                 },
                 cancel: {
-                  color: "white",
+                  color: "white"
                 },
                 options: {
                   type: "checkbox",
                   model: [],
                   // inline: true
-                  items: [{ label: "Nicht mehr fragen", value: true }],
+                  items: [{ label: "Nicht mehr fragen", value: true }]
                 },
                 cancel: true,
-                persistent: true,
+                persistent: true
               })
-              .onOk((data) => {
+              .onOk(data => {
                 res(data[0]);
               })
               .onCancel(rej);
@@ -202,14 +171,14 @@ export default {
           id: user.id,
           fbId: user.fbId,
           name: user.name,
-          surname: user.surname,
+          surname: user.surname
         },
         accepted: accepted,
-        reason: responseReason,
+        reason: responseReason
       });
     },
-    mounted() {},
-  },
+    mounted() {}
+  }
 };
 </script>
 

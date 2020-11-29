@@ -224,6 +224,10 @@
                 <q-tab name="true" icon="time_to_leave" label="Abfahrt ab" />
                 <q-tab name="a" icon="keyboard_tab" label="Ankunft bis" />
               </q-tabs>
+              <!-- <div class="q-gutter-md row items-start">
+                <q-date v-model="model" mask="YYYY-MM-DD HH:mm" color="purple" />
+                <q-time v-model="model" mask="YYYY-MM-DD HH:mm" color="purple" />
+              </div>-->
 
               <q-stepper-navigation>
                 <q-btn color="primary" @click="step --" label="Zurück" flat />

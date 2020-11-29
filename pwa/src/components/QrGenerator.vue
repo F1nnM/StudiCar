@@ -110,7 +110,7 @@ export default {
   props: {
     input: {
       type: String,
-      required: true,
+      required: true
     },
     value: Boolean,
     primColor: Boolean,
@@ -125,38 +125,40 @@ export default {
     return {
       color: {
         dark: this.primColor ? colors.getBrand("primary") : "#000000FF",
-        light: "#FFFFFFFF",
+        light: "#FFFFFFFF"
       },
       showInfo: false,
       qrProgress: 1,
       interval: null,
       progressColorWhite: false,
-      random: '01'
+      random: "01"
     };
   },
   watch: {
-    value: function(isOpen){
-      if(this.fakeRefresh){
-      const step = 5, // in hundreths, e.g. 100 means just one step to complete
-      duration = 5000
+    value: function(isOpen) {
+      if (this.fakeRefresh) {
+        const step = 5, // in hundreths, e.g. 100 means just one step to complete
+          duration = 5000;
 
-      var computedStep = step / 100,
-      numberOfSteps = 1 / computedStep
-      if(isOpen) this.interval = setInterval(_=> {
-        if(this.qrProgress <= computedStep) this.progressReset()
-        else this.qrProgress -= computedStep
-      }, duration / numberOfSteps)
-      else clearInterval(this.interval)
+        var computedStep = step / 100,
+          numberOfSteps = 1 / computedStep;
+        if (isOpen)
+          this.interval = setInterval(_ => {
+            if (this.qrProgress <= computedStep) this.progressReset();
+            else this.qrProgress -= computedStep;
+          }, duration / numberOfSteps);
+        else clearInterval(this.interval);
       }
     }
   },
 
   computed: {
-    qrInput(){
-      return JSON.stringify({ // just a joke, isn't more secure, just that qr code will change every interval, but important content stays the same xD
+    qrInput() {
+      /* return JSON.stringify({ // just a joke, isn't more secure, just that qr code will change every interval, but important content stays the same xD
         q: this.input,
         f: this.random
-      })
+      }) */
+      return this.input; // to make it scannable by other devices, input isn't encoded any more
     }
   },
 
@@ -165,12 +167,12 @@ export default {
       this.$emit("input", val);
     },
 
-    async progressReset(){
-      this.qrProgress = 1.15
-      this.random = Math.round(Math.random() * 100) + ''
+    async progressReset() {
+      this.qrProgress = 1.15;
+      this.random = Math.round(Math.random() * 100) + "";
       /* this.progressColorWhite = !this.progressColorWhite */
     }
-  },
+  }
 };
 </script>
 

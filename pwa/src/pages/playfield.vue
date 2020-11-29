@@ -14,34 +14,21 @@ import { scroll } from "quasar";
 import { sendApiRequest } from "../ApiAccess";
 
 export default {
-  components: {
-    
-  },
+  components: {},
   data() {
     return {
       open: true,
-      value: "one",
+      value: "one"
     };
   },
   computed: {},
   methods: {
-    go() {
-      navigator.geolocation.getCurrentPosition(pos=> {
-        var apiUrl = `https://geocode.xyz/${pos.coords.latitude},${pos.coords.longitude}?json=1`
-        this.$axios.get(apiUrl).then(result => {
-          var obj = {
-            city: result.data.city,
-            type: result.data.osmtags.name_prefix,
-            postcode: result.data.poi.addr_postcode
-          }
-        })
-      })
-    },
+    go() {}
   },
 
   mounted() {
     this.$store.commit("setPage", "Spielwiese");
-  },
+  }
 };
 </script>
 

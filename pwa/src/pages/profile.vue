@@ -1,19 +1,40 @@
 <template>
   <div>
+    <TitleButtonAnchor class="q-mt-md q-mr-md">
+      <q-btn :icon="groupIcon" label="Freunde" no-caps outline color="primary" />
+      <!-- <q-btn-toggle
+        v-model="statsFriendsTab"
+        rounded
+        outline
+        toggle-color="primary"
+        color="grey-5"
+        :options="[
+                { value: 'stats', slot: 'stats' },
+                { value: 'friends', slot: 'friends' },
+              ]"
+      >
+        <template v-slot:stats>
+          <q-icon name="bar_chart" size="xs" />
+        </template>
+        <template v-slot:friends>
+          <q-icon name="people_alt" size="xs" />
+        </template>
+      </q-btn-toggle>-->
+    </TitleButtonAnchor>
+
     <ProfileTopSection :username="username" :stats="stats" />
 
-    <div class="q-py-md q-px-none">
+    <div class="q-py-sm q-px-none">
       <q-tabs
         v-model="tab"
         dense
-        class="text-gray"
+        class="text-gray-7"
         active-color="gray"
         indicator-color="primary"
         align="justify"
-        narrow-indicator
       >
-        <q-tab name="data" label="Meine Daten" />
-        <q-tab name="reservoir" label="Reservoir" />
+        <q-tab name="data" icon="person_outline" />
+        <q-tab name="reservoir" icon="emoji_transportation" />
       </q-tabs>
 
       <q-separator />
@@ -27,7 +48,14 @@
       >
         <q-tab-panel name="data" class="q-mt-sm q-pt-none">
           <div class="q-pa-sm shadow-1">
-            <p class="text-uppercase text-caption q-mt-none q-mb-xs">Über Mich</p>
+            <p class="text-uppercase text-caption q-mt-xs q-mb-xs">Über Mich</p>
+            <div class="row q-py-md">
+              <span class="text-caption text-grey-7 q-mb-none col-10">Kurzbeschreibung</span>
+              <div class="col-2">
+                <q-btn size="sm" flat color="black" icon="edit" @click="toggleOpenEditDescription" />
+              </div>
+              <div class>{{ description }}</div>
+            </div>
 
             <q-select
               v-model="gender"
@@ -37,14 +65,6 @@
               label="Geschlecht"
               behavior="menu"
             />
-            <div class="row q-pt-md">
-              <span class="text-caption text-grey-7 q-mb-none col-10">Kurzbeschreibung</span>
-              <div class="col-2">
-                <q-btn size="sm" flat color="black" icon="edit" @click="toggleOpenEditDescription" />
-              </div>
-              <div class>{{ description }}</div>
-            </div>
-            <br />
           </div>
 
           <div class="q-mt-sm q-pa-sm shadow-1">
@@ -87,7 +107,9 @@
         <q-tab-panel name="reservoir">
           <div class="q-mt-sm q-pa-sm shadow-1">
             <div class="row">
-              <p class="col-5 text-uppercase text-caption q-mt-none q-mb-xs">Meine Adressen</p>
+              <p
+                class="col-5 text-uppercase text-caption q-mt-none q-mb-xs"
+              >Meine Adresse{{ addresses.length != 1 ? 'n' : '' }}</p>
               <div class="col-5">
                 <q-btn
                   flat
@@ -160,7 +182,9 @@
           </div>
           <div class="q-mt-sm q-pa-sm shadow-1">
             <div class="row">
-              <p class="text-uppercase text-caption q-mt-none q-mb-xs col-5">Meine Fahrzeuge</p>
+              <p
+                class="text-uppercase text-caption q-mt-none q-mb-xs col-5"
+              >Mein{{ cars.length != 1 ? 'e' : '' }} Fahrzeug{{ cars.length != 1 ? 'e' : '' }}</p>
               <div class="col-5">
                 <q-btn
                   flat
@@ -175,7 +199,7 @@
                 <q-btn size="sm" flat @click="openEditCars = !openEditCars" icon="edit" />
               </p>
               <q-slide-transition>
-                <p v-show="openEditCars" dense class="q-ma-none text-caption">
+                <p v-if="openEditCars" dense class="q-ma-none text-caption">
                   Hinweis: Deine Aktionen werden sofort synchronisiert, der
                   Haken blendet nur die Knöpfe aus.
                   <br />
@@ -630,7 +654,7 @@
                 <q-slide-transition>
                   <p
                     class="text-negative q-mt-md"
-                    v-show="!validNumberPlate()"
+                    v-if="!validNumberPlate"
                   >Noch keine gültige Eingabe</p>
                 </q-slide-transition>
               </q-step>
@@ -759,6 +783,8 @@ import ColoredMeter from "components/ColoredMeter";
 import ExtHr from "../components/ExtendedHr";
 import QrGen from "../components/QrGenerator";
 import CarInfo from "../components/CarInfo";
+import TitleButtonAnchor from "../components/TitleButtonAnchor";
+import { mdiAccountGroupOutline } from "@quasar/extras/mdi-v5";
 
 import {
   buildGetRequestUrl,
@@ -774,7 +800,8 @@ export default {
     ExtHr,
     ImageColorPicker,
     ProfileTopSection,
-    CarInfo
+    CarInfo,
+    TitleButtonAnchor
   },
 
   data() {
@@ -832,6 +859,7 @@ export default {
       openEditCars: false,
       openAddCar: false,
       openAddCarConfirm: false,
+      groupIcon: mdiAccountGroupOutline,
 
       tab: "data" // vue models which doesn't belong to specific function
     };
