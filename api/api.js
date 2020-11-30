@@ -67,7 +67,7 @@ users.FB_ID = ?
 
 group by lift_map.LIFT_ID
   `, [uid])).result[0]
-  return{
+  return {
     id: lift_data.LIFT_ID,
     car: {
       brand: lift_data.CAR_BRAND,
@@ -98,10 +98,32 @@ group by lift_map.LIFT_ID
   }
 }
 
+async function getLiftRequests(uid) {
+  var db_requests = (await runQuery(`
+  SELECT CONCAT('[', GROUP_CONCAT(lifts.DATA SEPARATOR ","), ']') AS JSON FROM (
+    
+    SELECT CONCAT('{liftId: ', my_lifts.LIFT_ID, ', requestingUsers: [', 
+                  GROUP_CONCAT( CONCAT('{fbId:\'', users.FB_ID, '\', name:\'', users.NAME, '\', surname:\'', users.SURNAME, '\', bio:\'', users.DESCRIPTION, '\', stats:{ liftCount:', IFNULL(liftCount.COUNT, 0) , ' , driverCount:', IFNULL(driverCount.COUNT, 0), ' }, prefs: { talk: \'',users.PREF_TALK,'\' , talkMorning: \'',users.PREF_TALK_MORNING,'\' , smoking: \'', users.PREF_SMOKING,'\', music: \'', users.PREF_MUSIC,'\' }}')
+                               SEPARATOR ', ')
+                  , ']}') AS DATA
+
+    FROM users me
+    join lift_map my_lifts on my_lifts.USER_ID = me.ID AND my_lifts.IS_DRIVER = 1
+    join lift_map requests on my_lifts.LIFT_ID = requests.LIFT_ID AND requests.PENDING = 1
+    join users on requests.USER_ID = users.ID
+    left outer join (SELECT lift_map.USER_ID, count(*) AS COUNT from lift_map where lift_map.IS_DRIVER = 0 AND lift_map.PENDING = 0 group by lift_map.USER_ID) liftCount on users.ID = liftCount. USER_ID
+    left outer join (SELECT lift_map.USER_ID, count(*) AS COUNT from lift_map where lift_map.IS_DRIVER = 1 group by lift_map.USER_ID) driverCount on users.ID = driverCount.USER_ID
+
+    group by my_lifts.LIFT_ID
+  ) lifts
+  `, [uid])).result[0].JSON
+
+  return JSON.parse(db_requests);
+}
+
 module.exports = {
   'GET': {
     '/ping': (req, res, options) => {
-      console.log("HIII")
       res.end('pong');
     },
     '/sqlTest': async (req, res, options) => {
@@ -198,8 +220,9 @@ module.exports = {
             })
 
             data.chatLifts = getChatLifts(uid)
+            data.liftRequests = getLiftRequests(uid)
 
-            const simulationProps = ['liftRequests', 'topFriends']
+            const simulationProps = ['topFriends']
 
             simulationProps.forEach(prop => {
               data[prop] = apiResponseSimulation[prop]
@@ -373,8 +396,7 @@ module.exports = {
       }
     },
     '/marketplace': async (req, res, options) => {
-      if (!isOptionMissing(options, ['msgId', 'secretFbId'], res)) {
-        let db_lifts = (await runQuery(`
+      let db_lifts = (await runQuery(`
 SELECT lift.UUID AS ID, driver.FB_ID as DRIVER_FB_ID, driver.NAME as DRIVER_NAME, driver.SURNAME as DRIVER_SURNAME, driver.PREF_TALK as DRIVER_PREF_TALK, driver.PREF_TALK_MORNING as DRIVER_PREF_TALKMORNING, driver.PREF_SMOKING AS DRIVER_PREF_SMOKING, driver.PREF_MUSIC as DRIVER_PREF_MUSIC, lift.DEPART_AT as LIFT_DEPART, lift.ARRIVE_BY as LIFT_ARRIVE, destination.CITY as DESTINATION_CITY, start_point.CITY AS START_CITY, lift.OFFERED_SEATS, IFNULL(counts.OCCUPIED_SEATS, 0) AS OCCUPIED_SEATS
 
 FROM lift
@@ -386,31 +408,34 @@ left outer join (SELECT lift_map.LIFT_ID, count(*) AS OCCUPIED_SEATS from lift_m
 
 where lift.FIRST_DATE >= CURRENT_DATE() OR lift.REPEATS_ON_WEEKDAY != 0`, [])).result[0]
 
-        var lifts = []
-        db_lifts.forEach(lift => lifts.push({
-          id: lift.ID,
-          driver: {
-            fbid: lift.DRIVER_FB_ID,
-            name: lift.DRIVER_NAME,
-            surname: lift.DRIVER_SURNAME,
-            prefs: {
-              talk: lift.DRIVER_PREF_TALK,
-              talkMorning: lift.DRIVER_PREF_TALKMONING,
-              smoking: lift.DRIVER_PREF_SMOKING,
-              music: lift.DRIVER_PREF_MUSIC
-            }
-          },
-          departAt: lift.LIFT_DEPART,
-          arriveBy: lift.LIFT_ARRIVE,
-          destination: lift.DESTINATION_CITY,
-          start: lift.START_CITY,
-          seatsOffered: lift.OFFERED_SEATS,
-          seatsOccupied: lift.OCCUPIED_SEATS
-        }))
-        res.end(audio);
-      }
+      var lifts = []
+      db_lifts.forEach(lift => lifts.push({
+        id: lift.ID,
+        driver: {
+          fbid: lift.DRIVER_FB_ID,
+          name: lift.DRIVER_NAME,
+          surname: lift.DRIVER_SURNAME,
+          prefs: {
+            talk: lift.DRIVER_PREF_TALK,
+            talkMorning: lift.DRIVER_PREF_TALKMONING,
+            smoking: lift.DRIVER_PREF_SMOKING,
+            music: lift.DRIVER_PREF_MUSIC
+          }
+        },
+        departAt: lift.LIFT_DEPART,
+        arriveBy: lift.LIFT_ARRIVE,
+        destination: lift.DESTINATION_CITY,
+        start: lift.START_CITY,
+        seatsOffered: lift.OFFERED_SEATS,
+        seatsOccupied: lift.OCCUPIED_SEATS
+      }))
+      res.end(audio);
     },
-
+    '/liftRequests': async (req, res, options) => {
+      if (!isOptionMissing(options, ['secretFbId'], res)) {
+        res.end((await getLiftRequests(secretFbId)));
+      }
+    }
   },
   'POST': {
     '/sqlTest': async (req, res, options) => {
