@@ -67,7 +67,7 @@ users.FB_ID = ?
 
 group by lift_map.LIFT_ID
   `, [uid])).result[0]
-  var chatLifts = {
+  return{
     id: lift_data.LIFT_ID,
     car: {
       brand: lift_data.CAR_BRAND,
@@ -410,6 +410,7 @@ where lift.FIRST_DATE >= CURRENT_DATE() OR lift.REPEATS_ON_WEEKDAY != 0`, [])).r
         res.end(audio);
       }
     },
+
   },
   'POST': {
     '/sqlTest': async (req, res, options) => {
