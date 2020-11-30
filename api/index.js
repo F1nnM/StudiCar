@@ -50,7 +50,6 @@ server.on('request', async (req, res) => {
         res.end;
         break;
       }
-
       let options = {};
       if (urlParts.query) {
         let arguments = urlParts.query.split("&");
@@ -62,9 +61,10 @@ server.on('request', async (req, res) => {
 
       if (!options.idtoken) {
         res.writeHead(401);
-        res.end;
+        res.end();
         break;
       }
+
       admin.auth().verifyIdToken(options.idtoken)
         .then(async decodedToken => {
           options.secretFbId = decodedToken.uid;
@@ -91,7 +91,7 @@ server.on('request', async (req, res) => {
 
         if (!options.idtoken) {
           res.writeHead(401);
-          res.end;
+          res.end();
           return;
         }
         admin.auth().verifyIdToken(options.idtoken)
