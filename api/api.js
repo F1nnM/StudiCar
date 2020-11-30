@@ -438,12 +438,6 @@ where lift.FIRST_DATE >= CURRENT_DATE() OR lift.REPEATS_ON_WEEKDAY != 0`, [])).r
     }
   },
   'POST': {
-    '/sqlTest': async (req, res, options) => {
-      if (!isOptionMissing(options, ['data'], res)) {
-        let result = await runQuery("INSERT INTO `test` (`ID`, `data`) VALUES (NULL, ?)", [options.data]);
-        res.end(JSON.stringify(result))
-      }
-    },
     '/createUserIfNotExisting': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'name', 'mail'], res)) {
         let users = (await runQuery("SELECT ID FROM `users` WHERE users.FB_ID = ?", [options.secretFbId])).result[0];
