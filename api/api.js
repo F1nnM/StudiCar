@@ -199,7 +199,7 @@ module.exports = {
 
             data.chatLifts = getChatLifts(uid)
 
-            const simulationProps = ['marketplaceOffers', 'liftRequests', 'topFriends']
+            const simulationProps = ['liftRequests', 'topFriends']
 
             simulationProps.forEach(prop => {
               data[prop] = apiResponseSimulation[prop]
@@ -371,7 +371,45 @@ module.exports = {
         res.setHeader('Content-Type', 'application/octet-stream');
         res.end(audio, 'binary');
       }
-    }
+    },
+    '/marketplace': async (req, res, options) => {
+      if (!isOptionMissing(options, ['msgId', 'secretFbId'], res)) {
+        let db_lifts = (await runQuery(`
+SELECT lift.UUID AS ID, driver.FB_ID as DRIVER_FB_ID, driver.NAME as DRIVER_NAME, driver.SURNAME as DRIVER_SURNAME, driver.PREF_TALK as DRIVER_PREF_TALK, driver.PREF_TALK_MORNING as DRIVER_PREF_TALKMORNING, driver.PREF_SMOKING AS DRIVER_PREF_SMOKING, driver.PREF_MUSIC as DRIVER_PREF_MUSIC, lift.DEPART_AT as LIFT_DEPART, lift.ARRIVE_BY as LIFT_ARRIVE, destination.CITY as DESTINATION_CITY, start_point.CITY AS START_CITY, lift.OFFERED_SEATS, IFNULL(counts.OCCUPIED_SEATS, 0) AS OCCUPIED_SEATS
+
+FROM lift
+join lift_map on lift_map.LIFT_ID = lift.ID
+join users driver on lift_map.USER_ID = driver.ID AND lift_map.IS_DRIVER = 1
+JOIN adresses destination on lift.DESTINATION = destination.ID
+join adresses start_point on lift.START = start_point.ID
+left outer join (SELECT lift_map.LIFT_ID, count(*) AS OCCUPIED_SEATS from lift_map where lift_map.PENDING != 0 GROUP BY lift_map.LIFT_ID) counts on lift.ID = counts.LIFT_ID
+
+where lift.FIRST_DATE >= CURRENT_DATE() OR lift.REPEATS_ON_WEEKDAY != 0`, [])).result[0]
+
+        var lifts = []
+        db_lifts.forEach(lift => lifts.push({
+          id: lift.ID,
+          driver: {
+            fbid: lift.DRIVER_FB_ID,
+            name: lift.DRIVER_NAME,
+            surname: lift.DRIVER_SURNAME,
+            prefs: {
+              talk: lift.DRIVER_PREF_TALK,
+              talkMorning: lift.DRIVER_PREF_TALKMONING,
+              smoking: lift.DRIVER_PREF_SMOKING,
+              music: lift.DRIVER_PREF_MUSIC
+            }
+          },
+          departAt: lift.LIFT_DEPART,
+          arriveBy: lift.LIFT_ARRIVE,
+          destination: lift.DESTINATION_CITY,
+          start: lift.START_CITY,
+          seatsOffered: lift.OFFERED_SEATS,
+          seatsOccupied: lift.OCCUPIED_SEATS
+        }))
+        res.end(audio);
+      }
+    },
   },
   'POST': {
     '/sqlTest': async (req, res, options) => {
