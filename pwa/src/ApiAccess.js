@@ -51,8 +51,13 @@ export const PING = {
   method: "GET"
 }
 
-export const GET_LEGAL = {
-  path: "/getLegal",
+export const SQL_TEST_READ = {
+  path: "/sqlTest",
+  method: "GET"
+}
+
+export const GET_USER_PROFILE_PIC = {
+  path: "/profilePicture",
   method: "GET"
 }
 
@@ -61,28 +66,23 @@ export const GET_NEWSTICKER = {
   method: "GET"
 }
 
-export const SQL_TEST_READ = {
-  path: "/sqlTest",
-  method: "GET"
-}
-
-export const SQL_TEST_ADD = {
-  path: "/sqlTest",
-  method: "POST"
-}
-
-export const SQL_CREATE_USER_IF_NOT_EXISTING = {
-  path: "/createUserIfNotExisting",
-  method: "POST"
-}
-
-export const GET_USER_PROFILE_PIC = {
-  path: "/profilePicture",
-  method: "GET"
-}
-
 export const SQL_GET_USER_DATA = {
   path: "/getUserData",
+  method: "GET"
+}
+
+export const GET_CAR_MODELS = {
+  path: "/getCarModels",
+  method: "GET"
+}
+
+export const GET_MESSAGES = {
+  path: "/getMessages",
+  method: "GET"
+}
+
+export const GET_LEGAL = {
+  path: "/getLegal",
   method: "GET"
 }
 
@@ -106,8 +106,28 @@ export const SQL_GET_TEAM = {
   method: "GET"
 }
 
-export const SQL_UPDATE_FAQ_QUESTION = {
-  path: "/updateQuestion",
+export const SQL_GET_CHAT_PICTURE = {
+  path: "/chatPicture",
+  method: "GET"
+}
+
+export const SQL_GET_CHAT_AUDIO = {
+  path: "/chatAudio",
+  method: "GET"
+}
+
+export const SQL_GET_MARKETPLACE = {
+  path: "/marketplace",
+  method: "GET"
+}
+
+export const SQL_GET_LIFT_REQUESTS = {
+  path: "/liftRequests",
+  method: "GET"
+}
+
+export const SQL_CREATE_USER_IF_NOT_EXISTING = {
+  path: "/createUserIfNotExisting",
   method: "POST"
 }
 
@@ -151,11 +171,6 @@ export const SQL_REMOVE_ADDRESS = {
   method: "POST"
 }
 
-export const GET_CAR_MODELS = {
-  path: "/getCarModels",
-  method: "GET"
-}
-
 export const SQL_ADD_CAR = {
   path: "/addCar",
   method: "POST"
@@ -178,5 +193,10 @@ export const SQL_SEND_MESSAGE = {
 
 export const SQL_ADD_QUESTION = {
   path: "/sendMessage",
+  method: "POST"
+}
+
+export const SQL_UPDATE_FAQ_QUESTION = {
+  path: "/updateQuestion",
   method: "POST"
 }
