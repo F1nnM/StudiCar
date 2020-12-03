@@ -40,142 +40,149 @@ function generateJdenticon (seed) {
 async function getChatLifts (uid) {
   //TODO make query return Nickname if the querying user is offering the lift. Maybe https://stackoverflow.com/questions/1747750/select-column-if-blank-select-from-another
   var lift_data = (await runQuery(`
-  SELECT
-  lift.id,
-  lift.UUID AS LIFT_ID,
-  car_models.BRAND AS CAR_BRAND,
-  car_models.MODEL AS CAR_MODEL,
-  car.COLOR AS CAR_COLOR,
-  car.SEATS AS CAR_SEATS,
-  car.LICENSE_PLATE AS CAR_LICENSE_PLATE,
-  car.YEAR AS CAR_BUILT,
-  car.TYPE AS CAR_TYPE,
-  lift.DEPART_AT AS LIFT_DEPART,
-  lift.ARRIVE_BY AS LIFT_ARRIVE,
-  destination.CITY AS DESTINATION_CITY,
-  start_point.CITY AS START_CITY,
-  driver.FB_ID AS DRIVER_ID,
-  driver.NAME AS DRIVER_NAME,
-  driver.SURNAME AS DRIVER_SURNAME,
-  driver.PREF_TALK AS DRIVER_PREF_TALK,
-  driver.PREF_TALK_MORNING AS DRIVER_PREF_TALKMORNING,
-  driver.PREF_SMOKING AS DRIVER_PREF_SMOKING,
-  driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
-  member_list.JSON_MEMBERS,
-  JSON_ARRAYAGG(
-      JSON_OBJECT('type',
-          IF(
-              ISNULL(messages.CONTENT),
-              IF(ISNULL(messages.AUDIO),
-              3,
-              2),
-              1
-          ),
-          'content',
-          IFNULL(
-              messages.CONTENT,
-              messages.UUID
-          ),
-          'timestamp',
-          messages.TIMESTAMP,
-          'sentBy',
-          msg_user.FB_ID
-      )
-  ) AS JSON_MESSAGES
-FROM
-  users 
-  JOIN
-      lift_map 
-      ON lift_map.USER_ID = users.ID 
-  JOIN
-      lift 
-      ON lift_map.LIFT_ID = lift.ID 
-  JOIN
-      car 
-      ON lift.CAR_ID = car.ID 
-  JOIN
-      car_models 
-      ON car.MODEL_ID = car_models.ID 
-  JOIN
-      adresses destination 
-      ON lift.DESTINATION = destination.ID 
-  JOIN
-      adresses start_point 
-      ON lift.START = start_point.ID 
-  JOIN
-      lift_map driver_map 
-      ON lift_map.LIFT_ID = driver_map.LIFT_ID 
-  JOIN
-      users driver 
-      ON driver_map.USER_ID = driver.ID 
-  LEFT OUTER JOIN(
-          SELECT
-              LIFT_ID,
-              JSON_ARRAYAGG(
-                  JSON_OBJECT(
-                      'name',
-                      members.NAME,
-                      'surname',
-                      members.SURNAME,
-                      'fbId',
-                      members.FB_ID
-                  )
-              ) AS JSON_MEMBERS
-          FROM
-              users members 
-              JOIN
-                  lift_map non_drivers 
-                  ON non_drivers.USER_ID = members.ID 
-          WHERE
-              non_drivers.IS_DRIVER = 0 
-              AND non_drivers.PENDING = 0 
-          GROUP BY
-              non_drivers.LIFT_ID 
-      )
-      member_list 
-      ON member_list.LIFT_ID = lift_map.LIFT_ID 
-  JOIN
-      messages 
-      ON lift_map.LIFT_ID = messages.LIFT_ID 
-  JOIN
-      users msg_user 
-      ON messages.FROM_USER_ID = msg_user.ID 
-WHERE
-  driver_map.IS_DRIVER = 1 
-  AND lift_map.PENDING = 0
-  AND users.FB_ID = ?
-GROUP BY
-  lift_map.LIFT_ID
+  WITH
+	lifts as (
+        SELECT
+          lift.id,
+          lift.UUID AS LIFT_ID,
+          car_models.BRAND AS CAR_BRAND,
+          car_models.MODEL AS CAR_MODEL,
+          car.COLOR AS CAR_COLOR,
+          car.SEATS AS CAR_SEATS,
+          car.LICENSE_PLATE AS CAR_LICENSE_PLATE,
+          car.YEAR AS CAR_BUILT,
+          car.TYPE AS CAR_TYPE,
+          lift.DEPART_AT AS LIFT_DEPART,
+          lift.ARRIVE_BY AS LIFT_ARRIVE,
+          destination.CITY AS DESTINATION_CITY,
+          start_point.CITY AS START_CITY,
+          driver.FB_ID AS DRIVER_ID,
+          driver.NAME AS DRIVER_NAME,
+          driver.SURNAME AS DRIVER_SURNAME,
+          driver.PREF_TALK AS DRIVER_PREF_TALK,
+          driver.PREF_TALK_MORNING AS DRIVER_PREF_TALKMORNING,
+          driver.PREF_SMOKING AS DRIVER_PREF_SMOKING,
+          driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
+          member_list.JSON_MEMBERS,
+          JSON_ARRAYAGG(
+              JSON_OBJECT('type',
+                  IF(
+                      ISNULL(messages.CONTENT),
+                      IF(ISNULL(messages.AUDIO),
+                      3,
+                      2),
+                      1
+                  ),
+                  'content',
+                  IFNULL(
+                      messages.CONTENT,
+                      messages.UUID
+                  ),
+                  'timestamp',
+                  messages.TIMESTAMP,
+                  'sentBy',
+                  msg_user.FB_ID
+              )
+          ) AS JSON_MESSAGES
+        FROM
+          users 
+          JOIN
+              lift_map 
+              ON lift_map.USER_ID = users.ID 
+          JOIN
+              lift 
+              ON lift_map.LIFT_ID = lift.ID 
+          JOIN
+              car 
+              ON lift.CAR_ID = car.ID 
+          JOIN
+              car_models 
+              ON car.MODEL_ID = car_models.ID 
+          JOIN
+              adresses destination 
+              ON lift.DESTINATION = destination.ID 
+          JOIN
+              adresses start_point 
+              ON lift.START = start_point.ID 
+          JOIN
+              lift_map driver_map 
+              ON lift_map.LIFT_ID = driver_map.LIFT_ID 
+          JOIN
+              users driver 
+              ON driver_map.USER_ID = driver.ID 
+          LEFT OUTER JOIN(
+                  SELECT
+                      LIFT_ID,
+                      JSON_ARRAYAGG(
+                          JSON_OBJECT(
+                              'name',
+                              members.NAME,
+                              'surname',
+                              members.SURNAME,
+                              'fbId',
+                              members.FB_ID
+                          )
+                      ) AS JSON_MEMBERS
+                  FROM
+                      users members 
+                      JOIN
+                          lift_map non_drivers 
+                          ON non_drivers.USER_ID = members.ID 
+                  WHERE
+                      non_drivers.IS_DRIVER = 0 
+                      AND non_drivers.PENDING = 0 
+                  GROUP BY
+                      non_drivers.LIFT_ID 
+              )
+              member_list 
+              ON member_list.LIFT_ID = lift_map.LIFT_ID 
+          JOIN
+              messages 
+              ON lift_map.LIFT_ID = messages.LIFT_ID 
+          JOIN
+              users msg_user 
+              ON messages.FROM_USER_ID = msg_user.ID 
+        WHERE
+          driver_map.IS_DRIVER = 1 
+          AND lift_map.PENDING = 0
+          AND users.FB_ID = ?
+        GROUP BY
+          lift_map.LIFT_ID
+    )
+SELECT 
+	JSON_OBJECT(
+        'id', LIFT_ID,
+        'car', JSON_OBJECT(
+            'brand', CAR_BRAND,
+            'model', CAR_MODEL,
+            'allSeats', CAR_SEATS,
+            'licensePlate', CAR_LICENSE_PLATE,
+            'built', CAR_BUILT,
+            'type', CAR_TYPE
+        ),
+        'departAt', LIFT_DEPART,
+        'arriveBy', LIFT_ARRIVE,
+        'destination', DESTINATION_CITY,
+        'start', START_CITY,
+        'driver', JSON_OBJECT(
+            'id', DRIVER_ID,
+            'name', DRIVER_NAME,
+            'surname', DRIVER_SURNAME,
+            'prefs', JSON_OBJECT(
+            	'talk', DRIVER_PREF_TALK,
+                'talkMorning', DRIVER_PREF_TALKMORNING,
+                'smoking', DRIVER_PREF_SMOKING,
+                'music', DRIVER_PREF_MUSIC
+            )
+        ),
+        'passengers', JSON_QUERY(JSON_MEMBERS, '$'),
+        'messages', JSON_QUERY(JSON_MESSAGES, '$')
+    )
+    AS JSON
+FROM lifts
+
   `, [uid])).result[0]
-  return {
-    id: lift_data.LIFT_ID,
-    car: {
-      brand: lift_data.CAR_BRAND,
-      model: lift_data.CAR_MODEL,
-      color: lift_data.CAR_COLOR,
-      allSeats: lift_data.CAR_SEATS,
-      licensePlate: lift_data.CAR_LICENSE_PLATE,
-      built: lift_data.CAR_BUILT,
-      type: lift_data.CAR_TYPE
-    },
-    departAt: lift_data.LIFT_DEPART,
-    arriveBy: lift_data.LIFT_ARRIVE,
-    destination: lift_data.DESTINATION_CITY,
-    start: lift_data.START_CITY,
-    driver: {
-      id: lift_data.DRIVER_ID,
-      name: lift_data.DRIVER_NAME,
-      surname: lift_data.DRIVER_SURNAME,
-      prefs: {
-        talk: lift_data.DRIVER_PREF_TALK,
-        talkMorning: lift_data.DRIVER_PREF_TALKMONING,
-        smoking: lift_data.DRIVER_PREF_SMOKING,
-        music: lift_data.DRIVER_PREF_MUSIC
-      }
-    },
-    passengers: JSON.parse(lift_data.JSON_MEMBERS),
-    messages: JSON.parse(lift_data.JSON_MESSAGES)
-  }
+  return lift_data
 }
 
 async function getLiftRequests (uid) {
@@ -269,7 +276,7 @@ FROM
     lifts
   `, [uid])).result[0].JSON
 
-  return JSON.parse(db_requests);
+  return db_requests;
 }
 
 module.exports = {
