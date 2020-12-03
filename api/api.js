@@ -62,7 +62,7 @@ join users msg_user on messages.FROM_USER_ID = msg_user.ID
 
 where 
 driver_map.IS_DRIVER = 1 AND
-AND lift_map.PENDING = 0
+lift_map.PENDING = 0 AND
 users.FB_ID = ?
 
 group by lift_map.LIFT_ID
