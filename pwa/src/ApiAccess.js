@@ -19,7 +19,7 @@ export function sendApiRequest (action, options, successCallback, errorCallback)
           .then(response => successCallback(Object.assign({
             status: response.status
           }, response.data)))
-          .catch(error => errorCallback)
+          .catch(+errorCallback)
       } else if (action.method === "POST") {
         axios.post(ApiBasePath + action.path, options)
           .then(response => successCallback(response.data))
