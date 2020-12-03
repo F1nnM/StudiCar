@@ -176,7 +176,7 @@
         align="center"
       >
         <q-route-tab exact icon="home" to="/" label="Marktplatz" replace />
-        <q-route-tab icon="add_circle_outline" to="/chats/lift/add" replace label="Anbieten" />
+        <q-route-tab icon="add_circle_outline" to="/add-lift" replace label="Anbieten" />
         <q-route-tab icon="directions_car" to="/chats" replace label="Fahrten" />
         <q-route-tab icon="account_box" to="/profil" replace label="Profil" />
       </q-tabs>
@@ -376,7 +376,7 @@ export default {
         GET_NEWSTICKER,
         {},
         data => {
-          this.newsticker = data;
+          this.newsticker = data.ticker;
         },
         err => {
           this.newsticker = "Fehler aufgetreten";

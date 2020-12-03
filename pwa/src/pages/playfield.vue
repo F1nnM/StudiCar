@@ -23,7 +23,18 @@ export default {
   },
   computed: {},
   methods: {
-    go() {}
+    go() {
+      sendApiRequest(
+        {
+          path: "/getNewsticker",
+          method: "GET"
+        },
+        {},
+        data => {
+          debugger;
+        }
+      );
+    }
   },
 
   mounted() {

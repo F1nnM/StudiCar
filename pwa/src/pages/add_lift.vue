@@ -1,8 +1,10 @@
 <template>
   <div>
+    <div v-if="!canAddLift" class="text-center flex column justify-center" style="height: 50vh"></div>
     <q-dialog
+      v-else
       maximized
-      :value="true"
+      :value="canAddLift"
       persistent
       transition-show="slide-up"
       transition-hide="slide-down"
@@ -153,11 +155,6 @@
                 >Du hast noch keine Fahrzeuge eingestellt, aus denen du auswählen könntest.</p>
                 <q-item tag="label" v-for="car in userCars" :key="car.carId" class="q-pr-none">
                   <q-radio v-model="lift.carId" :val="car.carId" />
-                  <!-- <q-item-section avatar>
-                    <q-avatar rounded>
-                      <img class="shadow-3 q-ma-none" src="~assets/loremimage.jpg" />
-                    </q-avatar>
-                  </q-item-section>-->
 
                   <q-item-section>
                     <q-item-label>
@@ -277,7 +274,7 @@
                     <div class="col-6 text-right">
                       <q-item>
                         <q-item-section>
-                          <q-item-label>{{getCarFromId(lift.carId).brand}} {{getCarFromId(lift.carId).model}}</q-item-label>
+                          <q-item-label>{{ getCarFromId(lift.carId).brand }} {{ getCarFromId(lift.carId).model }}</q-item-label>
                           <ExtHr class="q-my-sm" :color="getCarData.color" size="1px" />
                           <q-item-label caption>
                             {{lift.seats ? lift.seats : getCarData.seats}}
@@ -299,13 +296,13 @@
                             :key="stop.addressId"
                             class="row overview"
                           >
-                            <div class="col-2 text-right text-overline">{{getStopTime(stop.time)}}</div>
+                            <div class="col-2 text-right text-overline">{{ getStopTime(stop.time )}}</div>
                             <q-item class="col-10">
                               <q-item-section>
-                                <q-item-label>{{getDataFromAddressId(stop.addressId).city}}</q-item-label>
+                                <q-item-label>{{ getDataFromAddressId(stop.addressId).city }}</q-item-label>
                                 <q-item-label
                                   caption
-                                >{{getDataFromAddressId(stop.addressId).street}} {{getDataFromAddressId(stop.addressId).number}}</q-item-label>
+                                >{{ getDataFromAddressId(stop.addressId).street }} {{ getDataFromAddressId(stop.addressId).number }}</q-item-label>
                               </q-item-section>
                             </q-item>
                           </div>
@@ -326,17 +323,17 @@
 
                     <div class="col-12">
                       <p class="text-subtitle1 q-mt-sm">
-                        {{getDataFromAddressId(lift.destinationAddressId).nickname}}
+                        {{ getDataFromAddressId(lift.destinationAddressId).nickname }}
                         <span
                           class="text-caption q-ml-sm"
-                        >{{getDataFromAddressId(lift.destinationAddressId).city}}</span>
+                        >{{ getDataFromAddressId(lift.destinationAddressId).city }}</span>
                       </p>
                     </div>
                   </div>
                 </q-card-section>
                 <q-card-actions align="right">
                   <q-btn flat label="Bearbeiten" @click="openAddLiftConfirm = false" v-close-popup />
-                  <q-btn color="primary" label="Freigeben" @click="addLift()" v-close-popup />
+                  <q-btn color="primary" label="Freigeben" @click="addLift" v-close-popup />
                 </q-card-actions>
               </q-card>
             </q-dialog>
@@ -384,9 +381,20 @@ export default {
     };
   },
   computed: {
+    allAddresses() {
+      return this.$store.getters["auth/user"].addresses;
+    },
+
+    canAddLift() {
+      var areAddressesStored =
+          this.allAddresses.filter(item => item.id > 3).length > 0,
+        areCarsStored = this.userCars.length > 0;
+      return areAddressesStored && areCarsStored;
+    },
+
     carOptions() {
       let cars = [];
-      for (let car of this.$store.getters["auth/user"].cars) {
+      for (let car of this.userCars) {
         cars.push(car.licensePlate + " - " + car.brand + " " + car.model);
       }
       return cars;
@@ -398,7 +406,7 @@ export default {
 
     getCarData() {
       // returns data of selected car, so that user for example can see how many seats would be default
-      let cars = this.$store.getters["auth/user"].cars;
+      let cars = this.userCars;
       let obj = cars.find(item => {
         return item.carId == this.lift.carId;
       });
@@ -431,30 +439,22 @@ export default {
 
     getExactAddresses() {
       if (this.lift.destination == "school") {
-        return this.$store.getters["auth/user"].addresses.filter(item => {
-          return item.id < 4; // filter only the schools, which have IDs 1 to 3
-        });
+        return this.allAddresses.filter(item => item.id < 4); // filter only the schools, which have IDs 1 to 3
 
         // a[0].imagePath = require(pathBegin + 'HDH_cube.jpg')
         // a[1].imagePath = require(pathBegin + 'HDH_old.jpg')
         // a[2].imagePath = require(pathBegin + 'WIB_ext.jpg')
       } else if (this.lift.destination == "home") {
-        return this.$store.getters["auth/user"].addresses.filter(item => {
-          return item.id > 3; // filter only private adresses, IDs 1 to 3 are reserved for schools
-        });
+        return this.allAddresses.filter(item => item.id > 3); // filter only private adresses, IDs 1 to 3 are reserved for schools
       }
       return null;
     },
 
     getExactStartingPoints() {
       if (this.lift.destination != "school") {
-        return this.$store.getters["auth/user"].addresses.filter(item => {
-          return item.id < 4; // filter only the schools, which have IDs 1 to 3
-        });
+        return this.allAddresses.filter(item => item.id < 4); // filter only the schools, which have IDs 1 to 3
       } else if (this.lift.destination != "home") {
-        return this.$store.getters["auth/user"].addresses.filter(item => {
-          return item.id > 3; // filter only private adresses, IDs 1 to 3 are reserved for schools
-        });
+        return this.allAddresses.filter(item => item.id > 3); // filter only private adresses, IDs 1 to 3 are reserved for schools
       }
       return null;
     }
@@ -538,9 +538,9 @@ export default {
     },
 
     getDataFromAddressId(id) {
-      let data = this.$store.getters["auth/user"].addresses.find(item => {
-        return item.id == id;
-      });
+      let data = this.$store.getters["auth/user"].addresses.find(
+        item => item.id == id
+      );
       if (data) {
         if (!data.nickname) {
           // when no nickname saved, use city as nickname
@@ -556,9 +556,7 @@ export default {
     },
 
     getCarFromId(id) {
-      let data = this.userCars.find(item => {
-        return item.carId == id;
-      });
+      let data = this.userCars.find(item => item.carId == id);
       if (data) return data;
       return {
         brand: null,

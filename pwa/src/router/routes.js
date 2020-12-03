@@ -21,7 +21,7 @@ const routes = [{
         import('pages/lift.vue')
     },
     {
-      path: '/chats/lift/add',
+      path: '/add-lift',
       component: () =>
         import('pages/add_lift.vue')
     },

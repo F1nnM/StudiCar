@@ -7,7 +7,7 @@ const newsPath = 'news/postillon/ticker.txt',
   longQueries = require('./longQueries'),
   apiResponseSimulation = require('./simulation/apiResponse')
 
-function isOptionMissing(data, needed, res) {
+function isOptionMissing (data, needed, res) {
   return needed.some(key => {
     if (typeof data[key] == "undefined") {
       res.writeHead(400);
@@ -19,7 +19,7 @@ function isOptionMissing(data, needed, res) {
   });
 }
 
-function generateJdenticon(seed) {
+function generateJdenticon (seed) {
   var jdenticon = require("jdenticon")
   jdenticon.config = {
     lightness: {
@@ -37,35 +37,108 @@ function generateJdenticon(seed) {
   return jdenticon.toPng(seed, size);
 }
 
-async function getChatLifts(uid) {
+async function getChatLifts (uid) {
   //TODO make query return Nickname if the querying user is offering the lift. Maybe https://stackoverflow.com/questions/1747750/select-column-if-blank-select-from-another
   var lift_data = (await runQuery(`
-SELECT lift.id, lift.UUID AS LIFT_ID, car_models.BRAND AS CAR_BRAND, car_models.MODEL AS CAR_MODEL, car.COLOR AS CAR_COLOR, car.SEATS AS CAR_SEATS, car.LICENSE_PLATE AS CAR_LICENSE_PLATE, car.YEAR AS CAR_BUILT, car.TYPE AS CAR_TYPE, lift.DEPART_AT as LIFT_DEPART, lift.ARRIVE_BY as LIFT_ARRIVE, destination.CITY as DESTINATION_CITY, start_point.CITY AS START_CITY, driver.FB_ID as DRIVER_ID, driver.NAME as DRIVER_NAME, driver.SURNAME as DRIVER_SURNAME, driver.PREF_TALK as DRIVER_PREF_TALK, driver.PREF_TALK_MORNING as DRIVER_PREF_TALKMORNING, driver.PREF_SMOKING AS DRIVER_PREF_SMOKING, driver.PREF_MUSIC as DRIVER_PREF_MUSIC, member_list.JSON_MEMBERS, GROUP_CONCAT( CONCAT('{type:', IF(ISNULL(messages.CONTENT),IF(ISNULL(messages.AUDIO),3,2),1), ', content:\'', IFNULL(messages.CONTENT, messages.UUID) , '\', timestamp: \'', messages.TIMESTAMP,'\', sentBy: \'', msg_user.FB_ID, '\}') SEPARATOR ', ') AS JSON_MESSAGES
-FROM users
-join lift_map on lift_map.USER_ID = users.ID
-join lift on lift_map.LIFT_ID = lift.ID
-join car on lift.CAR_ID = car.ID
-join car_models on car.MODEL_ID = car_models.ID
-JOIN adresses destination on lift.DESTINATION = destination.ID
-join adresses start_point on lift.START = start_point.ID
-join lift_map driver_map on lift_map.LIFT_ID = driver_map.LIFT_ID
-join users driver on driver_map.USER_ID = driver.ID
-left outer join (
-    SELECT LIFT_ID, CONCAT( '[', GROUP_CONCAT(CONCAT('{name:', members.NAME, ',surname:', members.SURNAME, ',fbId:', members.FB_ID, '}') SEPARATOR ', ') , ']') AS JSON_MEMBERS
-    from users members 
-    join lift_map non_drivers on non_drivers.USER_ID = members.ID
-    where non_drivers.IS_DRIVER = 0
-    AND non_drivers.PENDING = 0
-    GROUP by non_drivers.LIFT_ID ) member_list on member_list.LIFT_ID = lift_map.LIFT_ID
-join messages on lift_map.LIFT_ID = messages.LIFT_ID
-join users msg_user on messages.FROM_USER_ID = msg_user.ID
-
-where 
-driver_map.IS_DRIVER = 1 AND
-lift_map.PENDING = 0 AND
-users.FB_ID = ?
-
-group by lift_map.LIFT_ID
+SELECT
+    lift.id,
+    lift.UUID AS LIFT_ID,
+    car_models.BRAND AS CAR_BRAND,
+    car_models.MODEL AS CAR_MODEL,
+    car.COLOR AS CAR_COLOR,
+    car.SEATS AS CAR_SEATS,
+    car.LICENSE_PLATE AS CAR_LICENSE_PLATE,
+    car.YEAR AS CAR_BUILT,
+    car.TYPE AS CAR_TYPE,
+    lift.DEPART_AT AS LIFT_DEPART,
+    lift.ARRIVE_BY AS LIFT_ARRIVE,
+    destination.CITY AS DESTINATION_CITY,
+    start_point.CITY AS START_CITY,
+    driver.FB_ID AS DRIVER_ID,
+    driver.NAME AS DRIVER_NAME,
+    driver.SURNAME AS DRIVER_SURNAME,
+    driver.PREF_TALK AS DRIVER_PREF_TALK,
+    driver.PREF_TALK_MORNING AS DRIVER_PREF_TALKMORNING,
+    driver.PREF_SMOKING AS DRIVER_PREF_SMOKING,
+    driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
+    member_list.JSON_MEMBERS,
+    GROUP_CONCAT(
+        CONCAT(
+            '{type:',
+            IF(
+                ISNULL(messages.CONTENT),
+                IF(ISNULL(messages.AUDIO),
+                3,
+                2),
+                1
+            ),
+            '',
+            'content:',
+            IFNULL(
+                messages.CONTENT,
+                messages.UUID
+            ),
+            '',
+            'timestamp: ',
+            messages.TIMESTAMP,
+            '',
+            'sentBy: ',
+            msg_user.FB_ID,
+            '} '
+        ) SEPARATOR ','
+    ) AS JSON_MESSAGES
+FROM
+    users
+JOIN lift_map ON lift_map.USER_ID = users.ID
+JOIN lift ON lift_map.LIFT_ID = lift.ID
+JOIN car ON lift.CAR_ID = car.ID
+JOIN car_models ON car.MODEL_ID = car_models.ID
+JOIN adresses destination ON
+    lift.DESTINATION = destination.ID
+JOIN adresses start_point ON
+    lift.START = start_point.ID
+JOIN lift_map driver_map ON
+    lift_map.LIFT_ID = driver_map.LIFT_ID
+JOIN users driver ON
+    driver_map.USER_ID = driver.ID
+LEFT OUTER JOIN(
+    SELECT LIFT_ID,
+        CONCAT(
+            ' [ ',
+            GROUP_CONCAT(
+                CONCAT(
+                    ' { NAME :',
+                    members.NAME,
+                    ',
+            surname: ',
+                    members.SURNAME,
+                    ',
+            fbId: ',
+                    members.FB_ID,
+                    ' } '
+                ) SEPARATOR ',
+            '
+            ),
+            ' ] '
+        ) AS JSON_MEMBERS
+    FROM
+        users members
+    JOIN lift_map non_drivers ON
+        non_drivers.USER_ID = members.ID
+    WHERE
+        non_drivers.IS_DRIVER = 0 AND non_drivers.PENDING = 0
+    GROUP BY
+        non_drivers.LIFT_ID
+) member_list
+ON
+    member_list.LIFT_ID = lift_map.LIFT_ID
+JOIN messages ON lift_map.LIFT_ID = messages.LIFT_ID
+JOIN users msg_user ON
+    messages.FROM_USER_ID = msg_user.ID
+WHERE
+    driver_map.IS_DRIVER = 1 AND lift_map.PENDING = 0 AND users.FB_ID = ?
+GROUP BY
+    lift_map.LIFT_ID
   `, [uid])).result[0]
   return {
     id: lift_data.LIFT_ID,
@@ -98,7 +171,7 @@ group by lift_map.LIFT_ID
   }
 }
 
-async function getLiftRequests(uid) {
+async function getLiftRequests (uid) {
   var db_requests = (await runQuery(`
   SELECT CONCAT('[', GROUP_CONCAT(lifts.DATA SEPARATOR ","), ']') AS JSON FROM (
     
@@ -145,9 +218,11 @@ module.exports = {
           news = news.filter(line => !line.includes('//') && line.length) // ignore all lines containing // and all empty lines
 
           var rnd = Math.floor(Math.random() * news.length)
-          news = news[rnd].split('+++')[1].trim()
+          const ticker = news[rnd].split('+++')[1].trim()
 
-          res.end(news)
+          res.end(JSON.stringify({
+            ticker: ticker
+          }))
         })
       }
     },
@@ -159,7 +234,9 @@ module.exports = {
           uid = options.fbid
         if (!userData) {
           res.writeHead(204) // case when wrong fbId has been transmitted
-          res.end()
+          res.end(JSON.stringify({
+            ticker: news
+          }))
           return
         }
         else {
