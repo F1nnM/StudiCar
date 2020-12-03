@@ -7,7 +7,7 @@ const newsPath = 'news/postillon/ticker.txt',
   longQueries = require('./longQueries'),
   apiResponseSimulation = require('./simulation/apiResponse')
 
-function isOptionMissing (data, needed, res) {
+function isOptionMissing(data, needed, res) {
   return needed.some(key => {
     if (typeof data[key] == "undefined") {
       res.writeHead(400);
@@ -19,7 +19,7 @@ function isOptionMissing (data, needed, res) {
   });
 }
 
-function generateJdenticon (seed) {
+function generateJdenticon(seed) {
   var jdenticon = require("jdenticon")
   jdenticon.config = {
     lightness: {
@@ -37,7 +37,7 @@ function generateJdenticon (seed) {
   return jdenticon.toPng(seed, size);
 }
 
-async function getChatLifts (uid) {
+async function getChatLifts(uid) {
   //TODO make query return Nickname if the querying user is offering the lift. Maybe https://stackoverflow.com/questions/1747750/select-column-if-blank-select-from-another
   var lift_data = (await runQuery(`
   WITH
@@ -185,7 +185,7 @@ FROM lifts
   return lift_data
 }
 
-async function getLiftRequests (uid) {
+async function getLiftRequests(uid) {
   var db_requests = (await runQuery(`
   SELECT
     JSON_ARRAYAGG(lifts.DATA) AS JSON 
@@ -313,86 +313,255 @@ module.exports = {
     },
     '/getUserData': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid', 'secretFbId'], res)) {
-        var userData = (await runQuery("SELECT ID, NAME, GENDER, COURSE, DESCRIPTION, CREATED_DATE, LIFTS_OFFERED, LIFTS_ALL, PREF_SMOKING, PREF_MUSIC, PREF_TALK, PREF_TALK_MORNING, LIFT_MAX_DISTANCE FROM `users` WHERE users.FB_ID = ?", [options.fbid])).result[0],
-          liftCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS LIFT_COUNT FROM `lift_map` WHERE `USER_ID` = ? ", [options.fbid])).result[0].LIFT_COUNT,
-          driverCount = (await runQuery("SELECT COUNT(`LIFT_ID`) AS DRIVER_COUNT FROM `lift_map` WHERE `IS_DRIVER` = true AND `USER_ID` = ? ", [options.fbid])).result[0].DRIVER_COUNT,
-          uid = options.fbid
-        if (!userData) {
-          res.writeHead(204) // case when wrong fbId has been transmitted
-          res.end(JSON.stringify({
-            ticker: news
-          }))
-          return
+        var data;
+        if (options.secretFbId = options.fbid) { // NOT ACCESSING PUBLIC PROFILE
+          data = (await runQuery(`
+          SELECT
+              users.ID INTO @userid 
+          FROM
+              users 
+          WHERE
+              users.FB_ID = "wG3cG4M7NFMJzJYcreFjLrJC9Q23";
+          WITH data AS 
+          (
+              SELECT
+                  users.ID AS USER_ID,
+                  users.FB_ID,
+                  users.NAME,
+                  users.GENDER,
+                  users.COURSE,
+                  users.DESCRIPTION,
+                  users.CREATED_DATE,
+                  users.PREF_SMOKING,
+                  users.PREF_MUSIC,
+                  users.PREF_TALK,
+                  users.PREF_TALK_MORNING,
+                  users.LIFT_MAX_DISTANCE 
+              FROM
+                  users 
+              WHERE
+                  users.ID = @userid 
+          )
+          ,
+          drives AS 
+          (
+              SELECT
+                  lift_map.USER_ID,
+                  COUNT(lift_map.LIFT_ID) AS COUNT 
+              FROM
+                  lift_map 
+              WHERE
+                  lift_map.IS_DRIVER = 1 
+                  AND lift_map.USER_ID = @userid 
+          )
+          ,
+          rides AS 
+          (
+              SELECT
+                  lift_map.USER_ID,
+                  COUNT(lift_map.LIFT_ID) AS COUNT 
+              FROM
+                  lift_map 
+              WHERE
+                  lift_map.PENDING = 0 
+                  AND lift_map.IS_DRIVER = 0 
+                  AND lift_map.USER_ID = @userid 
+          )
+          ,
+          user_addresses AS 
+          (
+            SELECT
+                addresses.ID, #TODO has to be removed
+                addresses.NICKNAME,
+                addresses.POSTCODE,
+                addresses.CITY,
+                addresses.NUMBER,
+                addresses.STREET,
+                addresses.USER_ID
+              FROM
+                addresses
+              WHERE
+                addresses.ID <= 3
+                OR addresses.USER_ID = @userid
+          )
+          ,
+          cars AS
+          (
+            SELECT
+                car.USER_ID,
+                car.ID, #TODO remove?
+                  car.LICENSE_PLATE,
+                  car.TYPE,
+                  car.SEATS,
+                  car.COLOR,
+                  car.YEAR,
+                car.MODEL_ID,
+                car_models.BRAND,
+                car_models.MODEL
+              FROM
+                car
+              JOIN
+                car_models
+                ON car.MODEL_ID = car_models.ID
+              WHERE
+                car.USER_ID = @userid
+          )
+          
+          SELECT
+            JSON_INSERT(
+                  JSON_OBJECT(
+                      'uid', data.FB_ID,
+                      'name', data.NAME,
+                      'gender', data.GENDER,
+                      'bio', data.DESCRIPTION,
+                      'stats', JSON_OBJECT(
+                          'createdAt', data.CREATED_DATE,
+                          'liftCount', IFNULL(rides.COUNT, 0),
+                          'driverCount', IFNULL(drives.COUNT,0)
+                      ),
+                      'prefs', JSON_OBJECT(
+                          'smoking', data.PREF_SMOKING,
+                          'music', data.PREF_MUSIC,
+                          'talk', data.PREF_TALK,
+                          'talkMorning', data.PREF_TALK_MORNING
+                      ),
+                      'settings', JSON_OBJECT(
+                          'liftMaxDistance', data.LIFT_MAX_DISTANCE
+                      )
+                  ),
+                  '$.addresses',
+                  JSON_ARRAYAGG(
+                      JSON_OBJECT(
+                          'id', user_addresses.ID,
+                          'nickname', user_addresses.NICKNAME,
+                          'postcode', user_addresses.POSTCODE,
+                          'city', user_addresses.CITY,
+                          'street', user_addresses.STREET,
+                          'number', user_addresses.NUMBER
+                      )
+                  ),
+                  '$.cars',
+                  JSON_ARRAYAGG(
+                      JSON_OBJECT(
+                          'modelId', cars.MODEL_ID,
+                          'carId', cars.ID,
+                          'brand', cars.BRAND,
+                          'model', cars.MODEL,
+                          'type', cars.TYPE,
+                          'licensePlate', cars.LICENSE_PLATE,
+                          'year', cars.YEAR,
+                          'seats', cars.SEATS,
+                          'color', CONCAT( '#', cars.COLOR)
+                      )
+                  )
+              ) AS JSON
+          FROM
+              data 
+              LEFT OUTER JOIN
+                  rides USING(USER_ID) 
+              LEFT OUTER JOIN
+                  drives USING(USER_ID)
+              LEFT OUTER JOIN
+                  user_addresses USING(USER_ID)
+              LEFT OUTER JOIN
+                cars USING(USER_ID)
+            `, [options.fbid])).result[0].JSON
+
+          data = JSON.parse(data)
+
+          data.chatLifts = getChatLifts(uid)
+          data.liftRequests = getLiftRequests(uid)
+
+          const simulationProps = ['topFriends']
+
+          simulationProps.forEach(prop => {
+            data[prop] = apiResponseSimulation[prop]
+          })
+        } else {
+          data = (await runQuery(`
+          SELECT
+              users.ID INTO @userid 
+          FROM
+              users 
+          WHERE
+              users.FB_ID = "wG3cG4M7NFMJzJYcreFjLrJC9Q23";
+          WITH data AS 
+          (
+              SELECT
+                  users.ID AS USER_ID,
+                  users.FB_ID,
+                  users.NAME,
+                  users.GENDER,
+                  users.COURSE,
+                  users.DESCRIPTION,
+                  users.CREATED_DATE,
+                  users.PREF_SMOKING,
+                  users.PREF_MUSIC,
+                  users.PREF_TALK,
+                  users.PREF_TALK_MORNING
+              FROM
+                  users 
+              WHERE
+                  users.ID = @userid 
+          )
+          ,
+          drives AS 
+          (
+              SELECT
+                  lift_map.USER_ID,
+                  COUNT(lift_map.LIFT_ID) AS COUNT 
+              FROM
+                  lift_map 
+              WHERE
+                  lift_map.IS_DRIVER = 1 
+                  AND lift_map.USER_ID = @userid 
+          )
+          ,
+          rides AS 
+          (
+              SELECT
+                  lift_map.USER_ID,
+                  COUNT(lift_map.LIFT_ID) AS COUNT 
+              FROM
+                  lift_map 
+              WHERE
+                  lift_map.PENDING = 0 
+                  AND lift_map.IS_DRIVER = 0 
+                  AND lift_map.USER_ID = @userid 
+          )
+          SELECT
+              JSON_OBJECT(
+                  'uid', data.FB_ID,
+                  'name', data.NAME,
+                  'gender', data.GENDER,
+                  'bio', data.DESCRIPTION,
+                  'stats', JSON_OBJECT(
+                      'createdAt', data.CREATED_DATE,
+                      'liftCount', IFNULL(rides.COUNT, 0),
+                      'driverCount', IFNULL(drives.COUNT,0)
+                  ),
+                  'prefs', JSON_OBJECT(
+                      'smoking', data.PREF_SMOKING,
+                      'music', data.PREF_MUSIC,
+                      'talk', data.PREF_TALK,
+                      'talkMorning', data.PREF_TALK_MORNING
+                  )
+              ) AS JSON
+          FROM
+              data 
+              LEFT OUTER JOIN
+                  rides USING(USER_ID) 
+              LEFT OUTER JOIN
+                  drives USING(USER_ID)
+            `, [options.fbid])).result[0].JSON
         }
-        else {
 
-          let data = {
-            uid: uid,
-            name: userData.NAME,
-            gender: userData.GENDER,
-            course: userData.COURSE,
-            bio: userData.DESCRIPTION,
-            stats: {
-              createdAt: userData.CREATED_DATE,
-              liftCount: liftCount,
-              driverCount: driverCount,
-              liftsOffered: userData.LIFTS_OFFERED,
-              liftsAll: userData.LIFTS_ALL,
-            },
-            prefs: {
-              smoking: userData.PREF_SMOKING,
-              music: userData.PREF_MUSIC,
-              talk: userData.PREF_TALK,
-              talkMorning: userData.PREF_TALK_MORNING
-            }
-          }
-          if (options.secretFbId = options.fbid) { // NOT ACCESSING PUBLIC PROFILE
-            data.settings = {
-              liftMaxDistance: userData.LIFT_MAX_DISTANCE
-            }
-            var addresses = await runQuery("SELECT adresses.* FROM `adresses` LEFT JOIN users ON (users.ID = adresses.USER_ID) WHERE adresses.ID <= 3 OR adresses.USER_ID = 1", [uid]);
-            data.addresses = []
 
-            addresses.result.forEach(item => {
-              let obj = {
-                id: item.ID,
-                nickname: item.NICKNAME,
-                postcode: item.POSTCODE,
-                city: item.CITY,
-                street: item.STREET,
-                number: item.NUMBER
-              }
-              data.addresses.push(obj)
-            })
-            var cars = await runQuery("SELECT car.*, car_models.BRAND, car_models.MODEL FROM car_models JOIN car ON car.MODEL_ID = car_models.ID WHERE car.USER_ID = ?", [uid]);
-            data.cars = []
-            cars.result.forEach(item => {
-              let obj = {
-                modelId: item.MODEL_ID,
-                carId: item.ID,
-                brand: item.BRAND,
-                model: item.MODEL,
-                type: item.TYPE,
-                licensePlate: item.LICENSE_PLATE,
-                year: item.YEAR,
-                seats: item.SEATS,
-                color: '#' + item.COLOR
-              }
-              data.cars.push(obj)
-            })
+        data = JSON.parse(data)
+        data.stats.liftsOffered = Math.random() * 100
+        data.stats.liftsAll = data.stats.liftsOffered + Math.random() * 200
 
-            data.chatLifts = getChatLifts(uid)
-            data.liftRequests = getLiftRequests(uid)
-
-            const simulationProps = ['topFriends']
-
-            simulationProps.forEach(prop => {
-              data[prop] = apiResponseSimulation[prop]
-            })
-          }
-
-          res.end(JSON.stringify(data))
-        }
+        res.end(JSON.stringify(data))
       }
     },
     '/getCarModels': async (req, res, options) => {
