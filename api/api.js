@@ -478,7 +478,7 @@ module.exports = {
             data[prop] = apiResponseSimulation[prop]
           })
         } else {
-          data = (await runQuery(`
+          data = JSON.parse((await runQuery(`
           SELECT
               users.ID INTO @userid 
           FROM
@@ -553,11 +553,10 @@ module.exports = {
                   rides USING(USER_ID) 
               LEFT OUTER JOIN
                   drives USING(USER_ID)
-            `, [options.fbid])).result[0].JSON
+            `, [options.fbid])).result[0].JSON)
         }
 
 
-        data = JSON.parse(data)
         data.stats.liftsOffered = Math.random() * 100
         data.stats.liftsAll = data.stats.liftsOffered + Math.random() * 200
 
