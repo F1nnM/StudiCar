@@ -40,105 +40,112 @@ function generateJdenticon (seed) {
 async function getChatLifts (uid) {
   //TODO make query return Nickname if the querying user is offering the lift. Maybe https://stackoverflow.com/questions/1747750/select-column-if-blank-select-from-another
   var lift_data = (await runQuery(`
-SELECT
-    lift.id,
-    lift.UUID AS LIFT_ID,
-    car_models.BRAND AS CAR_BRAND,
-    car_models.MODEL AS CAR_MODEL,
-    car.COLOR AS CAR_COLOR,
-    car.SEATS AS CAR_SEATS,
-    car.LICENSE_PLATE AS CAR_LICENSE_PLATE,
-    car.YEAR AS CAR_BUILT,
-    car.TYPE AS CAR_TYPE,
-    lift.DEPART_AT AS LIFT_DEPART,
-    lift.ARRIVE_BY AS LIFT_ARRIVE,
-    destination.CITY AS DESTINATION_CITY,
-    start_point.CITY AS START_CITY,
-    driver.FB_ID AS DRIVER_ID,
-    driver.NAME AS DRIVER_NAME,
-    driver.SURNAME AS DRIVER_SURNAME,
-    driver.PREF_TALK AS DRIVER_PREF_TALK,
-    driver.PREF_TALK_MORNING AS DRIVER_PREF_TALKMORNING,
-    driver.PREF_SMOKING AS DRIVER_PREF_SMOKING,
-    driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
-    member_list.JSON_MEMBERS,
-    GROUP_CONCAT(
-        CONCAT(
-            '{type:',
-            IF(
-                ISNULL(messages.CONTENT),
-                IF(ISNULL(messages.AUDIO),
-                3,
-                2),
-                1
-            ),
-            '',
-            'content:',
-            IFNULL(
-                messages.CONTENT,
-                messages.UUID
-            ),
-            '',
-            'timestamp: ',
-            messages.TIMESTAMP,
-            '',
-            'sentBy: ',
-            msg_user.FB_ID,
-            '} '
-        ) SEPARATOR ','
-    ) AS JSON_MESSAGES
+  SELECT
+  lift.id,
+  lift.UUID AS LIFT_ID,
+  car_models.BRAND AS CAR_BRAND,
+  car_models.MODEL AS CAR_MODEL,
+  car.COLOR AS CAR_COLOR,
+  car.SEATS AS CAR_SEATS,
+  car.LICENSE_PLATE AS CAR_LICENSE_PLATE,
+  car.YEAR AS CAR_BUILT,
+  car.TYPE AS CAR_TYPE,
+  lift.DEPART_AT AS LIFT_DEPART,
+  lift.ARRIVE_BY AS LIFT_ARRIVE,
+  destination.CITY AS DESTINATION_CITY,
+  start_point.CITY AS START_CITY,
+  driver.FB_ID AS DRIVER_ID,
+  driver.NAME AS DRIVER_NAME,
+  driver.SURNAME AS DRIVER_SURNAME,
+  driver.PREF_TALK AS DRIVER_PREF_TALK,
+  driver.PREF_TALK_MORNING AS DRIVER_PREF_TALKMORNING,
+  driver.PREF_SMOKING AS DRIVER_PREF_SMOKING,
+  driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
+  member_list.JSON_MEMBERS,
+  JSON_ARRAYAGG(
+      JSON_OBJECT('type',
+          IF(
+              ISNULL(messages.CONTENT),
+              IF(ISNULL(messages.AUDIO),
+              3,
+              2),
+              1
+          ),
+          'content',
+          IFNULL(
+              messages.CONTENT,
+              messages.UUID
+          ),
+          'timestamp',
+          messages.TIMESTAMP,
+          'sentBy',
+          msg_user.FB_ID
+      )
+  ) AS JSON_MESSAGES
 FROM
-    users
-JOIN lift_map ON lift_map.USER_ID = users.ID
-JOIN lift ON lift_map.LIFT_ID = lift.ID
-JOIN car ON lift.CAR_ID = car.ID
-JOIN car_models ON car.MODEL_ID = car_models.ID
-JOIN adresses destination ON
-    lift.DESTINATION = destination.ID
-JOIN adresses start_point ON
-    lift.START = start_point.ID
-JOIN lift_map driver_map ON
-    lift_map.LIFT_ID = driver_map.LIFT_ID
-JOIN users driver ON
-    driver_map.USER_ID = driver.ID
-LEFT OUTER JOIN(
-    SELECT LIFT_ID,
-        CONCAT(
-            ' [ ',
-            GROUP_CONCAT(
-                CONCAT(
-                    ' { NAME :',
-                    members.NAME,
-                    ',
-            surname: ',
-                    members.SURNAME,
-                    ',
-            fbId: ',
-                    members.FB_ID,
-                    ' } '
-                ) SEPARATOR ',
-            '
-            ),
-            ' ] '
-        ) AS JSON_MEMBERS
-    FROM
-        users members
-    JOIN lift_map non_drivers ON
-        non_drivers.USER_ID = members.ID
-    WHERE
-        non_drivers.IS_DRIVER = 0 AND non_drivers.PENDING = 0
-    GROUP BY
-        non_drivers.LIFT_ID
-) member_list
-ON
-    member_list.LIFT_ID = lift_map.LIFT_ID
-JOIN messages ON lift_map.LIFT_ID = messages.LIFT_ID
-JOIN users msg_user ON
-    messages.FROM_USER_ID = msg_user.ID
+  users 
+  JOIN
+      lift_map 
+      ON lift_map.USER_ID = users.ID 
+  JOIN
+      lift 
+      ON lift_map.LIFT_ID = lift.ID 
+  JOIN
+      car 
+      ON lift.CAR_ID = car.ID 
+  JOIN
+      car_models 
+      ON car.MODEL_ID = car_models.ID 
+  JOIN
+      adresses destination 
+      ON lift.DESTINATION = destination.ID 
+  JOIN
+      adresses start_point 
+      ON lift.START = start_point.ID 
+  JOIN
+      lift_map driver_map 
+      ON lift_map.LIFT_ID = driver_map.LIFT_ID 
+  JOIN
+      users driver 
+      ON driver_map.USER_ID = driver.ID 
+  LEFT OUTER JOIN(
+          SELECT
+              LIFT_ID,
+              JSON_ARRAYAGG(
+                  JSON_OBJECT(
+                      'name',
+                      members.NAME,
+                      'surname',
+                      members.SURNAME,
+                      'fbId',
+                      members.FB_ID
+                  )
+              ) AS JSON_MEMBERS
+          FROM
+              users members 
+              JOIN
+                  lift_map non_drivers 
+                  ON non_drivers.USER_ID = members.ID 
+          WHERE
+              non_drivers.IS_DRIVER = 0 
+              AND non_drivers.PENDING = 0 
+          GROUP BY
+              non_drivers.LIFT_ID 
+      )
+      member_list 
+      ON member_list.LIFT_ID = lift_map.LIFT_ID 
+  JOIN
+      messages 
+      ON lift_map.LIFT_ID = messages.LIFT_ID 
+  JOIN
+      users msg_user 
+      ON messages.FROM_USER_ID = msg_user.ID 
 WHERE
-    driver_map.IS_DRIVER = 1 AND lift_map.PENDING = 0 AND users.FB_ID = ?
+  driver_map.IS_DRIVER = 1 
+  AND lift_map.PENDING = 0
+  AND users.FB_ID = ?
 GROUP BY
-    lift_map.LIFT_ID
+  lift_map.LIFT_ID
   `, [uid])).result[0]
   return {
     id: lift_data.LIFT_ID,
@@ -173,22 +180,93 @@ GROUP BY
 
 async function getLiftRequests (uid) {
   var db_requests = (await runQuery(`
-  SELECT CONCAT('[', GROUP_CONCAT(lifts.DATA SEPARATOR ","), ']') AS JSON FROM (
-    
-    SELECT CONCAT('{liftId: ', my_lifts.LIFT_ID, ', requestingUsers: [', 
-                  GROUP_CONCAT( CONCAT('{fbId:\'', users.FB_ID, '\', name:\'', users.NAME, '\', surname:\'', users.SURNAME, '\', bio:\'', users.DESCRIPTION, '\', stats:{ liftCount:', IFNULL(liftCount.COUNT, 0) , ' , driverCount:', IFNULL(driverCount.COUNT, 0), ' }, prefs: { talk: \'',users.PREF_TALK,'\' , talkMorning: \'',users.PREF_TALK_MORNING,'\' , smoking: \'', users.PREF_SMOKING,'\', music: \'', users.PREF_MUSIC,'\' }}')
-                               SEPARATOR ', ')
-                  , ']}') AS DATA
-
-    FROM users me
-    join lift_map my_lifts on my_lifts.USER_ID = me.ID AND my_lifts.IS_DRIVER = 1
-    join lift_map requests on my_lifts.LIFT_ID = requests.LIFT_ID AND requests.PENDING = 1
-    join users on requests.USER_ID = users.ID
-    left outer join (SELECT lift_map.USER_ID, count(*) AS COUNT from lift_map where lift_map.IS_DRIVER = 0 AND lift_map.PENDING = 0 group by lift_map.USER_ID) liftCount on users.ID = liftCount. USER_ID
-    left outer join (SELECT lift_map.USER_ID, count(*) AS COUNT from lift_map where lift_map.IS_DRIVER = 1 group by lift_map.USER_ID) driverCount on users.ID = driverCount.USER_ID
-
-    group by my_lifts.LIFT_ID
-  ) lifts
+  SELECT
+    JSON_ARRAYAGG(lifts.DATA) AS JSON 
+FROM
+    (
+        SELECT
+            JSON_OBJECT(
+                'liftId',
+                my_lifts.LIFT_ID,
+                'requestingUsers',
+                JSON_ARRAY(
+                    JSON_OBJECT(
+                        'fbId',
+                        users.FB_ID,
+                        'name',
+                        users.NAME,
+                        'surname',
+                        users.SURNAME,
+                        'bio',
+                        users.DESCRIPTION,
+                        'stats',
+                        JSON_OBJECT(
+                            'liftCount',
+                            IFNULL(liftCount.COUNT, 0),
+                            'driverCount',
+                            IFNULL(driverCount.COUNT, 0)
+                        ),
+                        'prefs',
+                        JSON_OBJECT(
+                            'talk',
+                            users.PREF_TALK,
+                            'talkMorning',
+                            users.PREF_TALK_MORNING,
+                            'smoking',
+                            users.PREF_SMOKING,
+                            'music',
+                            users.PREF_MUSIC
+                        )
+                    )
+                )
+            ) AS DATA 
+        FROM
+            users me 
+            JOIN
+                lift_map my_lifts 
+                ON my_lifts.USER_ID = me.ID 
+                AND my_lifts.IS_DRIVER = 1 
+            JOIN
+                lift_map requests 
+                ON my_lifts.LIFT_ID = requests.LIFT_ID 
+                AND requests.PENDING = 1 
+            JOIN
+                users 
+                ON requests.USER_ID = users.ID 
+            LEFT OUTER JOIN
+                (
+                    SELECT
+                        lift_map.USER_ID,
+                        COUNT(*) AS COUNT 
+                    FROM
+                        lift_map 
+                    WHERE
+                        lift_map.IS_DRIVER = 0 
+                        AND lift_map.PENDING = 0 
+                    GROUP BY
+                        lift_map.USER_ID
+                )
+                liftCount 
+                ON users.ID = liftCount. USER_ID 
+            LEFT OUTER JOIN
+                (
+                    SELECT
+                        lift_map.USER_ID,
+                        COUNT(*) AS COUNT 
+                    FROM
+                        lift_map 
+                    WHERE
+                        lift_map.IS_DRIVER = 1 
+                    GROUP BY
+                        lift_map.USER_ID
+                )
+                driverCount 
+                ON users.ID = driverCount.USER_ID
+        WHERE me.FB_ID = ?
+        GROUP BY
+            my_lifts.LIFT_ID 
+    )
+    lifts
   `, [uid])).result[0].JSON
 
   return JSON.parse(db_requests);
