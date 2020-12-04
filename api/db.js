@@ -5,7 +5,8 @@ const pool = mariadb.createPool({
   user: config.username,
   password: config.password,
   database: config.database,
-  connectionLimit: 5
+  connectionLimit: 5,
+  multipleStatements: true
 });
 
 module.exports = async function runQuery(sql, data) {
