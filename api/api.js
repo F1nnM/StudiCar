@@ -99,10 +99,10 @@ async function getChatLifts(uid) {
               car_models 
               ON car.MODEL_ID = car_models.ID 
           JOIN
-              adresses destination 
+              addresses destination 
               ON lift.DESTINATION = destination.ID 
           JOIN
-              adresses start_point 
+              addresses start_point 
               ON lift.START = start_point.ID 
           JOIN
               lift_map driver_map 
@@ -150,130 +150,138 @@ async function getChatLifts(uid) {
           lift_map.LIFT_ID
     )
 SELECT 
-	JSON_OBJECT(
-        'id', LIFT_ID,
-        'car', JSON_OBJECT(
-            'brand', CAR_BRAND,
-            'model', CAR_MODEL,
-            'allSeats', CAR_SEATS,
-            'licensePlate', CAR_LICENSE_PLATE,
-            'built', CAR_BUILT,
-            'type', CAR_TYPE
-        ),
-        'departAt', LIFT_DEPART,
-        'arriveBy', LIFT_ARRIVE,
-        'destination', DESTINATION_CITY,
-        'start', START_CITY,
-        'driver', JSON_OBJECT(
-            'id', DRIVER_ID,
-            'name', DRIVER_NAME,
-            'surname', DRIVER_SURNAME,
-            'prefs', JSON_OBJECT(
-            	'talk', DRIVER_PREF_TALK,
-                'talkMorning', DRIVER_PREF_TALKMORNING,
-                'smoking', DRIVER_PREF_SMOKING,
-                'music', DRIVER_PREF_MUSIC
+	IFNULL(
+        JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'id', LIFT_ID,
+                'car', JSON_OBJECT(
+                    'brand', CAR_BRAND,
+                    'model', CAR_MODEL,
+                    'allSeats', CAR_SEATS,
+                    'licensePlate', CAR_LICENSE_PLATE,
+                    'built', CAR_BUILT,
+                    'type', CAR_TYPE
+                ),
+                'departAt', LIFT_DEPART,
+                'arriveBy', LIFT_ARRIVE,
+                'destination', DESTINATION_CITY,
+                'start', START_CITY,
+                'driver', JSON_OBJECT(
+                    'id', DRIVER_ID,
+                    'name', DRIVER_NAME,
+                    'surname', DRIVER_SURNAME,
+                    'prefs', JSON_OBJECT(
+                        'talk', DRIVER_PREF_TALK,
+                        'talkMorning', DRIVER_PREF_TALKMORNING,
+                        'smoking', DRIVER_PREF_SMOKING,
+                        'music', DRIVER_PREF_MUSIC
+                    )
+                ),
+                'passengers', JSON_QUERY(JSON_MEMBERS, '$'),
+                'messages', JSON_QUERY(JSON_MESSAGES, '$')
             )
         ),
-        'passengers', JSON_QUERY(JSON_MEMBERS, '$'),
-        'messages', JSON_QUERY(JSON_MESSAGES, '$')
+        JSON_ARRAY()
     )
     AS JSON
 FROM lifts
 
-  `, [uid])).result[0]
+  `, [uid])).result[0].JSON
   return lift_data
 }
 
 async function getLiftRequests(uid) {
   var db_requests = (await runQuery(`
   SELECT
-    JSON_ARRAYAGG(lifts.DATA) AS JSON 
+  IFNULL(
+      JSON_ARRAYAGG(lifts.DATA),
+      JSON_ARRAY()
+  ) AS JSON 
 FROM
-    (
-        SELECT
-            JSON_OBJECT(
-                'liftId',
-                my_lifts.LIFT_ID,
-                'requestingUsers',
-                JSON_ARRAY(
-                    JSON_OBJECT(
-                        'fbId',
-                        users.FB_ID,
-                        'name',
-                        users.NAME,
-                        'surname',
-                        users.SURNAME,
-                        'bio',
-                        users.DESCRIPTION,
-                        'stats',
-                        JSON_OBJECT(
-                            'liftCount',
-                            IFNULL(liftCount.COUNT, 0),
-                            'driverCount',
-                            IFNULL(driverCount.COUNT, 0)
-                        ),
-                        'prefs',
-                        JSON_OBJECT(
-                            'talk',
-                            users.PREF_TALK,
-                            'talkMorning',
-                            users.PREF_TALK_MORNING,
-                            'smoking',
-                            users.PREF_SMOKING,
-                            'music',
-                            users.PREF_MUSIC
-                        )
-                    )
-                )
-            ) AS DATA 
-        FROM
-            users me 
-            JOIN
-                lift_map my_lifts 
-                ON my_lifts.USER_ID = me.ID 
-                AND my_lifts.IS_DRIVER = 1 
-            JOIN
-                lift_map requests 
-                ON my_lifts.LIFT_ID = requests.LIFT_ID 
-                AND requests.PENDING = 1 
-            JOIN
-                users 
-                ON requests.USER_ID = users.ID 
-            LEFT OUTER JOIN
-                (
-                    SELECT
-                        lift_map.USER_ID,
-                        COUNT(*) AS COUNT 
-                    FROM
-                        lift_map 
-                    WHERE
-                        lift_map.IS_DRIVER = 0 
-                        AND lift_map.PENDING = 0 
-                    GROUP BY
-                        lift_map.USER_ID
-                )
-                liftCount 
-                ON users.ID = liftCount. USER_ID 
-            LEFT OUTER JOIN
-                (
-                    SELECT
-                        lift_map.USER_ID,
-                        COUNT(*) AS COUNT 
-                    FROM
-                        lift_map 
-                    WHERE
-                        lift_map.IS_DRIVER = 1 
-                    GROUP BY
-                        lift_map.USER_ID
-                )
-                driverCount 
-                ON users.ID = driverCount.USER_ID
-        WHERE me.FB_ID = ?
-        GROUP BY
-            my_lifts.LIFT_ID 
-    )
-    lifts
+  (
+      SELECT
+          JSON_OBJECT(
+              'liftId',
+              my_lifts.LIFT_ID,
+              'requestingUsers',
+              JSON_ARRAY(
+                  JSON_OBJECT(
+                      'fbId',
+                      users.FB_ID,
+                      'name',
+                      users.NAME,
+                      'surname',
+                      users.SURNAME,
+                      'bio',
+                      users.DESCRIPTION,
+                      'stats',
+                      JSON_OBJECT(
+                          'liftCount',
+                          IFNULL(liftCount.COUNT, 0),
+                          'driverCount',
+                          IFNULL(driverCount.COUNT, 0)
+                      ),
+                      'prefs',
+                      JSON_OBJECT(
+                          'talk',
+                          users.PREF_TALK,
+                          'talkMorning',
+                          users.PREF_TALK_MORNING,
+                          'smoking',
+                          users.PREF_SMOKING,
+                          'music',
+                          users.PREF_MUSIC
+                      )
+                  )
+              )
+          ) AS DATA 
+      FROM
+          users me 
+          JOIN
+              lift_map my_lifts 
+              ON my_lifts.USER_ID = me.ID 
+              AND my_lifts.IS_DRIVER = 1 
+          JOIN
+              lift_map requests 
+              ON my_lifts.LIFT_ID = requests.LIFT_ID 
+              AND requests.PENDING = 1 
+          JOIN
+              users 
+              ON requests.USER_ID = users.ID 
+          LEFT OUTER JOIN
+              (
+                  SELECT
+                      lift_map.USER_ID,
+                      COUNT(*) AS COUNT 
+                  FROM
+                      lift_map 
+                  WHERE
+                      lift_map.IS_DRIVER = 0 
+                      AND lift_map.PENDING = 0 
+                  GROUP BY
+                      lift_map.USER_ID
+              )
+              liftCount 
+              ON users.ID = liftCount. USER_ID 
+          LEFT OUTER JOIN
+              (
+                  SELECT
+                      lift_map.USER_ID,
+                      COUNT(*) AS COUNT 
+                  FROM
+                      lift_map 
+                  WHERE
+                      lift_map.IS_DRIVER = 1 
+                  GROUP BY
+                      lift_map.USER_ID
+              )
+              driverCount 
+              ON users.ID = driverCount.USER_ID
+      WHERE me.FB_ID = ?
+      GROUP BY
+          my_lifts.LIFT_ID 
+  )
+  lifts
   `, [uid])).result[0].JSON
 
   return db_requests;
@@ -465,18 +473,15 @@ module.exports = {
                   user_addresses USING(USER_ID)
               LEFT OUTER JOIN
                 cars USING(USER_ID)
-            `, [options.fbid])).result[0].JSON
+            `, [options.fbid])).result[1][0].JSON
 
           data = JSON.parse(data)
 
-          data.chatLifts = getChatLifts(uid)
-          data.liftRequests = getLiftRequests(uid)
+          data.chatLifts = JSON.parse(await getChatLifts(options.fbid))
+          data.liftRequests = JSON.parse(await getLiftRequests(options.fbid))
 
-          const simulationProps = ['topFriends']
+          data['topFriends'] = apiResponseSimulation['topFriends']
 
-          simulationProps.forEach(prop => {
-            data[prop] = apiResponseSimulation[prop]
-          })
         } else {
           data = JSON.parse((await runQuery(`
           SELECT
@@ -553,12 +558,12 @@ module.exports = {
                   rides USING(USER_ID) 
               LEFT OUTER JOIN
                   drives USING(USER_ID)
-            `, [options.fbid])).result[0].JSON)
+            `, [options.fbid])).result[1][0].JSON)
         }
 
 
-        data.stats.liftsOffered = Math.random() * 100
-        data.stats.liftsAll = data.stats.liftsOffered + Math.random() * 200
+        data.stats.liftsOffered = Math.floor(Math.random() * 100)
+        data.stats.liftsAll = data.stats.liftsOffered + Math.floor(Math.random() * 200)
 
         res.end(JSON.stringify(data))
       }
@@ -732,8 +737,8 @@ SELECT lift.UUID AS ID, driver.FB_ID as DRIVER_FB_ID, driver.NAME as DRIVER_NAME
 FROM lift
 join lift_map on lift_map.LIFT_ID = lift.ID
 join users driver on lift_map.USER_ID = driver.ID AND lift_map.IS_DRIVER = 1
-JOIN adresses destination on lift.DESTINATION = destination.ID
-join adresses start_point on lift.START = start_point.ID
+JOIN addresses destination on lift.DESTINATION = destination.ID
+join addresses start_point on lift.START = start_point.ID
 left outer join (SELECT lift_map.LIFT_ID, count(*) AS OCCUPIED_SEATS from lift_map where lift_map.PENDING != 0 GROUP BY lift_map.LIFT_ID) counts on lift.ID = counts.LIFT_ID
 
 where lift.FIRST_DATE >= CURRENT_DATE() OR lift.REPEATS_ON_WEEKDAY != 0`, [])).result[0]
@@ -769,13 +774,13 @@ where lift.FIRST_DATE >= CURRENT_DATE() OR lift.REPEATS_ON_WEEKDAY != 0`, [])).r
   },
   'POST': {
     '/createUserIfNotExisting': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId', 'name', 'mail'], res)) {
+      if (!isOptionMissing(options, ['secretFbId', 'name', 'surname', 'mail'], res)) {
         let users = (await runQuery("SELECT ID FROM `users` WHERE users.FB_ID = ?", [options.secretFbId])).result[0];
         if (!users) {
           let png = generateJdenticon(options.name);
           await runQuery(
-            "INSERT INTO `users` (`ID`, `FB_ID`, `NAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKING`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`)" +
-            "VALUES (NULL, ?, ?, 'X', '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED')", [options.secretFbId, options.name, png, options.mail]).catch(error => {
+            "INSERT INTO `users` (`ID`, `FB_ID`, `NAME`, `SURNAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKING`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`)" +
+            "VALUES (NULL, ?, ?, ?, 'X', '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED')", [options.secretFbId, options.name, options.surname, png, options.mail]).catch(error => {
               throw error;
             });
           res.end("added")
@@ -845,7 +850,7 @@ where lift.FIRST_DATE >= CURRENT_DATE() OR lift.REPEATS_ON_WEEKDAY != 0`, [])).r
       }
     },
     '/addAddress': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId', 'adresses', 'id'], res)) {
+      if (!isOptionMissing(options, ['secretFbId', 'address', 'id'], res)) {
         await runQuery(
           "INSERT INTO `address` (`ID`, `NICKNAME`, `POSTCODE`, `CITY`, `NUMBER`, `STREET`, `USER_INDEX`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, '1', ?);", [options.address.nickname, options.address.postcode, options.address.city, options.address.number, options.address.street, options.id]).catch(error => {
             throw error;
@@ -857,7 +862,7 @@ where lift.FIRST_DATE >= CURRENT_DATE() OR lift.REPEATS_ON_WEEKDAY != 0`, [])).r
     '/removeAddress': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId', 'id'], res)) {
         await runQuery(
-          "DELETE FROM `adresses` WHERE `adresses`.`ID` = ?", [options.id]).catch(error => {
+          "DELETE FROM `addresses` WHERE `addresses`.`ID` = ?", [options.id]).catch(error => {
             throw error;
           });
 

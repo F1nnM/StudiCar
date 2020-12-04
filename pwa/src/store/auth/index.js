@@ -111,13 +111,13 @@ export default {
       await Firebase.auth().createUserWithEmailAndPassword(email, password)
         .then(user => {
           Firebase.auth().currentUser.updateProfile({
-            displayName: name
+            displayName: name+ " " + surname
           })
             .then(_ => {
-              let currentUser = Firebase.auth().currentUser;
+              let currentUser = Firebase.auth().currentUser
               sendApiRequest(
                 SQL_CREATE_USER_IF_NOT_EXISTING,
-                { name: currentUser.displayName, mail: currentUser.email },
+                { name, surname, mail: currentUser.email },
                 _ => sendApiRequest(SQL_GET_USER_DATA, { fbid: currentUser.uid },
                   data => {
                     commit("SET_USER", data);
