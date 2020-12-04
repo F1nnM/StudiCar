@@ -8,11 +8,10 @@ export default ({ router, store }) => {
   Firebase.auth().onAuthStateChanged(user => {
     if (user) {
       store.commit("auth/SET_USER_DATA_LOADING", true)
-      var nameArr = user.displayName.split(" "),
-        name = nameArr[0], surname = nameArr[1]
+      var [name, surname] = user.displayName.split(" ")
       sendApiRequest(
         SQL_CREATE_USER_IF_NOT_EXISTING,
-        { name: name, surname: surname, mail: user.email },
+        { name, surname, mail: user.email },
         _ => sendApiRequest(
           SQL_GET_USER_DATA,
           { fbid: user.uid },
