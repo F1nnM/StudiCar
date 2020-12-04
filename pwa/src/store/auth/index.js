@@ -65,7 +65,7 @@ export default {
       state.user.cars = state.user.cars.filter(item => item.carId != payload) // filters the one with matching id
     },
 
-    SET_USER_DATA_LOADING (state, payload) {
+    SET_USER_DATA_LOADED (state, payload) {
       state.signinLoaded = payload
     },
 

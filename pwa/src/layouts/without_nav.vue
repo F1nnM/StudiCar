@@ -5,6 +5,7 @@
         <q-toolbar-title>StudiCar Authentifizierung</q-toolbar-title>
       </q-toolbar>
     </q-header>
+    <GetUserDataLoading persistent v-model="loadingScreenVisible" />
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -12,12 +13,17 @@
 </template>
 
 <script>
-import EssentialLink from "components/EssentialLink";
+import GetUserDataLoading from "components/GetUserDataLoading";
 
 export default {
   name: "without_nav",
-  components: {},
-};
+  components: {GetUserDataLoading},
+  computed: {
+    loadingScreenVisible() {
+      return !this.$store.getters["auth/signinLoaded"];
+    }
+  }
+}
 </script>
 
 <style scoped>
