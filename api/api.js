@@ -321,7 +321,7 @@ module.exports = {
           FROM
               users 
           WHERE
-              users.FB_ID = "wG3cG4M7NFMJzJYcreFjLrJC9Q23";
+              users.FB_ID = ?;
           WITH data AS 
           (
               SELECT
@@ -484,7 +484,7 @@ module.exports = {
           FROM
               users 
           WHERE
-              users.FB_ID = "wG3cG4M7NFMJzJYcreFjLrJC9Q23";
+              users.FB_ID = ?;
           WITH data AS 
           (
               SELECT
