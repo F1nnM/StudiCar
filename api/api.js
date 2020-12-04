@@ -7,7 +7,7 @@ const newsPath = 'news/postillon/ticker.txt',
   longQueries = require('./longQueries'),
   apiResponseSimulation = require('./simulation/apiResponse')
 
-function isOptionMissing (data, needed, res) {
+function isOptionMissing(data, needed, res) {
   return needed.some(key => {
     if (typeof data[key] == "undefined") {
       res.writeHead(400);
@@ -19,7 +19,7 @@ function isOptionMissing (data, needed, res) {
   });
 }
 
-function generateJdenticon (seed) {
+function generateJdenticon(seed) {
   var jdenticon = require("jdenticon")
   jdenticon.config = {
     lightness: {
@@ -37,7 +37,7 @@ function generateJdenticon (seed) {
   return jdenticon.toPng(seed, size);
 }
 
-async function getChatLifts (uid) {
+async function getChatLifts(uid) {
   //TODO make query return Nickname if the querying user is offering the lift. Maybe https://stackoverflow.com/questions/1747750/select-column-if-blank-select-from-another
   var lift_data = (await runQuery(`
   WITH
@@ -190,98 +190,92 @@ FROM lifts
   return lift_data
 }
 
-async function getLiftRequests (uid) {
+async function getLiftRequests(uid) {
   var db_requests = (await runQuery(`
-  SELECT
-  IFNULL(
-      JSON_ARRAYAGG(lifts.DATA),
-      JSON_ARRAY()
-  ) AS JSON 
+SELECT
+    JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'liftId',
+            my_lifts.LIFT_ID,
+            'requestingUsers',
+            JSON_ARRAY(
+                JSON_OBJECT(
+                    'fbId',
+                    users.FB_ID,
+                    'name',
+                    users.NAME,
+                    'surname',
+                    users.SURNAME,
+                    'bio',
+                    users.DESCRIPTION,
+                    'stats',
+                    JSON_OBJECT(
+                        'liftCount',
+                        IFNULL(liftCount.COUNT, 0),
+                        'driverCount',
+                        IFNULL(driverCount.COUNT, 0)
+                    ),
+                    'prefs',
+                    JSON_OBJECT(
+                        'talk',
+                        users.PREF_TALK,
+                        'talkMorning',
+                        users.PREF_TALK_MORNING,
+                        'smoking',
+                        users.PREF_SMOKING,
+                        'music',
+                        users.PREF_MUSIC
+                    )
+                )
+            )
+        ) 
+    )AS DATA 
 FROM
-  (
-      SELECT
-          JSON_OBJECT(
-              'liftId',
-              my_lifts.LIFT_ID,
-              'requestingUsers',
-              JSON_ARRAY(
-                  JSON_OBJECT(
-                      'fbId',
-                      users.FB_ID,
-                      'name',
-                      users.NAME,
-                      'surname',
-                      users.SURNAME,
-                      'bio',
-                      users.DESCRIPTION,
-                      'stats',
-                      JSON_OBJECT(
-                          'liftCount',
-                          IFNULL(liftCount.COUNT, 0),
-                          'driverCount',
-                          IFNULL(driverCount.COUNT, 0)
-                      ),
-                      'prefs',
-                      JSON_OBJECT(
-                          'talk',
-                          users.PREF_TALK,
-                          'talkMorning',
-                          users.PREF_TALK_MORNING,
-                          'smoking',
-                          users.PREF_SMOKING,
-                          'music',
-                          users.PREF_MUSIC
-                      )
-                  )
-              )
-          ) AS DATA 
-      FROM
-          users me 
-          JOIN
-              lift_map my_lifts 
-              ON my_lifts.USER_ID = me.ID 
-              AND my_lifts.IS_DRIVER = 1 
-          JOIN
-              lift_map requests 
-              ON my_lifts.LIFT_ID = requests.LIFT_ID 
-              AND requests.PENDING = 1 
-          JOIN
-              users 
-              ON requests.USER_ID = users.ID 
-          LEFT OUTER JOIN
-              (
-                  SELECT
-                      lift_map.USER_ID,
-                      COUNT(*) AS COUNT 
-                  FROM
-                      lift_map 
-                  WHERE
-                      lift_map.IS_DRIVER = 0 
-                      AND lift_map.PENDING = 0 
-                  GROUP BY
-                      lift_map.USER_ID
-              )
-              liftCount 
-              ON users.ID = liftCount. USER_ID 
-          LEFT OUTER JOIN
-              (
-                  SELECT
-                      lift_map.USER_ID,
-                      COUNT(*) AS COUNT 
-                  FROM
-                      lift_map 
-                  WHERE
-                      lift_map.IS_DRIVER = 1 
-                  GROUP BY
-                      lift_map.USER_ID
-              )
-              driverCount 
-              ON users.ID = driverCount.USER_ID
-      WHERE me.FB_ID = ?
-      GROUP BY
-          my_lifts.LIFT_ID 
-  )
-  lifts
+users me 
+JOIN
+    lift_map my_lifts 
+    ON my_lifts.USER_ID = me.ID 
+    AND my_lifts.IS_DRIVER = 1 
+JOIN
+    lift_map requests 
+    ON my_lifts.LIFT_ID = requests.LIFT_ID 
+    AND requests.PENDING = 1 
+JOIN
+    users 
+    ON requests.USER_ID = users.ID 
+LEFT OUTER JOIN
+    (
+        SELECT
+            lift_map.USER_ID,
+            COUNT(*) AS COUNT 
+        FROM
+            lift_map 
+        WHERE
+            lift_map.IS_DRIVER = 0 
+            AND lift_map.PENDING = 0 
+        GROUP BY
+            lift_map.USER_ID 
+    )
+    liftCount 
+    ON users.ID = liftCount. USER_ID 
+LEFT OUTER JOIN
+    (
+        SELECT
+            lift_map.USER_ID,
+            COUNT(*) AS COUNT 
+        FROM
+            lift_map 
+        WHERE
+            lift_map.IS_DRIVER = 1 
+        GROUP BY
+            lift_map.USER_ID 
+    )
+    driverCount 
+    ON users.ID = driverCount.USER_ID 
+WHERE
+me.FB_ID = "wG3cG4M7NFMJzJYcreFjLrJC9Q23" 
+GROUP BY
+my_lifts.LIFT_ID
   `, [uid])).result[0].JSON
 
   return db_requests;
@@ -290,6 +284,13 @@ FROM
 function endWithJSON(res, JSON) {
   res.setHeader('Content-Type', 'application/json')
   res.end(JSON)
+}
+
+async function isUserVerified(fbid) {
+  var verified = (await runQuery(`
+  SELECT VERIFIED FROM users WHERE FB_ID = ?
+  `, [fbid])).result[0].VERIFIED
+  return verified === 1
 }
 
 module.exports = {
@@ -302,14 +303,14 @@ module.exports = {
       res.end(JSON.stringify(result));
     },
     '/profilePicture': async (req, res, options) => {
-      if (!isOptionMissing(options, ['fbid'], res)) {
+      if (!isOptionMissing(options, ['fbid'], res) && isUserVerified(options.secretFbId)) {
         let result = await runQuery("SELECT PICTURE FROM `users` WHERE users.FB_ID = ?", [options.fbid]);
         res.setHeader('Content-Type', 'image/png');
         res.end(result.result[0].PICTURE, 'binary');
       }
     },
     '/getNewsticker': async (req, res, options) => {
-      if (!isOptionMissing(options, [], res)) {
+      if (isUserVerified(options.secretFbId)) {
         fs.readFile(newsPath, 'utf8', (err, data) => {
           if (err) throw err;
           var news = data.toString().split("\n");
@@ -325,7 +326,7 @@ module.exports = {
       }
     },
     '/getUserData': async (req, res, options) => {
-      if (!isOptionMissing(options, ['fbid', 'secretFbId'], res)) {
+      if (!isOptionMissing(options, ['fbid'], res) && isUserVerified(options.secretFbId)) {
         var data;
         if (options.secretFbId = options.fbid) { // NOT ACCESSING PUBLIC PROFILE
           data = (await runQuery(`
@@ -334,7 +335,7 @@ module.exports = {
           FROM
               users 
           WHERE
-              users.FB_ID = ?;
+              users.FB_ID = "wG3cG4M7NFMJzJYcreFjLrJC9Q23";
           WITH data AS 
           (
               SELECT
@@ -390,7 +391,7 @@ module.exports = {
                 addresses.CITY,
                 addresses.NUMBER,
                 addresses.STREET,
-                addresses.USER_ID
+                @userid as USER_ID
               FROM
                 addresses
               WHERE
@@ -442,29 +443,35 @@ module.exports = {
                           'liftMaxDistance', data.LIFT_MAX_DISTANCE
                       )
                   ),
-                  '$.addresses',
-                  JSON_ARRAYAGG(
-                      JSON_OBJECT(
-                          'id', user_addresses.ID,
-                          'nickname', user_addresses.NICKNAME,
-                          'postcode', user_addresses.POSTCODE,
-                          'city', user_addresses.CITY,
-                          'street', user_addresses.STREET,
-                          'number', user_addresses.NUMBER
-                      )
+                  '$.addresses', JSON_COMPACT(
+                      (SELECT
+                          JSON_ARRAYAGG(
+                              JSON_OBJECT(
+                                  'id', user_addresses.ID,
+                                  'nickname', user_addresses.NICKNAME,
+                                  'postcode', user_addresses.POSTCODE,
+                                  'city', user_addresses.CITY,
+                                  'street', user_addresses.STREET,
+                                  'number', user_addresses.NUMBER
+                              )
+                          ) from user_addresses
+                     )
                   ),
-                  '$.cars',
-                  JSON_ARRAYAGG(
-                      JSON_OBJECT(
-                          'modelId', cars.MODEL_ID,
-                          'carId', cars.ID,
-                          'brand', cars.BRAND,
-                          'model', cars.MODEL,
-                          'type', cars.TYPE,
-                          'licensePlate', cars.LICENSE_PLATE,
-                          'year', cars.YEAR,
-                          'seats', cars.SEATS,
-                          'color', CONCAT( '#', cars.COLOR)
+                  '$.cars', JSON_COMPACT(
+                      (SELECT
+                          JSON_ARRAYAGG(
+                              JSON_OBJECT(
+                                  'modelId', cars.MODEL_ID,
+                                  'carId', cars.ID,
+                                  'brand', cars.BRAND,
+                                  'model', cars.MODEL,
+                                  'type', cars.TYPE,
+                                  'licensePlate', cars.LICENSE_PLATE,
+                                  'year', cars.YEAR,
+                                  'seats', cars.SEATS,
+                                  'color', CONCAT( '#', cars.COLOR)
+                              )
+                          ) from cars
                       )
                   )
               ) AS JSON
@@ -474,10 +481,6 @@ module.exports = {
                   rides USING(USER_ID) 
               LEFT OUTER JOIN
                   drives USING(USER_ID)
-              LEFT OUTER JOIN
-                  user_addresses USING(USER_ID)
-              LEFT OUTER JOIN
-                cars USING(USER_ID)
             `, [options.fbid])).result[1][0].JSON
 
           data = JSON.parse(data)
@@ -574,7 +577,7 @@ module.exports = {
       }
     },
     '/getCarModels': async (req, res, options) => {
-      if (!isOptionMissing(options, [], res)) {
+      if (isUserVerified(options.secretFbId)) {
         let result = await runQuery("SELECT BRAND, MODEL FROM car_models", []);
         let cars = result.result
         let carsObj = {}
@@ -592,29 +595,27 @@ module.exports = {
       }
     },
     '/getMessages': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId'], res)) {
-        endWithJSON(res, await getChatLifts(secretFbId))
+      if (isUserVerified(options.secretFbId)) {
+        endWithJSON(res, await getChatLifts(options.secretFbId))
       }
     },
     '/getLegal': async (req, res, options) => {
-      if (!isOptionMissing(options, [], res)) {
-        var html = "Legal.md couldn't be processed."
-        fs.readFile('legal/legal.md', 'utf8', (err, data) => {
+      var html = "Legal.md couldn't be processed."
+      fs.readFile('legal/legal.md', 'utf8', (err, data) => {
 
-          try {
-            var converter = new showdown.Converter()
+        try {
+          var converter = new showdown.Converter()
 
-            html = converter.makeHtml(data)
+          html = converter.makeHtml(data)
 
-          } catch (e) {
-            res.writeHead(500);
-          }
-          res.end(html)
-        })
-      }
+        } catch (e) {
+          res.writeHead(500);
+        }
+        res.end(html)
+      })
     },
     '/getLiftInfo': async (req, res, options) => {
-      if (!isOptionMissing(options, ['id'], res)) {
+      if (!isOptionMissing(options, ['id'], res) && isUserVerified(options.secretFbId)) {
         var liftId = options.id
         let carInfo = await runQuery("SELECT car_models.BRAND, car_models.MODEL, car.COLOR, car.TYPE, car.LICENSE_PLATE, lift.OFFERED_SEATS FROM lift JOIN car ON lift.CAR_ID = car.ID JOIN car_models ON car_models.ID = car.MODEL_ID WHERE lift.ID = ?;", [liftId])
         carInfo = carInfo.result[0]
@@ -647,49 +648,45 @@ module.exports = {
       }
     },
     '/getFAQ': async (req, res, options) => {
-      if (!isOptionMissing(options, [], res)) {
-        var result = (await runQuery(longQueries.getFAQ, [])).result,
-          data = []
-        result.forEach(item => {
-          data.push({
-            id: item.ID,
-            question: item.QUESTION,
-            answer: item.ANSWER,
-            category: item.CATEGORY,
-            answeredBy: {
-              id: item.ORGA_ID,
-              name: item.ORGAS_NAME.split(' ')[0],
-              function: item.FUNCTION
-            }
-          })
+      var result = (await runQuery(longQueries.getFAQ, [])).result,
+        data = []
+      result.forEach(item => {
+        data.push({
+          id: item.ID,
+          question: item.QUESTION,
+          answer: item.ANSWER,
+          category: item.CATEGORY,
+          answeredBy: {
+            id: item.ORGA_ID,
+            name: item.ORGAS_NAME.split(' ')[0],
+            function: item.FUNCTION
+          }
         })
-        endWithJSON(res, JSON.stringify(data))
-      }
+      })
+      endWithJSON(res, JSON.stringify(data))
     },
     '/getAllFAQ': async (req, res, options) => {
-      if (!isOptionMissing(options, [], res)) {
-        var result = (await runQuery(longQueries.getAllFAQ, [])).result,
-          obj = {
-            'bedienung': [],
-            'sonstiges': []
-          }
-        result.forEach(item => {
-          obj[item.CATEGORY.toLowerCase()].push({
-            id: item.ID,
-            question: item.QUESTION,
-            askedBy: item.FIRST_NAME,
-            answer: item.ANSWER,
-            answeredBy: item.ORGAS_NAME.split(' ')[0],
-            isPublic: item.IS_PUBLIC,
-            lastChange: item.LAST_CHANGE
-          })
+      var result = (await runQuery(longQueries.getAllFAQ, [])).result,
+        obj = {
+          'bedienung': [],
+          'sonstiges': []
+        }
+      result.forEach(item => {
+        obj[item.CATEGORY.toLowerCase()].push({
+          id: item.ID,
+          question: item.QUESTION,
+          askedBy: item.FIRST_NAME,
+          answer: item.ANSWER,
+          answeredBy: item.ORGAS_NAME.split(' ')[0],
+          isPublic: item.IS_PUBLIC,
+          lastChange: item.LAST_CHANGE
         })
+      })
 
-        endWithJSON(res, JSON.stringify(obj))
-      }
+      endWithJSON(res, JSON.stringify(obj))
     },
     '/getTeamInfo': async (req, res, options) => {
-      if (!isOptionMissing(options, [], res)) {
+      if (isUserVerified(options.secretFbId)) {
         const team = apiResponseSimulation.team,
           about = apiResponseSimulation.info
 
@@ -712,7 +709,7 @@ module.exports = {
       }
     },
     '/chatPicture': async (req, res, options) => {
-      if (!isOptionMissing(options, ['msgId', 'secretFbId'], res)) {
+      if (!isOptionMissing(options, ['msgId'], res) && isUserVerified(options.secretFbId)) {
         let pic = (await runQuery(`
         SELECT messages.PICTURE from messages
         join lift_map on messages.LIFT_ID = lift_map.LIFT_ID
@@ -725,7 +722,7 @@ module.exports = {
       }
     },
     '/chatAudio': async (req, res, options) => {
-      if (!isOptionMissing(options, ['msgId', 'secretFbId'], res)) {
+      if (!isOptionMissing(options, ['msgId'], res) && isUserVerified(options.secretFbId)) {
         let audio = (await runQuery(`
         SELECT messages.AUDIO from messages
         join lift_map on messages.LIFT_ID = lift_map.LIFT_ID
@@ -738,86 +735,88 @@ module.exports = {
       }
     },
     '/marketplace': async (req, res, options) => {
-      let JSON = (await runQuery(`
-      WITH
-      lifts as (
-          SELECT
-              lift.UUID AS ID,
-              driver.FB_ID AS DRIVER_FB_ID,
-              driver.NAME AS DRIVER_NAME,
-              driver.SURNAME AS DRIVER_SURNAME,
-              driver.PREF_TALK AS DRIVER_PREF_TALK,
-              driver.PREF_TALK_MORNING AS DRIVER_PREF_TALKMORNING,
-              driver.PREF_SMOKING AS DRIVER_PREF_SMOKING,
-              driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
-              lift.DEPART_AT AS LIFT_DEPART,
-              lift.ARRIVE_BY AS LIFT_ARRIVE,
-              destination.CITY AS DESTINATION_CITY,
-              start_point.CITY AS START_CITY,
-              lift.OFFERED_SEATS,
-              IFNULL(counts.OCCUPIED_SEATS, 0) AS OCCUPIED_SEATS 
-          FROM
-              lift 
-              JOIN
-                  lift_map 
-                  ON lift_map.LIFT_ID = lift.ID 
-              JOIN
-                  users driver 
-                  ON lift_map.USER_ID = driver.ID 
-                  AND lift_map.IS_DRIVER = 1 
-              JOIN
-                  addresses destination 
-                  ON lift.DESTINATION = destination.ID 
-              JOIN
-                  addresses start_point 
-                  ON lift.START = start_point.ID 
-              LEFT OUTER JOIN
-                  (
-                      SELECT
-                          lift_map.LIFT_ID,
-                          COUNT(*) AS OCCUPIED_SEATS 
-                      FROM
-                          lift_map 
-                      WHERE
-                          lift_map.PENDING != 0 
-                      GROUP BY
-                          lift_map.LIFT_ID
-                  )
-                  counts 
-                  ON lift.ID = counts.LIFT_ID 
-          WHERE
-              lift.FIRST_DATE >= CURRENT_DATE() 
-              OR lift.REPEATS_ON_WEEKDAY != 0
-      )
-      
-      SELECT
-        JSON_ARRAYAGG(
-            JSON_OBJECT(
-                'id', lifts.ID,
-                  'diver', JSON_OBJECT(),
-                  'departAt', lifts.LIFT_DEPART,
-                  'arriveBy', lifts.LIFT_ARRIVE,
-                  'destination', lifts.DESTINATION_CITY,
-                  'start', lifts.START_CITY,
-                  'seatsOffered', lifts.OFFERED_SEATS,
-                  'seatsOccupied', lifts.OCCUPIED_SEATS
-              )
-          )
-      FROM
-        lifts
-      `, [])).result[0].JSON
+      if (isUserVerified(options.secretFbId)) {
+        let JSON = (await runQuery(`
+        WITH
+        lifts as (
+            SELECT
+                lift.UUID AS ID,
+                driver.FB_ID AS DRIVER_FB_ID,
+                driver.NAME AS DRIVER_NAME,
+                driver.SURNAME AS DRIVER_SURNAME,
+                driver.PREF_TALK AS DRIVER_PREF_TALK,
+                driver.PREF_TALK_MORNING AS DRIVER_PREF_TALKMORNING,
+                driver.PREF_SMOKING AS DRIVER_PREF_SMOKING,
+                driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
+                lift.DEPART_AT AS LIFT_DEPART,
+                lift.ARRIVE_BY AS LIFT_ARRIVE,
+                destination.CITY AS DESTINATION_CITY,
+                start_point.CITY AS START_CITY,
+                lift.OFFERED_SEATS,
+                IFNULL(counts.OCCUPIED_SEATS, 0) AS OCCUPIED_SEATS 
+            FROM
+                lift 
+                JOIN
+                    lift_map 
+                    ON lift_map.LIFT_ID = lift.ID 
+                JOIN
+                    users driver 
+                    ON lift_map.USER_ID = driver.ID 
+                    AND lift_map.IS_DRIVER = 1 
+                JOIN
+                    addresses destination 
+                    ON lift.DESTINATION = destination.ID 
+                JOIN
+                    addresses start_point 
+                    ON lift.START = start_point.ID 
+                LEFT OUTER JOIN
+                    (
+                        SELECT
+                            lift_map.LIFT_ID,
+                            COUNT(*) AS OCCUPIED_SEATS 
+                        FROM
+                            lift_map 
+                        WHERE
+                            lift_map.PENDING != 0 
+                        GROUP BY
+                            lift_map.LIFT_ID
+                    )
+                    counts 
+                    ON lift.ID = counts.LIFT_ID 
+            WHERE
+                lift.FIRST_DATE >= CURRENT_DATE() 
+                OR lift.REPEATS_ON_WEEKDAY != 0
+        )
+        
+        SELECT
+          JSON_ARRAYAGG(
+              JSON_OBJECT(
+                  'id', lifts.ID,
+                    'diver', JSON_OBJECT(),
+                    'departAt', lifts.LIFT_DEPART,
+                    'arriveBy', lifts.LIFT_ARRIVE,
+                    'destination', lifts.DESTINATION_CITY,
+                    'start', lifts.START_CITY,
+                    'seatsOffered', lifts.OFFERED_SEATS,
+                    'seatsOccupied', lifts.OCCUPIED_SEATS
+                )
+            )
+        FROM
+          lifts
+        `, [])).result[0].JSON
 
-      endWithJSON(res, JSON)
+        endWithJSON(res, JSON)
+      }
     },
     '/liftRequests': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId'], res)) {
+      if (isUserVerified(options.secretFbId)) {
         endWithJSON(res, await getLiftRequests(secretFbId));
       }
     }
   },
   'POST': {
     '/createUserIfNotExisting': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId', 'name', 'surname', 'mail'], res)) {
+      if (!isOptionMissing(options, ['name', 'surname', 'mail'], res)) {
         let users = (await runQuery("SELECT ID FROM `users` WHERE users.FB_ID = ?", [options.secretFbId])).result[0];
         if (!users) {
           let png = generateJdenticon(options.name);
@@ -832,7 +831,7 @@ module.exports = {
       }
     },
     '/updateDescription': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId', 'description'], res)) {
+      if (!isOptionMissing(options, ['description'], res) && isUserVerified(options.secretFbId)) {
         await runQuery(
           "UPDATE `users` SET `DESCRIPTION` = ? WHERE `users`.`FB_ID` = ?", [options.description, options.secretFbId]).catch(error => {
             throw error;
@@ -841,7 +840,7 @@ module.exports = {
       }
     },
     '/updateGender': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId', 'gender'], res)) {
+      if (!isOptionMissing(options, ['gender'], res) && isUserVerified(options.secretFbId)) {
         await runQuery(
           "UPDATE `users` SET `GENDER` = ? WHERE `users`.`FB_ID` = ?", [options.gender, options.secretFbId]).catch(error => {
             throw error;
@@ -850,7 +849,7 @@ module.exports = {
       }
     },
     '/updateLiftMaxDistance': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId', 'liftMaxDistance'], res)) {
+      if (!isOptionMissing(options, ['liftMaxDistance'], res) && isUserVerified(options.secretFbId)) {
         await runQuery(
           "UPDATE `users` SET `LIFT_MAX_DISTANCE` = ? WHERE `users`.`FB_ID` = ?", [options.liftMaxDistance, options.secretFbId]).catch(error => {
             throw error;
@@ -859,7 +858,7 @@ module.exports = {
       }
     },
     '/updateProfilePicture': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId', 'imageData'], res)) {
+      if (!isOptionMissing(options, ['imageData'], res) && isUserVerified(options.secretFbId)) {
         var img = Buffer.from(options.imageData.substr(22), 'base64');
         var dimensions = require('image-size')(img);
         if (!(dimensions.width == 300 && dimensions.height == 300)) {
@@ -874,7 +873,7 @@ module.exports = {
       }
     },
     '/resetProfilePicture': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId'], res)) {
+      if (isUserVerified(options.secretFbId)) {
         var name = (await runQuery("SELECT NAME FROM `users` WHERE users.FB_ID = ?", [options.secretFbId])).result[0].NAME
         await runQuery(
           "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?", [generateJdenticon(name), options.secretFbId]).catch(error => {
@@ -884,7 +883,7 @@ module.exports = {
       }
     },
     '/updatePrefs': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId', 'prefs'], res)) {
+      if (!isOptionMissing(options, ['prefs'], res) && isUserVerified(options.secretFbId)) {
         await runQuery(
           "UPDATE users SET PREF_TALK = ?, PREF_TALK_MORNING = ?, PREF_SMOKING = ?, PREF_MUSIC = ? WHERE FB_ID = ?;", [options.prefs.talk, options.prefs.talkMorning, options.prefs.smoking, options.prefs.music, options.secretFbId]).catch(error => {
             throw error;
@@ -893,7 +892,7 @@ module.exports = {
       }
     },
     '/addAddress': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId', 'address', 'id'], res)) {
+      if (!isOptionMissing(options, ['address', 'id'], res) && isUserVerified(options.secretFbId)) {
         await runQuery(
           "INSERT INTO `address` (`ID`, `NICKNAME`, `POSTCODE`, `CITY`, `NUMBER`, `STREET`, `USER_INDEX`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, '1', ?);", [options.address.nickname, options.address.postcode, options.address.city, options.address.number, options.address.street, options.id]).catch(error => {
             throw error;
@@ -903,7 +902,7 @@ module.exports = {
       }
     },
     '/removeAddress': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId', 'id'], res)) {
+      if (!isOptionMissing(options, ['id'], res) && isUserVerified(options.secretFbId)) {
         await runQuery(
           "DELETE FROM `addresses` WHERE `addresses`.`ID` = ?", [options.id]).catch(error => {
             throw error;
@@ -913,7 +912,7 @@ module.exports = {
       }
     },
     '/addCar': async (req, res, options) => {
-      if (!isOptionMissing(options, ['data'], res)) {
+      if (!isOptionMissing(options, ['data'], res) && isUserVerified(options.secretFbId)) {
 
         let car = options.data.car
         let id = options.data.id
@@ -933,7 +932,7 @@ module.exports = {
       }
     },
     '/removeCar': async (req, res, options) => {
-      if (!isOptionMissing(options, ['id'], res)) {
+      if (!isOptionMissing(options, ['id'], res) && isUserVerified(options.secretFbId)) {
         await runQuery(
           "DELETE FROM `car` WHERE `car`.`ID` = ?", [options.id]).catch(error => {
             throw error;
@@ -943,7 +942,7 @@ module.exports = {
       }
     },
     '/addLift': async (req, res, options) => {
-      if (!isOptionMissing(options, ['secretFbId', 'lift'], res)) {
+      if (!isOptionMissing(options, ['lift'], res) && isUserVerified(options.secretFbId)) {
         var lift = options.lift
         var userId = options.id
 
@@ -966,7 +965,7 @@ module.exports = {
       }
     },
     '/sendMessage': async (req, res, options) => {
-      if (!isOptionMissing(options, ['id', 'message'], res)) {
+      if (!isOptionMissing(options, ['id', 'message'], res) && isUserVerified(options.secretFbId)) {
         var message = options.message
         var id = options.id
         switch (message.type) {
@@ -997,7 +996,7 @@ module.exports = {
       }
     },
     '/addQuestion': async (req, res, options) => {
-      if (!isOptionMissing(options, ['question', 'category', 'uid'], res)) {
+      if (!isOptionMissing(options, ['question', 'category', 'uid'], res) && isUserVerified(options.secretFbId)) {
         var cat = options.category
 
         await runQuery("INSERT INTO `faq` (`QUESTION`, `CATEGORY`, `ASKED_BY`) VALUES (?, ?, ?)", [options.question, cat, uid])
@@ -1005,7 +1004,7 @@ module.exports = {
       }
     },
     '/updateQuestion': async (req, res, options) => {
-      if (!isOptionMissing(options, ['data', 'mode'], res)) {
+      if (!isOptionMissing(options, ['data', 'mode'], res) && isUserVerified(options.secretFbId)) {
         var d = options.data
         if (options.mode == 1) { // normal mode
           await runQuery("UPDATE faq SET ANSWER = ?, ANSWERED_BY = ?, IS_PUBLIC = ? WHERE ID = ?;", [d.answer, d.orgaId, d.instantPublish, d.id])
