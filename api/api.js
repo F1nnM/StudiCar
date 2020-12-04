@@ -287,6 +287,11 @@ FROM
   return db_requests;
 }
 
+function endWithJSON(res, JSON) {
+  res.setHeader('Content-Type', 'application/json')
+  res.end(JSON)
+}
+
 module.exports = {
   'GET': {
     '/ping': (req, res, options) => {
@@ -313,7 +318,7 @@ module.exports = {
           var rnd = Math.floor(Math.random() * news.length)
           const ticker = news[rnd].split('+++')[1].trim()
 
-          res.end(JSON.stringify({
+          endWithJSON(res, JSON.stringify({
             ticker: ticker
           }))
         })
@@ -565,7 +570,7 @@ module.exports = {
         data.stats.liftsOffered = Math.floor(Math.random() * 100)
         data.stats.liftsAll = data.stats.liftsOffered + Math.floor(Math.random() * 200)
 
-        res.end(JSON.stringify(data))
+        endWithJSON(res, JSON.stringify(data))
       }
     },
     '/getCarModels': async (req, res, options) => {
@@ -583,17 +588,17 @@ module.exports = {
           } // basically grouped all cars in object array
         })
 
-        res.end(JSON.stringify(carsObj))
+        endWithJSON(res, JSON.stringify(carsObj))
       }
     },
     '/getMessages': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId'], res)) {
-        res.end(getChatLifts(secretFbId))
+        endWithJSON(res, await getChatLifts(secretFbId))
       }
     },
     '/getLegal': async (req, res, options) => {
       if (!isOptionMissing(options, [], res)) {
-        var html = ''
+        var html = "Legal.md couldn't be processed."
         fs.readFile('legal/legal.md', 'utf8', (err, data) => {
 
           try {
@@ -601,7 +606,9 @@ module.exports = {
 
             html = converter.makeHtml(data)
 
-          } catch (e) { }
+          } catch (e) {
+            res.writeHead(500);
+          }
           res.end(html)
         })
       }
@@ -632,7 +639,7 @@ module.exports = {
           })
         })
 
-        res.end(JSON.stringify({
+        endWithJSON(res, JSON.stringify({
           car: car,
           passengers: passengers,
           seats: carInfo.OFFERED_SEATS
@@ -656,7 +663,7 @@ module.exports = {
             }
           })
         })
-        res.end(JSON.stringify(data))
+        endWithJSON(res, JSON.stringify(data))
       }
     },
     '/getAllFAQ': async (req, res, options) => {
@@ -678,7 +685,7 @@ module.exports = {
           })
         })
 
-        res.end(JSON.stringify(obj))
+        endWithJSON(res, JSON.stringify(obj))
       }
     },
     '/getTeamInfo': async (req, res, options) => {
@@ -701,7 +708,7 @@ module.exports = {
           about: about
         }
 
-        res.end(JSON.stringify(obj))
+        endWithJSON(res, JSON.stringify(obj))
       }
     },
     '/chatPicture': async (req, res, options) => {
@@ -731,44 +738,80 @@ module.exports = {
       }
     },
     '/marketplace': async (req, res, options) => {
-      let db_lifts = (await runQuery(`
-SELECT lift.UUID AS ID, driver.FB_ID as DRIVER_FB_ID, driver.NAME as DRIVER_NAME, driver.SURNAME as DRIVER_SURNAME, driver.PREF_TALK as DRIVER_PREF_TALK, driver.PREF_TALK_MORNING as DRIVER_PREF_TALKMORNING, driver.PREF_SMOKING AS DRIVER_PREF_SMOKING, driver.PREF_MUSIC as DRIVER_PREF_MUSIC, lift.DEPART_AT as LIFT_DEPART, lift.ARRIVE_BY as LIFT_ARRIVE, destination.CITY as DESTINATION_CITY, start_point.CITY AS START_CITY, lift.OFFERED_SEATS, IFNULL(counts.OCCUPIED_SEATS, 0) AS OCCUPIED_SEATS
+      let JSON = (await runQuery(`
+      WITH
+      lifts as (
+          SELECT
+              lift.UUID AS ID,
+              driver.FB_ID AS DRIVER_FB_ID,
+              driver.NAME AS DRIVER_NAME,
+              driver.SURNAME AS DRIVER_SURNAME,
+              driver.PREF_TALK AS DRIVER_PREF_TALK,
+              driver.PREF_TALK_MORNING AS DRIVER_PREF_TALKMORNING,
+              driver.PREF_SMOKING AS DRIVER_PREF_SMOKING,
+              driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
+              lift.DEPART_AT AS LIFT_DEPART,
+              lift.ARRIVE_BY AS LIFT_ARRIVE,
+              destination.CITY AS DESTINATION_CITY,
+              start_point.CITY AS START_CITY,
+              lift.OFFERED_SEATS,
+              IFNULL(counts.OCCUPIED_SEATS, 0) AS OCCUPIED_SEATS 
+          FROM
+              lift 
+              JOIN
+                  lift_map 
+                  ON lift_map.LIFT_ID = lift.ID 
+              JOIN
+                  users driver 
+                  ON lift_map.USER_ID = driver.ID 
+                  AND lift_map.IS_DRIVER = 1 
+              JOIN
+                  addresses destination 
+                  ON lift.DESTINATION = destination.ID 
+              JOIN
+                  addresses start_point 
+                  ON lift.START = start_point.ID 
+              LEFT OUTER JOIN
+                  (
+                      SELECT
+                          lift_map.LIFT_ID,
+                          COUNT(*) AS OCCUPIED_SEATS 
+                      FROM
+                          lift_map 
+                      WHERE
+                          lift_map.PENDING != 0 
+                      GROUP BY
+                          lift_map.LIFT_ID
+                  )
+                  counts 
+                  ON lift.ID = counts.LIFT_ID 
+          WHERE
+              lift.FIRST_DATE >= CURRENT_DATE() 
+              OR lift.REPEATS_ON_WEEKDAY != 0
+      )
+      
+      SELECT
+        JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'id', lifts.ID,
+                  'diver', JSON_OBJECT(),
+                  'departAt', lifts.LIFT_DEPART,
+                  'arriveBy', lifts.LIFT_ARRIVE,
+                  'destination', lifts.DESTINATION_CITY,
+                  'start', lifts.START_CITY,
+                  'seatsOffered', lifts.OFFERED_SEATS,
+                  'seatsOccupied', lifts.OCCUPIED_SEATS
+              )
+          )
+      FROM
+        lifts
+      `, [])).result[0].JSON
 
-FROM lift
-join lift_map on lift_map.LIFT_ID = lift.ID
-join users driver on lift_map.USER_ID = driver.ID AND lift_map.IS_DRIVER = 1
-JOIN addresses destination on lift.DESTINATION = destination.ID
-join addresses start_point on lift.START = start_point.ID
-left outer join (SELECT lift_map.LIFT_ID, count(*) AS OCCUPIED_SEATS from lift_map where lift_map.PENDING != 0 GROUP BY lift_map.LIFT_ID) counts on lift.ID = counts.LIFT_ID
-
-where lift.FIRST_DATE >= CURRENT_DATE() OR lift.REPEATS_ON_WEEKDAY != 0`, [])).result[0]
-
-      var lifts = []
-      db_lifts.forEach(lift => lifts.push({
-        id: lift.ID,
-        driver: {
-          fbid: lift.DRIVER_FB_ID,
-          name: lift.DRIVER_NAME,
-          surname: lift.DRIVER_SURNAME,
-          prefs: {
-            talk: lift.DRIVER_PREF_TALK,
-            talkMorning: lift.DRIVER_PREF_TALKMONING,
-            smoking: lift.DRIVER_PREF_SMOKING,
-            music: lift.DRIVER_PREF_MUSIC
-          }
-        },
-        departAt: lift.LIFT_DEPART,
-        arriveBy: lift.LIFT_ARRIVE,
-        destination: lift.DESTINATION_CITY,
-        start: lift.START_CITY,
-        seatsOffered: lift.OFFERED_SEATS,
-        seatsOccupied: lift.OCCUPIED_SEATS
-      }))
-      res.end(audio);
+      endWithJSON(res, JSON)
     },
     '/liftRequests': async (req, res, options) => {
       if (!isOptionMissing(options, ['secretFbId'], res)) {
-        res.end((await getLiftRequests(secretFbId)));
+        endWithJSON(res, await getLiftRequests(secretFbId));
       }
     }
   },
