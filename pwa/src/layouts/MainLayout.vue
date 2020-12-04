@@ -75,7 +75,6 @@
         @swipe="closeScanner"
       />
     </q-header>
-    <GetUserDataLoading persistent v-model="loadingScreenVisible" />
 
     <q-drawer
       :no-swipe-open="scannerOpen"
@@ -190,7 +189,6 @@ import QrScanner from "components/QrScanner";
 import { scroll } from "quasar";
 
 import EssentialLink from "components/EssentialLink";
-import GetUserDataLoading from "components/GetUserDataLoading";
 import DrawerWelcomeImage from "components/DrawerWelcomeImage";
 import QrLiftDisplay from "components/QrLiftDisplay";
 import ExtHr from "components/ExtendedHr";
@@ -204,7 +202,6 @@ export default {
     EssentialLink,
     QrScanner,
     DrawerWelcomeImage,
-    GetUserDataLoading,
     QrLiftDisplay,
     ExtHr
   },
@@ -213,7 +210,6 @@ export default {
     return {
       greeting: this.$store.state.greeting,
       newsticker: null,
-      userDataLoading: true,
       leftDrawerOpen: false,
       pageTransY: 15,
       scannerOpen: false,
@@ -233,7 +229,7 @@ export default {
     },
 
     loadingScreenVisible() {
-      return this.$store.getters["auth/signinLoaded"];
+      return !this.$store.getters["auth/signinLoaded"];
     },
 
     navTitle() {
