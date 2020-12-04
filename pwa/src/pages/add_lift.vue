@@ -1,10 +1,43 @@
 <template>
   <div>
-    <div v-if="!canAddLift" class="text-center flex column justify-center" style="height: 50vh"></div>
+    <div
+      v-if="!(hasOwnAddresses || hasOwnCars)"
+      class="text-center flex column justify-center q-pa-lg"
+      style="height: 50vh"
+    >
+      <q-item class="text-left">
+        <q-item-section avatar>
+          <q-icon name="warning" size="md" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label>Du kannst noch keine Angebote hinzufügen</q-item-label>
+          <q-item-label
+            caption
+            v-if="!(hasOwnCars && hasOwnAddresses)"
+          >Weder Autos noch Adressen gespeichert</q-item-label>
+          <q-item-label caption v-else-if="!hasOwnCars">Noch keine Autos gespeichert</q-item-label>
+          <q-item-label caption v-else-if="!hasOwnAddresses">Noch keine Adressen gespeichert</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item class="text-right">
+        <q-item-section>
+          <q-item-label>
+            <q-btn
+              icon="add"
+              label="Zum Profil"
+              class="q-mt-sm"
+              to="/profil?tab=reservoir"
+              dense
+              outline
+            />
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+    </div>
     <q-dialog
       v-else
       maximized
-      :value="canAddLift"
+      :value="!canAddLift"
       persistent
       transition-show="slide-up"
       transition-hide="slide-down"
@@ -75,10 +108,6 @@
             <q-step :name="2" title="Genaue Adresse auswählen" icon="location_on" :done="step > 2">
               <p class="text-caption">Wo fährst du genau hin?</p>
               <q-list>
-                <p class="text-caption text-red" v-if="!getExactAddresses.length">
-                  <!-- when shown, school cannot be selected, because then length would not be 0 -->
-                  Du hast noch keine Adressen hinterlegt, aus denen du auswählen könntest.
-                </p>
                 <q-item tag="label" v-for="address in getExactAddresses" :key="address.id">
                   <q-radio v-model="lift.destinationAddressId" :val="address.id" />
                   <q-item-section v-show="getImagePath(address.id)" avatar>
@@ -112,10 +141,6 @@
             <q-step :name="3" title="Abfahrtsort festlegen" icon="near_me" :done="step > 3">
               <p class="text-caption">Und wo fährst du los?</p>
               <q-list>
-                <p class="text-caption text-red" v-if="!getExactStartingPoints.length">
-                  <!-- when shown, school cannot be selected, because then length would not be 0 -->
-                  Du hast noch keine Adressen hinterlegt, aus denen du auswählen könntest.
-                </p>
                 <q-item tag="label" v-for="address in getExactStartingPoints" :key="address.id">
                   <q-radio v-model="lift.startAddressId" :val="address.id" />
                   <q-item-section v-show="getImagePath(address.id)" avatar>
@@ -149,10 +174,6 @@
             <q-step :name="4" title="Auto auswählen" icon="emoji_transportation" :done="step > 4">
               <p class="text-caption">Mit welchem Auto fährst du?</p>
               <q-list>
-                <p
-                  class="text-caption text-red"
-                  v-if="!userCars.length"
-                >Du hast noch keine Fahrzeuge eingestellt, aus denen du auswählen könntest.</p>
                 <q-item tag="label" v-for="car in userCars" :key="car.carId" class="q-pr-none">
                   <q-radio v-model="lift.carId" :val="car.carId" />
 
@@ -385,11 +406,12 @@ export default {
       return this.$store.getters["auth/user"].addresses;
     },
 
-    canAddLift() {
-      var areAddressesStored =
-          this.allAddresses.filter(item => item.id > 3).length > 0,
-        areCarsStored = this.userCars.length > 0;
-      return areAddressesStored && areCarsStored;
+    hasOwnAddresses() {
+      return this.allAddresses.filter(item => item.id > 3).length > 0;
+    },
+
+    hasOwnCars() {
+      return this.userCars.length > 0;
     },
 
     carOptions() {

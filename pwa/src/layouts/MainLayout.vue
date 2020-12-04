@@ -91,11 +91,9 @@
         <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link" />
       </q-list>
       <ExtHr color="grey-7" size="xs" />
-      <div class="q-pa-md text-grey-7 row">
-        <div class="col-7">StudiCar v1.0</div>
-        <div class="col-5 text-right">
-          <!-- <q-btn flat @click="hardReload" icon="refresh" size="sm" /> -->
-        </div>
+      <div class="q-pa-md text-grey-7 row justify-between">
+        <span>StudiCar</span>
+        <span>Quasar v{{ $q.version }}</span>
       </div>
     </q-drawer>
     <q-pull-to-refresh ref="refresher" @refresh="refresh">
@@ -386,7 +384,7 @@ export default {
   },
 
   mounted() {
-    setTimeout(this.reloadNews(), 300); // simple call was buggy, no idea why
+    setTimeout(this.reloadNews, 50); // simple call was buggy, no idea why
   }
 };
 </script>

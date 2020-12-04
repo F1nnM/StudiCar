@@ -30,9 +30,7 @@ export default {
           method: "GET"
         },
         {},
-        data => {
-          debugger;
-        }
+        data => {}
       );
     }
   },

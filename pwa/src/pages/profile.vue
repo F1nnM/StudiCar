@@ -560,19 +560,28 @@
 
       <q-dialog v-model="openAddCar" full-height full-width position="bottom" persistent>
         <q-card>
-          <q-card-section
-            clickable
-            @click="addRandomCar()"
-            class="row items-center text-h6 text-weight-light"
-          >
+          <q-card-section class="row items-center text-h6 text-weight-light">
             Ein neues Fahrzeug hinzufügen
             <q-space />
             <q-btn icon="close" flat round dense v-close-popup />
           </q-card-section>
 
           <q-card-section class="overflow-auto">
-            <q-stepper v-model="openNewCarTab" ref="stepper" color="primary" animated>
-              <q-step :name="1" title="Marke" icon="home" :done="openNewCarTab > 1">
+            <q-stepper
+              header-nav
+              contracted
+              v-model="openNewCarTab"
+              ref="stepper"
+              color="primary"
+              animated
+            >
+              <q-step
+                :name="1"
+                title="Marke"
+                icon="home"
+                :done="openNewCarTab > 1 || !newCar.brand"
+                :error="openNewCarTab > 1 && !newCar.brand"
+              >
                 <q-select
                   v-model="newCar.brand"
                   label="Marke auswählen"
@@ -587,9 +596,16 @@
                 </p>
               </q-step>
 
-              <q-step :name="2" title="Modell" icon="rv_hookup" :done="openNewCarTab > 2">
+              <q-step
+                :name="2"
+                title="Modell"
+                icon="rv_hookup"
+                :done="openNewCarTab > 2 || newCar.model"
+                :error="openNewCarTab > 2 && !newCar.model"
+              >
                 <q-select
                   v-model="newCar.model"
+                  :color="!newCar.brand ? 'negative' : 'dark'"
                   :label="
                     newCar.brand
                       ? 'Modell auswählen'
@@ -605,26 +621,30 @@
                   <a href="#/contact">schreib uns</a> bitte das fehlende Modell.
                 </p>
               </q-step>
-              <q-step :name="3" title="Typ" icon="rv_hookup" :done="openNewCarTab > 3">
+              <q-step
+                :name="3"
+                title="Typ"
+                icon="rv_hookup"
+                :done="openNewCarTab > 3 || newCar.type"
+                :error="openNewCarTab > 3 && !newCar.type"
+              >
                 <q-select
                   v-model="newCar.type"
                   label="Typ auswählen"
                   hint="Versuche, dein Auto einzuordnen"
-                  :options="[
-                    'Kompaktwagen',
-                    'Kombi',
-                    'Limousine',
-                    'Cabrio',
-                    'SUV',
-                    'Sportwagen',
-                    'Transporter',
-                  ]"
+                  :options="carTypeOptions"
                   behavior="menu"
                   @input="$refs.stepper.next()"
                 />
               </q-step>
 
-              <q-step :name="4" title="Farbe" icon="brush" :done="openNewCarTab > 4">
+              <q-step
+                :name="4"
+                title="Farbe"
+                icon="brush"
+                :done="openNewCarTab > 4 || newCar.color"
+                :error="openNewCarTab > 4 && !newCar.color"
+              >
                 <div class="text-caption">
                   Anhand der Autofarbe können andere Nutzer dein Auto besser
                   erkennen
@@ -632,7 +652,13 @@
                 <ImageColorPicker imageSrc="app-icon_color_preview.png" v-model="newCar.color" />
               </q-step>
 
-              <q-step :name="5" title="Baujahr" icon="query_builder" :done="openNewCarTab > 5">
+              <q-step
+                :name="5"
+                title="Baujahr"
+                icon="query_builder"
+                :done="openNewCarTab > 5 || newCar.year != 'XXXX'"
+                :error="openNewCarTab > 5 && newCar.year == 'XXXX'"
+              >
                 <q-select
                   v-model="newCar.year"
                   label="Baujahr auswählen"
@@ -643,7 +669,13 @@
                 />
               </q-step>
 
-              <q-step :name="6" title="Nummernschild" icon="money" :done="openNewCarTab > 6">
+              <q-step
+                :name="6"
+                title="Nummernschild"
+                icon="money"
+                :done="openNewCarTab > 6 || validNumberPlate()"
+                :error="openNewCarTab > 6 && !newCar.licensePlate && !validNumberPlate()"
+              >
                 <q-input
                   type="text"
                   placeholder="HDH DH 2020"
@@ -652,20 +684,34 @@
                   hint="Das können Nutzer nur dann sehen, wenn sie mit dir mitfahren."
                 />
                 <q-slide-transition>
-                  <p
-                    class="text-negative q-mt-md"
-                    v-if="!validNumberPlate"
-                  >Noch keine gültige Eingabe</p>
+                  <div v-if="!validNumberPlate()">
+                    <span class="text-negative q-pt-md">Noch keine gültige Eingabe</span>
+                  </div>
                 </q-slide-transition>
               </q-step>
 
-              <q-step :name="7" title="Sitze" icon="supervisor_account" :done="openNewCarTab > 7">
-                <q-select
+              <q-step
+                :name="7"
+                title="Sitze"
+                icon="supervisor_account"
+                :done="openNewCarTab > 7 && (typeof newCar.seats == 'number')"
+                :error="openNewCarTab > 7 && newCar.seats == null"
+              >
+                <p>
+                  Wie viele Leute kannst du normalerweise noch
+                  <bold>mitnehmen?</bold>
+                </p>
+                <q-slider
+                  markers
+                  :thumb-path="'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'"
+                  :min="1"
+                  :max="9"
+                  snap
+                  :step="1"
+                  label
+                  label-always
                   @input="$refs.stepper.next()"
                   v-model="newCar.seats"
-                  label="Freie Plätze"
-                  :options="[1, 2, 3, 4, 5, 6, 7]"
-                  hint="Wie viele Leute kannst du normalerweise noch mitnehmen?"
                 />
                 <p
                   class="text-caption q-mt-lg"
@@ -682,6 +728,7 @@
                         openAddCarConfirm = true;
                       }
                     "
+                    :disable="openNewCarTab >= 7 && !newCarInfoComplete"
                     color="primary"
                     :label="openNewCarTab == 7 ? 'Hinzufügen' : 'Weiter'"
                   />
@@ -697,23 +744,13 @@
               </template>
             </q-stepper>
           </q-card-section>
-          <q-card-section>
-            <p class="text-caption">
-              Beim Hinzufügen eines Autos erklärst du dich mit unserer
-              <a
-                href="/#/legal"
-                class="block text-dark"
-              >Datenverarbeitung</a>
-              einverstanden.
-            </p>
-          </q-card-section>
+          <q-card-section></q-card-section>
         </q-card>
       </q-dialog>
 
       <q-dialog
         v-model="openAddCarConfirm"
         full-width
-        full-height
         persistent
         transition-show="slide-up"
         transition-hide="flip-up"
@@ -723,14 +760,6 @@
             <div class="text-h6">Überprüfe deine Angaben</div>
             <div class="col-7 text-h5">{{ newCar.brand }}</div>
             <div class="col-5 text-h6 text-weight-light">{{ newCar.model }}</div>
-            <p
-              v-show="
-                newCar.brand
-                  ? newCarOptions[newCar.brand].indexOf(newCar.model) == -1
-                  : false
-              "
-              class="text-red"
-            >Ausgewählte Marke und Modell passen nicht zueinander. Bitte korrigiere deine Eingaben.</p>
           </q-card-section>
 
           <q-card-section>
@@ -746,11 +775,7 @@
               <p class="text-uppercase text-caption col-7">Kennzeichen</p>
 
               <div class="col-5">
-                <div v-if="newCar.licensePlate">
-                  <p v-if="validNumberPlate" class="col-5">{{ newCar.licensePlate }}</p>
-                  <div v-else class="text-negative">- ungültig -</div>
-                </div>
-                <p v-else class="text-negative">- fehlt noch -</p>
+                <p v-if="validNumberPlate()" class="col-5">{{ newCar.licensePlate }}</p>
               </div>
 
               <p class="text-uppercase text-caption col-7">Baujahr</p>
@@ -761,13 +786,7 @@
 
           <q-card-actions align="right">
             <q-btn flat label="Bearbeiten" @click="openAddCarConfirm = false" v-close-popup />
-            <q-btn
-              color="primary"
-              label="Auto hinzufügen"
-              :disabled="!newCarInfoComplete"
-              @click="addCar"
-              v-close-popup
-            />
+            <q-btn color="primary" label="Auto hinzufügen" @click="addCar" v-close-popup />
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -811,6 +830,16 @@ export default {
       newLiftMaxDistance: 0, // basic profile settings
       editDistance: false,
       genderOptions: ["Männlich", "Weiblich", "Divers"],
+      carTypeOptions: [
+        "Kompaktwagen",
+        "Kombi",
+        "Limousine",
+        "Cabrio",
+        "SUV",
+        "Sportwagen",
+        "Transporter",
+        "Pickup"
+      ],
       openEditDescription: false,
       newDescription: "",
 
@@ -841,7 +870,7 @@ export default {
         type: "",
         color: "",
         licensePlate: "",
-        seats: 0
+        seats: null
       },
       carInfoOpen: false,
       newCar: {
@@ -976,6 +1005,13 @@ export default {
     }
   },
   methods: {
+    validNumberPlate() {
+      this.newCar.licensePlate = this.newCar.licensePlate.toUpperCase();
+      var pattern = /[A-Z]{1,3} [A-Z]{1,2} \d{1,4}$/gm;
+      var match = this.newCar.licensePlate.match(pattern);
+      return match;
+    },
+
     toggleOpenEditDescription() {
       if (this.openEditDescription) {
         // already open
@@ -1056,13 +1092,6 @@ export default {
       if (id) this.$store.dispatch("auth/removeAddress", id);
     },
 
-    validNumberPlate() {
-      this.newCar.licensePlate = this.newCar.licensePlate.toUpperCase();
-      var pattern = /[A-Z]{1,3} [A-Z]{1,2} \d{1,4}$/gm;
-      var match = this.newCar.licensePlate.match(pattern);
-      return match;
-    },
-
     async addCar() {
       let id = this.$store.getters["auth/user"].id;
       let car = this.newCar;
@@ -1092,11 +1121,9 @@ export default {
       this.newCar.brand = this.randomItemFromArray(
         Object.keys(this.newCarOptions)
       );
-      this.newCar.type = this.randomItemFromArray(
-        Object.keys(this.newCarOptions[this.newCar.brand])
-      );
+      this.newCar.type = this.randomItemFromArray(this.carTypeOptions);
       this.newCar.model = this.randomItemFromArray(
-        this.newCarOptions[this.newCar.brand][this.newCar.type]
+        this.newCarOptions[this.newCar.brand]
       );
       this.newCar.color =
         "#" + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, "0"); // just random hex color
@@ -1124,6 +1151,9 @@ export default {
     }
   },
   mounted() {
+    var locArr = window.location.href.split("?tab=");
+    this.tab = locArr.length > 1 ? locArr[1] : "data";
+
     sendApiRequest(
       GET_CAR_MODELS,
       {},
