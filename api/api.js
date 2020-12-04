@@ -7,7 +7,7 @@ const newsPath = 'news/postillon/ticker.txt',
   longQueries = require('./longQueries'),
   apiResponseSimulation = require('./simulation/apiResponse')
 
-function isOptionMissing(data, needed, res) {
+function isOptionMissing (data, needed, res) {
   return needed.some(key => {
     if (typeof data[key] == "undefined") {
       res.writeHead(400);
@@ -19,7 +19,7 @@ function isOptionMissing(data, needed, res) {
   });
 }
 
-function generateJdenticon(seed) {
+function generateJdenticon (seed) {
   var jdenticon = require("jdenticon")
   jdenticon.config = {
     lightness: {
@@ -37,7 +37,7 @@ function generateJdenticon(seed) {
   return jdenticon.toPng(seed, size);
 }
 
-async function getChatLifts(uid) {
+async function getChatLifts (uid) {
   //TODO make query return Nickname if the querying user is offering the lift. Maybe https://stackoverflow.com/questions/1747750/select-column-if-blank-select-from-another
   var lift_data = (await runQuery(`
   WITH
@@ -190,7 +190,7 @@ FROM lifts
   return lift_data
 }
 
-async function getLiftRequests(uid) {
+async function getLiftRequests (uid) {
   var db_requests = (await runQuery(`
   SELECT
   IFNULL(
