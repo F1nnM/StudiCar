@@ -7,7 +7,7 @@ const newsPath = 'news/postillon/ticker.txt',
   longQueries = require('./longQueries'),
   apiResponseSimulation = require('./simulation/apiResponse')
 
-function isOptionMissing(data, needed, res) {
+function isOptionMissing (data, needed, res) {
   return needed.some(key => {
     if (typeof data[key] == "undefined") {
       res.writeHead(400);
@@ -19,7 +19,7 @@ function isOptionMissing(data, needed, res) {
   });
 }
 
-function generateJdenticon(seed) {
+function generateJdenticon (seed) {
   var jdenticon = require("jdenticon")
   jdenticon.config = {
     lightness: {
@@ -37,7 +37,7 @@ function generateJdenticon(seed) {
   return jdenticon.toPng(seed, size);
 }
 
-async function getChatLifts(uid) {
+async function getChatLifts (uid) {
   //TODO make query return Nickname if the querying user is offering the lift. Maybe https://stackoverflow.com/questions/1747750/select-column-if-blank-select-from-another
   var lift_data = (await runQuery(`
   WITH
@@ -190,7 +190,7 @@ FROM lifts
   return lift_data
 }
 
-async function getLiftRequests(uid) {
+async function getLiftRequests (uid) {
   var db_requests = (await runQuery(`
 SELECT
     JSON_ARRAYAGG(
@@ -229,7 +229,7 @@ SELECT
                 )
             )
         ) 
-    )AS DATA 
+    ) AS JSON 
 FROM
 users me 
 JOIN
@@ -281,12 +281,12 @@ my_lifts.LIFT_ID
   return db_requests;
 }
 
-function endWithJSON(res, JSON) {
+function endWithJSON (res, JSON) {
   res.setHeader('Content-Type', 'application/json')
   res.end(JSON)
 }
 
-async function isUserVerified(fbid) {
+async function isUserVerified (fbid) {
   var verified = (await runQuery(`
   SELECT VERIFIED FROM users WHERE FB_ID = ?
   `, [fbid])).result[0].VERIFIED
@@ -740,7 +740,8 @@ module.exports = {
         WITH
         lifts as (
             SELECT
-                lift.UUID AS ID,
+            lift.ID AS ID,
+                lift.UUID AS UUID,
                 driver.FB_ID AS DRIVER_FB_ID,
                 driver.NAME AS DRIVER_NAME,
                 driver.SURNAME AS DRIVER_SURNAME,
@@ -806,6 +807,10 @@ module.exports = {
         `, [])).result[0].JSON
 
         endWithJSON(res, JSON)
+      }
+      else {
+        console.log('not verified')
+        res.end()
       }
     },
     '/liftRequests': async (req, res, options) => {

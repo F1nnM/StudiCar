@@ -217,14 +217,6 @@ export default {
       return returnedArray;
     },
 
-    dataOfSelectedDaysFirstLift() {
-      var liftsOfThatDay = Object.keys(
-        this.liftRequests[this.liftRequestDayTab]
-      );
-      lift = this.lifts[idOfLiftToBeViewed];
-      return lift;
-    },
-
     thumbStyle() {
       return {
         right: "4px",
@@ -282,6 +274,7 @@ export default {
 
     seatsLeft(liftId) {
       const lift = this.getLiftFromId(liftId);
+      debugger;
       var a = lift.car.allSeats - lift.passengers.length;
       return a;
     },
