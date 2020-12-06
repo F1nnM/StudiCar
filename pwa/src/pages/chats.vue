@@ -274,7 +274,6 @@ export default {
 
     seatsLeft(liftId) {
       const lift = this.getLiftFromId(liftId);
-      debugger;
       var a = lift.car.allSeats - lift.passengers.length;
       return a;
     },
