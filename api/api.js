@@ -281,7 +281,7 @@ LEFT OUTER JOIN
     driverCount 
     ON users.ID = driverCount.USER_ID 
 WHERE
-me.FB_ID = "wG3cG4M7NFMJzJYcreFjLrJC9Q23" 
+me.FB_ID = ? 
 GROUP BY
 my_lifts.LIFT_ID
   `, [uid])).result[0].JSON
@@ -343,7 +343,7 @@ module.exports = {
           FROM
               users 
           WHERE
-              users.FB_ID = "wG3cG4M7NFMJzJYcreFjLrJC9Q23";
+              users.FB_ID = ?;
           WITH data AS 
           (
               SELECT
