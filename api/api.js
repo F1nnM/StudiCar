@@ -200,93 +200,97 @@ FROM lifts
 
 async function getLiftRequests (uid) {
   var db_requests = (await runQuery(`
-SELECT
-    JSON_ARRAYAGG(
-        JSON_OBJECT(
-            'liftId',
-            my_lifts.LIFT_ID,
-            'requestingUsers',
-            JSON_ARRAY(
-                JSON_OBJECT(
-                    'fbId',
-                    users.FB_ID,
-                    'name',
-                    users.NAME,
-                    'surname',
-                    users.SURNAME,
-                    'bio',
-                    users.DESCRIPTION,
-                    'stats',
-                    JSON_OBJECT(
-                        'liftCount',
-                        IFNULL(liftCount.COUNT, 0),
-                        'driverCount',
-                        IFNULL(driverCount.COUNT, 0)
-                    ),
-                    'prefs',
-                    JSON_OBJECT(
-                        'talk',
-                        users.PREF_TALK,
-                        'talkMorning',
-                        users.PREF_TALK_MORNING,
-                        'smoking',
-                        users.PREF_SMOKING,
-                        'music',
-                        users.PREF_MUSIC
-                    )
-                )
-            )
-        ) 
-    ) AS JSON 
-FROM
-users me 
-JOIN
-    lift_map my_lifts 
-    ON my_lifts.USER_ID = me.ID 
-    AND my_lifts.IS_DRIVER = 1 
-JOIN
-    lift_map requests 
-    ON my_lifts.LIFT_ID = requests.LIFT_ID 
-    AND requests.PENDING = 1 
-JOIN
-    users 
-    ON requests.USER_ID = users.ID 
-LEFT OUTER JOIN
-    (
-        SELECT
-            lift_map.USER_ID,
-            COUNT(*) AS COUNT 
-        FROM
-            lift_map 
-        WHERE
-            lift_map.IS_DRIVER = 0 
-            AND lift_map.PENDING = 0 
-        GROUP BY
-            lift_map.USER_ID 
-    )
-    liftCount 
-    ON users.ID = liftCount. USER_ID 
-LEFT OUTER JOIN
-    (
-        SELECT
-            lift_map.USER_ID,
-            COUNT(*) AS COUNT 
-        FROM
-            lift_map 
-        WHERE
-            lift_map.IS_DRIVER = 1 
-        GROUP BY
-            lift_map.USER_ID 
-    )
-    driverCount 
-    ON users.ID = driverCount.USER_ID 
-WHERE
-me.FB_ID = ? 
-GROUP BY
-my_lifts.LIFT_ID
+  (
+    SELECT
+          JSON_ARRAYAGG(
+              JSON_OBJECT(
+                  'liftId',
+                  my_lifts.LIFT_ID,
+                  'requestingUsers',
+                  JSON_ARRAY(
+                      JSON_OBJECT(
+                          'fbId',
+                          users.FB_ID,
+                          'name',
+                          users.NAME,
+                          'surname',
+                          users.SURNAME,
+                          'bio',
+                          users.DESCRIPTION,
+                          'stats',
+                          JSON_OBJECT(
+                              'liftCount',
+                              IFNULL(liftCount.COUNT, 0),
+                              'driverCount',
+                              IFNULL(driverCount.COUNT, 0)
+                          ),
+                          'prefs',
+                          JSON_OBJECT(
+                              'talk',
+                              users.PREF_TALK,
+                              'talkMorning',
+                              users.PREF_TALK_MORNING,
+                              'smoking',
+                              users.PREF_SMOKING,
+                              'music',
+                              users.PREF_MUSIC
+                          )
+                      )
+                  )
+              ) 
+          ) AS JSON 
+      FROM
+      users me 
+      JOIN
+          lift_map my_lifts 
+          ON my_lifts.USER_ID = me.ID 
+          AND my_lifts.IS_DRIVER = 1 
+      JOIN
+          lift_map requests 
+          ON my_lifts.LIFT_ID = requests.LIFT_ID 
+          AND requests.PENDING = 1 
+      JOIN
+          users 
+          ON requests.USER_ID = users.ID 
+      LEFT OUTER JOIN
+          (
+              SELECT
+                  lift_map.USER_ID,
+                  COUNT(*) AS COUNT 
+              FROM
+                  lift_map 
+              WHERE
+                  lift_map.IS_DRIVER = 0 
+                  AND lift_map.PENDING = 0 
+              GROUP BY
+                  lift_map.USER_ID 
+          )
+          liftCount 
+          ON users.ID = liftCount. USER_ID 
+      LEFT OUTER JOIN
+          (
+              SELECT
+                  lift_map.USER_ID,
+                  COUNT(*) AS COUNT 
+              FROM
+                  lift_map 
+              WHERE
+                  lift_map.IS_DRIVER = 1 
+              GROUP BY
+                  lift_map.USER_ID 
+          )
+          driverCount 
+          ON users.ID = driverCount.USER_ID 
+      WHERE
+      me.FB_ID = ?
+      GROUP BY
+      my_lifts.LIFT_ID
+  )
+  UNION
+  (SELECT "[]")
+  LIMIT 1;
   `, [uid])).result[0].JSON
-
-  return db_requests;
+  return  db_requests;
 }
 
 function endWithJSON (res, JSON) {
