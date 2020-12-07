@@ -1,12 +1,30 @@
 <template>
   <div class="q-pa-sm full-height bg-white">
-    <TitleButton>
-      <q-tabs v-model="viewTab" dense no-caps inline-label class="text-dark">
+    <TitleButton class="q-pt-md">
+      <q-tabs v-if="!!info" v-model="viewTab" dense no-caps inline-label class="text-dark">
         <q-tab name="altogether" label="Wir als Team" />
         <q-tab name="matrix" label="Bereiche" />
       </q-tabs>
     </TitleButton>
-    <q-card class="bg-white q-px-none" v-if="teamLoading == 2">
+    <div v-if="!info">
+      <div style="height: 40vh" class="text-center column justify-center">
+        <p>
+          <q-circular-progress
+            show-value
+            indeterminate
+            size="15vw"
+            :thickness="0.05"
+            :value="100"
+            color="primary"
+            class="q-ma-md full-width"
+          >
+            <q-icon name="emoji_people" color="dark" size="md" />
+          </q-circular-progress>
+          <span class="text-subtitle1">Informationen werden geladen</span>
+        </p>
+      </div>
+    </div>
+    <div v-else class="bg-white q-px-none">
       <q-tab-panels
         v-model="viewTab"
         animated
@@ -55,15 +73,15 @@
           </div>
         </q-tab-panel>
         <q-tab-panel name="altogether">
-          <q-parallax :height="250">
+          <!-- <q-parallax :height="250">
             <template v-slot:media>
               <img src="https://cdn.quasar.dev/img/parallax1.jpg" />
             </template>
-          </q-parallax>
-          <p class="text-caption" ref="anchor"></p>
+          </q-parallax>-->
+          <div class="about-anchor" ref="anchor"></div>
         </q-tab-panel>
       </q-tab-panels>
-    </q-card>
+    </div>
     <q-dialog
       style="width: 60vw;"
       v-model="dialogOpen"
@@ -97,8 +115,8 @@
         <q-separator />
 
         <q-card-section>
-          <p class="text-caption">Beschreibung</p>
-          <p>{{ showMember.bio }}</p>
+          <p>Über mich</p>
+          <p class="text-caption">{{ showMember.bio || '- noch keine Beschreibung hinterlegt -' }}</p>
         </q-card-section>
 
         <!-- <q-card-actions>
@@ -125,16 +143,15 @@ export default {
       info: this.$store.getters["getStudiCarInfo"],
       htmlText: "",
       viewTab: "matrix",
-      showMember: null,
-      teamLoading: 0
+      showMember: null
     };
   },
   watch: {
     viewTab: function(newv) {
-      if (newv != "matrix") {
+      if (newv == "altogether") {
         setTimeout(_ => {
-          this.$refs.anchor.$el.innerHTML = this.htmlText;
-        }, 100);
+          this.$refs.anchor.innerHTML = this.htmlText;
+        }, 50);
       }
     }
   },
@@ -175,14 +192,12 @@ export default {
     });
 
     if (!this.$store.getters["getStudiCarInfo"]) {
-      this.teamLoading = 1;
       sendApiRequest(
         SQL_GET_TEAM,
         {},
         data => {
           this.$store.commit("setInfo", data);
           this.info = data;
-          this.teamLoading = 2;
 
           var loc = document.location.href; // check whether specific member should be visited
           if (loc.includes("?orgaId=")) {
@@ -192,19 +207,23 @@ export default {
             });
           }
 
-          this.htmlText = data.about.text;
+          this.htmlText = data.infoText;
         },
         error => {
-          this.teamLoading = -1;
+          alert("Fehler aufgetreten: " + error);
         }
       );
     } else {
       this.info = this.$store.getters["getStudiCarInfo"];
-      this.teamLoading = 2; // just to be sure
+      this.htmlText = this.info.infoText;
     }
   }
 };
 </script>
 
 <style lang="scss" scoped>
+.about-anchor h2 {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
 </style>

@@ -377,7 +377,6 @@ module.exports = {
 			surname: 'Floruß',
 			function: 'Projektleitung',
 			funcShort: 'Leitung',
-			team: true,
 			bio: `Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner test Lorem ipsum dolor sit ein kleiner
 		 test Lorem ipsum dolor sit ein kleiner test`
 		},

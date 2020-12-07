@@ -13,9 +13,9 @@ module.exports = {
     JOIN adresses AS dest_adress ON dest_adress.ID = lift.DESTINATION 
     WHERE lift_map.USER_ID = ? AND lift_map.PENDING = 0 
     ORDER BY messages.TIMESTAMP DESC;`,
-    'getFAQ': `SELECT faq.ID, faq.QUESTION, faq.CATEGORY, faq.ANSWER, users.NAME AS ORGAS_NAME, orgas.FUNCTION, orgas.ID AS ORGA_ID 
-    FROM faq JOIN orgas ON orgas.ID = faq.ANSWERED_BY 
-    JOIN users ON users.ID = faq.ANSWERED_BY 
+    'getFAQ': `SELECT faq.ID, faq.QUESTION, faq.CATEGORY, faq.ANSWER, users.NAME AS ORGAS_NAME, team.FUNCTION, team.ID AS ORGA_ID 
+    FROM faq JOIN team ON team.ID = faq.ANSWERED_BY 
+    LEFT JOIN users ON users.ID = faq.ANSWERED_BY
     WHERE IS_PUBLIC = 1`,
     'getAllFAQ': `SELECT faq.*, users.NAME AS ORGAS_NAME, orgas.FUNCTION 
     FROM faq JOIN orgas ON orgas.ID = faq.ANSWERED_BY 

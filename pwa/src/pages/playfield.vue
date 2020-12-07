@@ -26,7 +26,7 @@ export default {
     go() {
       sendApiRequest(
         {
-          path: "/getNewsticker",
+          path: "/getTeamInfo",
           method: "GET"
         },
         {},

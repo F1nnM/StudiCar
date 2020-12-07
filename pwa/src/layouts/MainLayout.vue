@@ -86,8 +86,10 @@
     >
       <DrawerWelcomeImage :timeText="greeting" :caption="newsticker || 'Ticker wird geladen...'" />
       <q-list class="q-pb-sm">
-        <q-item-label header class="text-grey-8">Navigation</q-item-label>
-        <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link" />
+        <div v-for="group in navigationLinks" :key="group.title">
+          <q-item-label header class="text-grey-8">{{ group.title }}</q-item-label>
+          <EssentialLink v-for="link in group.links" :key="link.title" v-bind="link" />
+        </div>
       </q-list>
       <ExtHr color="grey-7" size="xs" />
       <div class="q-pa-md text-grey-7 row justify-between">
@@ -254,43 +256,70 @@ export default {
       return this.$store.state.oldVersionRunning;
     },
 
-    essentialLinks() {
+    navigationLinks() {
       return [
         {
-          title: "Marktplatz",
-          caption: "Zur Übersicht",
-          icon: "home",
-          link: "/#/"
-        },
-        {
-          title: "Einstellungen",
-          caption: "Personalisiere die App",
-          icon: "settings",
-          link: "/#/einstellungen"
-        },
-        {
-          title: "Spielwiese",
-          caption: "Endlich wieder Kind sein",
-          icon: "toys",
-          link: "/#/spielwiese"
+          title: "Hauptseiten",
+          links: [
+            {
+              title: "Marktplatz",
+              caption: "Zur Übersicht",
+              icon: "home",
+              link: "/#/"
+            },
+            {
+              title: "Team",
+              caption: "Wer hinter dem Projekt steckt",
+              icon: "emoji_people",
+              link: "/#/das-team"
+            },
+            {
+              title: "Support",
+              caption: "Wie können wir dir helfen?",
+              icon: "accessibility_new",
+              link: "/#/hilfe"
+            }
+          ]
         },
         {
           title: "Rechtliches",
-          caption: "Muss auch sein",
-          icon: "policy",
-          link: "/#/rechtliches"
+          links: [
+            {
+              title: "AGB",
+              caption: "Unsere Nutzungsbedingungen",
+              icon: "format_list_numbered",
+              link: "/#/agb"
+            },
+            {
+              title: "Datenschutz",
+              caption: "Was mit deinen Daten passiert",
+              icon: "verified_user",
+              link: "/#/datenschutz"
+            } /* ,
+          {
+            title: "Impressum",
+            caption: "Muss auch sein",
+            icon: "policy",
+            link: "/#/rechtliches"
+          } */
+          ]
         },
         {
-          title: "Team",
-          caption: "Wer hinter dem Projekt steckt",
-          icon: "emoji_people",
-          link: "/#/das-team"
-        },
-        {
-          title: "Support",
-          caption: "Wie können wir dir helfen?",
-          icon: "accessibility_new",
-          link: "/#/hilfe?faq-id=30"
+          title: "BETA-Bereich",
+          links: [
+            {
+              title: "Einstellungen",
+              caption: "Personalisiere die App",
+              icon: "settings",
+              link: "/#/einstellungen"
+            },
+            {
+              title: "Spielwiese",
+              caption: "Endlich wieder Kind sein",
+              icon: "toys",
+              link: "/#/spielwiese"
+            }
+          ]
         }
       ];
     }

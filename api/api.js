@@ -37,6 +37,14 @@ function generateJdenticon (seed) {
   return jdenticon.toPng(seed, size);
 }
 
+function blobToBase64 (blob) {
+  var reader = new FileReader();
+  reader.readAsDataURL(blob);
+  reader.onloadend = function () {
+    return reader.result;
+  }
+}
+
 async function getChatLifts (uid) {
   //TODO make query return Nickname if the querying user is offering the lift. Maybe https://stackoverflow.com/questions/1747750/select-column-if-blank-select-from-another
   var lift_data = (await runQuery(`
@@ -663,7 +671,9 @@ module.exports = {
           }
         })
       })
-      endWithJSON(res, JSON.stringify(data))
+      endWithJSON(res, JSON.stringify({
+        faq: data
+      }))
     },
     '/getAllFAQ': async (req, res, options) => {
       var result = (await runQuery(longQueries.getAllFAQ, [])).result,
@@ -687,22 +697,38 @@ module.exports = {
     },
     '/getTeamInfo': async (req, res, options) => {
       if (isUserVerified(options.secretFbId)) {
-        const team = apiResponseSimulation.team,
-          about = apiResponseSimulation.info
+        var team = (await runQuery('SELECT * from team where ID <> 0')).result,
+          about = '',
+          teamArr = []
 
-        var html = ''
-        fs.readFile('legal/about.md', 'utf8', (err, data) => {
+        about = await new Promise((res, rej) => fs.readFile('legal/about.md', 'utf8', (err, data) => {
+          if (err) {
+            about = err
+            console.log(err)
+          }
 
           try {
             var converter = new showdown.Converter()
 
-            html = converter.makeHtml(data)
-            about.text = html
+            res(converter.makeHtml(data))
           } catch (e) { }
+        }))
+
+        team.forEach(m => {
+          teamArr.push({
+            id: m.ID,
+            name: m.NAME,
+            surname: m.SURNAME,
+            function: m.FUNCTION,
+            funcShort: m.FUNC_SHORT || null,
+            bio: m.BIO,
+            picture: ''// blobToBase64(m.PICTURE)
+          })
         })
+
         var obj = {
-          team: team,
-          about: about
+          team: teamArr,
+          infoText: about
         }
 
         endWithJSON(res, JSON.stringify(obj))

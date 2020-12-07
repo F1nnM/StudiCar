@@ -1,11 +1,29 @@
 <template>
   <div class="q-ma-md">
+    <div v-if="!faq">
+      <div style="height: 40vh" class="text-center column justify-center">
+        <q-circular-progress
+          show-value
+          :indeterminate="!notFound"
+          size="15vw"
+          :thickness="0.05"
+          :value="100"
+          color="primary"
+          class="q-ma-md full-width"
+        >
+          <q-icon name="contact_support" color="dark" size="md" />
+        </q-circular-progress>
+        <span class="text-subtitle1">FAQ werden geladen</span>
+      </div>
+    </div>
     <q-tabs
+      v-else
       v-model="tab"
       dense
       toggle-color="primary"
       color="white"
       inline-label
+      no-caps
       text-color="primary"
     >
       <q-tab
@@ -37,11 +55,6 @@
             >Hier findest du alle Fragen beantwortet, die häufig gestellt wurden.</q-card-section>
           </q-card>
         </q-expansion-item>
-        <LoadingDisplay
-          v-model="FAQloading"
-          errorText="Beim Laden der Daten ist ein Fehler aufgetreten."
-          loadingText="Fragen werden geladen, bitte hab einen Moment Geduld..."
-        />
         <div v-if="faq.length">
           <q-expansion-item
             style="border-radius: 30px"
@@ -90,9 +103,9 @@
         </div>
       </q-tab-panel>
       <q-tab-panel name="question">
-        <q-expansion-item dense class="q-my-md">
+        <q-expansion-item dense class="q-my-md q-px-none">
           <template v-slot:header>
-            <q-item dense class="q-px-none">
+            <q-item dense>
               <q-item-section>
                 <div class="text-h5">Eine Frage stellen</div>
               </q-item-section>
@@ -196,13 +209,13 @@
         </q-expansion-item>
         <q-video
           v-for="v in [{
-          src: 'https://www.youtube.com/embed/k3_tw44QsZQ?rel=0'
+          src: 'https://www.youtube.com/embed/k3_tw44QsZQ?rel=0&d'
         },
         {
-          src: 'https://www.youtube.com/embed/k3_tw44QsZQ?rel=0'
+          src: 'https://www.youtube.com/embed/k3_tw44QsZQ?rel=0&e'
         },
         {
-          src: 'https://www.youtube.com/embed/k3_tw44QsZQ?rel=0'
+          src: 'https://www.youtube.com/embed/k3_tw44QsZQ?rel=0&d'
         }]"
           :key="v.src"
           :ratio="v.ratio || 16/9"
@@ -216,13 +229,10 @@
 
 <script>
 import { sendApiRequest, SQL_ADD_QUESTION, SQL_GET_FAQ } from "../ApiAccess";
-import LoadingDisplay from "components/LoadingDisplay";
 
 export default {
   name: "Support",
-  components: {
-    LoadingDisplay
-  },
+  components: {},
   data() {
     return {
       tab: "faq",
@@ -283,13 +293,13 @@ export default {
           SQL_GET_FAQ,
           {},
           data => {
-            data.forEach(item => {
+            data.faq.forEach(item => {
               item.icon = this.categories.find(el => {
                 return el.label == item.category;
               }).icon;
             });
 
-            var newFAQ = data.sort((a, b) => {
+            var newFAQ = data.faq.sort((a, b) => {
               var categoryA = a.category;
               var categoryB = b.category;
               var qA = a.question;
@@ -317,15 +327,10 @@ export default {
                 }, 100);
               }, 100); // wait 100ms until rendered
             }
-
-            this.FAQloading = 2;
           },
-          error => {
-            this.FAQloading = -1;
-          }
+          error => {}
         );
       } else {
-        this.FAQloading = 0; // just to be sure
       }
     }
   },

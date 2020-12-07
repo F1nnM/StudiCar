@@ -705,13 +705,6 @@ export default {
       this.scrollToEnd(50);
     },
 
-    async makeAudioSRC(base64) {
-      const response = await fetch(base64),
-        blob = await response.blob();
-      console.warn(blob);
-      return blob;
-    },
-
     sendAudio(blob) {
       this.sendMessage(2, blob);
     },
