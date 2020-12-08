@@ -1,8 +1,5 @@
 var runQuery = require('./db'),
-  showdown = require('showdown'),
-  fs = require('fs'),
-  readline = require('readline');
-const { chatLifts } = require('./simulation/apiResponse');
+  fs = require('fs')
 const newsPath = 'news/postillon/ticker.txt',
   longQueries = require('./longQueries'),
   apiResponseSimulation = require('./simulation/apiResponse')
@@ -707,17 +704,12 @@ module.exports = {
       if (!filename) {
         res.writeHead(404)
       }
-      else fs.readFile(`legal/${filename}.md`, 'utf8', (err, data) => {
-        try {
-          var converter = new showdown.Converter()
-
-          html = converter.makeHtml(data)
-
-        } catch (e) {
-          res.writeHead(500);
-        }
+      else fs.readFile(`legal/${filename}.html`, 'utf8', (err, data) => {
+        if(err)
+          res.writeHead(500)
+        
         endWithJSON(res, JSON.stringify({
-          text: html
+          text: data
         }))
       })
     },
@@ -812,17 +804,12 @@ module.exports = {
           about = '',
           teamArr = []
 
-        about = await new Promise((res, rej) => fs.readFile('legal/about.md', 'utf8', (err, data) => {
+        about = await new Promise((resolve, reject) => fs.readFile('legal/about.html', 'utf8', (err, data) => {
           if (err) {
             about = err
             console.log(err)
           }
-
-          try {
-            var converter = new showdown.Converter()
-
-            res(converter.makeHtml(data))
-          } catch (e) { }
+          resolve(about)
         }))
 
         team.forEach(m => {
