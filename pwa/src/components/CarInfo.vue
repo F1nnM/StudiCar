@@ -1,33 +1,27 @@
 <template>
-  <q-dialog :value="value" @input="emit" position="bottom">
-    <q-card>
-      <q-card-section class="row items-center q-pb-none">
-        <div class="text-h6 custom-underline c-u-4 c-u-l c-u-md">Infos zum Fahrzeug</div>
-        <q-space />
-        <q-btn icon="close" flat round dense v-close-popup />
-      </q-card-section>
-      <q-card-section>
-        <div class="row">
-          <div class="col-5 shadow-2 rounded-borders">
-            <q-img
-              src="~assets/app-logo.svg"
-              spinner-color="primary"
-              spinner-size="82px"
-              class="full-height full-width"
-              style="max-height: 20vh"
-            />
-          </div>
-          <div class="col-7 q-pa-lg">
-            <p class="text-h4 overflow">{{ car.brand }}</p>
-            <p class="text-h6 text-weight-light">{{ car.model }}</p>
-          </div>
+  <q-card>
+    <q-card-section>
+      <div class="row">
+        <div class="col-5 shadow-2 rounded-borders">
+          <q-img
+            src="~assets/app-logo.svg"
+            spinner-color="primary"
+            spinner-size="82px"
+            class="full-height full-width"
+            style="max-height: 20vh"
+          />
         </div>
-      </q-card-section>
-      <ExtHr :color="car.color ? car.color : 'black'" hex size="xs" />
-      <q-card-section class="q-pt-sm q-pa-lg">
-        <div
-          class="row"
-          v-for="data in [
+        <div class="col-7 q-pa-lg">
+          <p class="text-h4 overflow">{{ car.brand }}</p>
+          <p class="text-h6 text-weight-light">{{ car.model }}</p>
+        </div>
+      </div>
+    </q-card-section>
+    <ExtHr :color="car.color ? car.color : 'black'" hex size="xs" />
+    <q-card-section class="q-pt-sm q-pa-lg">
+      <div
+        class="row"
+        v-for="data in [
                   {
                     prop: 'type',
                     label: 'Fahrzeugtyp',
@@ -45,14 +39,13 @@
                     label: 'Baujahr',
                   },
                 ]"
-          :key="data.prop"
-        >
-          <p class="text-uppercase text-caption col-7">{{ data.label }}</p>
-          <p class="col-5">{{ car[data.prop] }}</p>
-        </div>
-      </q-card-section>
-    </q-card>
-  </q-dialog>
+        :key="data.prop"
+      >
+        <p class="text-uppercase text-caption col-7">{{ data.label }}</p>
+        <p class="col-5">{{ car[data.prop] }}</p>
+      </div>
+    </q-card-section>
+  </q-card>
 </template>
 
 <script>
@@ -62,22 +55,17 @@ import ExtHr from "components/ExtendedHr";
 export default {
   name: "CarInfo",
   components: {
-    ExtHr,
+    ExtHr
   },
   props: {
-    car: Object,
-    value: Boolean,
+    car: Object
   },
   data() {
     return {};
   },
   computed: {},
-  methods: {
-    emit(val) {
-      this.$emit("input", val);
-    },
-  },
-  mounted() {},
+  methods: {},
+  mounted() {}
 };
 </script>
 

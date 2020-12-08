@@ -61,8 +61,8 @@ export default {
       state.user.cars.push(payload.car)
     },
 
-    REMOVE_CAR (state, payload) {
-      state.user.cars = state.user.cars.filter(item => item.carId != payload) // filters the one with matching id
+    REMOVE_CAR (state, carId) {
+      state.user.cars = state.user.cars.filter(item => item.carId != carId) // filters the one with matching id
     },
 
     SET_USER_DATA_LOADED (state, payload) {
@@ -111,7 +111,7 @@ export default {
       await Firebase.auth().createUserWithEmailAndPassword(email, password)
         .then(user => {
           Firebase.auth().currentUser.updateProfile({
-            displayName: name+ " " + surname
+            displayName: name + " " + surname
           })
             .then(_ => {
               let currentUser = Firebase.auth().currentUser

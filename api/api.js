@@ -45,6 +45,16 @@ function blobToBase64 (blob) {
   }
 }
 
+function catchall (error, res, endpoint) {
+  isConstraintErr = _ => error.code == 'ER_ROW_IS_REFERENCED_2'
+
+  switch (endpoint) {
+    case 'removeCar': // cannot delete car
+      if (isConstraintErr()) res.writeHead(404)
+      break
+  }
+}
+
 async function getChatLifts (uid) {
   //TODO make query return Nickname if the querying user is offering the lift. Maybe https://stackoverflow.com/questions/1747750/select-column-if-blank-select-from-another
   var lift_data = (await runQuery(`
@@ -290,7 +300,7 @@ async function getLiftRequests (uid) {
   (SELECT "[]")
   LIMIT 1;
   `, [uid])).result[0].JSON
-  return  db_requests;
+  return db_requests;
 }
 
 function endWithJSON (res, JSON) {
@@ -992,11 +1002,8 @@ module.exports = {
     '/removeCar': async (req, res, options) => {
       if (!isOptionMissing(options, ['id'], res) && isUserVerified(options.secretFbId)) {
         await runQuery(
-          "DELETE FROM `car` WHERE `car`.`ID` = ?", [options.id]).catch(error => {
-            throw error;
-          })
-
-        res.end();
+          "DELETE FROM `car` WHERE `car`.`ID` = ?", [options.id]).catch(error => catchall(error, res, 'removeCar'))
+          .then(_ => res.end())
       }
     },
     '/addLift': async (req, res, options) => {
