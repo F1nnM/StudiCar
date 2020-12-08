@@ -3,5 +3,7 @@ server.key
 server.pem
 firebaseAccountKey.json
 
+legal/*.html
+
 # ignoring all the modules
 node_modules/
