@@ -1,66 +1,119 @@
 <template>
   <div class="q-ma-md">
-    <TitleButtonAnchor>
-      <q-btn @click="getContent(true)" icon="refresh" size="md" flat />
-    </TitleButtonAnchor>
-    <div v-show="downloading == 2" class="overflow-hidden" ref="text_anchor">
+    <div v-if="!view" class="text-negative">- ungültige Anfrage -</div>
+
+    <div v-else-if="!loaded">
+      <div style="height: 40vh" class="text-center column justify-center">
+        <q-circular-progress
+          show-value
+          indeterminate
+          size="15vw"
+          :thickness="0.05"
+          :value="100"
+          color="primary"
+          class="q-ma-md full-width"
+        >
+          <q-icon name="contact_support" color="dark" size="md" />
+        </q-circular-progress>
+        <span class="text-subtitle1">Daten werden geladen</span>
+      </div>
+    </div>
+    <div class="overflow-hidden" ref="text_anchor">
       <!-- content goes here after downloading -->
     </div>
-    <LoadingDisplay
-      v-model="downloading"
-      loadingText="Inhalt wird geladen"
-      errorText="Ein Fehler ist aufgetreten. Bitte versuch es später noch mal"
-    />
   </div>
 </template>
 
 <script>
 import { sendApiRequest, GET_LEGAL } from "../ApiAccess";
-import LoadingDisplay from "components/LoadingDisplay";
-import TitleButtonAnchor from "components/TitleButtonAnchor";
 
 export default {
   name: "legal",
-  components: {
-    LoadingDisplay,
-    TitleButtonAnchor
-  },
-  mounted() {
-    this.$store.commit("setPage", {
-      name: "Rechtliches"
-    });
-    this.getContent();
-  },
+  components: {},
   data() {
     return {
-      downloading: 0, // 0 means not downloading, 1 means downloading, 2 means success and -1 means error
-      converter: null
+      loc: window.location.href,
+      content: "",
+      loaded: false,
+      view: null
     };
   },
+  watch: {
+    $route(to) {
+      this.recomputeView();
+    },
+    view: function(newValue, old) {
+      if (old != newValue) this.setMode(newValue);
+    }
+  },
   methods: {
+    recomputeView() {
+      var locArr = window.location.href.split("?view=");
+      if (locArr.length > 1) this.view = locArr[1];
+      // you can control the view via url
+    },
     getContent(force) {
-      const currentLegal = this.$store.getters["getLegal"];
-      if (currentLegal != "" && !force) {
+      const isViewContentStored = this.$store.getters["getLegalViews"].includes(
+        this.view
+      );
+      if (isViewContentStored && !force) {
         // already some content
-        this.$refs.text_anchor.innerHTML = currentLegal;
-        this.downloading = 2;
+        this.$refs.text_anchor.innerHTML = this.$store.state.legal[this.view];
+        this.loaded = true;
       } else {
-        this.downloading = 1;
+        this.loaded = false;
+        this.$refs.text_anchor.innerHTML = "";
         sendApiRequest(
           GET_LEGAL,
-          {},
-          html_ => {
-            this.$refs.text_anchor.innerHTML = html_;
-            this.$store.commit("setLegal", html_);
-            this.downloading = 2;
+          {
+            view: this.view
+          },
+          data => {
+            this.loaded = true;
+            this.$refs.text_anchor.innerHTML = data.text;
+            var obj = {};
+            obj[this.view] = data.text;
+            this.$store.commit("addToLegal", obj);
           },
           err => {
             alert("Fehler: " + err);
-            this.downloading = -1;
           }
         );
       }
+    },
+
+    setMode(value) {
+      var pageName = null,
+        view;
+      switch (value) {
+        case "agb":
+          pageName = "Nutzungsbedingungen";
+          view = "agb";
+          break;
+        case "datenschutz":
+          pageName = "Datenschutz";
+          view = "dataSec";
+          break;
+      }
+      if (pageName) {
+        this.$store.commit("setPage", {
+          name: pageName
+        });
+        this.view = view;
+        this.getContent();
+      }
+    },
+
+    refreshContent(res) {
+      this.getContent(true);
+      res();
     }
+  },
+  mounted() {
+    this.$store.commit("setPage", {
+      name: ""
+    });
+    this.recomputeView();
   }
 };
 </script>

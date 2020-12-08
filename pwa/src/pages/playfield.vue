@@ -11,7 +11,7 @@
 import { scroll } from "quasar";
 /* import ExpansionLiftTimeline from "components/ExpansionLiftTimeline"; */
 
-import { sendApiRequest } from "../ApiAccess";
+import { sendApiRequest, GET_LEGAL } from "../ApiAccess";
 
 export default {
   components: {},
@@ -23,16 +23,7 @@ export default {
   },
   computed: {},
   methods: {
-    go() {
-      sendApiRequest(
-        {
-          path: "/getTeamInfo",
-          method: "GET"
-        },
-        {},
-        data => {}
-      );
-    }
+    go() {}
   },
 
   mounted() {

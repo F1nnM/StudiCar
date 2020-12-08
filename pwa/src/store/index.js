@@ -33,12 +33,15 @@ const store = new Vuex.Store({
       state.navTitle = obj.navTitle || ''
     },
 
-    setFAQ (state, faq_) {
-      state.faq = faq_
+    setSupportData (state, data_) {
+      state.supportData = data_
     },
 
-    setLegal (state, legal_) {
-      state.legal = legal_
+    addToLegal (state, legal_) {
+      state.legal = {
+        ...state.legal,
+        ...legal_
+      }
     },
 
     setInfo (state, info_) {
@@ -60,16 +63,16 @@ const store = new Vuex.Store({
   actions: {
   },
   getters: {
-    getFAQ (state) {
-      return state.faq
+    getSupportData (state) {
+      return state.supportData
     },
 
     getStudiCarInfo (state) {
       return state.info
     },
 
-    getLegal (state) {
-      return state.legal
+    getLegalViews (state) {
+      return Object.keys(state.legal)
     },
   },
   strict: process.env.DEV,
@@ -81,8 +84,8 @@ const store = new Vuex.Store({
     onlyInNav: false,
     navTitle: '',
     testValue: 10,
-    legal: '',
-    faq: [],
+    legal: {},
+    supportData: null,
     info: null,
     scroll: 0,
     message: 'Hello',

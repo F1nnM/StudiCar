@@ -41,31 +41,37 @@ const routes = [{
         import('pages/view_user.vue')
     },
     {
-      path: '/contact',
-      component: () =>
-        import('pages/contact.vue')
-    },
-    {
-      path: '/rechtliches',
-      component: () =>
-        import('pages/legal.vue')
-    },
-    {
-      path: '/hilfe',
-      component: () =>
-        import('pages/support.vue')
-    },
-    {
-      path: '/hilfe/bearbeiten',
-      component: () =>
-        import('pages/edit_faq.vue')
-    },
-    {
       path: '/das-team',
       component: () =>
         import('pages/team.vue')
     },
   ]
+},
+{
+  path: '/',
+  meta: { requiresAuth: false }, // these pages has to be accessible even when user isn't signed in yet
+  component: () =>
+    import('layouts/MainLayout.vue'),
+  children: [{
+    path: '/rechtliches',
+    component: () =>
+      import('pages/legal.vue')
+  },
+  {
+    path: '/hilfe',
+    component: () =>
+      import('pages/support.vue')
+  },
+  {
+    path: '/contact',
+    component: () =>
+      import('pages/contact.vue')
+  },
+  {
+    path: '/hilfe/bearbeiten',
+    component: () =>
+      import('pages/edit_faq.vue')
+  }]
 },
 {
   path: '/spielwiese',

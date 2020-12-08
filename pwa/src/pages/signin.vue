@@ -17,7 +17,7 @@
       <div class="row justify-evenly">
         <GoogleSignInButton class="col-5" />
         <q-btn dense no-caps class="col-5" to="/auth/registrierung" outline color="primary">
-          <q-avatar size="sm" class="q-mr-none">
+          <q-avatar size="sm" class="q-mr-xs">
             <img src="~assets/app-icon.svg" />
           </q-avatar>
           <span class="text-dark">Registrierung</span>
@@ -85,7 +85,7 @@
 import GoogleSignInButton from "../components/GoogleButton";
 export default {
   components: {
-    GoogleSignInButton,
+    GoogleSignInButton
   },
   data() {
     return {
@@ -98,18 +98,18 @@ export default {
     onSubmit() {
       let credentials = {
         email: this.email,
-        password: this.password,
+        password: this.password
       };
       this.$store
         .dispatch("auth/signIn", credentials)
-        .then((user) => {
+        .then(user => {
           this.$router.replace({ name: "marketplace" }).catch(() => {});
         })
-        .catch((error) => {
+        .catch(error => {
           this.$q.notify("Invalid Login!");
           console.error(`Not signed in: ${error.message}`);
         });
-    },
-  },
+    }
+  }
 };
 </script>

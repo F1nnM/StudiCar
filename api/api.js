@@ -608,9 +608,18 @@ module.exports = {
       }
     },
     '/getLegal': async (req, res, options) => {
-      var html = "Legal.md couldn't be processed."
-      fs.readFile('legal/legal.md', 'utf8', (err, data) => {
+      var html = '', filename = null
 
+      switch (options.view) {
+        case 'agb': filename = 'terms_of_use'
+          break
+        case 'dataSec': filename = 'data_security'
+          break
+      }
+      if (!filename) {
+        res.writeHead(404)
+      }
+      else fs.readFile(`legal/${filename}.md`, 'utf8', (err, data) => {
         try {
           var converter = new showdown.Converter()
 
@@ -619,7 +628,9 @@ module.exports = {
         } catch (e) {
           res.writeHead(500);
         }
-        res.end(html)
+        endWithJSON(res, JSON.stringify({
+          text: html
+        }))
       })
     },
     '/getLiftInfo': async (req, res, options) => {
@@ -655,11 +666,12 @@ module.exports = {
         }))
       }
     },
-    '/getFAQ': async (req, res, options) => {
+    '/getSupportData': async (req, res, options) => {
       var result = (await runQuery(longQueries.getFAQ, [])).result,
-        data = []
+        faqArr = [],
+        tutArr = []
       result.forEach(item => {
-        data.push({
+        faqArr.push({
           id: item.ID,
           question: item.QUESTION,
           answer: item.ANSWER,
@@ -671,8 +683,19 @@ module.exports = {
           }
         })
       })
+      result = (await runQuery('SELECT ID, TITLE, CAPTION, URL FROM tutorials WHERE PUBLIC = 1')).result
+      result.forEach(video => {
+        tutArr.push({
+          id: video.ID,
+          title: video.TITLE,
+          caption: video.SUBTITLE || '',
+          url: video.URL
+        })
+      })
+
       endWithJSON(res, JSON.stringify({
-        faq: data
+        faq: faqArr,
+        tutorials: tutArr
       }))
     },
     '/getAllFAQ': async (req, res, options) => {

@@ -288,13 +288,13 @@ export default {
               title: "AGB",
               caption: "Unsere Nutzungsbedingungen",
               icon: "format_list_numbered",
-              link: "/#/agb"
+              link: "/#/rechtliches?view=agb"
             },
             {
               title: "Datenschutz",
               caption: "Was mit deinen Daten passiert",
               icon: "verified_user",
-              link: "/#/datenschutz"
+              link: "/#/rechtliches?view=datenschutz"
             } /* ,
           {
             title: "Impressum",
