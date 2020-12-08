@@ -303,6 +303,79 @@ async function getLiftRequests (uid) {
   return db_requests;
 }
 
+async function getMarketplace () {
+  let JSON = (await runQuery(`
+        WITH
+        lifts as (
+            SELECT
+            lift.ID AS ID,
+                lift.UUID AS UUID,
+                driver.FB_ID AS DRIVER_FB_ID,
+                driver.NAME AS DRIVER_NAME,
+                driver.SURNAME AS DRIVER_SURNAME,
+                driver.PREF_TALK AS DRIVER_PREF_TALK,
+                driver.PREF_TALK_MORNING AS DRIVER_PREF_TALKMORNING,
+                driver.PREF_SMOKING AS DRIVER_PREF_SMOKING,
+                driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
+                lift.DEPART_AT AS LIFT_DEPART,
+                lift.ARRIVE_BY AS LIFT_ARRIVE,
+                destination.CITY AS DESTINATION_CITY,
+                start_point.CITY AS START_CITY,
+                lift.OFFERED_SEATS,
+                IFNULL(counts.OCCUPIED_SEATS, 0) AS OCCUPIED_SEATS 
+            FROM
+                lift 
+                JOIN
+                    lift_map 
+                    ON lift_map.LIFT_ID = lift.ID 
+                JOIN
+                    users driver 
+                    ON lift_map.USER_ID = driver.ID 
+                    AND lift_map.IS_DRIVER = 1 
+                JOIN
+                    addresses destination 
+                    ON lift.DESTINATION = destination.ID 
+                JOIN
+                    addresses start_point 
+                    ON lift.START = start_point.ID 
+                LEFT OUTER JOIN
+                    (
+                        SELECT
+                            lift_map.LIFT_ID,
+                            COUNT(*) AS OCCUPIED_SEATS 
+                        FROM
+                            lift_map 
+                        WHERE
+                            lift_map.PENDING != 0 
+                        GROUP BY
+                            lift_map.LIFT_ID
+                    )
+                    counts 
+                    ON lift.ID = counts.LIFT_ID 
+            WHERE
+                lift.FIRST_DATE >= CURRENT_DATE() 
+                OR lift.REPEATS_ON_WEEKDAY != 0
+        )
+        
+        SELECT
+          JSON_ARRAYAGG(
+              JSON_OBJECT(
+                  'id', lifts.ID,
+                    'diver', JSON_OBJECT(),
+                    'departAt', lifts.LIFT_DEPART,
+                    'arriveBy', lifts.LIFT_ARRIVE,
+                    'destination', lifts.DESTINATION_CITY,
+                    'start', lifts.START_CITY,
+                    'seatsOffered', lifts.OFFERED_SEATS,
+                    'seatsOccupied', lifts.OCCUPIED_SEATS
+                )
+            )
+        FROM
+          lifts
+        `, [])).result[0].JSON
+  return JSON
+}
+
 function endWithJSON (res, JSON) {
   res.setHeader('Content-Type', 'application/json')
   res.end(JSON)
@@ -594,6 +667,7 @@ module.exports = {
 
         data.stats.liftsOffered = Math.floor(Math.random() * 100)
         data.stats.liftsAll = data.stats.liftsOffered + Math.floor(Math.random() * 200)
+        data.marketplace = JSON.parse(getMarketplace())
 
         endWithJSON(res, JSON.stringify(data))
       }
@@ -799,77 +873,7 @@ module.exports = {
     },
     '/marketplace': async (req, res, options) => {
       if (isUserVerified(options.secretFbId)) {
-        let JSON = (await runQuery(`
-        WITH
-        lifts as (
-            SELECT
-            lift.ID AS ID,
-                lift.UUID AS UUID,
-                driver.FB_ID AS DRIVER_FB_ID,
-                driver.NAME AS DRIVER_NAME,
-                driver.SURNAME AS DRIVER_SURNAME,
-                driver.PREF_TALK AS DRIVER_PREF_TALK,
-                driver.PREF_TALK_MORNING AS DRIVER_PREF_TALKMORNING,
-                driver.PREF_SMOKING AS DRIVER_PREF_SMOKING,
-                driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
-                lift.DEPART_AT AS LIFT_DEPART,
-                lift.ARRIVE_BY AS LIFT_ARRIVE,
-                destination.CITY AS DESTINATION_CITY,
-                start_point.CITY AS START_CITY,
-                lift.OFFERED_SEATS,
-                IFNULL(counts.OCCUPIED_SEATS, 0) AS OCCUPIED_SEATS 
-            FROM
-                lift 
-                JOIN
-                    lift_map 
-                    ON lift_map.LIFT_ID = lift.ID 
-                JOIN
-                    users driver 
-                    ON lift_map.USER_ID = driver.ID 
-                    AND lift_map.IS_DRIVER = 1 
-                JOIN
-                    addresses destination 
-                    ON lift.DESTINATION = destination.ID 
-                JOIN
-                    addresses start_point 
-                    ON lift.START = start_point.ID 
-                LEFT OUTER JOIN
-                    (
-                        SELECT
-                            lift_map.LIFT_ID,
-                            COUNT(*) AS OCCUPIED_SEATS 
-                        FROM
-                            lift_map 
-                        WHERE
-                            lift_map.PENDING != 0 
-                        GROUP BY
-                            lift_map.LIFT_ID
-                    )
-                    counts 
-                    ON lift.ID = counts.LIFT_ID 
-            WHERE
-                lift.FIRST_DATE >= CURRENT_DATE() 
-                OR lift.REPEATS_ON_WEEKDAY != 0
-        )
-        
-        SELECT
-          JSON_ARRAYAGG(
-              JSON_OBJECT(
-                  'id', lifts.ID,
-                    'diver', JSON_OBJECT(),
-                    'departAt', lifts.LIFT_DEPART,
-                    'arriveBy', lifts.LIFT_ARRIVE,
-                    'destination', lifts.DESTINATION_CITY,
-                    'start', lifts.START_CITY,
-                    'seatsOffered', lifts.OFFERED_SEATS,
-                    'seatsOccupied', lifts.OCCUPIED_SEATS
-                )
-            )
-        FROM
-          lifts
-        `, [])).result[0].JSON
-
-        endWithJSON(res, JSON)
+        endWithJSON(res, getMarketplace())
       }
       else {
         console.log('not verified')
