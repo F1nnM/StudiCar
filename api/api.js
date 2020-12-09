@@ -212,7 +212,7 @@ async function getLiftRequests (uid) {
           JSON_ARRAYAGG(
               JSON_OBJECT(
                   'liftId',
-                  my_lifts.LIFT_ID,
+                  lift.UUID,
                   'requestingUsers',
                   JSON_ARRAY(
                       JSON_OBJECT(
@@ -252,6 +252,8 @@ async function getLiftRequests (uid) {
           lift_map my_lifts 
           ON my_lifts.USER_ID = me.ID 
           AND my_lifts.IS_DRIVER = 1 
+      JOIN lift
+      	  ON my_lifts.LIFT_ID = lift.ID
       JOIN
           lift_map requests 
           ON my_lifts.LIFT_ID = requests.LIFT_ID 
