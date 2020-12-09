@@ -358,7 +358,7 @@ async function getMarketplace () {
           JSON_ARRAYAGG(
               JSON_OBJECT(
                   'id', lifts.ID,
-                    'diver', JSON_OBJECT(),
+                    'driver', JSON_OBJECT(),
                     'departAt', lifts.LIFT_DEPART,
                     'arriveBy', lifts.LIFT_ARRIVE,
                     'destination', lifts.DESTINATION_CITY,
@@ -366,7 +366,7 @@ async function getMarketplace () {
                     'seatsOffered', lifts.OFFERED_SEATS,
                     'seatsOccupied', lifts.OCCUPIED_SEATS
                 )
-            )
+            ) AS JSON
         FROM
           lifts
         `, [])).result[0].JSON
@@ -667,7 +667,7 @@ module.exports = {
 
         data.stats.liftsOffered = Math.floor(Math.random() * 100)
         data.stats.liftsAll = data.stats.liftsOffered + Math.floor(Math.random() * 200)
-        data.marketplace = JSON.parse(getMarketplace())
+        data.marketplaceOffers = JSON.parse(await getMarketplace())
 
         endWithJSON(res, JSON.stringify(data))
       }
@@ -708,9 +708,9 @@ module.exports = {
         res.writeHead(404)
       }
       else fs.readFile(`legal/${filename}.html`, 'utf8', (err, data) => {
-        if(err)
+        if (err)
           res.writeHead(500)
-        
+
         endWithJSON(res, JSON.stringify({
           text: data
         }))
