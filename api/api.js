@@ -549,22 +549,25 @@ module.exports = {
                           ) from user_addresses
                      )
                   ),
-                  '$.cars', JSON_COMPACT(
-                      (SELECT
-                          JSON_ARRAYAGG(
-                              JSON_OBJECT(
-                                  'modelId', cars.MODEL_ID,
-                                  'carId', cars.ID,
-                                  'brand', cars.BRAND,
-                                  'model', cars.MODEL,
-                                  'type', cars.TYPE,
-                                  'licensePlate', cars.LICENSE_PLATE,
-                                  'year', cars.YEAR,
-                                  'seats', cars.SEATS,
-                                  'color', CONCAT( '#', cars.COLOR)
-                              )
-                          ) from cars
-                      )
+                  '$.cars', IFNULL(
+                      JSON_COMPACT(
+                          (SELECT
+                              JSON_ARRAYAGG(
+                                  JSON_OBJECT(
+                                      'modelId', cars.MODEL_ID,
+                                      'carId', cars.ID,
+                                      'brand', cars.BRAND,
+                                      'model', cars.MODEL,
+                                      'type', cars.TYPE,
+                                      'licensePlate', cars.LICENSE_PLATE,
+                                      'year', cars.YEAR,
+                                      'seats', cars.SEATS,
+                                      'color', CONCAT( '#', cars.COLOR)
+                                  )
+                              ) from cars
+                          )
+                      ),
+                      JSON_ARRAY()
                   )
               ) AS JSON
           FROM
