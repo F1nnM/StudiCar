@@ -100,6 +100,7 @@
       <div :key="offerIndexToRefresh">
         <!-- key is to re-render component -->
         <LiftOffer
+          class="q-mb-sm"
           v-for="lift in getFilteredAndSortedOffers"
           :key="lift.index"
           v-bind:lift="lift"
@@ -121,6 +122,7 @@
 </template>
 
 <script>
+import { sendApiRequest } from "../ApiAccess";
 import LiftOffer from "../components/LiftOffer";
 export default {
   components: { LiftOffer },
@@ -313,7 +315,10 @@ export default {
   methods: {
     async refreshContent(res, rej) {
       // check whether new LiftOffers can be loaded
-      res();
+      this.$store.dispatch("auth/reloadMarketplaceOffers", {
+        res: res,
+        rej: rej
+      });
     },
 
     triggerLiftRequest(liftId) {

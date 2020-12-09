@@ -7,7 +7,6 @@
         maximized
         transition-show="jump-up"
         transition-hide="slide-up"
-        @input="emitAndClose()"
       >
         <div class="flex flex-center bg-white">
           <div class="loading-header text-center full-width">
@@ -22,15 +21,23 @@
             <div v-if="open" class="full-width q-px-xl text-center">
               <p class>{{ loadingText }}</p>
 
-              <q-linear-progress indeterminate rounded color="primary" class="q-mt-sm" />
+              <q-linear-progress
+                :indeterminate="open"
+                :value="100"
+                rounded
+                color="primary"
+                class="q-mt-sm"
+              />
             </div>
           </q-slide-transition>
 
-          <div class="fixed-bottom overflow-hidden-y q-mb-lg q-mx-lg text-center">
-            <div class="branding-rise">
-              Mit freundlicher Unterstützung des
-              ADAC e.V.
-            </div>
+          <div class="fixed-bottom overflow-hidden-y text-center">
+            <q-tab-panels v-model="showBranding" animated>
+              <q-tab-panel :name="true">
+                Mit freundlicher Unterstützung des
+                ADAC e.V.
+              </q-tab-panel>
+            </q-tab-panels>
           </div>
         </div>
       </q-dialog>
@@ -45,34 +52,43 @@ import { sendApiRequest } from "../ApiAccess";
 export default {
   name: "GetUserDataLoading.vue",
   components: {
-    ExtendedHR,
+    ExtendedHR
   },
   data() {
     return {
       loadingTexts: [
         "Bitte hab noch einen Moment Geduld",
-        "Daten werden geladen",
+        "Daten werden geladen"
       ],
+      showBranding: false
     };
   },
   model: {
     prop: "open",
-    event: "input",
+    event: "input"
+  },
+  watch: {
+    open: function(isOpen) {
+      if (isOpen)
+        setTimeout(_ => {
+          this.showBranding = true;
+        }, 500);
+    }
   },
   props: {
-    open: Boolean,
+    open: Boolean
   },
   computed: {
     loadingText() {
       const pos = 1;
 
       return this.loadingTexts[pos];
-    },
+    }
   },
 
   mounted() {},
 
-  methods: {},
+  methods: {}
 };
 </script>
 

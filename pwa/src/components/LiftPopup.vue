@@ -584,9 +584,10 @@ export default {
     },
 
     getNameFromId(userId) {
-      var people = JSON.parse(JSON.stringify(this.lift.passengers)); // deep copy, otherwise passengers would be overwritten
+      return "Ersatzname";
+      /* var people = JSON.parse(JSON.stringify(this.lift.passengers)); // deep copy, otherwise passengers would be overwritten
       people.push(JSON.parse(JSON.stringify(this.lift.driver)));
-      return people.find(p => p.id == userId).name;
+      return people.find(p => p.id == userId).name; */
     },
 
     emit(val) {

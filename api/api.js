@@ -42,14 +42,23 @@ function blobToBase64 (blob) {
   }
 }
 
-function catchall (error, res, endpoint) {
-  isConstraintErr = _ => error.code == 'ER_ROW_IS_REFERENCED_2'
+function catchall (err, res, endpoint) {
+  isConstraintErr = _ => err.code == 'ER_ROW_IS_REFERENCED_2'
 
   switch (endpoint) {
     case 'removeCar': // cannot delete car
       if (isConstraintErr()) res.writeHead(404)
       break
+    case 'getLegal':
+      console.log(err)
+      break
+    default: {
+      res.writeHead(200)
+      res.end()
+    }
   }
+  console.log(`ERROR AT CALLING ${endpoint} : ${err}`)
+
 }
 
 async function getChatLifts (uid) {
@@ -136,7 +145,7 @@ async function getChatLifts (uid) {
                               members.NAME,
                               'surname',
                               members.SURNAME,
-                              'fbId',
+                              'id',
                               members.FB_ID
                           )
                       ) AS JSON_MEMBERS
@@ -224,7 +233,7 @@ async function getLiftRequests (uid) {
                   'requestingUsers',
                   JSON_ARRAY(
                       JSON_OBJECT(
-                          'fbId',
+                          'id',
                           users.FB_ID,
                           'name',
                           users.NAME,
@@ -448,7 +457,8 @@ module.exports = {
     '/getUserData': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid'], res) && isUserVerified(options.secretFbId)) {
         var data;
-        if (options.secretFbId = options.fbid) { // NOT ACCESSING PUBLIC PROFILE
+        if (options.secretFbId == options.fbid) { // ACCESSING PRIVATE PROFILE
+          console.log('not public')
           data = (await runQuery(`
           SELECT
               users.ID INTO @userid 
@@ -607,14 +617,15 @@ module.exports = {
             `, [options.fbid])).result[1][0].JSON
 
           data = JSON.parse(data)
+          console.log(data)
 
           data.chatLifts = JSON.parse(await getChatLifts(options.fbid))
           data.liftRequests = JSON.parse(await getLiftRequests(options.fbid))
 
           data['topFriends'] = apiResponseSimulation['topFriends']
 
-        } else {
-          data = JSON.parse((await runQuery(`
+        } else { // accessing public information
+          data = runQuery(`
           SELECT
               users.ID INTO @userid 
           FROM
@@ -689,15 +700,14 @@ module.exports = {
                   rides USING(USER_ID) 
               LEFT OUTER JOIN
                   drives USING(USER_ID)
-            `, [options.fbid])).result[1][0].JSON)
+            `, [options.fbid]).result[1][0].JSON
         }
-
-
         data.stats.liftsOffered = Math.floor(Math.random() * 100)
         data.stats.liftsAll = data.stats.liftsOffered + Math.floor(Math.random() * 200)
         data.marketplaceOffers = JSON.parse(await getMarketplace())
 
         endWithJSON(res, JSON.stringify(data))
+
       }
     },
     '/getCarModels': async (req, res, options) => {
@@ -736,10 +746,9 @@ module.exports = {
         res.writeHead(404)
       }
       else fs.readFile(`legal/${filename}.html`, 'utf8', (err, data) => {
-        if (err)
-          res.writeHead(500)
+        if (err) catchall(err, res, 'getLegal')
 
-        endWithJSON(res, JSON.stringify({
+        else endWithJSON(res, JSON.stringify({
           text: data
         }))
       })
@@ -891,7 +900,7 @@ module.exports = {
     },
     '/marketplace': async (req, res, options) => {
       if (isUserVerified(options.secretFbId)) {
-        endWithJSON(res, getMarketplace())
+        endWithJSON(res, await getMarketplace())
       }
       else {
         console.log('not verified')

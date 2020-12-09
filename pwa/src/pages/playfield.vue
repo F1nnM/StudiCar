@@ -11,7 +11,7 @@
 import { scroll } from "quasar";
 /* import ExpansionLiftTimeline from "components/ExpansionLiftTimeline"; */
 
-import { sendApiRequest, GET_LEGAL } from "../ApiAccess";
+import { sendApiRequest, PING } from "../ApiAccess";
 
 export default {
   components: {},
@@ -23,7 +23,10 @@ export default {
   },
   computed: {},
   methods: {
-    go() {}
+    go() {
+      window.location.href =
+        "https://localhost:3000/#/benutzerinfo?userFbId=wG3cG4Mawf";
+    }
   },
 
   mounted() {

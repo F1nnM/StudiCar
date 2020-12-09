@@ -175,6 +175,29 @@ export default {
   },
 
   computed: {
+    lastMessages() {
+      var returnedArray = [];
+      var lifts = JSON.parse(JSON.stringify(this.lifts));
+      lifts.forEach((lift, index) => {
+        var lastMessage = lift.messages[lift.messages.length - 1];
+        returnedArray.push({
+          liftId: lift.id,
+          start: lift.start.name,
+          destination: lift.destination.name,
+          sentBy: /* this.getPassengerNameFromId(lift, */ lastMessage.sentBy,
+          type: lastMessage.type,
+          content: lastMessage.content,
+          timestamp: lastMessage.timestamp
+        });
+      });
+      returnedArray.sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      ); // sort descending, so swap compared values
+
+      return returnedArray;
+    },
+
     bigTabOptions() {
       return [
         { value: "current", icon: "playlist_add_check", label: "Bestehend" },
@@ -190,31 +213,6 @@ export default {
         delete item.label;
         return item;
       });
-    },
-    lastMessages() {
-      var returnedArray = [];
-      for (let liftId in this.lifts) {
-        var data = this.lifts[liftId],
-          lastMessage = data.messages[data.messages.length - 1];
-        returnedArray.push({
-          liftId: liftId, // id is property
-          start: data.start.name,
-          destination: data.destination.name,
-          sentBy: this.getNameFromId(liftId, lastMessage.sentBy),
-          type: lastMessage.type,
-          content: lastMessage.content,
-          timestamp: lastMessage.timestamp
-        });
-        // if(firstItem) firstItem = false; // just not to have a gray line above top item
-      }
-      returnedArray.sort((a, b) => {
-        return (
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        );
-        // sort descending, so swap compared values
-      });
-
-      return returnedArray;
     },
 
     thumbStyle() {
@@ -247,6 +245,13 @@ export default {
   },
 
   methods: {
+    async refreshContent(res, rej) {
+      this.$store.dispatch("auth/reloadChatLifts", {
+        res: res,
+        rej: rej
+      });
+    },
+
     onLeft({ reset }) {
       //alert("SWIPED LEFT")
 
@@ -259,13 +264,14 @@ export default {
       this.finalize(reset);
     },
 
-    getNameFromId(liftId, userId) {
-      var lift = this.lifts[liftId],
-        people = JSON.parse(JSON.stringify(lift.passengers)); // otherwise passengers would be overwritten
-      people.push(lift.driver);
-      return people.find(p => {
-        return p.id == userId;
-      }).name;
+    getPassengerNameFromId(lift, userId) {
+      if (!lift.passengers) alert("no passengers");
+
+      var people = {};
+      lift.passengers.forEach(p => (people[p.id] = p.name));
+      people[lift.driver.id] = lift.driver.name;
+      var a = people[userId].name;
+      return a;
     },
 
     getLiftFromId(liftId) {
@@ -299,7 +305,7 @@ export default {
     },
 
     openLiftPopup(liftId) {
-      var lift = this.lifts[liftId];
+      var lift = this.lifts.find(l => l.id == liftId);
       this.chatPopup.data = lift;
       this.shortLiftPopup.isOpen = false; // just to be sure
       this.chatPopup.isOpen = true;

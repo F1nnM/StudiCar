@@ -3,9 +3,9 @@
     <q-toolbar>
       <q-toolbar-title>
         <!-- <q-icon :name="lift.start.id > 3 ? 'home' : 'school'" size="sm" /> -->
-        <span>{{ lift.start.name }}</span>
+        <span class="ellipsis">{{ lift.start.name }}</span>
         <!-- <small>({{ lift.distance }}km entfernt)</small> -->
-        <span class="q-mx-md">&rsaquo;</span>
+        <span class="q-mx-sm">&rsaquo;</span>
         <span>
           {{ lift.destination.name }}
           <!-- <q-badge transparent floating color="white">
@@ -107,7 +107,7 @@ val: 'music', icon: 'music_note'
                 </div>
               </q-toolbar-title>
               <q-btn
-                :to="'benutzerinfo?userFbId='+lift.driver.fbid"
+                :to="'benutzerinfo?userFbId='+lift.driver.id"
                 outline
                 class="rounded-borders"
                 color="dark"
@@ -128,7 +128,7 @@ import ExtendedHr from "components/ExtendedHr";
 import {
   buildGetRequestUrl,
   sendApiRequest,
-  GET_USER_PROFILE_PIC,
+  GET_USER_PROFILE_PIC
 } from "../ApiAccess";
 
 export default {
@@ -140,7 +140,7 @@ export default {
   },
   data() {
     return {
-      imageUrl: "",
+      imageUrl: ""
     };
   },
   computed: {
@@ -154,8 +154,8 @@ export default {
             "Mittwoch",
             "Donnerstag",
             "Freitag",
-            "Samstag",
-          ],
+            "Samstag"
+          ]
         }),
         timeFormatted = this.formatAsTime(dateObj),
         isNextText =
@@ -165,13 +165,13 @@ export default {
       return {
         firstLine: "Fahrt ist am " + isNextText + dateFormatted,
         secondLine:
-          "Angestrebte " + directionText + ": " + timeFormatted + " Uhr",
+          "Angestrebte " + directionText + ": " + timeFormatted + " Uhr"
       };
     },
 
     prefsDocu() {
       return this.$store.state.prefsDocu;
-    },
+    }
   },
   methods: {
     betterPrefColor(prefName) {
@@ -184,14 +184,14 @@ export default {
       if (this.prefViewTab != "legend") {
         this.prefViewTab = "legend";
         this.prefsExpanded = false;
-        setTimeout((_) => {
+        setTimeout(_ => {
           this.prefsExpanded = true;
         }, 50);
       } else {
         this.prefViewTab = "short";
         this.prefsExpanded = false;
 
-        setTimeout((_) => {
+        setTimeout(_ => {
           this.prefsExpanded = true;
         }, 0); // just that we have a transition, otherwise there would be no pretty scaling effect
       }
@@ -201,27 +201,27 @@ export default {
       return date.formatDate(new Date(dateString), "H:mm");
     },
 
-    requestLift(){
+    requestLift() {
       this.$q
-              .dialog({
-                title: "Anfragen",
-                message: `${this.lift.driver.name} fragen, ob du mitfahren kannst?`,
-                ok: {
-                  color: "positive",
-                },
-                cancel: {
-                  color: "white",
-                },
-                cancel: true,
-                persistent: true,
-              })
-              .onOk((data) => {
-                this.$emit('request', this.lift.id)
-              })
-              .onCancel();
+        .dialog({
+          title: "Anfragen",
+          message: `${this.lift.driver.name} fragen, ob du mitfahren kannst?`,
+          ok: {
+            color: "positive"
+          },
+          cancel: {
+            color: "white"
+          },
+          cancel: true,
+          persistent: true
+        })
+        .onOk(data => {
+          this.$emit("request", this.lift.id);
+        })
+        .onCancel();
     }
   },
-  mounted() {},
+  mounted() {}
 };
 </script>
 

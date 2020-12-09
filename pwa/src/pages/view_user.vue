@@ -62,7 +62,7 @@
         </template>
         <template v-slot:after v-if="splitterPos.current <= 70">
           <q-slide-transition>
-            <q-list class="shadow-2 rounded-borders" style="width: 100%;">
+            <q-list class="rounded-borders" style="width: 100%;">
               <q-item class="q-my-md">
                 <q-item-section>
                   <span
