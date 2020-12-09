@@ -319,9 +319,11 @@ async function getMarketplace () {
           lift.DEPART_AT AS LIFT_DEPART,
           lift.ARRIVE_BY AS LIFT_ARRIVE,
           destination.CITY AS DESTINATION_CITY,
+      	  (IF(destination.ID <= 3, destination.ID, -1)) AS DESTINATION_ID,
           start_point.CITY AS START_CITY,
+      	  (IF(start_point.ID <= 3, start_point.ID, -1)) AS START_ID,
           lift.OFFERED_SEATS,
-          IFNULL(counts.OCCUPIED_SEATS, 0) AS OCCUPIED_SEATS 
+          IFNULL(counts.OCCUPIED_SEATS, 0) AS OCCUPIED_SEATS
       FROM
           lift 
           JOIN
@@ -373,8 +375,14 @@ async function getMarketplace () {
               ),
               'departAt', lifts.LIFT_DEPART,
               'arriveBy', lifts.LIFT_ARRIVE,
-              'destination', lifts.DESTINATION_CITY,
-              'start', lifts.START_CITY,
+              'destination', JSON_OBJECT(
+              	  'name', lifts.DESTINATION_CITY,
+                  'id', lifts.DESTINATION_ID
+              ),
+              'start', JSON_OBJECT(
+              	  'name', lifts.START_CITY,
+                  'id', lifts.START_ID
+              ),
               'seatsOffered', lifts.OFFERED_SEATS,
               'seatsOccupied', lifts.OCCUPIED_SEATS
           )
