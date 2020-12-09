@@ -81,6 +81,8 @@ async function getChatLifts (uid) {
           driver.PREF_SMOKING AS DRIVER_PREF_SMOKING,
           driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
           member_list.JSON_MEMBERS,
+      	  lift.REPEATS_ON_WEEKDAY AS REPEAT_DAY,
+      	  lift.FIRST_DATE AS FIRST_DATE,
           JSON_ARRAYAGG(
               JSON_OBJECT('type',
                   IF(
@@ -182,12 +184,12 @@ SELECT
                 'departAt', LIFT_DEPART,
                 'arriveBy', LIFT_ARRIVE,
                 'destination', JSON_OBJECT(
-              	  'name', lifts.DESTINATION_CITY,
-                  'id', lifts.DESTINATION_ID
+              	  'name', DESTINATION_CITY,
+                  'id', DESTINATION_ID
                 ),
                 'start', JSON_OBJECT(
-                    'name', lifts.START_CITY,
-                    'id', lifts.START_ID
+                    'name', START_CITY,
+                    'id', START_ID
                 ),
                 'driver', JSON_OBJECT(
                     'id', DRIVER_ID,
@@ -200,15 +202,16 @@ SELECT
                         'music', DRIVER_PREF_MUSIC
                     )
                 ),
-                'passengers', JSON_QUERY(JSON_MEMBERS, '$'),
-                'messages', JSON_QUERY(JSON_MESSAGES, '$')
+                'passengers', JSON_QUERY(IFNULL(JSON_MEMBERS, JSON_ARRAY()), '$'),
+                'messages', JSON_QUERY(IFNULL(JSON_MESSAGES, JSON_ARRAY()), '$'),
+                'repeatsOn', REPEAT_DAY,
+                'date', FIRST_DATE
             )
         ),
         JSON_ARRAY()
     )
     AS JSON
 FROM lifts
-
   `, [uid])).result[0].JSON
   return lift_data
 }
@@ -331,7 +334,9 @@ async function getMarketplace () {
           start_point.CITY AS START_CITY,
       	  (IF(start_point.ID <= 3, start_point.ID, -1)) AS START_ID,
           lift.OFFERED_SEATS,
-          IFNULL(counts.OCCUPIED_SEATS, 0) AS OCCUPIED_SEATS
+          IFNULL(counts.OCCUPIED_SEATS, 0) AS OCCUPIED_SEATS,
+      	  lift.REPEATS_ON_WEEKDAY AS REPEAT_DAY,
+      	  lift.FIRST_DATE AS FIRST_DATE
       FROM
           lift 
           JOIN
@@ -392,7 +397,9 @@ async function getMarketplace () {
                   'id', lifts.START_ID
               ),
               'seatsOffered', lifts.OFFERED_SEATS,
-              'seatsOccupied', lifts.OCCUPIED_SEATS
+              'seatsOccupied', lifts.OCCUPIED_SEATS,
+              'repeatsOn', lifts.REPEAT_DAY,
+              'date', lifts.FIRST_DATE
           )
       ) AS JSON
   FROM
