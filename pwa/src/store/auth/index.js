@@ -1,6 +1,6 @@
 import Firebase from 'firebase/app'
 import 'firebase/auth'
-import { SQL_CREATE_USER_IF_NOT_EXISTING, sendApiRequest, SQL_GET_USER_DATA, SQL_UPDATE_DESCRIPTION, SQL_UPDATE_GENDER, SQL_UPDATE_LIFT_MAX_DISTANCE, SQL_UPDATE_PREFS, SQL_ADD_ADDRESS, SQL_REMOVE_ADDRESS, SQL_ADD_CAR, SQL_REMOVE_CAR } from '../../ApiAccess'
+import { SQL_CREATE_USER_IF_NOT_EXISTING, sendApiRequest, SQL_GET_USER_DATA, SQL_UPDATE_DESCRIPTION, SQL_UPDATE_GENDER, SQL_UPDATE_LIFT_MAX_DISTANCE, SQL_UPDATE_PREFS, SQL_ADD_ADDRESS, SQL_REMOVE_ADDRESS, SQL_ADD_CAR, SQL_REMOVE_CAR, SQL_GET_MARKETPLACE } from '../../ApiAccess'
 
 export default {
   namespaced: true,
@@ -31,6 +31,10 @@ export default {
 
     RESET_USER (state) {
       state.user = null
+    },
+
+    UPDATE_MARKETPLACE_OFFERS (state, payload) {
+      state.user.marketplaceOffers = payload
     },
 
     UPDATE_DESCRIPTION (state, payload) {
@@ -153,6 +157,22 @@ export default {
         _ => commit('UPDATE_DESCRIPTION', payload),
         error => alert(error)
       );
+    },
+
+    async reloadMarketplaceOffers ({ commit }, callbacks) {
+      sendApiRequest(
+        SQL_GET_MARKETPLACE,
+        {},
+        (offers, statuscode) => {
+          commit('UPDATE_MARKETPLACE_OFFERS', offers)
+          callbacks.res()
+        },
+        error => callbacks.rej(error)
+      );
+    },
+
+    async reloadChatLifts ({ commit }, callbacks) {
+      callbacks.res()
     },
 
     async updatePrefs ({ commit }, payload) {
