@@ -595,8 +595,8 @@ module.exports = {
                           ) from user_addresses
                      )
                   ),
-                  '$.cars', IFNULL(
-                      JSON_COMPACT(
+                  '$.cars', JSON_QUERY(
+                      IFNULL(
                           (SELECT
                               JSON_ARRAYAGG(
                                   JSON_OBJECT(
@@ -611,9 +611,10 @@ module.exports = {
                                       'color', CONCAT( '#', cars.COLOR)
                                   )
                               ) from cars
-                          )
+                          ),
+                          JSON_ARRAY()
                       ),
-                      JSON_ARRAY()
+                      '$'
                   )
               ) AS JSON
           FROM
@@ -719,7 +720,6 @@ module.exports = {
 
       }
     },
-
     '/getMessages': async (req, res, options) => {
       if (isUserVerified(options.secretFbId)) {
         endWithJSON(res, await getChatLifts(options.secretFbId))
@@ -845,7 +845,7 @@ module.exports = {
         }))
 
         team.forEach(m => {
-          teamArr.push({
+          let teamElem = {
             id: m.ID,
             name: m.NAME,
             surname: m.SURNAME,
@@ -853,7 +853,8 @@ module.exports = {
             funcShort: m.FUNC_SHORT || null,
             bio: m.BIO,
             picture: ''// blobToBase64(m.PICTURE)
-          })
+          }
+          teamArr.push(teamElem)
         })
 
         var obj = {
