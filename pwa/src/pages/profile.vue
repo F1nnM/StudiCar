@@ -74,7 +74,7 @@
                 <div class="text-uppercase text-caption q-mt-none q-mb-xs">
                   Präferenzen
                   <br />im Auto
-                  <q-btn size="sm" flat @click="toggleOpenEditPrefs()" icon="edit" />
+                  <q-btn size="sm" flat @click="toggleOpenEditPrefs" icon="edit" />
                 </div>
                 <div class="row">
                   <div class="col-9">Redseligkeit</div>
@@ -143,17 +143,13 @@
               class="text-weight-light"
             >Du hast noch keine Adressen hinzugefügt</div>
             <q-list v-else>
-              <div class="row" v-for="item in addresses" :key="item.id">
-                <q-item class="col-10">
+              <div v-for="item in addresses" :key="item.id">
+                <q-item>
                   <div class="row">
-                    <q-item-section
-                      avatar
-                      class="q-pl-md col-5"
-                      style="border-left: 1px solid lightgray"
-                    >
+                    <q-item-section class="q-pl-md" style="border-left: 1px solid lightgray">
                       <p class="text-overline text-weight-light">{{ item.nickname }}</p>
                     </q-item-section>
-                    <q-item-section class="q-pl-md col-7 overflow-hidden">
+                    <q-item-section class="q-pl-md overflow-hidden">
                       <q-item-label>{{ item.street }} {{ item.number }}</q-item-label>
                       <q-item-label caption>
                         {{ item.postcode }}
@@ -164,24 +160,25 @@
                         </span>
                       </q-item-label>
                     </q-item-section>
+                    <q-item-section side top>
+                      <q-slide-transition>
+                        <q-btn
+                          v-if="openEditAddresses"
+                          @click="removeAddress(item.id)"
+                          flat
+                          class="float-right"
+                          icon="remove_circle_outline"
+                          color="red"
+                          size="md"
+                        />
+                      </q-slide-transition>
+                    </q-item-section>
                   </div>
                 </q-item>
-                <div class="col-2">
-                  <q-slide-transition>
-                    <q-btn
-                      v-show="openEditAddresses"
-                      @click="removeAddress(item.id)"
-                      flat
-                      icon="remove_circle_outline"
-                      color="red"
-                      size="md"
-                    />
-                  </q-slide-transition>
-                </div>
               </div>
             </q-list>
           </div>
-          <div class="q-mt-sm q-pa-sm shadow-1">
+          <div class="q-mt-sm q-pa-sm shadow-1" v-if="false">
             <div class="row">
               <p
                 class="text-uppercase text-caption q-mt-none q-mb-xs col-5"
@@ -325,7 +322,7 @@
         </div>
       </q-dialog>
 
-      <q-dialog v-model="openEditPrefs" position="bottom" class="q-pa-md">
+      <q-dialog v-model="openEditPrefs" persistent position="bottom" class="q-pa-md">
         <q-card class="q-pa-xs">
           <q-btn
             icon="close"
@@ -486,15 +483,6 @@
                   hint="Optional, wird groß vor der Adresse angezeigt."
                 />
               </div>
-            </q-card-section>
-            <q-card-section>
-              <p class="text-caption">
-                Bitte stelle sicher, dass du darüber Bescheid weißt:
-                <a
-                  href="https://mi.com"
-                  class="block"
-                >Info zu unserer Datenverarbeitung</a>
-              </p>
             </q-card-section>
 
             <q-card-actions align="right">
@@ -940,7 +928,7 @@ export default {
       if (this.openEditPrefs) {
         // open, shall be closed, so prefs have to be converted and stored back to original var (only when save)
         if (save) {
-          this.prefs = this.newPrefs; // just to minimize traffic, prefs are only stored when clicking on save
+          this.prefs = this.newPrefs; // just to minimize traffic, prefs are only stored when clicking on save (respectively closing dialog)
           this.newPrefs = {
             talk: "",
             talkMorning: "",
@@ -977,10 +965,7 @@ export default {
     },
 
     addAddress() {
-      this.$store.dispatch("auth/addAddress", {
-        id: this.$store.getters["auth/user"].id,
-        address: this.newAddress
-      });
+      this.$store.dispatch("auth/addAddress", this.newAddress);
       this.newAddress = {
         nickname: "",
         street: "",
@@ -1052,10 +1037,6 @@ export default {
       let validPlate = true;
       this.newCar.licensePlate = validPlate ? "HDH DH 2020" : "B SS 2330";
       this.openAddCarConfirm = true;
-    },
-
-    capitalize(string) {
-      return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
     },
 
     randomItemFromArray(array) {

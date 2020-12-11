@@ -1,7 +1,5 @@
 import { register } from 'register-service-worker'
 
-import { Notify } from 'quasar'
-
 import Vue from 'vue'
 import Vuex from 'vuex'
 

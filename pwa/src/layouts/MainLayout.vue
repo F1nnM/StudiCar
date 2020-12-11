@@ -346,8 +346,8 @@ export default {
         }
       })
         .then()
-        .catch(res => {
-          this.refreshErr = res;
+        .catch(response => {
+          this.refreshErr = response;
         })
         .finally(done);
     },
