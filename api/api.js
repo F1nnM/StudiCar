@@ -17,6 +17,10 @@ function isOptionMissing (data, needed, res) {
   });
 }
 
+async function getUserId (fbId) {
+  return (await runQuery("SELECT ID FROM `users` WHERE users.FB_ID = ?", [fbId])).result[0].ID;
+}
+
 function generateJdenticon (seed) {
   var jdenticon = require("jdenticon")
   jdenticon.config = {
@@ -631,8 +635,8 @@ module.exports = {
             `, [options.fbid])).result[1][0].JSON
 
           data = JSON.parse(data)
-
           data.chatLifts = JSON.parse(await getChatLifts(options.fbid))
+
           data.liftRequests = JSON.parse(await getLiftRequests(options.fbid))
 
           data['topFriends'] = apiResponseSimulation['topFriends']
@@ -1079,34 +1083,43 @@ module.exports = {
       }
     },
     '/sendMessage': async (req, res, options) => {
-      if (!isOptionMissing(options, ['id', 'message'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['message'], res) && isUserVerified(options.secretFbId)) {
         var message = options.message
-        var id = options.id
-        switch (message.type) {
-          case 1: // text
-            await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, ?, ?, current_timestamp())", [message.content, id, message.liftId]).catch(error => {
-              throw error
-            })
-            break
-          case 2: // audio blob
-            var blob = await (await fetch(dataURI)).blob();
-            await runQuery("INSERT INTO `messages` (`UUID`, `AUDIO`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, ?, ?, current_timestamp())", [blob, id, message.liftId]).catch(error => {
-              throw error
-            })
-            break
-          case 3: // image blob
-            var blob = await (await fetch(dataURI)).blob();
-            await runQuery("INSERT INTO `messages` (`UUID`, `PICTURE`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, ?, ?, current_timestamp())", [message.content, id, message.liftId]).catch(error => {
-              throw error
-            })
-            break
-        }
+        var userId = await getUserId(options.secretFbId),
+          liftId = (await runQuery('SELECT ID FROM lift WHERE UUID = ?', [message.liftId])).result[0].ID
+        if (message.content) {
 
-        let result = await runQuery("SELECT MAX(ID) FROM `messages`", []).catch(error => {
-          throw error
-        })
-        var id = result.result[0]['MAX(ID)'] + ''
-        res.end(id)
+          switch (message.type) {
+            case 1: // text
+              await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, ?, ?, current_timestamp())", [message.content, userId, liftId]).catch(error => {
+                throw error
+              })
+              break
+            case 2: // audio blob
+              var blob = await (await fetch(dataURI)).blob();
+              await runQuery("INSERT INTO `messages` (`UUID`, `AUDIO`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, ?, ?, current_timestamp())", [blob, userId, liftId]).catch(error => {
+                throw error
+              })
+              break
+            case 3: // image blob
+              var blob = await (await fetch(dataURI)).blob();
+              await runQuery("INSERT INTO `messages` (`UUID`, `PICTURE`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, ?, ?, current_timestamp())", [message.content, userId, liftId]).catch(error => {
+                throw error
+              })
+              break
+          }
+
+          let result = await runQuery("SELECT MAX(ID), CURRENT_TIMESTAMP() AS TIME FROM `messages`", []).catch(error => {
+            throw error
+          })
+          var id = result.result[0]['MAX(ID)']
+
+          endWithJSON(res, JSON.stringify({
+            id: id,
+            timestamp: result.result[0].TIME
+          }))
+        }
+        else res.end()
       }
     },
     '/addQuestion': async (req, res, options) => {

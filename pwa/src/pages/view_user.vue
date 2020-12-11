@@ -37,7 +37,14 @@
     </div>
     <div v-else>
       <q-splitter v-model="splitterPos.current" disable>
-        <template v-slot:before>
+        <template v-slot:before class="relative-position">
+          <!-- <q-btn
+            class="absolute-position absolute-left absolute-top z-top "
+            icon="keyboard_arrow_left"
+            size="lg"
+            dense
+            flat
+          />-->
           <div class="q-px-md q-py-sm">
             <q-card>
               <q-img
@@ -506,24 +513,24 @@ export default {
 .other-user-image {
   // the octagon
   -webkit-clip-path: polygon(
-    20% 0%,
-    80% 0%,
-    100% 20%,
-    100% 80%,
-    80% 100%,
-    20% 100%,
-    0% 80%,
-    0% 20%
+    10% 0%,
+    90% 0%,
+    100% 10%,
+    100% 90%,
+    90% 100%,
+    10% 100%,
+    0% 90%,
+    0% 10%
   );
   clip-path: polygon(
-    20% 0%,
-    80% 0%,
-    100% 20%,
-    100% 80%,
-    80% 100%,
-    20% 100%,
-    0% 80%,
-    0% 20%
+    10% 0%,
+    90% 0%,
+    100% 10%,
+    100% 90%,
+    90% 100%,
+    10% 100%,
+    0% 90%,
+    0% 10%
   );
 }
 </style>

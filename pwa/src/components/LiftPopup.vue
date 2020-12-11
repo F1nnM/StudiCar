@@ -26,25 +26,23 @@
                           </div>
                         </q-item-label>
                         <q-slide-transition>
-                        <q-item-label v-if="!infoDrawerOpen" caption class="q-mt-none">
-                          <q-tab-panels
-                            class="q-pa-none bg-primary q-mb-xs text-grey-3 text-weight-thin"
-                            v-model="showMembersInTitle"
-                            animated
-                            transition-next="fade"
-                            transition-prev="fade"
-                          >
-                            <q-tab-panel :name="true" class="q-pa-none row justify-between">
-                              <div v-if="lift.passengers">
-                                <span
-                                  v-for="(p, index) in lift.passengers"
-                                  :key="p.fbId"
-                                >{{ index > 0 ? ', ' : '' }}{{ p.name }}</span>
-                              </div>
-                              <div v-else>
-                                - noch keine Mitfahrer -
-                              </div>
-                             <!--  <q-btn
+                          <q-item-label v-if="!infoDrawerOpen" caption class="q-mt-none">
+                            <q-tab-panels
+                              class="q-pa-none bg-primary q-mb-xs text-grey-3 text-weight-thin"
+                              v-model="showMembersInTitle"
+                              animated
+                              transition-next="fade"
+                              transition-prev="fade"
+                            >
+                              <q-tab-panel :name="true" class="q-pa-none row justify-between">
+                                <div v-if="lift.passengers.length">
+                                  <span
+                                    v-for="(p, index) in lift.passengers"
+                                    :key="p.fbId"
+                                  >{{ index > 0 ? ', ' : '' }}{{ p.name }}</span>
+                                </div>
+                                <div v-else>- noch keine Mitfahrer -</div>
+                                <!--  <q-btn
                                 @click="searchDialogOpen = true"
                                 icon="search"
                                 disable
@@ -54,15 +52,12 @@
                                 size="sm"
                                 color="white"
                                 dense
-                              /> -->
-                              <!-- <q-btn flat round dense icon="search" /> -->
-                            </q-tab-panel>
-                            <q-tab-panel
-                              :name="false"
-                              class="q-pa-none"
-                            >Tippe für Info</q-tab-panel>
-                          </q-tab-panels>
-                        </q-item-label>
+                                />-->
+                                <!-- <q-btn flat round dense icon="search" /> -->
+                              </q-tab-panel>
+                              <q-tab-panel :name="false" class="q-pa-none">Tippe für Info</q-tab-panel>
+                            </q-tab-panels>
+                          </q-item-label>
                         </q-slide-transition>
                       </q-item-section>
                     </q-item>
@@ -441,7 +436,7 @@ export default {
       showMembersInTitle: false,
       quickMessagesTab: "text",
       footerBgColor: "white",
-      user: this.$store.getters["auth/user"].id,
+      user: this.$store.getters["auth/user"].uid,
       // lift: {
       //   car: {
       //     brand: "",
@@ -556,8 +551,9 @@ export default {
           setTimeout(res, delay);
         });
       try {
-        var endOfPage = (this.$refs.endOfPage.$el || document.getElementById('endOfPage'))
-          
+        var endOfPage =
+          this.$refs.endOfPage.$el || document.getElementById("endOfPage");
+
         endOfPage.scrollIntoView(
           delay
             ? {
@@ -574,10 +570,10 @@ export default {
     },
 
     getNameFromId(userId) {
-      return "Ersatzname";
-      /* var people = JSON.parse(JSON.stringify(this.lift.passengers)); // deep copy, otherwise passengers would be overwritten
+      var people = [];
+      this.lift.passengers.forEach(item => people.push(item));
       people.push(JSON.parse(JSON.stringify(this.lift.driver)));
-      return people.find(p => p.id == userId).name; */
+      return people.find(p => p.id == userId).name;
     },
 
     emit(val) {
@@ -705,8 +701,7 @@ export default {
       this.showQuickMessages = false;
       var msgObj = {
         type: 0, // 1 means raw text, 2 means audio, 3 will mean image when implemented in future
-        liftId: this.lift.messages[0].id, // all from same lift, doesn't matter which one is taken
-        timestamp: Date.now()
+        liftId: this.lift.id
       };
       switch (type) {
         case 1: // only text
@@ -715,13 +710,12 @@ export default {
           break;
         case 2: // audio
           msgObj.type = 2;
-          var haha;
           await new Promise((res, rej) => {
             var reader = new FileReader();
             reader.readAsDataURL(blob);
             reader.onloadend = _ => {
               msgObj.content = reader.result;
-              haha = reader.result;
+
               alert(reader.result);
               res();
             };
@@ -729,31 +723,8 @@ export default {
           break;
       }
 
-      // sendApiRequest(
-      //   SQL_SEND_MESSAGE,
-      //   {
-      //     id: this.user,
-      //     message: msgObj,
-      //   },
-      //   (data) => {
-      //     // is id of just inserted row
-      //     // check whether last message was from this user
-      //     msgObj.messageId = data;
-      //     msgObj.nameOfUser = this.$store.getters["auth/user"].name.split(
-      //       " "
-      //     )[0];
-      //     msgObj.userId = this.user;
-      //     msgObj.destination = this.messages.list[0].destination; // just copy the remaining properties from the other messages
-      //     msgObj.start = this.messages.list[0].start;
-      //     this.messages.list.push(msgObj);
-      //     this.messages.list.sort((a, b) => {
-      //       return a.timestamp < b.timestamp;
-      //     });
-      //   },
-      //   (error) => {
-      //     throw error;
-      //   }
-      // );
+      await this.$store.dispatch("auth/sendMessage", msgObj);
+      this.scrollToEnd(100);
 
       this.messageText = "";
       setTimeout(() => window.scrollTo(0, 1000000), 100);

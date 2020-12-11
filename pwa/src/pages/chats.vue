@@ -126,6 +126,7 @@
             v-for="(m, index) in lastMessages"
             :key="m.timestamp"
             :message="m"
+            :sentByName="getNameFromId(m.liftId, m.sentBy)"
             :firstItem="index == 0"
             @left="onLeft"
             @right="onRight"
@@ -296,6 +297,14 @@ export default {
       //alert("SWIPED RIGHT")
 
       this.finalize(reset);
+    },
+
+    getNameFromId(liftId, userId) {
+      var lift = this.lifts.find(l => l.id == liftId);
+      var people = [];
+      lift.passengers.forEach(item => people.push(item));
+      people.push(JSON.parse(JSON.stringify(lift.driver)));
+      return people.find(p => p.id == userId).name;
     },
 
     getPassengerNameFromId(lift, userId) {

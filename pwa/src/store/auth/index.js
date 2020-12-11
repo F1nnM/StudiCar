@@ -1,6 +1,6 @@
 import Firebase from 'firebase/app'
 import 'firebase/auth'
-import { SQL_CREATE_USER_IF_NOT_EXISTING, sendApiRequest, SQL_GET_USER_DATA, SQL_UPDATE_DESCRIPTION, SQL_UPDATE_GENDER, SQL_UPDATE_LIFT_MAX_DISTANCE, SQL_UPDATE_PREFS, SQL_ADD_ADDRESS, SQL_REMOVE_ADDRESS, SQL_ADD_CAR, SQL_REMOVE_CAR, SQL_GET_MARKETPLACE, GET_MESSAGES } from '../../ApiAccess'
+import { SQL_CREATE_USER_IF_NOT_EXISTING, sendApiRequest, SQL_GET_USER_DATA, SQL_UPDATE_DESCRIPTION, SQL_UPDATE_GENDER, SQL_UPDATE_LIFT_MAX_DISTANCE, SQL_UPDATE_PREFS, SQL_ADD_ADDRESS, SQL_REMOVE_ADDRESS, SQL_ADD_CAR, SQL_REMOVE_CAR, SQL_GET_MARKETPLACE, GET_MESSAGES, SQL_SEND_MESSAGE } from '../../ApiAccess'
 
 import { Notify } from 'quasar'
 function errorNotify (msg) {
@@ -63,6 +63,18 @@ export default {
 
     UPDATE_PREFS (state, payload) {
       state.user.prefs = payload
+    },
+
+    SEND_MESSAGE (state, payload) {
+      if (payload.content) { // fallback for empty messages
+        var a = state.user.chatLifts.find(l => l.id == payload.liftId)
+        a.messages.push({
+          content: payload.content,
+          sentBy: state.user.uid,
+          type: payload.type,
+          timestamp: payload.timestamp
+        })
+      }
     },
 
     ADD_ADDRESS (state, payload) {
@@ -188,6 +200,15 @@ export default {
         commit('UPDATE_CHAT_LIFTS', chatLifts)
         callbacks.res()
       }, err => callbacks.rej(err))
+    },
+
+    async sendMessage ({ commit }, payload) {
+      sendApiRequest(
+        SQL_SEND_MESSAGE,
+        { message: payload },
+        data => commit('SEND_MESSAGE', Object.assign(payload, data)),
+        error => errorNotify(error)
+      );
     },
 
     async updatePrefs ({ commit }, payload) {

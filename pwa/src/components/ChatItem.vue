@@ -30,7 +30,7 @@
             {{ message.destination }}
           </q-item-label>
           <q-item-label caption lines="3">
-            <span class="text-weight-bold q-mr-xs">{{ message.sentBy }}:</span>
+            <span class="text-weight-bold" style="margin-right: 2px">{{ sentByName }}:</span>
             <span v-if="message.type != 1">
               <q-icon :name="message.type == 2 ? 'keyboard_voice' : 'image'" />
               <!-- {{ message.content.length }}
@@ -62,6 +62,7 @@ export default {
       type: Object,
       required: true
     },
+    sentByName: String,
     firstItem: Boolean
   },
 
@@ -102,13 +103,15 @@ export default {
       } else if (diff("days") < 7) {
         display_text = "vor " + diff("days") + " Tagen";
       } else {
-        display_text = "Vor " + diff('weeks') + " Woche" + (diff('weeks') != 1 ? 'n' : '');
+        display_text =
+          "Vor " + diff("weeks") + " Woche" + (diff("weeks") != 1 ? "n" : "");
       }
 
       return display_text;
 
       function diff(unit) {
-        if(unit == 'weeks') return Math.floor(date.getDateDiff(new Date(), time, 'days') / 7)
+        if (unit == "weeks")
+          return Math.floor(date.getDateDiff(new Date(), time, "days") / 7);
         else return date.getDateDiff(new Date(), time, unit);
       }
 
