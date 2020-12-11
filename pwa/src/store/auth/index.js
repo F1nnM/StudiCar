@@ -2,6 +2,14 @@ import Firebase from 'firebase/app'
 import 'firebase/auth'
 import { SQL_CREATE_USER_IF_NOT_EXISTING, sendApiRequest, SQL_GET_USER_DATA, SQL_UPDATE_DESCRIPTION, SQL_UPDATE_GENDER, SQL_UPDATE_LIFT_MAX_DISTANCE, SQL_UPDATE_PREFS, SQL_ADD_ADDRESS, SQL_REMOVE_ADDRESS, SQL_ADD_CAR, SQL_REMOVE_CAR, SQL_GET_MARKETPLACE, GET_MESSAGES } from '../../ApiAccess'
 
+import { Notify } from 'quasar'
+function errorNotify (msg) {
+  Notify.create({
+    type: 'negative',
+    message: msg
+  });
+}
+
 export default {
   namespaced: true,
 
@@ -194,8 +202,10 @@ export default {
     async addAddress ({ commit }, payload) {
       sendApiRequest(
         SQL_ADD_ADDRESS,
-        { address: payload.address, id: payload.id },
-        _ => commit('ADD_ADDRESS', payload.address),
+        { address: payload },
+        data => commit('ADD_ADDRESS', Object.assign(
+          payload, data
+        )),
         error => alert(error)
       )
     },
@@ -205,7 +215,9 @@ export default {
         SQL_REMOVE_ADDRESS,
         { id: payload },
         _ => commit('REMOVE_ADDRESS', payload),
-        error => alert(error)
+        error => {
+          if (error.status == 424) errorNotify('Kann Adresse nicht entfernen: Eine Mitfahrgelegenheit hängt davon ab')
+        }
       )
     },
 

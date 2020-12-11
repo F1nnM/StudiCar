@@ -53,6 +53,12 @@ function catchall (err, res, endpoint) {
     case 'getLegal':
       console.log(err)
       break
+    case 'removeAddress':
+      if (isConstraintErr()) {
+        res.writeHead(424)
+        res.end()
+      }
+      break
     default: {
       res.writeHead(200)
       res.end()
@@ -379,7 +385,7 @@ async function getMarketplace (uuidOnly) {
       WHERE
           (lift.FIRST_DATE >= CURRENT_DATE() 
           OR lift.REPEATS_ON_WEEKDAY != 0)
-          AND ${uuidOnly ? `lift.UUID = ${uuidOnly}` : 'TRUE'}
+          AND ${uuidOnly && (typeof uuidOnly == 'Number') ? `lift.UUID = ${uuidOnly}` : 'TRUE'}
   )
   
   SELECT
@@ -996,20 +1002,27 @@ module.exports = {
       }
     },
     '/addAddress': async (req, res, options) => {
-      if (!isOptionMissing(options, ['address', 'id'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['address'], res) && isUserVerified(options.secretFbId)) {
+        var userId = (await runQuery('SELECT ID FROM users WHERE FB_ID = ?', [options.secretFbId])).result[0].ID,
+          a = options.address
         await runQuery(
-          "INSERT INTO `address` (`ID`, `NICKNAME`, `POSTCODE`, `CITY`, `NUMBER`, `STREET`, `USER_INDEX`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, '1', ?);", [options.address.nickname, options.address.postcode, options.address.city, options.address.number, options.address.street, options.id]).catch(error => {
-            throw error;
+          "INSERT INTO `addresses` (`ID`, `NICKNAME`, `POSTCODE`, `CITY`, `NUMBER`, `STREET`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, ?);", [a.nickname || '', a.postcode, a.city, a.number, a.street, userId]).catch(err => {
+            catchall(err, res, 'addAddress')
           });
+        var a = (await runQuery('SELECT MAX(b.ID) AS MAX FROM ( SELECT ID FROM addresses a WHERE a.CITY = ? AND a.NUMBER = ? AND a.STREET = ? ORDER BY a.ID DESC ) as b', [
+          a.city, a.number, a.street
+        ])).result[0].MAX
 
-        res.end();
+        endWithJSON(res, JSON.stringify({
+          id: a
+        }))
       }
     },
     '/removeAddress': async (req, res, options) => {
       if (!isOptionMissing(options, ['id'], res) && isUserVerified(options.secretFbId)) {
         await runQuery(
-          "DELETE FROM `addresses` WHERE `addresses`.`ID` = ?", [options.id]).catch(error => {
-            throw error;
+          "DELETE FROM `addresses` WHERE `addresses`.`ID` = ?", [options.id]).catch(err => {
+            catchall(err, res, 'removeAddress')
           });
 
         res.end();

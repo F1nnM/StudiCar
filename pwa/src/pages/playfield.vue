@@ -23,10 +23,7 @@ export default {
   },
   computed: {},
   methods: {
-    go() {
-      window.location.href =
-        "https://localhost:3000/#/benutzerinfo?userFbId=wG3cG4Mawf";
-    }
+    go() {}
   },
 
   mounted() {
