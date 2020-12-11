@@ -605,8 +605,8 @@ module.exports = {
                           ) from user_addresses
                      )
                   ),
-                  '$.cars', IFNULL(
-                      JSON_COMPACT(
+                  '$.cars', JSON_QUERY(
+                      IFNULL(
                           (SELECT
                               JSON_ARRAYAGG(
                                   JSON_OBJECT(
@@ -621,9 +621,10 @@ module.exports = {
                                       'color', CONCAT( '#', cars.COLOR)
                                   )
                               ) from cars
-                          )
+                          ),
+                          JSON_ARRAY()
                       ),
-                      JSON_ARRAY()
+                      '$'
                   )
               ) AS JSON
           FROM
@@ -729,7 +730,6 @@ module.exports = {
 
       }
     },
-
     '/getMessages': async (req, res, options) => {
       if (isUserVerified(options.secretFbId)) {
         endWithJSON(res, await getChatLifts(options.secretFbId))
@@ -855,15 +855,25 @@ module.exports = {
         }))
 
         team.forEach(m => {
-          teamArr.push({
+          let teamElem = {
             id: m.ID,
             name: m.NAME,
             surname: m.SURNAME,
             function: m.FUNCTION,
             funcShort: m.FUNC_SHORT || null,
             bio: m.BIO,
-            picture: ''// blobToBase64(m.PICTURE)
+            picture: null
+          }
+          
+          teamElem.picture = await new Promise( (resolve, reject) => {
+            let reader = new FileReader();
+            reader.onloadend = function() {
+              resolve(reader.result )
+            } 
+            reader.readAsDataURL(m.PICTURE)
           })
+          
+          teamArr.push(teamElem)
         })
 
         var obj = {
@@ -935,8 +945,8 @@ module.exports = {
         if (!users) {
           let png = generateJdenticon(options.name);
           await runQuery(
-            "INSERT INTO `users` (`ID`, `FB_ID`, `NAME`, `SURNAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKING`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`)" +
-            "VALUES (NULL, ?, ?, ?, 'X', '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED')", [options.secretFbId, options.name, options.surname, png, options.mail]).catch(error => {
+            "INSERT INTO `users` (`ID`, `FB_ID`, `NAME`, `SURNAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKING`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`, `VERIFIED`)" +
+            "VALUES (NULL, ?, ?, ?, 'X', '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED', 1)", [options.secretFbId, options.name, options.surname, png, options.mail]).catch(error => {
               throw error;
             });
           res.end("added")
