@@ -52,24 +52,20 @@ function catchall (err, res, endpoint) {
 
   switch (endpoint) {
     case 'removeCar': // cannot delete car
-      if (isConstraintErr()) res.writeHead(404)
+
       break
     case 'getLegal':
       console.log(err)
       break
     case 'removeAddress':
-      if (isConstraintErr()) {
-        res.writeHead(424)
-        res.end()
-      }
+
       break
     default: {
-      res.writeHead(200)
-      res.end()
     }
   }
   console.log(`ERROR AT CALLING ${endpoint} : ${err}`)
-
+  if (isConstraintErr()) res.writeHead(424)
+  res.end()
 }
 
 async function getChatLifts (uid) {
@@ -730,6 +726,25 @@ module.exports = {
 
       }
     },
+    '/getCarModels': async (req, res, options) => {
+      if (isUserVerified(options.secretFbId)) {
+        let result = await runQuery("SELECT BRAND, MODEL FROM car_models", []);
+        let cars = result.result
+        let carsObj = {}
+
+        cars.forEach(item => {
+          if (!carsObj[item.BRAND]) { // when brand not initialized, then do it	
+            carsObj[item.BRAND] = []
+          }
+          if (carsObj[item.BRAND].indexOf(item.MODEL) == -1) { // models should not exist twice in array	
+            carsObj[item.BRAND].push(item.MODEL)
+          } // basically grouped all cars in object array	
+        })
+
+
+        endWithJSON(res, JSON.stringify(carsObj))
+      }
+    },
     '/getMessages': async (req, res, options) => {
       if (isUserVerified(options.secretFbId)) {
         endWithJSON(res, await getChatLifts(options.secretFbId))
@@ -854,7 +869,7 @@ module.exports = {
           else resolve(data)
         }))
 
-        team.forEach(m => {
+        team.forEach(async m => {
           let teamElem = {
             id: m.ID,
             name: m.NAME,
@@ -864,15 +879,15 @@ module.exports = {
             bio: m.BIO,
             picture: null
           }
-          
-          teamElem.picture = await new Promise( (resolve, reject) => {
+
+          teamElem.picture = await new Promise((resolve, reject) => {
             let reader = new FileReader();
-            reader.onloadend = function() {
-              resolve(reader.result )
-            } 
+            reader.onloadend = function () {
+              resolve(reader.result)
+            }
             reader.readAsDataURL(m.PICTURE)
           })
-          
+
           teamArr.push(teamElem)
         })
 
@@ -880,7 +895,6 @@ module.exports = {
           team: teamArr,
           infoText: about
         }
-        console.log('info: ' + about)
 
         endWithJSON(res, JSON.stringify(obj))
       }
@@ -1043,30 +1057,30 @@ module.exports = {
       }
     },
     '/addCar': async (req, res, options) => {
-      if (!isOptionMissing(options, ['data'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['car'], res) && isUserVerified(options.secretFbId)) {
 
-        let car = options.data.car
-        let id = options.data.id
+        var car = options.car,
+          modelId = (await runQuery('SELECT ID FROM car_models WHERE BRAND = ? AND MODEL = ?', [car.brand, car.model])).result[0].ID
 
-        result = await runQuery("SELECT car_models.ID FROM car_models WHERE BRAND = ? AND MODEL = ?", [car.brand, car.model]).catch(error => {
-          throw error
-        })
-
-        var modelId = result.result[0].ID
-
-        await runQuery("INSERT INTO `car` (`ID`, `LICENSE_PLATE`, `SEATS`, `TYPE`, `COLOR`, `YEAR`, `MODEL_ID`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)",
-          [car.licensePlate, car.seats, car.type, car.color.replace('#', ''), car.year, modelId, id]).catch(error => {
+        await runQuery("INSERT INTO car (`ID`, `LICENSE_PLATE`, `SEATS`, `MODEL_ID`, `TYPE`, `COLOR`, `YEAR`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)",
+          [car.licensePlate, car.seats, modelId, car.type, car.color.replace('#', ''), car.year, await getUserId(options.secretFbId)]).catch(error => {
             throw error
           })
 
-        res.end();
+        var createdId = (await runQuery('SELECT ID FROM car WHERE LICENSE_PLATE = ? AND COLOR = ?', [car.licensePlate, car.color.replace('#', '')])).result[0].ID
+
+        endWithJSON(res, JSON.stringify({
+          id: createdId
+        }))
       }
     },
     '/removeCar': async (req, res, options) => {
       if (!isOptionMissing(options, ['id'], res) && isUserVerified(options.secretFbId)) {
         await runQuery(
-          "DELETE FROM `car` WHERE `car`.`ID` = ?", [options.id]).catch(error => catchall(error, res, 'removeCar'))
-          .then(_ => res.end())
+          "DELETE FROM car WHERE ID = ?", [options.id]).catch(err => {
+            catchall(err, res, 'removeCar')
+          })
+        res.end()
       }
     },
     '/addLift': async (req, res, options) => {

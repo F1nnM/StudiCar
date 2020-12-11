@@ -82,15 +82,15 @@ export default {
     },
 
     REMOVE_ADDRESS (state, payload) {
-      state.user.addresses = state.user.addresses.filter(item => item.id != payload) // filters the one with matching id
+      state.user.addresses = state.user.addresses.filter(item => item.id != payload) // filters the one with matching id out
     },
 
     ADD_CAR (state, payload) {
-      state.user.cars.push(payload.car)
+      state.user.cars.push(payload)
     },
 
     REMOVE_CAR (state, carId) {
-      state.user.cars = state.user.cars.filter(item => item.carId != carId) // filters the one with matching id
+      state.user.cars = state.user.cars.filter(item => item.carId != carId) // filters the one with matching id out
     },
 
     SET_USER_DATA_LOADED (state, payload) {
@@ -237,7 +237,7 @@ export default {
         { id: payload },
         _ => commit('REMOVE_ADDRESS', payload),
         error => {
-          if (error.status == 424) errorNotify('Kann Adresse nicht entfernen: Eine Mitfahrgelegenheit hängt davon ab')
+          if (error.status == 424) errorNotify('Kann Adresse noch nicht entfernen: Eine Mitfahrgelegenheit hängt davon ab')
         }
       )
     },
@@ -245,13 +245,13 @@ export default {
     async addCar ({ commit }, payload) {
       sendApiRequest(
         SQL_ADD_CAR,
-        { data: payload },
-        id => {
-          payload.id = id
+        { car: payload },
+        data => {
+          payload.carId = data.id
 
           commit('ADD_CAR', payload)
         },
-        error => alert(error)
+        error => alert(err)
       )
     },
 
@@ -259,8 +259,12 @@ export default {
       sendApiRequest(
         SQL_REMOVE_CAR,
         { id: payload },
-        _ => commit('REMOVE_CAR', payload),
-        error => alert(error)
+        _ => {
+          commit('REMOVE_CAR', payload)
+        },
+        error => {
+          if (error.status == 424) errorNotify('Kann Fahrzeug noch nicht entfernen: Eine Mitfahrgelegenheit hängt davon ab')
+        }
       )
     },
 

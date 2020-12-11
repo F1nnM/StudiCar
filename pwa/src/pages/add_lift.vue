@@ -199,7 +199,7 @@
             <q-step :name="5" title="Sitze bearbeiten" icon="person_add" :done="step > 5">
               <p class="text-caption">
                 Willst du die Anzahl an Mitfahrern für diese Fahrt ändern?
-                (Hinweis: Wenn du hier 0 beibehältst, speichern wir {{ getCarData.seats }} Mitfahrer wie sonst auch)
+                (Hinweis: Wenn du hier 0 beibehältst, dann speichern wir für diese Fahrt {{ getCarData.seats }} Mitfahrer, also die übliche Kapazität dieses Autos)
               </p>
               <q-item>
                 <q-item-section avatar>
@@ -490,9 +490,9 @@ export default {
     getCarData() {
       // returns data of selected car, so that user for example can see how many seats would be default
       let cars = this.userCars;
-      let obj = null; /*  cars.find(item => {
+      let obj = cars.find(item => {
         return item.carId == this.lift.carId;
-      }); */
+      });
       return obj
         ? obj
         : {

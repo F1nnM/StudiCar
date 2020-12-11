@@ -2,16 +2,16 @@
   <q-card>
     <q-card-section>
       <div class="row">
-        <div class="col-5 shadow-2 rounded-borders">
+        <div class="col-4 rounded-borders" :style="'box-shadow: -1px 0px 4px 2px' + car.color">
           <q-img
             src="~assets/app-logo.svg"
             spinner-color="primary"
             spinner-size="82px"
             class="full-height full-width"
-            style="max-height: 20vh"
+            style="max-height: 10vh max-width: 10vh"
           />
         </div>
-        <div class="col-7 q-pa-lg">
+        <div class="col-8 q-pl-lg">
           <p class="text-h4 overflow">{{ car.brand }}</p>
           <p class="text-h6 text-weight-light">{{ car.model }}</p>
         </div>
@@ -20,7 +20,7 @@
     <ExtHr :color="car.color ? car.color : 'black'" hex size="xs" />
     <q-card-section class="q-pt-sm q-pa-lg">
       <div
-        class="row"
+        class="row q-"
         v-for="data in [
                   {
                     prop: 'type',
@@ -41,8 +41,8 @@
                 ]"
         :key="data.prop"
       >
-        <p class="text-uppercase text-caption col-7">{{ data.label }}</p>
-        <p class="col-5">{{ car[data.prop] }}</p>
+        <div class="text-uppercase text-caption q-mb-sm col-7">{{ data.label }}</div>
+        <div class="col-5">{{ car[data.prop] }}</div>
       </div>
     </q-card-section>
   </q-card>

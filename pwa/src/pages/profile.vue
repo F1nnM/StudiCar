@@ -178,7 +178,7 @@
               </div>
             </q-list>
           </div>
-          <div class="q-mt-sm q-pa-sm shadow-1" v-if="false">
+          <div class="q-mt-sm q-pa-sm shadow-1">
             <div class="row">
               <p
                 class="text-uppercase text-caption q-mt-none q-mb-xs col-5"
@@ -980,23 +980,16 @@ export default {
     },
 
     async addCar() {
-      let id = this.$store.getters["auth/user"].id;
-      let car = this.newCar;
-
       await this.$store.dispatch(
         "auth/addCar",
-        JSON.parse(
-          JSON.stringify({
-            id: id,
-            car: car
-          })
-        )
+        JSON.parse(JSON.stringify(this.newCar))
       );
 
       for (let key in this.newCar) {
-        this.newCar[key] = key != "seats" ? "" : 3; // original state, 3 seats look better than 0, it's the default value when selecting the seats.
+        this.newCar[key] = key != "seats" ? "" : 3; // original state, reset to blank form to continue. 3 seats look better than 0, it's the default value when selecting the seats.
       }
       this.openAddCar = false;
+      this.openNewCarTab = 1;
       this.openAddCarConfirm = false;
     },
 
