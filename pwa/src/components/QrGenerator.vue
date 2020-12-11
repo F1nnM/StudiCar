@@ -18,7 +18,7 @@
               <span class="text-subtitle1 text-dark">
                 <slot v-if="!label">Scan den Code</slot>
                 <span v-else>{{ label }}</span>
-                </span>
+              </span>
               <!-- (above is a fallback when no label is given, not be best but easiest way) -->
             </q-chip>
             <q-circular-progress
@@ -58,7 +58,7 @@
             <img src="~assets/app-icon.svg" />
             </q-avatar>-->
 
-            <q-toolbar-title class="column">
+            <q-toolbar-title class="column bg-white">
               <div>
                 <span class="text-dark">StudiCar</span> Code
                 <q-btn
@@ -145,12 +145,12 @@ export default {
 
         var computedStep = step / 100,
           numberOfSteps = 1 / computedStep;
-        if (isOpen)
+        /* if (isOpen)
           this.interval = setInterval(_ => {
             if (this.qrProgress <= computedStep) this.progressReset();
             else this.qrProgress -= computedStep;
           }, duration / numberOfSteps);
-        else clearInterval(this.interval);
+        else clearInterval(this.interval); */
       }
     }
   },

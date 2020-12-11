@@ -254,14 +254,13 @@ export default {
     },
 
     oldVersionRunning() {
-      const bypass = false // page will be auto-reloaded when in dev mode and no bypass
+      const bypass = false; // page will be auto-reloaded when in dev mode and no bypass
 
       var old = this.$store.state.oldVersionRunning;
-      if(old && process.env.DEV && !bypass) {
-        this.reloadPage()
-        return false
-      }
-      else return old
+      if (old && process.env.DEV && !bypass) {
+        this.reloadPage();
+        return false;
+      } else return old;
     },
 
     navigationLinks() {
@@ -374,7 +373,7 @@ export default {
           window.location.href = "#/benutzerinfo?userFbId=" + e.res;
           break;
         case "l":
-          this.liftQrId = parseInt(e.res);
+          this.liftQrId = e.res;
           window.location.href = "#/";
           break;
       }

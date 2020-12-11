@@ -1,10 +1,10 @@
 <template>
   <div>
-    <q-list dense style="border: 1px solid gray" class="q-my-md rounded-borders">
+    <q-list dense style="border: 1px solid gray" class="rounded-borders">
       <q-item dense class="q-pr-none">
         <q-item-section avatar>
-          <q-avatar>
-            <q-img :src="requestingUser.imageUrl" />
+          <q-avatar size="xl">
+            <img :src="requestingUser.imageUrl" />
           </q-avatar>
         </q-item-section>
         <q-item-section>
@@ -22,22 +22,24 @@
           <div class="row justify-between">
             <q-btn
               outline
-              icon="thumb_down"
               @click="respondLiftRequest(false)"
               no-caps
               class="q-px-xs q-mr-md"
-              color="red"
+              color="grey-7"
               dense
-            />
+            >
+              <q-icon color="negative" name="thumb_down" />
+            </q-btn>
             <q-btn
               outline
-              icon="thumb_up"
               @click="respondLiftRequest(true)"
               no-caps
+              color="grey-7"
               class="q-px-xs"
-              color="green"
               dense
-            />
+            >
+              <q-icon name="thumb_up" color="positive" />
+            </q-btn>
           </div>
         </q-item-section>
       </q-item>
@@ -53,7 +55,7 @@
               <q-btn
                 label="zum Profil"
                 outline
-                :to="'benutzerinfo?userFbId=' + requestingUser.fbId"
+                :to="'benutzerinfo?userFbId=' + requestingUser.id"
                 no-caps
                 class="q-px-xs q-mt-md"
                 color="dark"
@@ -72,7 +74,7 @@ import { date } from "quasar";
 import ExtHr from "components/ExtendedHr";
 import ColoredMeter from "components/ColoredMeter";
 
-import { sendApiRequest } from "../ApiAccess";
+import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
 
 export default {
   name: "IncomingLiftRequest",
@@ -176,8 +178,18 @@ export default {
         accepted: accepted,
         reason: responseReason
       });
-    },
-    mounted() {}
+    }
+  },
+  mounted() {
+    buildGetRequestUrl(
+      GET_USER_PROFILE_PIC,
+      {
+        fbid: this.requestingUser.id
+      },
+      url => {
+        this.requestingUser.imageUrl = url;
+      }
+    );
   }
 };
 </script>

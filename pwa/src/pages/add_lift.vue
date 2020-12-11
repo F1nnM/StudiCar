@@ -1,7 +1,7 @@
 <template>
   <div>
     <div
-      v-if="!(hasOwnAddresses || hasOwnCars)"
+      v-if="false /* !(hasOwnAddresses || hasOwnCars) */"
       class="text-center flex column justify-center q-pa-lg"
       style="height: 50vh"
     >
@@ -226,35 +226,89 @@
               </q-item>
 
               <q-stepper-navigation>
-                <q-btn color="primary" @click="step --" label="Zurück" flat />
-                <q-btn @click="step++" color="primary" label="Weiter" class="q-ml-sm" />
+                <q-btn flat @click="step--" color="primary" label="Eins Zurück" class="q-ml-sm" />
+                <q-btn @click="step ++" color="primary" label="Weiter" />
               </q-stepper-navigation>
             </q-step>
-            <q-step :name="6" title="Zeit festlegen" icon="person_add" :done="step > 6">
+            <q-step :name="6" title="Tag festlegen" icon="event" :done="step > 6">
+              <p class="text-caption">Wähle aus, wann du planst zu fahren.</p>
+              <q-input
+                clickable
+                @click="_=> $refs.datepicker.toggle()"
+                outlined
+                readonly
+                :value="lift.datestamp || '- fehlt -'"
+              >
+                <template v-slot:append>
+                  <q-btn icon="edit" color="grey-9" flat>
+                    <q-menu ref="datepicker" transition-show="jump-down" transition-hide="jump-up">
+                      <q-date
+                        title="Tag auswählen"
+                        :subtitle="`Maximal ${maxDaysAhead} Tage im Voraus`"
+                        event-color="primary"
+                        v-model="lift.datestamp"
+                        :events="[todayString]"
+                        :options="dateOptions"
+                      />
+                    </q-menu>
+                  </q-btn>
+                </template>
+              </q-input>
+
+              <q-stepper-navigation>
+                <q-btn flat @click="step--" color="primary" label="Eins Zurück" class="q-ml-sm" />
+                <q-btn @click="step ++" color="primary" :disable="!lift.datestamp" label="Weiter" />
+              </q-stepper-navigation>
+            </q-step>
+            <q-step :name="7" title="Zeit festlegen" icon="schedule" :done="step > 7">
               <p class="text-caption">Wähle aus, wann du planst zu fahren.</p>
               <q-tabs
                 v-model="departAtText"
                 dense
                 no-caps
                 inline-label
-                class="bg-white text-grey-9"
+                class="bg-white text-grey-9 q-mb-sm q-pa-none"
               >
                 <q-tab name="true" icon="time_to_leave" label="Abfahrt ab" />
                 <q-tab name="a" icon="keyboard_tab" label="Ankunft bis" />
               </q-tabs>
-              <!-- <div class="q-gutter-md row items-start">
-                <q-date v-model="model" mask="YYYY-MM-DD HH:mm" color="purple" />
-                <q-time v-model="model" mask="YYYY-MM-DD HH:mm" color="purple" />
-              </div>-->
+              <q-input
+                clickable
+                @click="_=> $refs.timepicker.toggle()"
+                outlined
+                readonly
+                :value="lift.timestamp || '- fehlt -'"
+              >
+                <template v-slot:append>
+                  <q-btn icon="edit" color="grey-9" flat>
+                    <q-menu ref="timepicker" transition-show="jump-down" transition-hide="jump-up">
+                      <q-time format24h v-model="lift.timestamp" mask="HH:mm" color="primary" />
+                    </q-menu>
+                  </q-btn>
+                </template>
+              </q-input>
 
               <q-stepper-navigation>
                 <q-btn color="primary" @click="step --" label="Zurück" flat />
                 <q-btn
-                  @click="openAddLiftConfirm = true"
+                  @click="step ++"
                   color="primary"
+                  :disable="!lift.timestamp"
                   label="Abschließen"
                   class="q-ml-sm"
                 />
+              </q-stepper-navigation>
+            </q-step>
+
+            <q-step :name="8" title="Überprüfen" icon="visibility" :done="step > 8">
+              <p class="text-subtitle1">Vorschau</p>
+              <q-list>
+                <p>{{ lift.destinationAddressId }} > {{ lift.startAddressId }}</p>
+              </q-list>
+
+              <q-stepper-navigation>
+                <q-btn color="primary" @click="step --" label="Zurück" flat />
+                <q-btn @click="addLift" color="primary" label="Veröffentlichen" class="q-ml-sm" />
               </q-stepper-navigation>
             </q-step>
             <q-card v-show="uploading == 1">
@@ -375,13 +429,15 @@ export default {
 
   data() {
     return {
+      maxDaysAhead: 30,
       lift: {
         destination: "school", // default set to school, user selects first home/school, then exact address
         destinationAddressId: 0,
         startAddressId: 0,
         carId: null,
         departAt: true,
-        stamp: "",
+        timestamp: "",
+        datestamp: "",
         seats: 0, // just to avoid error when rendering slider
         stops: [
           {
@@ -395,6 +451,7 @@ export default {
         ]
       },
       step: 6,
+      showTimePicker: false,
       openAddLiftConfirm: false,
       flipAddLiftConfirm: true,
       overviewExpanded: false,
@@ -402,6 +459,10 @@ export default {
     };
   },
   computed: {
+    todayString() {
+      return date.formatDate(new Date(), "YYYY/MM/DD");
+    },
+
     allAddresses() {
       return this.$store.getters["auth/user"].addresses;
     },
@@ -429,9 +490,9 @@ export default {
     getCarData() {
       // returns data of selected car, so that user for example can see how many seats would be default
       let cars = this.userCars;
-      let obj = cars.find(item => {
+      let obj = null; /*  cars.find(item => {
         return item.carId == this.lift.carId;
-      });
+      }); */
       return obj
         ? obj
         : {
@@ -482,17 +543,20 @@ export default {
     }
   },
 
-  mounted() {
-    this.$store.commit("setPage", {
-      name: "Fahrt hinzufügen",
-      onlyInNav: true
-    });
-  },
-
   methods: {
     goHome() {
       window.location.href = "/#/";
     },
+
+    dateOptions(d) {
+      const limit = this.maxDaysAhead;
+
+      var a = date.getDateDiff(d, new Date(), "days");
+      a = a < limit && a >= 0;
+      console.log(d + ": " + a);
+      return a;
+    },
+
     addLift() {
       new Promise(_ => {
         this.flipAddLiftConfirm = false;
@@ -578,17 +642,25 @@ export default {
     },
 
     getCarFromId(id) {
-      let data = this.userCars.find(item => item.carId == id);
+      let data = null; // this.userCars.find(item => item.carId == id);
       if (data) return data;
-      return {
-        brand: null,
-        model: null // similar case to above method
-      };
+      else
+        return {
+          brand: null,
+          model: null // similar case to above method
+        };
     },
 
     getStopTime(stamp) {
       return date.formatDate(stamp, "H:mm");
     }
+  },
+
+  mounted() {
+    this.$store.commit("setPage", {
+      name: "Fahrt hinzufügen",
+      onlyInNav: true
+    });
   }
 };
 </script>

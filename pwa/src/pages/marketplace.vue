@@ -110,12 +110,12 @@
       <div
         class="text-caption"
         v-show="!(getFilteredAndSortedOffers.length || filter.length)"
-      >Anscheinend gibt es für dich gerade keine Angebote. Schau einfach später nochmal vorbei.</div>
+      >Im Moment gibt es für dich gerade keine Angebote. Schau einfach später nochmal vorbei.</div>
       <!-- above case for neither offers nor filter applied -->
       <div
         class="text-caption"
         v-show="!getFilteredAndSortedOffers.length && filter.length"
-      >Anscheinend gibt es keine Angebote, die deinen Filterkriterien entsprechen.</div>
+      >Es gibt keine Angebote, die deinen Filterkriterien entsprechen.</div>
       <!-- above case for offers all not matching selected filter settings -->
     </div>
   </div>
@@ -333,7 +333,7 @@ export default {
       navTitle: "Marktplatz"
     });
 
-    this.filterOptions.push({
+    /* this.filterOptions.push({
       label: "Nur reine " + this.genderName + "-Autos",
       value: "gender",
       caption:
@@ -341,7 +341,7 @@ export default {
       icon: "wc",
       disabled: true // genderCarsAvaiable ? this.$store.getters['auth/user'].gender == 'X'
     });
-
+ */
     // this.filter.push(this.filterOptions[0]); // only show not yet requested offers by default
   }
 };

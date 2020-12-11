@@ -839,9 +839,9 @@ module.exports = {
         about = await new Promise((resolve, reject) => fs.readFile('legal/about.html', 'utf8', (err, data) => {
           if (err) {
             about = err
-            console.log(err)
+            catchall(err, res, 'getTeamInfo')
           }
-          resolve(about)
+          else resolve(data)
         }))
 
         team.forEach(m => {
@@ -860,6 +860,7 @@ module.exports = {
           team: teamArr,
           infoText: about
         }
+        console.log('info: ' + about)
 
         endWithJSON(res, JSON.stringify(obj))
       }
@@ -898,7 +899,11 @@ module.exports = {
         else {
           var offers = JSON.parse(await getMarketplace()),
             wantedOffer = offers[0] // when specific uuid is wanted, then only one result will be there, which should be returned as single object and not as array with just one element
-          endWithJSON(res, JSON.stringify(wantedOffer))
+          var invitingUserName = (await runQuery('SELECT NAME FROM users where FB_ID = ?', [options.invitingUserId])).result[0].NAME
+          endWithJSON(res, JSON.stringify({
+            lift: wantedOffer,
+            invitingUserName: invitingUserName
+          }))
         }
 
       }

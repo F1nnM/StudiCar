@@ -15,11 +15,13 @@
             :key="item.value"
             :name="item.value"
           >
-            <q-badge
-              v-if="item.value == 'pending'"
-              class="q-mx-xs"
-              :color="totalRequests ? 'primary' : 'dark'"
-            >{{ totalRequests }}</q-badge>
+            <q-slide-transition>
+              <q-badge
+                v-if="item.value == 'pending'"
+                class="q-mx-xs"
+                :color="totalRequests ? 'primary' : 'dark'"
+              >{{ totalRequests }}</q-badge>
+            </q-slide-transition>
             {{ item.label }}
           </q-tab-panel>
         </q-tab-panels>
@@ -69,14 +71,41 @@
                 />
                 <ExtHr color="dark" size="xs" />
                 <div v-if="seatsLeft(lift.liftId) > 0" class="full-width">
-<span class="text-negative" v-if="seatsLeft(lift.liftId) > lift.requestingUsers.length">Achtung: Du hast mehr Anfragen als noch Plätze frei sind!</span>
-                  <IncomingLiftRequest
+                  <span
+                    class="text-negative"
+                    v-if="seatsLeft(lift.liftId) > lift.requestingUsers.length"
+                  >Achtung: Du hast mehr Anfragen als noch Plätze frei sind!</span>
+                  <q-slide-item
+                    left-color="white"
+                    right-color="white"
+                    class="q-my-sm"
                     v-for="r in lift.requestingUsers"
                     :key="r.id"
-                    :requestingUser="r"
-                    :liftId="lift.liftId"
-                    @respond="respondLiftRequest"
-                  />
+                  >
+                    <template v-slot:left>
+                      <q-avatar>
+                        <q-icon name="thumb_up" color="positive" size="sm" />
+                      </q-avatar>
+                      <span class="text-dark text-h6 text-uppercase">Ok</span>
+
+                      <p class="text-grey-9">Anfrage von {{ r.name }} annehmen</p>
+                    </template>
+                    <template v-slot:right>
+                      <q-avatar>
+                        <q-icon name="thumb_down" color="negative" size="sm" />
+                      </q-avatar>
+                      <span class="text-dark text-h6 text-uppercase">Ne</span>
+
+                      <p class="text-grey-9">Anfrage von {{ r.name }} ablehnen</p>
+                    </template>
+                    <div>
+                      <IncomingLiftRequest
+                        :requestingUser="r"
+                        :liftId="lift.liftId"
+                        @respond="respondLiftRequest"
+                      />
+                    </div>
+                  </q-slide-item>
                 </div>
                 <div
                   v-else
@@ -113,10 +142,12 @@
           position="bottom"
           v-model="shortLiftPopup.isOpen"
           linearProgress
-          :input="'l' + (shortLiftPopup.data ? shortLiftPopup.data.id : '')"
+          :input="'l' + (shortLiftPopup.data ? shortLiftPopup.data.id : '') + '#i' + ownId"
           text="Über diesen Code kannst du eine Fahrgemeinschaft direkt teilen."
         >
-        {{ shortLiftPopup.data ? shortLiftPopup.data.start.name : '' }} <span class="q-mx-xs">›</span> {{ shortLiftPopup.data ? shortLiftPopup.data.destination.name : '' }}
+          {{ shortLiftPopup.data ? shortLiftPopup.data.start.name : '' }}
+          <span class="q-mx-xs">›</span>
+          {{ shortLiftPopup.data ? shortLiftPopup.data.destination.name : '' }}
         </QrGen>
       </q-tab-panel>
       <q-tab-panel name="outgoing">Hier kommen dann die ausgehenden</q-tab-panel>
@@ -149,6 +180,7 @@ export default {
 
   data() {
     return {
+      ownId: this.$store.getters["auth/user"].uid,
       lifts: this.$store.getters["auth/user"].chatLifts,
       alreadyTappedOnItem: false,
       liftTab: "current",
@@ -206,7 +238,7 @@ export default {
         {
           value: "pending",
           icon: "call_received",
-          label: "eingehende Anfrage" + (this.totalRequests != 1 ? 'n' : '')
+          label: "eingehende Anfrage" + (this.totalRequests != 1 ? "n" : "")
         }
       ];
     },

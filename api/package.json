@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \\\"No test specified\\\" && exit 0",
     "start": "node index.js",
-    "nodemon": "nodemon index.js",
-    "build": "node build.js"
+    "build": "node build.js",
+    "nodemon": "nodemon index.js"
   },
   "author": "Finn Melzer <studicar@mfinn.de>",
   "license": "ISC",

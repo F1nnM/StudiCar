@@ -22,31 +22,34 @@
         </q-item-label>
       </q-item-section>
     </q-item>
-    <q-item>
-      <q-item-section >
-        <!-- <q-knob
-          size="lg"
-          show-value
-          :thickness="0.05"
-          readonly
-          track-color="white"
-          color="primary"
-          text-color="dark"
-          :value="lift.passengers.length / lift.car.allSeats * 100"
-        >
-          <span>{{ lift.passengers.length }}/{{ lift.car.allSeats }}</span>
-          <q-icon style="display: inline" id="seats" size="12px" name="person" />
-        </q-knob> -->
-        <q-chip
-        text-color="dark"
-      >
-      <q-avatar 
-        :text-color="enoughSeatsLeft ? 'positive' : 'negative'" :color="enoughSeatsLeft ? 'white' : 'dark'" size="md">
-        <q-icon :name="enoughSeatsLeft ? 'done' : 'error'" size="sm" />
-        </q-avatar>
-      {{ numberOfRequests }} Anfrage{{ numberOfRequests != 1 ? 'n' :'' }} <span class="text-h5 q-mx-sm">☞</span> {{ seatsLeft }} freie{{ seatsLeft == 1 ? 'r' : '' }} {{ seatsLeft != 1 ? 'Plätze' : 'Platz' }}</q-chip>
-      </q-item-section>
-    </q-item>
+
+    <div class="full-width q-py-sm">
+      <div class="q-ml-md full-width bg-grey-4">
+        <q-slide-item left-color="white">
+          <template v-slot:left>
+            <div class="bg-positive q-pa-sm" style="border-radius: 20px">
+              <q-icon name="done_all" class="q-mr-sm" />Alle annehmen
+            </div>
+          </template>
+          <div class="row bg-grey-4 q-pr-lg full-width" style="border-radius: 25px">
+            <q-avatar
+              class="q-mr-md"
+              :text-color="enoughSeatsLeft ? 'positive' : 'negative'"
+              :color="enoughSeatsLeft ? 'white' : 'dark'"
+            >
+              <q-btn flat dense :icon="enoughSeatsLeft ? 'done_outline' : 'error'" size="md" />
+            </q-avatar>
+            <div class="self-center">
+              {{ numberOfRequests }} Anfrage{{ numberOfRequests != 1 ? 'n' :'' }}
+              <span
+                class="text-h5 q-mx-sm"
+              >☞</span>
+              {{ seatsLeft }} freie{{ seatsLeft == 1 ? 'r' : '' }} {{ seatsLeft != 1 ? 'Plätze' : 'Platz' }}
+            </div>
+          </div>
+        </q-slide-item>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -64,17 +67,16 @@ export default {
     return {};
   },
   computed: {
-    enoughSeatsLeft(){
-      return this.numberOfRequests <= this.seatsLeft
+    enoughSeatsLeft() {
+      return this.numberOfRequests <= this.seatsLeft;
     },
 
-     timeText(){
-      var isArriveBy = this.lift.arriveBy != '00:00:00'
+    timeText() {
+      var isArriveBy = this.lift.arriveBy != "00:00:00";
       var time = isArriveBy ? this.lift.arriveBy : this.lift.departAt,
-      text = isArriveBy ? 'Ankunft bis' : 'Abfahrt um'
-            time = time.slice(0,5) // simply cut the seconds
-            return text + ' ' + time
-      
+        text = isArriveBy ? "Ankunft bis" : "Abfahrt um";
+      time = time.slice(0, 5); // simply cut the seconds
+      return text + " " + time;
     },
 
     dateText() {
@@ -129,15 +131,14 @@ export default {
       }
     },
 
-    seatsLeft(){
-      return this.lift.car.allSeats - this.lift.passengers.length
+    seatsLeft() {
+      return this.lift.car.allSeats - this.lift.passengers.length;
     }
   },
   methods: {
     timeFormatted(dateString) {
       return date.formatDate(new Date(dateString), "H:mm");
-    },
-
+    }
   },
   mounted() {}
 };

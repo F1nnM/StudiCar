@@ -184,7 +184,17 @@ export default {
       }
     }
   },
-  methods: {},
+  methods: {
+    async refreshContent(res, rej) {
+      sendApiRequest(SQL_GET_TEAM, {}, data => {
+        this.$store.commit("setInfo", data);
+        this.info = data;
+
+        this.htmlText = data.infoText;
+        res();
+      });
+    }
+  },
 
   mounted() {
     this.$store.commit("setPage", {
