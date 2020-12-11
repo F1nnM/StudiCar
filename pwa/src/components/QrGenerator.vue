@@ -15,7 +15,10 @@
         <q-card-section class="text-center overflow-hidden-y q-pa-none q-ma-md">
           <div class="text-center bg-white">
             <q-chip outline size="md" color="primary" class="q-pa-sm q-mt-lg">
-              <span class="text-subtitle1 text-dark">{{ label || 'Scan den Code' }}</span>
+              <span class="text-subtitle1 text-dark">
+                <slot v-if="!label">Scan den Code</slot>
+                <span v-else>{{ label }}</span>
+                </span>
               <!-- (above is a fallback when no label is given, not be best but easiest way) -->
             </q-chip>
             <q-circular-progress

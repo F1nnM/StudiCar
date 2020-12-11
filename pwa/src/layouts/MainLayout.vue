@@ -122,6 +122,7 @@
       :value="!hideUpdateField && oldVersionRunning"
       transition-show="fade"
       transition-hide="fade"
+      persistent
       class="z-top"
     >
       <q-card class="bg-dark text-white">
@@ -130,7 +131,7 @@
             <q-icon name="info_outline" class="q-mr-sm" size="sm" />
             <span>Neue Version verfügbar</span>
           </q-toolbar-title>
-          <q-btn icon="close" flat round dense v-close-popup />
+          <!-- <q-btn icon="close" flat round dense v-close-popup /> -->
         </q-toolbar>
 
         <q-card-section>
@@ -217,7 +218,7 @@ export default {
       tab: "home",
       chats: "Main",
       show: true,
-      liftQrId: "",
+      liftQrId: null,
       refreshErr: null,
       hideUpdateField: false
     };
@@ -253,7 +254,14 @@ export default {
     },
 
     oldVersionRunning() {
-      return this.$store.state.oldVersionRunning;
+      const bypass = false // page will be auto-reloaded when in dev mode and no bypass
+
+      var old = this.$store.state.oldVersionRunning;
+      if(old && process.env.DEV && !bypass) {
+        this.reloadPage()
+        return false
+      }
+      else return old
     },
 
     navigationLinks() {
@@ -366,7 +374,7 @@ export default {
           window.location.href = "#/benutzerinfo?userFbId=" + e.res;
           break;
         case "l":
-          this.liftQrId = e.res;
+          this.liftQrId = parseInt(e.res);
           window.location.href = "#/";
           break;
       }

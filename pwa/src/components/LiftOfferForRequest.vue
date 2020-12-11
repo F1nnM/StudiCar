@@ -13,20 +13,18 @@
           </q-badge>-->
         </span>
       </q-toolbar-title>
-      <q-badge
-        color="primary"
-        transparent
-      >{{ numberOfRequests }} Anfrage{{ numberOfRequests != 1 ? 'n' :'' }}</q-badge>
     </q-toolbar>
     <q-item>
       <q-item-section>
         <q-item-label caption>
           <q-badge v-if="liftSoonLabel" color="grey-7" class="q-mr-sm">{{ liftSoonLabel }}</q-badge>
-          <span>{{ dateText }}</span>
+          <span>{{ timeText }}</span>
         </q-item-label>
       </q-item-section>
-      <q-item-section side>
-        <q-knob
+    </q-item>
+    <q-item>
+      <q-item-section >
+        <!-- <q-knob
           size="lg"
           show-value
           :thickness="0.05"
@@ -38,7 +36,15 @@
         >
           <span>{{ lift.passengers.length }}/{{ lift.car.allSeats }}</span>
           <q-icon style="display: inline" id="seats" size="12px" name="person" />
-        </q-knob>
+        </q-knob> -->
+        <q-chip
+        text-color="dark"
+      >
+      <q-avatar 
+        :text-color="enoughSeatsLeft ? 'positive' : 'negative'" :color="enoughSeatsLeft ? 'white' : 'dark'" size="md">
+        <q-icon :name="enoughSeatsLeft ? 'done' : 'error'" size="sm" />
+        </q-avatar>
+      {{ numberOfRequests }} Anfrage{{ numberOfRequests != 1 ? 'n' :'' }} <span class="text-h5 q-mx-sm">☞</span> {{ seatsLeft }} freie{{ seatsLeft == 1 ? 'r' : '' }} {{ seatsLeft != 1 ? 'Plätze' : 'Platz' }}</q-chip>
       </q-item-section>
     </q-item>
   </div>
@@ -58,6 +64,19 @@ export default {
     return {};
   },
   computed: {
+    enoughSeatsLeft(){
+      return this.numberOfRequests <= this.seatsLeft
+    },
+
+     timeText(){
+      var isArriveBy = this.lift.arriveBy != '00:00:00'
+      var time = isArriveBy ? this.lift.arriveBy : this.lift.departAt,
+      text = isArriveBy ? 'Ankunft bis' : 'Abfahrt um'
+            time = time.slice(0,5) // simply cut the seconds
+            return text + ' ' + time
+      
+    },
+
     dateText() {
       const timeString = this.lift.departAt || this.lift.arriveBy;
       var dateObj = new Date(timeString),
@@ -108,12 +127,17 @@ export default {
         default:
           return false;
       }
+    },
+
+    seatsLeft(){
+      return this.lift.car.allSeats - this.lift.passengers.length
     }
   },
   methods: {
     timeFormatted(dateString) {
       return date.formatDate(new Date(dateString), "H:mm");
-    }
+    },
+
   },
   mounted() {}
 };

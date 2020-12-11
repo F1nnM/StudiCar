@@ -32,7 +32,7 @@
 import { date } from "quasar";
 import ExtHR from "components/ExtendedHr";
 import LiftOffer from "components/LiftOffer";
-import { sendApiRequest, SQL_GET_LIFT_INFO } from "../ApiAccess";
+import { sendApiRequest, SQL_GET_MARKETPLACE } from "../ApiAccess";
 
 export default {
   name: "QRLiftDisplay",
@@ -51,10 +51,11 @@ export default {
   },
   watch: {
     value: function (val) {
-      /* sendApiRequest(
-          SQL_GET_LIFT_INFO,
+      if (val) {
+      sendApiRequest(
+          SQL_GET_MARKETPLACE,
           {
-            qrId: val, // here comes the scanned qr content without the type letter, is encrypted lift id
+            uuid: val, // a uuid, can be treated as a longer and more secure liftId
           },
           (lift_) => {
             this.lift = lift_;
@@ -62,8 +63,7 @@ export default {
           (err_) => {
             this.err = err_;
           }
-        ); */
-      if (val) {
+        );
         this.lift = this.$store.getters["auth/user"].chatLifts[1];
       }
     },

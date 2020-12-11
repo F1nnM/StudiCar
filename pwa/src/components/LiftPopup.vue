@@ -25,23 +25,26 @@
                             {{ lift.destination.name }}
                           </div>
                         </q-item-label>
-                        <q-item-label caption class="q-mt-none q-mb-xs">
+                        <q-slide-transition>
+                        <q-item-label v-if="!infoDrawerOpen" caption class="q-mt-none">
                           <q-tab-panels
-                            class="q-pa-none bg-primary"
+                            class="q-pa-none bg-primary q-mb-xs text-grey-3 text-weight-thin"
                             v-model="showMembersInTitle"
                             animated
                             transition-next="fade"
                             transition-prev="fade"
                           >
                             <q-tab-panel :name="true" class="q-pa-none row justify-between">
-                              <p class="q-mb-none">
+                              <div v-if="lift.passengers">
                                 <span
-                                  class="text-grey-3 text-weight-thin"
                                   v-for="(p, index) in lift.passengers"
                                   :key="p.fbId"
                                 >{{ index > 0 ? ', ' : '' }}{{ p.name }}</span>
-                              </p>
-                              <q-btn
+                              </div>
+                              <div v-else>
+                                - noch keine Mitfahrer -
+                              </div>
+                             <!--  <q-btn
                                 @click="searchDialogOpen = true"
                                 icon="search"
                                 disable
@@ -51,15 +54,16 @@
                                 size="sm"
                                 color="white"
                                 dense
-                              />
+                              /> -->
                               <!-- <q-btn flat round dense icon="search" /> -->
                             </q-tab-panel>
                             <q-tab-panel
                               :name="false"
-                              class="q-pa-none text-grey-3 text-weight-thin"
+                              class="q-pa-none"
                             >Tippe für Info</q-tab-panel>
                           </q-tab-panels>
                         </q-item-label>
+                        </q-slide-transition>
                       </q-item-section>
                     </q-item>
                   </q-toolbar-title>
@@ -470,7 +474,7 @@ export default {
         }, 2000); // after that time, hide tap-for-info-hint and show members
         setTimeout(_ => {
           this.scrollToEnd();
-        });
+        }, 50);
       } else this.infoDrawerOpen = false;
     },
 
@@ -552,14 +556,8 @@ export default {
           setTimeout(res, delay);
         });
       try {
-        var endOfPage = /* await new Promise((res) => {
-            setTimeout(_=> {
-              var a =  */ this
-          .$refs.endOfPage.$el;
-        /* 
-           res(a)
-        }, 50);
-      }) */
+        var endOfPage = (this.$refs.endOfPage.$el || document.getElementById('endOfPage'))
+          
         endOfPage.scrollIntoView(
           delay
             ? {
@@ -569,14 +567,6 @@ export default {
             : null
         );
       } catch (e) {}
-    },
-
-    pageScrolled(e) {
-      if (!this.open) return;
-      const limit = 100;
-      var done = e.position <= limit;
-      console.warn(done);
-      this.bottomReached = done;
     },
 
     getImageOfUser(id) {

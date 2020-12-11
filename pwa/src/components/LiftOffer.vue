@@ -35,7 +35,7 @@
     <q-list>
       <q-item dense>
         <q-item-section>
-          <q-item-label caption>{{ dateText.firstLine }}</q-item-label>
+          <q-item-label caption>{{ timeText }}</q-item-label>
           <q-item-label caption>{{ dateText.secondLine }}</q-item-label>
         </q-item-section>
         <q-item-section side>
@@ -62,12 +62,22 @@
 
       <q-expansion-item dense class="link-border full-width q-mt-md">
         <template v-slot:header>
+          <q-item dense>
+            <q-item-section avatar>
+
+            <q-avatar>
+              <img :src="imageUrl" />
+            </q-avatar>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>
+
           <div class="text-subtitle1">
             angeboten von {{ lift.driver.name }}
-            <q-avatar>
-              <img :src="lift.driver.imageUrl" />
-            </q-avatar>
           </div>
+              </q-item-label>
+            </q-item-section>
+          </q-item>
         </template>
         <q-card>
           <q-card-section class="q-pa-xs">
@@ -144,8 +154,16 @@ export default {
     };
   },
   computed: {
+    timeText(){
+      var isArriveBy = this.lift.arriveBy != '00:00:00'
+      var time = isArriveBy ? this.lift.arriveBy : this.lift.departAt,
+      text = isArriveBy ? 'Ankunft bis' : 'Abfahrt um'
+            time = time.slice(0,5) // simply cut the seconds
+            return text + ' ' + time
+      
+    },
     dateText() {
-      var dateObj = new Date(this.lift.departAt || this.lift.arriveBy),
+      /* this.
         dateFormatted = date.formatDate(dateObj, "dddd, DD.MM.", {
           days: [
             "Sonntag",
@@ -160,13 +178,9 @@ export default {
         timeFormatted = this.formatAsTime(dateObj),
         isNextText =
           date.getDateDiff(new Date(), dateObj, "days") < 7 ? "kommenden " : "",
-        directionText = this.lift.departAt ? "Abfahrt" : "Ankunft";
+        directionText = this.lift.departAt ? "Abfahrt" : "Ankunft"; */
 
-      return {
-        firstLine: "Fahrt ist am " + isNextText + dateFormatted,
-        secondLine:
-          "Angestrebte " + directionText + ": " + timeFormatted + " Uhr"
-      };
+      return '- noch nicht gesetzt -';
     },
 
     prefsDocu() {
@@ -219,9 +233,18 @@ export default {
           this.$emit("request", this.lift.id);
         })
         .onCancel();
-    }
+    },
   },
-  mounted() {}
+  mounted() {
+    buildGetRequestUrl(
+      GET_USER_PROFILE_PIC,
+      { fbid: this.lift.driver.id },
+      url => {
+        this.imageUrl = url;
+      }
+    );
+
+  }
 };
 </script>
 

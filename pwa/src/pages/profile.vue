@@ -142,7 +142,7 @@
               v-if="!addresses.length"
               class="text-weight-light"
             >Du hast noch keine Adressen hinzugefügt</div>
-            <q-list>
+            <q-list v-else>
               <div class="row" v-for="item in addresses" :key="item.id">
                 <q-item class="col-10">
                   <div class="row">

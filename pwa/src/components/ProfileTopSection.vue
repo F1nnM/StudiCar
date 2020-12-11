@@ -365,7 +365,7 @@ export default {
       const uid = this.$store.getters["auth/user"].uid,
         host = process.env.DEV ? "localhost:3000" : "dev.pwa.studicar.mfinn.de";
 
-      return "https://" + host + "/#/benutzerinfo?userFbId=" + uid;
+      return "u" + uid;
     }
   },
   methods: {
@@ -435,7 +435,7 @@ export default {
         .dialog({
           title: "Bild zurücksetzen",
           message:
-            "Willst du dein Bild wirklich zurücksetzen? Wir speichern dann ein zufälliges Ersatzbild.",
+            "Willst du dein Bild wirklich zurücksetzen? Wir speichern dann ein anonymes Ersatzbild.",
           cancel: true,
           persistent: true
         })

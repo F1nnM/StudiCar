@@ -68,7 +68,8 @@
                   :numberOfRequests="lift.requestingUsers.length"
                 />
                 <ExtHr color="dark" size="xs" />
-                <div v-if="seatsLeft(lift.liftId) > lift.requestingUsers.length" class="full-width">
+                <div v-if="seatsLeft(lift.liftId) > 0" class="full-width">
+<span class="text-negative" v-if="seatsLeft(lift.liftId) > lift.requestingUsers.length">Achtung: Du hast mehr Anfragen als noch Plätze frei sind!</span>
                   <IncomingLiftRequest
                     v-for="r in lift.requestingUsers"
                     :key="r.id"
@@ -111,11 +112,12 @@
         <QrGen
           position="bottom"
           v-model="shortLiftPopup.isOpen"
-          :label="shortLiftPopup.data ? shortLiftPopup.data.start.name + '  ›  ' + shortLiftPopup.data.destination.name : ''"
           linearProgress
-          :input="'l' + (shortLiftPopup.data ? shortLiftPopup.data.qr : '')"
+          :input="'l' + (shortLiftPopup.data ? shortLiftPopup.data.id : '')"
           text="Über diesen Code kannst du eine Fahrgemeinschaft direkt teilen."
-        />
+        >
+        {{ shortLiftPopup.data ? shortLiftPopup.data.start.name : '' }} <span class="q-mx-xs">›</span> {{ shortLiftPopup.data ? shortLiftPopup.data.destination.name : '' }}
+        </QrGen>
       </q-tab-panel>
       <q-tab-panel name="outgoing">Hier kommen dann die ausgehenden</q-tab-panel>
     </q-tab-panels>
@@ -204,7 +206,7 @@ export default {
         {
           value: "pending",
           icon: "call_received",
-          label: "Eingehende Anfragen"
+          label: "eingehende Anfrage" + (this.totalRequests != 1 ? 'n' : '')
         }
       ];
     },
@@ -312,7 +314,7 @@ export default {
     },
 
     openShortLiftInfo(liftId) {
-      var lift = this.lifts[liftId];
+      var lift = this.lifts.find(l => l.id == liftId);
       this.shortLiftPopup.data = lift;
       this.shortLiftPopup.isOpen = true;
     },

@@ -1,3 +1,4 @@
+const { off } = require('process');
 var runQuery = require('./db'),
   fs = require('fs')
 const newsPath = 'news/postillon/ticker.txt',
@@ -319,7 +320,7 @@ async function getLiftRequests (uid) {
   return db_requests;
 }
 
-async function getMarketplace () {
+async function getMarketplace (uuidOnly) {
   let JSON = (await runQuery(`
   WITH
   lifts as (
@@ -371,8 +372,9 @@ async function getMarketplace () {
               counts 
               ON lift.ID = counts.LIFT_ID 
       WHERE
-          lift.FIRST_DATE >= CURRENT_DATE() 
-          OR lift.REPEATS_ON_WEEKDAY != 0
+          (lift.FIRST_DATE >= CURRENT_DATE() 
+          OR lift.REPEATS_ON_WEEKDAY != 0)
+          AND ${uuidOnly ? `lift.UUID = ${uuidOnly}` : 'TRUE'}
   )
   
   SELECT
@@ -458,7 +460,6 @@ module.exports = {
       if (!isOptionMissing(options, ['fbid'], res) && isUserVerified(options.secretFbId)) {
         var data;
         if (options.secretFbId == options.fbid) { // ACCESSING PRIVATE PROFILE
-          console.log('not public')
           data = (await runQuery(`
           SELECT
               users.ID INTO @userid 
@@ -617,7 +618,6 @@ module.exports = {
             `, [options.fbid])).result[1][0].JSON
 
           data = JSON.parse(data)
-          console.log(data)
 
           data.chatLifts = JSON.parse(await getChatLifts(options.fbid))
           data.liftRequests = JSON.parse(await getLiftRequests(options.fbid))
@@ -625,7 +625,7 @@ module.exports = {
           data['topFriends'] = apiResponseSimulation['topFriends']
 
         } else { // accessing public information
-          data = runQuery(`
+          data = (await runQuery(`
           SELECT
               users.ID INTO @userid 
           FROM
@@ -700,7 +700,9 @@ module.exports = {
                   rides USING(USER_ID) 
               LEFT OUTER JOIN
                   drives USING(USER_ID)
-            `, [options.fbid]).result[1][0].JSON
+            `, [options.fbid])).result[1][0].JSON
+
+          data = JSON.parse(data)
         }
         data.stats.liftsOffered = Math.floor(Math.random() * 100)
         data.stats.liftsAll = data.stats.liftsOffered + Math.floor(Math.random() * 200)
@@ -710,24 +712,7 @@ module.exports = {
 
       }
     },
-    '/getCarModels': async (req, res, options) => {
-      if (isUserVerified(options.secretFbId)) {
-        let result = await runQuery("SELECT BRAND, MODEL FROM car_models", []);
-        let cars = result.result
-        let carsObj = {}
 
-        cars.forEach(item => {
-          if (!carsObj[item.BRAND]) { // when brand not initialized, then do it
-            carsObj[item.BRAND] = []
-          }
-          if (carsObj[item.BRAND].indexOf(item.MODEL) == -1) { // models should not exist twice in array
-            carsObj[item.BRAND].push(item.MODEL)
-          } // basically grouped all cars in object array
-        })
-
-        endWithJSON(res, JSON.stringify(carsObj))
-      }
-    },
     '/getMessages': async (req, res, options) => {
       if (isUserVerified(options.secretFbId)) {
         endWithJSON(res, await getChatLifts(options.secretFbId))
@@ -754,7 +739,7 @@ module.exports = {
       })
     },
     '/getLiftInfo': async (req, res, options) => {
-      if (!isOptionMissing(options, ['id'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['liftId'], res) && isUserVerified(options.secretFbId)) {
         var liftId = options.id
         let carInfo = await runQuery("SELECT car_models.BRAND, car_models.MODEL, car.COLOR, car.TYPE, car.LICENSE_PLATE, lift.OFFERED_SEATS FROM lift JOIN car ON lift.CAR_ID = car.ID JOIN car_models ON car_models.ID = car.MODEL_ID WHERE lift.ID = ?;", [liftId])
         carInfo = carInfo.result[0]
@@ -900,7 +885,15 @@ module.exports = {
     },
     '/marketplace': async (req, res, options) => {
       if (isUserVerified(options.secretFbId)) {
-        endWithJSON(res, await getMarketplace())
+        if (!options.uuid) {
+          endWithJSON(res, await getMarketplace(options.uuid)) // normal, simple marketplace offers are wanted
+        }
+        else {
+          var offers = JSON.parse(await getMarketplace()),
+            wantedOffer = offers[0] // when specific uuid is wanted, then only one result will be there, which should be returned as single object and not as array with just one element
+          endWithJSON(res, JSON.stringify(wantedOffer))
+        }
+
       }
       else {
         console.log('not verified')

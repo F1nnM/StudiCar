@@ -102,14 +102,14 @@ export default {
       } else if (diff("days") < 7) {
         display_text = "vor " + diff("days") + " Tagen";
       } else {
-        display_text = "Vor über einer Woche";
+        display_text = "Vor " + diff('weeks') + " Woche" + (diff('weeks') != 1 ? 'n' : '');
       }
 
       return display_text;
 
       function diff(unit) {
-        //console.warn(date.getDateDiff(new Date(), time, unit))
-        return date.getDateDiff(new Date(), time, unit);
+        if(unit == 'weeks') return Math.floor(date.getDateDiff(new Date(), time, 'days') / 7)
+        else return date.getDateDiff(new Date(), time, unit);
       }
 
       function wasToday() {

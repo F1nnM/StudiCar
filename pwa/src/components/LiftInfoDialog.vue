@@ -9,11 +9,11 @@
     <div v-if="lift" v-touch-swipe.mouse.right="swipedToRight">
       <div class="row justify-end">
         <div
-          class="col-2 text-right column justify-center q-pr-md text-primary bg-white text-subtitle1"
+          class="col-2 text-right column justify-center q-pr-md text-primary bg-white"
         >Info</div>
         <div class="col-2 bg-white text-primary">
           <q-toolbar>
-            <q-toolbar-title>
+            <q-toolbar-title class="text-uppercase">
               <q-btn v-ripple icon="close" flat round dense @click="emit(false)" />
             </q-toolbar-title>
           </q-toolbar>
@@ -64,7 +64,7 @@
             </q-item-section>
           </q-item>
           <q-item-label header>
-            <p v-if="lift.passengers.length">
+            <div v-if="lift.passengers">
               Menschen
               <br />
               <small
@@ -75,14 +75,18 @@
                 {{ lift.passengers.length + 1 }} / {{ lift.car.allSeats }}
                 <q-icon name="person" size="xs" />
               </span>
-            </p>
-            <p v-else class="text-center q-pt-sm text-gray">Bis jetzt hast du noch keine Mitfahrer.</p>
+
             <p
               class="text-right text-primary text-caption"
               v-if="lift.passengers.length == lift.seats"
             >Volles Auto. Wow!</p>
+            </div>
+            <span class="text-caption float-right">
+                0 / {{ lift.car.allSeats }}
+                <q-icon name="person" size="xs" />
+              </span>
           </q-item-label>
-          <q-item v-ripple clickable @click="viewUserFromFbId(lift.driver.fbid)">
+          <q-item v-ripple clickable @click="viewUserFromFbId(lift.driver.id)">
             <q-item-section top avatar>
               <q-avatar>
                 <img :src="getImageOfUser(lift.driver.id)" />
@@ -127,11 +131,13 @@ val: 'music', icon: 'music_note'
             </q-item-section>
           </q-item>
           <q-separator />
+          <div v-if="lift.passengers">
+
           <div class="row justify-between">
             <q-item
               clickable
               v-ripple
-              @click="viewUserFromFbId(item.fbId)"
+              @click="viewUserFromFbId(item.id)"
               class="col-6"
               v-for="item in lift.passengers"
               :key="item.id"
@@ -156,6 +162,8 @@ val: 'music', icon: 'music_note'
               </q-item-section>-->
             </q-item>
           </div>
+          </div>
+          <p v-else class="text-center q-mt-sm text-grey-7">Du hast noch keine Mitfahrer</p>
         </q-list>
       </div>
       <q-dialog v-model="showModelFrame" full-height full-width>
@@ -178,6 +186,7 @@ val: 'music', icon: 'music_note'
 import { openURL, date } from "quasar";
 import ExtHr from "components/ExtendedHr";
 import Vue from 'vue';
+import { sendApiRequest, GET_USER_PROFILE_PIC } from '../ApiAccess'
 import VueFriendlyIframe from 'vue-friendly-iframe';
 Vue.use(VueFriendlyIframe);
 
@@ -223,11 +232,11 @@ export default {
       dest = this.lift.destination,
       arriveBy = this.lift.arriveBy,
       departAt = this.lift.departAt
-      addToCourse(start.name, start.id > 3 ? 'home' : 'school', (start.id > 3 ? 'bei ' + this.lift.driver.name : ''), departAt)
+      addToCourse(start.name, start.id == -1 ? 'home' : 'school', (start.id == -1 ? 'bei ' + this.lift.driver.name : ''), departAt)
       if(this.lift.stations) this.lift.stations.forEach(station => {
         addToCourse(station.name, 'person_outline', 'bei ' + station.passenger, '- ? -') 
         })
-      addToCourse(dest.name, dest.id > 3 ? 'home' : 'school', (dest.id > 3 ? 'bei ' + this.lift.driver.name : ''), arriveBy)
+      addToCourse(dest.name, dest.id == -1 ? 'home' : 'school', (dest.id == -1 ? 'bei ' + this.lift.driver.name : ''), arriveBy)
 
 
       function addToCourse(title, icon, text, time){
@@ -268,9 +277,13 @@ export default {
       else return color;
     },
 
-    viewUserFromFbId(fbId) {
-      window.location.href = "/#/benutzerinfo?userFbId=" + fbId;
+    viewUserFromFbId(id) {
+      window.location.href = "/#/benutzerinfo?userFbId=" + id;
     },
+  },
+
+  mounted(){
+    
   }
 };
 </script>
