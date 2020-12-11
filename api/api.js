@@ -925,8 +925,8 @@ module.exports = {
         if (!users) {
           let png = generateJdenticon(options.name);
           await runQuery(
-            "INSERT INTO `users` (`ID`, `FB_ID`, `NAME`, `SURNAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKING`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`)" +
-            "VALUES (NULL, ?, ?, ?, 'X', '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED')", [options.secretFbId, options.name, options.surname, png, options.mail]).catch(error => {
+            "INSERT INTO `users` (`ID`, `FB_ID`, `NAME`, `SURNAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKING`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`, `VERIFIED`)" +
+            "VALUES (NULL, ?, ?, ?, 'X', '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED', 1)", [options.secretFbId, options.name, options.surname, png, options.mail]).catch(error => {
               throw error;
             });
           res.end("added")
