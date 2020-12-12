@@ -1,32 +1,43 @@
 <template>
   <div>
-    <q-toolbar>
-      <q-toolbar-title>
-        <!-- <q-icon :name="lift.start.id > 3 ? 'home' : 'school'" size="sm" /> -->
-        <span>{{ lift.start.name }}</span>
-        <!-- <small>({{ lift.distance }}km entfernt)</small> -->
-        <span class="q-mx-md">&rsaquo;</span>
-        <span>
-          {{ lift.destination.name }}
-          <!-- <q-badge transparent floating color="white">
+    <div class="row no-wrap">
+      <div class="self-center">
+        <q-btn icon="chevron_left" @click="emit('left')" dense flat />
+      </div>
+      <div class="ellipsis col-9">
+        <q-toolbar>
+          <q-toolbar-title class="text-subtitle1">
+            <!-- <q-icon :name="lift.start.id > 3 ? 'home' : 'school'" size="sm" /> -->
+            <span>{{ lift.start.name }}</span>
+            <!-- <small>({{ lift.distance }}km entfernt)</small> -->
+            <span class="q-mx-sm">&rsaquo;</span>
+            <span>
+              {{ lift.destination.name }}
+              <!-- <q-badge transparent floating color="white">
             <q-icon :name="lift.destination.id > 3 ? 'home' : 'school'" size="xs" color="grey-9" />
-          </q-badge>-->
-        </span>
-      </q-toolbar-title>
-    </q-toolbar>
-    <q-item>
-      <q-item-section>
-        <q-item-label caption>
-          <q-badge v-if="liftSoonLabel" color="grey-7" class="q-mr-sm">{{ liftSoonLabel }}</q-badge>
-          <span>{{ timeText }}</span>
-        </q-item-label>
-      </q-item-section>
-    </q-item>
+              </q-badge>-->
+            </span>
+          </q-toolbar-title>
+        </q-toolbar>
+        <q-item>
+          <q-item-section>
+            <q-item-label caption>
+              <q-badge v-if="liftSoonLabel" color="grey-7" class="q-mr-sm">{{ liftSoonLabel }}</q-badge>
+              <div>Am {{ dateText }} (in {{ daysLeft }} Tage{{ daysLeft != 1 ? 'n' : '' }})</div>
+              <div>{{ timeText }} Uhr</div>
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+      </div>
+      <div class="self-center">
+        <q-btn icon="chevron_right" @click="emit('right')" dense flat />
+      </div>
+    </div>
 
     <div class="full-width q-py-sm">
       <div class="q-ml-md full-width bg-grey-4">
         <q-slide-item left-color="white">
-          <template v-slot:left>
+          <template v-slot:left v-if="enoughSeatsLeft">
             <div class="bg-positive q-pa-sm" style="border-radius: 20px">
               <q-icon name="done_all" class="q-mr-sm" />Alle annehmen
             </div>
@@ -37,7 +48,7 @@
               :text-color="enoughSeatsLeft ? 'positive' : 'negative'"
               :color="enoughSeatsLeft ? 'white' : 'dark'"
             >
-              <q-btn flat dense :icon="enoughSeatsLeft ? 'done_outline' : 'error'" size="md" />
+              <q-btn flat dense :icon="enoughSeatsLeft ? 'double_arrow' : 'error'" size="md" />
             </q-avatar>
             <div class="self-center">
               {{ numberOfRequests }} Anfrage{{ numberOfRequests != 1 ? 'n' :'' }}
@@ -68,47 +79,47 @@ export default {
   },
   computed: {
     enoughSeatsLeft() {
-      return this.numberOfRequests <= this.seatsLeft;
+      return this.numberOfRequests <= this.seatsLeft && this.seatsLeft > 0;
     },
 
     timeText() {
       var isArriveBy = this.lift.arriveBy != "00:00:00";
       var time = isArriveBy ? this.lift.arriveBy : this.lift.departAt,
-        text = isArriveBy ? "Ankunft bis" : "Abfahrt um";
+        text = isArriveBy ? "Ankunft" : "Abfahrt";
       time = time.slice(0, 5); // simply cut the seconds
-      return text + " " + time;
+      return text + " um " + time;
     },
 
     dateText() {
-      const timeString = this.lift.departAt || this.lift.arriveBy;
-      var dateObj = new Date(timeString),
-        dateFormatted = date.formatDate(dateObj, "dddd, DD. MMMM", {
-          days: [
-            "Sonntag",
-            "Montag",
-            "Dienstag",
-            "Mittwoch",
-            "Donnerstag",
-            "Freitag",
-            "Samstag"
-          ],
-          months: [
-            "Januar",
-            "Februar",
-            "März",
-            "April",
-            "Mai",
-            "Juni",
-            "Juli",
-            "August",
-            "September",
-            "Oktober",
-            "November",
-            "Dezember"
-          ]
-        });
+      return date.formatDate(new Date(this.lift.date), "dddd, DD. MMMM", {
+        days: [
+          "Sonntag",
+          "Montag",
+          "Dienstag",
+          "Mittwoch",
+          "Donnerstag",
+          "Freitag",
+          "Samstag"
+        ],
+        months: [
+          "Januar",
+          "Februar",
+          "März",
+          "April",
+          "Mai",
+          "Juni",
+          "Juli",
+          "August",
+          "September",
+          "Oktober",
+          "November",
+          "Dezember"
+        ]
+      });
+    },
 
-      return dateFormatted;
+    daysLeft() {
+      return date.getDateDiff(new Date(this.lift.date), new Date(), "days");
     },
 
     liftSoonLabel() {
@@ -138,6 +149,10 @@ export default {
   methods: {
     timeFormatted(dateString) {
       return date.formatDate(new Date(dateString), "H:mm");
+    },
+
+    emit(type) {
+      this.$emit(type);
     }
   },
   mounted() {}

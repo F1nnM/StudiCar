@@ -1,7 +1,7 @@
 <template>
   <div>
     <div
-      v-if="false /* !(hasOwnAddresses || hasOwnCars) */"
+      v-if="!(hasOwnAddresses || hasOwnCars)"
       class="text-center flex column justify-center q-pa-lg"
       style="height: 50vh"
     >
@@ -36,8 +36,8 @@
     </div>
     <q-dialog
       v-else
+      :value="true"
       maximized
-      :value="!canAddLift"
       persistent
       transition-show="slide-up"
       transition-hide="slide-down"
@@ -246,6 +246,7 @@
                         title="Tag auswählen"
                         :subtitle="`Maximal ${maxDaysAhead} Tage im Voraus`"
                         event-color="primary"
+                        mask="YYYY-MM-DD"
                         v-model="lift.datestamp"
                         :events="[todayString]"
                         :options="dateOptions"
@@ -450,7 +451,7 @@ export default {
           }
         ]
       },
-      step: 6,
+      step: 1,
       showTimePicker: false,
       openAddLiftConfirm: false,
       flipAddLiftConfirm: true,
@@ -557,7 +558,7 @@ export default {
       return a;
     },
 
-    addLift() {
+    async addLift() {
       new Promise(_ => {
         this.flipAddLiftConfirm = false;
       })
@@ -572,33 +573,19 @@ export default {
         // case when user didn't want to change number of seats at this lift
         this.lift.seats = this.getCarData.seats;
       }
-      this.step = 0;
+      this.step = 1;
       this.uploading = 1;
-      sendApiRequest(
-        SQL_ADD_LIFT,
-        {
-          id: this.$store.getters["auth/user"].id,
-          lift: this.lift
-        },
-        _ => {
-          // here comes your success code
-          this.lift = {
-            destination: "school", // default set to school, user selects first home/school, then exact address
-            destinationAddressId: 0,
-            startingPoint: 0,
-            car: null,
-            seats: 0 // just to avoid error when rendering slider
-          };
-          this.step = 0;
-          this.openAddLiftConfirm = false;
-          this.uploading = 2;
-        },
-        error => {
-          alert(error);
-          this.step = 1;
-          this.uploading = -1;
-        }
-      );
+      this.$store.dispatch("auth/addLift", this.lift).then(_ => {
+        this.lift = {
+          destination: "school", // default set to school, user selects first home/school, then exact address
+          destinationAddressId: 0,
+          startingPoint: 0,
+          car: null,
+          seats: 0 // just to avoid error when rendering slider
+        };
+        this.step = 1;
+        this.uploading = 2;
+      });
     },
 
     resetFields() {

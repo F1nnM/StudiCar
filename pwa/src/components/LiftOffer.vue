@@ -35,8 +35,8 @@
     <q-list>
       <q-item dense>
         <q-item-section>
+          <q-item-label caption>{{ dateText }}</q-item-label>
           <q-item-label caption>{{ timeText }}</q-item-label>
-          <q-item-label caption>{{ dateText.secondLine }}</q-item-label>
         </q-item-section>
         <q-item-section side>
           <q-knob
@@ -64,17 +64,13 @@
         <template v-slot:header>
           <q-item dense>
             <q-item-section avatar>
-
-            <q-avatar>
-              <img :src="imageUrl" />
-            </q-avatar>
+              <q-avatar>
+                <img :src="imageUrl" />
+              </q-avatar>
             </q-item-section>
             <q-item-section>
               <q-item-label>
-
-          <div class="text-subtitle1">
-            angeboten von {{ lift.driver.name }}
-          </div>
+                <div class="text-subtitle1">angeboten von {{ lift.driver.name }}</div>
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -154,16 +150,16 @@ export default {
     };
   },
   computed: {
-    timeText(){
-      var isArriveBy = this.lift.arriveBy != '00:00:00'
+    timeText() {
+      var isArriveBy = this.lift.arriveBy != "00:00:00";
       var time = isArriveBy ? this.lift.arriveBy : this.lift.departAt,
-      text = isArriveBy ? 'Ankunft bis' : 'Abfahrt um'
-            time = time.slice(0,5) // simply cut the seconds
-            return text + ' ' + time
-      
+        text = isArriveBy ? "Ankunft" : "Abfahrt";
+      time = time.slice(0, 5); // simply cut the seconds
+      return text + " um " + time;
     },
+
     dateText() {
-      /* this.
+      var dateObj = new Date(this.lift.date),
         dateFormatted = date.formatDate(dateObj, "dddd, DD.MM.", {
           days: [
             "Sonntag",
@@ -175,12 +171,10 @@ export default {
             "Samstag"
           ]
         }),
-        timeFormatted = this.formatAsTime(dateObj),
-        isNextText =
-          date.getDateDiff(new Date(), dateObj, "days") < 7 ? "kommenden " : "",
-        directionText = this.lift.departAt ? "Abfahrt" : "Ankunft"; */
+        nextWeekText =
+          date.getDateDiff(new Date(), dateObj, "days") < 7 ? "kommenden " : "";
 
-      return '- noch nicht gesetzt -';
+      return "Am " + nextWeekText + dateFormatted;
     },
 
     prefsDocu() {
@@ -233,7 +227,7 @@ export default {
           this.$emit("request", this.lift.id);
         })
         .onCancel();
-    },
+    }
   },
   mounted() {
     buildGetRequestUrl(
@@ -243,7 +237,6 @@ export default {
         this.imageUrl = url;
       }
     );
-
   }
 };
 </script>

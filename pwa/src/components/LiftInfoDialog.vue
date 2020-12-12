@@ -63,14 +63,14 @@
           </q-item>
           <q-item-label header>
             <div v-if="lift.passengers">
-              Menschen
+              Teilnehmer
               <br />
               <small
                 class="text-caption"
                 style="font-size: .7em;"
               >Tippe, um zum jeweiligen Profil zu kommen</small>
               <span class="text-caption float-right">
-                {{ lift.passengers.length + 1 }} / {{ lift.car.allSeats }}
+                {{ lift.passengers.length + 1 }} / {{ lift.car.allSeats + 1 }}
                 <q-icon name="person" size="xs" />
               </span>
 
@@ -161,6 +161,41 @@ val: 'music', icon: 'music_note'
             </div>
           </div>
           <p v-else class="text-center q-mt-sm text-grey-7">Du hast noch keine Mitfahrer</p>
+          <q-expansion-item>
+            <template v-slot:header>
+              <q-item>
+                <q-item-section>
+                  <q-item-label>Optionen</q-item-label>
+                </q-item-section>
+                <q-item-section avatar>
+                  <q-avatar>
+                    <q-icon name="settings" color="dark" />
+                  </q-avatar>
+                </q-item-section>
+              </q-item>
+            </template>
+            <q-card>
+              <q-card-section>
+                <q-btn
+                  :disable="isDriver && !!lift.passengers.length"
+                  color="dark"
+                  outline
+                  @click="leave"
+                >
+                  <q-icon name="logout" color="negative" />
+                  <span class="q-ml-sm" v-if="isDriver">Mitfahrgelegenheit auflösen</span>
+                  <span class="q-ml-sm" v-else>Verlassen</span>
+                  <q-tooltip
+                    anchor="top middle"
+                    style="border-bottom: 1px solid black"
+                    :content-class="`bg-white text-dark`"
+                    self="bottom middle"
+                    :offset="[10, 10]"
+                  >Hinweis: Wenn du noch Mitfahrer hast, dann kannst du als Fahrer nicht einfach so absagen.</q-tooltip>
+                </q-btn>
+              </q-card-section>
+            </q-card>
+          </q-expansion-item>
         </q-list>
       </div>
       <q-dialog v-model="showModelFrame" full-height full-width>
@@ -223,6 +258,10 @@ export default {
       return "https://www.pexels.com/search/" + search;
     },
 
+    areRequestsOnThisLift() {
+      return !!this.$store.getters["auth/user"].liftRequests.length;
+    },
+
     courseStations() {
       var arr = [],
         start = this.lift.start,
@@ -261,6 +300,10 @@ export default {
       }
 
       return arr;
+    },
+
+    isDriver() {
+      return this.lift.driver.id == this.$store.getters["auth/user"].uid;
     }
   },
   methods: {
@@ -298,6 +341,30 @@ export default {
 
     viewUserFromFbId(id) {
       window.location.href = "/#/benutzerinfo?userFbId=" + id;
+    },
+
+    leave() {
+      this.$q
+        .dialog({
+          title: "Verlassen",
+          message: `Willst du diese Mitfahrgelegenheit wirklich ${
+            this.isDriver
+              ? "auflösen?"
+              : "verlassen? Deine Nachrichten bleiben ohne Namensanzeige erhalten."
+          }`,
+          ok: {
+            color: "negative"
+          },
+          cancel: {
+            color: "white"
+          },
+          cancel: true,
+          persistent: true
+        })
+        .onOk(data => {
+          this.$emit("closeAndLeave", this.lift.id);
+        })
+        .onCancel();
     }
   },
 

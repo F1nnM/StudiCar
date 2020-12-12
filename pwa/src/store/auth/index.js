@@ -1,6 +1,26 @@
 import Firebase from 'firebase/app'
 import 'firebase/auth'
-import { SQL_CREATE_USER_IF_NOT_EXISTING, sendApiRequest, SQL_GET_USER_DATA, SQL_UPDATE_DESCRIPTION, SQL_UPDATE_GENDER, SQL_UPDATE_LIFT_MAX_DISTANCE, SQL_UPDATE_PREFS, SQL_ADD_ADDRESS, SQL_REMOVE_ADDRESS, SQL_ADD_CAR, SQL_REMOVE_CAR, SQL_GET_MARKETPLACE, GET_MESSAGES, SQL_SEND_MESSAGE } from '../../ApiAccess'
+import {
+  SQL_CREATE_USER_IF_NOT_EXISTING,
+  sendApiRequest,
+  SQL_GET_USER_DATA,
+  SQL_UPDATE_DESCRIPTION,
+  SQL_UPDATE_GENDER,
+  SQL_UPDATE_LIFT_MAX_DISTANCE,
+  SQL_UPDATE_PREFS,
+  SQL_ADD_ADDRESS,
+  SQL_REMOVE_ADDRESS,
+  SQL_ADD_CAR,
+  SQL_REMOVE_CAR,
+  SQL_GET_MARKETPLACE,
+  GET_MESSAGES,
+  SQL_SEND_MESSAGE,
+  SQL_ADD_LIFT,
+  SQL_LEAVE_LIFT,
+  SQL_GET_LIFT_REQUESTS,
+  SQL_RESPOND_REQUEST,
+  SQL_ADD_LIFT_REQUEST
+} from '../../ApiAccess'
 
 import { Notify } from 'quasar'
 function errorNotify (msg) {
@@ -61,8 +81,16 @@ export default {
       state.user.settings.liftMaxDistance = payload
     },
 
+    UPDATE_LIFT_REQUESTS (state, payload) {
+      state.user.liftRequests = payload
+    },
+
     UPDATE_PREFS (state, payload) {
       state.user.prefs = payload
+    },
+
+    LEAVE_LIFT (state, payload) {
+      state.user.chatLifts = state.user.chatLifts.filter(l => l.id != payload)
     },
 
     SEND_MESSAGE (state, payload) {
@@ -97,21 +125,17 @@ export default {
       state.signinLoaded = payload
     },
 
-    RESPOND_LIFT_REQUEST (state, payload) {
-      var dayShort = payload.dayShort,
-        liftId = payload.liftId,
-        userFbId = payload.user.fbId,
-        requestsOfThatLift = state.user.liftRequests[dayShort][liftId]
-      requestsOfThatLift = requestsOfThatLift.filter(request => request.requestingUser.fbId != userFbId) // sort out user with given fbId
-      state.user.liftRequests[dayShort][liftId] = requestsOfThatLift // if lift is still there, overwrite it
+    ACCEPT_LIFT_REQUEST (state, payload) {
+      var requestedLift = state.user.liftRequests.find(l => l.liftId == payload.liftId)
+      requestedLift.requestingUsers = requestedLift.requestingUsers.filter(u => u.id != payload.user.id)
 
-      if (!state.user.liftRequests[dayShort][liftId].length) {
-        delete state.user.liftRequests[dayShort][liftId]
-        if (!Object.keys(state.user.liftRequests[dayShort]).length) {
-          delete state.user.liftRequests[dayShort]
-        }
-      }
-      if (payload.accepted == true) state.user.chatLifts[liftId].passengers.push(payload.user) // user object is structured like other passengers
+      var chatLift = state.user.chatLifts.find(l => l.id == payload.liftId)
+      chatLift.passengers.push(payload.user)
+    },
+
+    DENY_LIFT_REQUEST (state, payload) {
+      var requestedLift = state.user.liftRequests.find(l => l.liftId == payload.liftId)
+      requestedLiftift.requestingUsers = requestedLift.requestingUsers.filter(u => u.id != payload.userId)
     },
 
     REQUEST_TO_LIFT (state, liftId) {
@@ -202,6 +226,21 @@ export default {
       }, err => callbacks.rej(err))
     },
 
+    async leaveLift ({ commit }, payload) {
+      sendApiRequest(SQL_LEAVE_LIFT, {
+        liftId: payload
+      }, _ => {
+        commit('LEAVE_LIFT', payload)
+      }, err => errorNotify(err))
+    },
+
+    async getLiftRequests ({ commit }, callbacks) {
+      sendApiRequest(SQL_GET_LIFT_REQUESTS, {}, data => {
+        commit('UPDATE_LIFT_REQUESTS', data.requests)
+        callbacks.res()
+      }, err => errorNotify(err))
+    },
+
     async sendMessage ({ commit }, payload) {
       sendApiRequest(
         SQL_SEND_MESSAGE,
@@ -231,6 +270,16 @@ export default {
       )
     },
 
+    async addLift ({ commit }, payload) {
+      sendApiRequest(
+        SQL_ADD_LIFT,
+        { lift: payload },
+        data => {
+          commit('UPDATE_CHAT_LIFTS', data)
+        },
+        error => errorNotify(error)
+      )
+    },
     async removeAddress ({ commit }, payload) {
       sendApiRequest(
         SQL_REMOVE_ADDRESS,
@@ -305,11 +354,35 @@ export default {
     },
 
     async respondLiftRequest ({ commit }, payload) {
-      commit('RESPOND_LIFT_REQUEST', payload)
+      var obj = {
+        liftId: payload.liftId,
+        userId: payload.user.id,
+        accepted: payload.accepted
+      }
+      sendApiRequest(SQL_RESPOND_REQUEST, obj, _ => {
+        if (payload.accepted) {
+          obj = { // re-build object to make local changes
+            liftId: obj.liftId,
+            user: payload.user
+          }
+          commit('ACCEPT_LIFT_REQUEST', obj)
+        }
+        else {
+          obj = {
+            liftId: payload.liftId,
+            userId: payload.user.id
+          }
+          commit('DENY_LIFT_REQUEST', obj)
+        }
+      }, err => errorNotify(err))
     },
 
     async requestToLift ({ commit }, payload) {
-      commit('REQUEST_TO_LIFT', payload)
+      sendApiRequest(SQL_ADD_LIFT_REQUEST, {
+        liftId: payload
+      }, data => {
+        commit('REQUEST_TO_LIFT', payload)
+      }, err => errorNotify(err))
     }
   }
 }

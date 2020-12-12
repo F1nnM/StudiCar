@@ -45,18 +45,17 @@
     </TitleButtonAnchor>
 
     <q-tab-panels animated v-model="liftTab" transition-prev="fade" transition-next="fade">
-      <q-tab-panel name="pending" class="q-px-none">
+      <q-tab-panel name="pending" class="q-pa-none">
         <div v-if="totalRequests" class="row">
           <!-- <p class="text-caption">Du hast Anfragen für die folgenden Mitfahrgelegenheiten:</p> -->
-          <div class="order-last q-ml-md" style="border-left: 6px dotted gray"></div>
-          <div class="col-11">
+          <!-- <div class="order-last q-ml-md" style="border-left: 6px dotted gray"></div> -->
+          <div>
             <q-tab-panels
               swipeable
-              vertical
               animated
               v-model="pendingRequestTab"
-              transition-prev="slide-down"
-              transition-next="slide-up"
+              transition-prev="slide-right"
+              transition-next="slide-left"
               class="text-caption q-pa-none"
             >
               <q-tab-panel
@@ -68,12 +67,20 @@
                 <LiftOfferForRequest
                   :lift="getLiftFromId(lift.liftId)"
                   :numberOfRequests="lift.requestingUsers.length"
+                  @left="switchTab"
+                  @right="switchTab(true)"
                 />
                 <ExtHr color="dark" size="xs" />
-                <div v-if="seatsLeft(lift.liftId) > 0" class="full-width">
+                <div
+                  v-if="!(seatsLeft(lift.liftId) > 0)"
+                  class="text-negative"
+                >Das Auto ist im Moment voll, du kannst keine Angebote annehmen.</div>
+                <div
+                  :class="'full-width ' + (!(seatsLeft(lift.liftId) > 0) ? 'no-pointer-events' : '')"
+                >
                   <span
                     class="text-negative"
-                    v-if="seatsLeft(lift.liftId) > lift.requestingUsers.length"
+                    v-if="canAcceptAllRequests(lift)"
                   >Achtung: Du hast mehr Anfragen als noch Plätze frei sind!</span>
                   <q-slide-item
                     left-color="white"
@@ -107,10 +114,6 @@
                     </div>
                   </q-slide-item>
                 </div>
-                <div
-                  v-else
-                  class="text-negative"
-                >Das Auto ist voll, du kannst keine Angebote mehr annehmen.</div>
               </q-tab-panel>
             </q-tab-panels>
           </div>
@@ -121,23 +124,37 @@
       </q-tab-panel>
 
       <q-tab-panel name="current" class="q-pa-none">
-        <q-list>
+        <q-list class="q-pb-sm">
           <ChatItem
             v-for="(m, index) in lastMessages"
-            :key="m.timestamp"
+            :key="m.timestamp + Math.random() + ''"
             :message="m"
             :sentByName="getNameFromId(m.liftId, m.sentBy)"
             :firstItem="index == 0"
-            @left="onLeft"
-            @right="onRight"
             @open="openTheLift"
             @shortLiftInfo="openShortLiftInfo"
           />
+        </q-list>
+        <q-item-label header>Fahrten ohne Nachrichten</q-item-label>
+        <q-list class="row justify-evenly">
+          <q-item
+            clickable
+            @click="openTheLift(m.liftId)"
+            class="col-5"
+            v-for="(m) in withoutMessages"
+            :key="m.timestamp + Math.random() + ''"
+          >
+            <q-item-section>
+              <q-item-label>{{ m.start }} > {{ m.destination }}</q-item-label>
+              <q-item-label>In {{ m.daysLeft }} Tagen</q-item-label>
+            </q-item-section>
+          </q-item>
         </q-list>
         <LiftPopup
           @shortLiftInfo="openShortLiftInfo"
           v-model="chatPopup.isOpen"
           :lift="chatPopup.data"
+          @closeAndLeave="leave"
         />
         <QrGen
           position="bottom"
@@ -182,7 +199,6 @@ export default {
   data() {
     return {
       ownId: this.$store.getters["auth/user"].uid,
-      lifts: this.$store.getters["auth/user"].chatLifts,
       alreadyTappedOnItem: false,
       liftTab: "current",
       pendingRequestTab: 0,
@@ -194,7 +210,6 @@ export default {
         isOpen: false,
         data: null
       },
-      liftRequests: this.$store.getters["auth/user"].liftRequests,
       liftRequestDayTab: null,
       liftRequestTimeTab: null
     };
@@ -206,24 +221,63 @@ export default {
         // if previous selected lift isn't present at that day, select first lift of that day
         this.liftRequestTimeTab = Object.keys(this.liftRequests[newDay])[0];
       }
+    },
+    liftTab: function(newTab) {
+      if (newTab == "current") this.pendingRequestTab = 0;
     }
   },
 
   computed: {
+    lifts() {
+      return this.$store.getters["auth/user"].chatLifts;
+    },
+    liftRequests() {
+      return this.$store.getters["auth/user"].liftRequests;
+    },
     lastMessages() {
       var returnedArray = [];
       var lifts = JSON.parse(JSON.stringify(this.lifts));
       lifts.forEach((lift, index) => {
-        var lastMessage = lift.messages[lift.messages.length - 1];
-        returnedArray.push({
-          liftId: lift.id,
-          start: lift.start.name,
-          destination: lift.destination.name,
-          sentBy: /* this.getPassengerNameFromId(lift, */ lastMessage.sentBy,
-          type: lastMessage.type,
-          content: lastMessage.content,
-          timestamp: lastMessage.timestamp
-        });
+        if (
+          lift.messages.length > 0 &&
+          lift.messages[lift.messages.length - 1].content
+        ) {
+          var lastMessage = lift.messages[lift.messages.length - 1];
+          returnedArray.push({
+            liftId: lift.id,
+            start: lift.start.name,
+            destination: lift.destination.name,
+            sentBy: lastMessage.sentBy,
+            type: lastMessage.type,
+            content: lastMessage.content,
+            timestamp: lastMessage.timestamp
+          });
+        }
+      });
+      returnedArray.sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      ); // sort descending, so swap compared values
+
+      return returnedArray;
+    },
+
+    withoutMessages() {
+      var returnedArray = [];
+      var lifts = JSON.parse(JSON.stringify(this.lifts));
+      lifts.forEach((lift, index) => {
+        var hasMessageButNoContent = lift.messages.length
+          ? !lift.messages[lift.messages.length - 1].content
+          : true;
+        if (lift.messages.length == 0 || hasMessageButNoContent) {
+          returnedArray.push({
+            liftId: lift.id,
+            start: lift.start.name,
+            destination: lift.destination.name,
+            daysLeft: date.getDateDiff(new Date(lift.date), new Date(), "days"),
+            timestamp: new Date()
+          });
+        }
       });
       returnedArray.sort(
         (a, b) =>
@@ -281,22 +335,23 @@ export default {
 
   methods: {
     async refreshContent(res, rej) {
-      this.$store.dispatch("auth/reloadChatLifts", {
+      var method =
+        this.liftTab == "current" ? "reloadChatLifts" : "getLiftRequests";
+      this.$store.dispatch("auth/" + method, {
         res: res,
         rej: rej
       });
     },
 
-    onLeft({ reset }) {
-      //alert("SWIPED LEFT")
-
-      this.finalize(reset);
-    },
-
-    onRight({ reset }) {
-      //alert("SWIPED RIGHT")
-
-      this.finalize(reset);
+    switchTab(right) {
+      var a = this.pendingRequestTab,
+        max = this.liftRequests.length - 1,
+        min = 0;
+      if (right) {
+        if (a < max) this.pendingRequestTab++;
+      } else {
+        if (a > min) this.pendingRequestTab--;
+      }
     },
 
     getNameFromId(liftId, userId) {
@@ -304,7 +359,18 @@ export default {
       var people = [];
       lift.passengers.forEach(item => people.push(item));
       people.push(JSON.parse(JSON.stringify(lift.driver)));
-      return people.find(p => p.id == userId).name;
+      if (userId == -1) {
+        // no messages there yet
+        return "[SYSTEM]";
+      } else {
+        var a = people.find(p => p.id == userId);
+        if (!a) return "[Ehemalig]";
+        else return a.name;
+      }
+    },
+
+    canAcceptAllRequests(lift) {
+      return this.seatsLeft(lift.liftId) > lift.requestingUsers.length;
     },
 
     getPassengerNameFromId(lift, userId) {
@@ -313,8 +379,9 @@ export default {
       var people = {};
       lift.passengers.forEach(p => (people[p.id] = p.name));
       people[lift.driver.id] = lift.driver.name;
-      var a = people[userId].name;
-      return a;
+      var a = people[userId];
+      if (!a) return "[Ehemalig]";
+      else return a.name;
     },
 
     getLiftFromId(liftId) {
@@ -382,9 +449,13 @@ export default {
     },
 
     respondLiftRequest(eventObj) {
-      // here comes dispatching code then
-      eventObj.dayShort = this.liftRequestDayTab; // add missing information to object
       this.$store.dispatch("auth/respondLiftRequest", eventObj);
+    },
+
+    leave(liftId) {
+      this.chatPopup.data = null;
+      this.chatPopup.isOpen = false;
+      this.$store.dispatch("auth/leaveLift", liftId);
     }
   },
 

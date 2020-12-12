@@ -148,12 +148,14 @@ export default {
         }
         // here an additional option will be dynamically generated in mounted()
       ],
-      allOffers: this.$store.getters["auth/user"].marketplaceOffers,
       offerIndexToRefresh: 1
     };
   },
 
   computed: {
+    allOffers() {
+      return this.$store.getters["auth/user"].marketplaceOffers;
+    },
     title() {
       var greeting = this.$store.state.greeting;
       var name = this.$store.getters["auth/user"].name.split(" ")[0];
@@ -197,7 +199,7 @@ export default {
     },
 
     getFilteredAndSortedOffers() {
-      var offers = this.allOffers;
+      var offers = JSON.parse(JSON.stringify(this.allOffers));
 
       // filter code
       if (this.filter.length) {

@@ -18,7 +18,11 @@ function isOptionMissing (data, needed, res) {
 }
 
 async function getUserId (fbId) {
-  return (await runQuery("SELECT ID FROM `users` WHERE users.FB_ID = ?", [fbId])).result[0].ID;
+  return (await runQuery("SELECT ID FROM users WHERE FB_ID = ?", [fbId])).result[0].ID;
+}
+
+async function getLiftId (liftUuid) {
+  return (await runQuery("SELECT ID FROM lift WHERE UUID = ?", [liftUuid])).result[0].ID;
 }
 
 function generateJdenticon (seed) {
@@ -69,7 +73,7 @@ function catchall (err, res, endpoint) {
 }
 
 async function getChatLifts (uid) {
-  //TODO make query return Nickname if the querying user is offering the lift. Maybe https://stackoverflow.com/questions/1747750/select-column-if-blank-select-from-another
+  // TODO make query return Nickname if the querying user is offering the lift. Maybe https://stackoverflow.com/questions/1747750/select-column-if-blank-select-from-another
   var lift_data = (await runQuery(`
   WITH
 	lifts as (
@@ -171,10 +175,10 @@ async function getChatLifts (uid) {
               )
               member_list 
               ON member_list.LIFT_ID = lift_map.LIFT_ID 
-          JOIN
+          LEFT JOIN
               messages 
               ON lift_map.LIFT_ID = messages.LIFT_ID 
-          JOIN
+          LEFT JOIN
               users msg_user 
               ON messages.FROM_USER_ID = msg_user.ID 
         WHERE
@@ -321,12 +325,25 @@ async function getLiftRequests (uid) {
       me.FB_ID = ?
       GROUP BY
       my_lifts.LIFT_ID
-  )
-  UNION
-  (SELECT "[]")
-  LIMIT 1;
-  `, [uid])).result[0].JSON
-  return db_requests;
+  );
+  `, [uid])).result
+  var arr = [], liftsSaved = []
+  db_requests.forEach(r => {
+    var a = JSON.parse(r['JSON'])
+    if (a.length > 1) { // more requests, have to merge them
+      var b = {}
+      a.forEach((s, index) => {
+        if (index == 0) b = s
+        else b.requestingUsers.push(s.requestingUsers[0]) // always only one user request in there
+      })
+      arr.push(b)
+    }
+    else {
+      arr.push(a[0])
+    }
+  })
+
+  return JSON.stringify(arr);
 }
 
 async function getMarketplace (uuidOnly) {
@@ -747,7 +764,9 @@ module.exports = {
     },
     '/getMessages': async (req, res, options) => {
       if (isUserVerified(options.secretFbId)) {
-        endWithJSON(res, await getChatLifts(options.secretFbId))
+        var a = await getChatLifts(options.secretFbId)
+
+        endWithJSON(res, a)
       }
     },
     '/getLegal': async (req, res, options) => {
@@ -948,14 +967,16 @@ module.exports = {
     },
     '/liftRequests': async (req, res, options) => {
       if (isUserVerified(options.secretFbId)) {
-        endWithJSON(res, await getLiftRequests(secretFbId));
+        endWithJSON(res, JSON.stringify({
+          requests: JSON.parse(await getLiftRequests(options.secretFbId))
+        }));
       }
     }
   },
   'POST': {
     '/createUserIfNotExisting': async (req, res, options) => {
       if (!isOptionMissing(options, ['name', 'surname', 'mail'], res)) {
-        let users = (await runQuery("SELECT ID FROM `users` WHERE users.FB_ID = ?", [options.secretFbId])).result[0];
+        let users = await getUserId(options.secretFbId)
         if (!users) {
           let png = generateJdenticon(options.name);
           await runQuery(
@@ -1029,10 +1050,29 @@ module.exports = {
         res.end();
       }
     },
+    '/addLiftRequest': async (req, res, options) => {
+      if (!isOptionMissing(options, ['liftId'], res) && isUserVerified(options.secretFbId)) {
+        var userId = await getUserId(options.secretFbId),
+          liftId = await getLiftId(options.liftId)
+        await runQuery('INSERT INTO lift_map (USER_ID, LIFT_ID) VALUES (?, ?)', [userId, liftId]).catch(err =>
+          catchall(err, res, 'addLiftRequest'))
+        res.end();
+      }
+    },
+    '/respondRequest': async (req, res, options) => {
+      if (!isOptionMissing(options, ['accepted', 'liftId', 'userId'], res) && isUserVerified(options.secretFbId)) {
+        var requestingUserId = await getUserId(options.userId),
+          accepted = options.accepted,
+          liftId = await getLiftId(options.liftId)
+        if (accepted) await runQuery('UPDATE lift_map SET PENDING = 0 WHERE LIFT_ID = ? AND USER_ID = ?', [liftId, requestingUserId])
+        else await runQuery('DELETE FROM lift_map WHERE LIFT_ID = ? AND USER_ID = ?', [liftId, requestingUserId])
+        res.end();
+      }
+    },
     '/addAddress': async (req, res, options) => {
       if (!isOptionMissing(options, ['address'], res) && isUserVerified(options.secretFbId)) {
-        var userId = (await runQuery('SELECT ID FROM users WHERE FB_ID = ?', [options.secretFbId])).result[0].ID,
-          a = options.address
+        var userId = await getUserId(options.secretFbId)
+        a = options.address
         await runQuery(
           "INSERT INTO `addresses` (`ID`, `NICKNAME`, `POSTCODE`, `CITY`, `NUMBER`, `STREET`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, ?);", [a.nickname || '', a.postcode, a.city, a.number, a.street, userId]).catch(err => {
             catchall(err, res, 'addAddress')
@@ -1085,32 +1125,44 @@ module.exports = {
     },
     '/addLift': async (req, res, options) => {
       if (!isOptionMissing(options, ['lift'], res) && isUserVerified(options.secretFbId)) {
-        var lift = options.lift
-        var userId = options.id
+        var lift = options.lift,
+          isdepartAt = lift.departAt,
+          userId = await getUserId(options.secretFbId)
 
         await runQuery(
-          "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `START`, `DESTINATION`, `UUID`, `REPEATS_ON_WEEKDAY`, `FIRST_DATE`, `DEPART_AT`, `ARRIVE_BY`,) VALUES (current_timestamp(), ?, ?, ?, ?, UUID_SSHORT(), ?, ? ,?, ?)", [lift.seats, lift.carId, userId, lift.startAddressId, lift.destinationAddressId, lift.repeats ? lift.weekday : 0, lift.firstDate, lift.departAt, lift.arriveBy]).catch(error => {
+          "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `START`, `DESTINATION`, `UUID`, `REPEATS_ON_WEEKDAY`, `FIRST_DATE`, `DEPART_AT`, `ARRIVE_BY`) VALUES (current_timestamp(), ?, ?, ?, ?, UUID_SHORT(), ?, ? ,?, ?)",
+          [lift.seats, lift.carId, lift.startAddressId, lift.destinationAddressId, lift.repeats ? lift.weekday : 0, lift.datestamp, isdepartAt ? lift.timestamp : '', isdepartAt ? '' : lift.timestamp]).catch(error => {
             throw error;
           })
-        let insertedResult = await runQuery(
-          "SELECT MAX(ID) FROM `lift`", []).catch(error => {
+        var insertedResult = (await runQuery(
+          "SELECT MAX(ID) AS ID, UUID FROM lift WHERE CAR_ID = ? AND START = ?", [lift.carId, lift.startAddressId]).catch(error => {
             throw error;
-          })
-        let newLiftId = insertedResult.result[0]['MAX(ID)']
+          })).result[0]
+        var newLiftId = insertedResult.ID
         await runQuery(
           "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`, `PENDING`) VALUES (?, ?, 1, 0)", [newLiftId, userId]).catch(error => {
             throw error;
           })
 
+        /* INSERT INTO `messages` (`ID`, `UUID`, `CONTENT`, `AUDIO`, `PICTURE`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (NULL, '6516515156313513', 'Hallo! Schön, dass ihr da seid!', NULL, NULL, '1', '1', current_timestamp()) */
 
-        res.end();
+        endWithJSON(res, await getChatLifts(options.secretFbId))
+      }
+    },
+    '/leaveLift': async (req, res, options) => {
+      if (!isOptionMissing(options, ['liftId', 'destroy'], res) && isUserVerified(options.secretFbId)) {
+        var liftId = await getLiftId(options.liftId)
+        userId = await getUserId(options.secretFbId)
+        await runQuery('DELETE FROM lift_map WHERE LIFT_ID = ? AND USER_ID = ?', [liftId, userId])
+
+        res.end()
       }
     },
     '/sendMessage': async (req, res, options) => {
       if (!isOptionMissing(options, ['message'], res) && isUserVerified(options.secretFbId)) {
         var message = options.message
         var userId = await getUserId(options.secretFbId),
-          liftId = (await runQuery('SELECT ID FROM lift WHERE UUID = ?', [message.liftId])).result[0].ID
+          liftId = await getLiftId(options.message.liftId)
         if (message.content) {
 
           switch (message.type) {
@@ -1120,7 +1172,7 @@ module.exports = {
               })
               break
             case 2: // audio blob
-              var blob = await (await fetch(dataURI)).blob();
+              var blob = Buffer.from(message.content)
               await runQuery("INSERT INTO `messages` (`UUID`, `AUDIO`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, ?, ?, current_timestamp())", [blob, userId, liftId]).catch(error => {
                 throw error
               })

@@ -45,11 +45,11 @@
       </q-item>
 
       <q-card>
-        <q-card-section>
-          <q-item>
+        <q-card-section class="q-px-sm q-py-xs">
+          <q-item dense>
             <q-item-section>
               <q-item-label>Kurzbeschreibung</q-item-label>
-              <q-item-label caption>{{ requestingUser.bio }}</q-item-label>
+              <q-item-label caption>{{ requestingUser.bio || '- keine Beschreibung eingestellt -' }}</q-item-label>
             </q-item-section>
             <q-item-section side>
               <q-btn

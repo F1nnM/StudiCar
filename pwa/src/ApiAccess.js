@@ -180,6 +180,21 @@ export const SQL_ADD_LIFT = {
   method: "POST"
 }
 
+export const SQL_LEAVE_LIFT = {
+  path: "/leaveLift",
+  method: "POST"
+}
+
+export const SQL_ADD_LIFT_REQUEST = {
+  path: "/addLiftRequest",
+  method: "POST"
+}
+
+export const SQL_RESPOND_REQUEST = {
+  path: "/respondRequest",
+  method: "POST"
+}
+
 export const SQL_SEND_MESSAGE = {
   path: "/sendMessage",
   method: "POST"

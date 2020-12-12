@@ -12,37 +12,46 @@
       >
         <q-layout v-if="lift" view="hHh lpR fFr" class="bg-white q-pa-none">
           <q-header reveal elevated class="bg-primary text-white">
-            <div class="row">
-              <div class="col-10 bg-primary">
-                <q-toolbar class="q-pr-xs">
-                  <q-toolbar-title>
-                    <q-item dense class="q-px-none" clickable @click="infoDrawerOpen = true">
-                      <q-item-section class="text-white">
-                        <q-item-label class="row no-wrap">
-                          <div class="col-auto text-h6 text-weight-light ellipsis">
-                            {{ lift.start.name }}
-                            <span class="q-mx-sm">&rsaquo;</span>
-                            {{ lift.destination.name }}
-                          </div>
-                        </q-item-label>
-                        <q-slide-transition>
-                          <q-item-label v-if="!infoDrawerOpen" caption class="q-mt-none">
-                            <q-tab-panels
-                              class="q-pa-none bg-primary q-mb-xs text-grey-3 text-weight-thin"
-                              v-model="showMembersInTitle"
-                              animated
-                              transition-next="fade"
-                              transition-prev="fade"
-                            >
-                              <q-tab-panel :name="true" class="q-pa-none row justify-between">
-                                <div v-if="lift.passengers.length">
-                                  <span
-                                    v-for="(p, index) in lift.passengers"
-                                    :key="p.fbId"
-                                  >{{ index > 0 ? ', ' : '' }}{{ p.name }}</span>
-                                </div>
-                                <div v-else>- noch keine Mitfahrer -</div>
-                                <!--  <q-btn
+            <q-pull-to-refresh @refresh="reloadMessages">
+              <div class="row">
+                <div class="col-10 bg-primary">
+                  <q-toolbar class="q-pr-xs">
+                    <q-toolbar-title>
+                      <q-item dense class="q-px-none" clickable @click="infoDrawerOpen = true">
+                        <q-item-section class="text-white">
+                          <q-item-label class="row no-wrap">
+                            <div class="col-auto text-h6 text-weight-light ellipsis">
+                              {{ lift.start.name }}
+                              <span class="q-mx-sm">&rsaquo;</span>
+                              {{ lift.destination.name }}
+                            </div>
+                          </q-item-label>
+                          <q-slide-transition>
+                            <q-item-label v-if="!infoDrawerOpen" caption class="q-mt-none">
+                              <q-tab-panels
+                                class="q-pa-none bg-primary q-mb-xs text-grey-3 text-weight-thin"
+                                v-model="showMembersInTitle"
+                                animated
+                                transition-next="fade"
+                                transition-prev="fade"
+                              >
+                                <q-tab-panel :name="true" class="q-pa-none row justify-between">
+                                  <div>
+                                    <span>
+                                      Du
+                                      <span v-if="isDriver">
+                                        (
+                                        <q-icon size="1.3em" name="directions_car" />)
+                                      </span>
+                                    </span>
+                                    <span v-if="allMembersOfLift.length">
+                                      <span v-for="(p) in allMembersOfLift" :key="p.fbId">
+                                        <span v-if="p.id != myFbId">{{ ', ' }}{{ p.name }}</span>
+                                      </span>
+                                    </span>
+                                    <span v-else>keine Mitfahrer</span>
+                                  </div>
+                                  <!--  <q-btn
                                 @click="searchDialogOpen = true"
                                 icon="search"
                                 disable
@@ -52,38 +61,44 @@
                                 size="sm"
                                 color="white"
                                 dense
-                                />-->
-                                <!-- <q-btn flat round dense icon="search" /> -->
-                              </q-tab-panel>
-                              <q-tab-panel :name="false" class="q-pa-none">Tippe für Info</q-tab-panel>
-                            </q-tab-panels>
-                          </q-item-label>
-                        </q-slide-transition>
-                      </q-item-section>
-                    </q-item>
-                  </q-toolbar-title>
-                </q-toolbar>
+                                  />-->
+                                  <!-- <q-btn flat round dense icon="search" /> -->
+                                </q-tab-panel>
+                                <q-tab-panel :name="false" class="q-pa-none">Tippe für Info</q-tab-panel>
+                              </q-tab-panels>
+                            </q-item-label>
+                          </q-slide-transition>
+                        </q-item-section>
+                      </q-item>
+                    </q-toolbar-title>
+                  </q-toolbar>
+                </div>
+                <div class="col-2 bg-white text-primary">
+                  <q-toolbar>
+                    <q-toolbar-title>
+                      <q-btn
+                        v-ripple
+                        class="self-center"
+                        icon="close"
+                        flat
+                        round
+                        dense
+                        @click="emit(false)"
+                      />
+                    </q-toolbar-title>
+                  </q-toolbar>
+                </div>
               </div>
-              <div class="col-2 bg-white text-primary">
-                <q-toolbar>
-                  <q-toolbar-title>
-                    <q-btn
-                      v-ripple
-                      class="self-center"
-                      icon="close"
-                      flat
-                      round
-                      dense
-                      @click="emit(false)"
-                    />
-                  </q-toolbar-title>
-                </q-toolbar>
-              </div>
-            </div>
+            </q-pull-to-refresh>
           </q-header>
 
           <q-page-container>
-            <LiftInfoDialog v-model="infoDrawerOpen" @input="infoDrawerOpen = false" :lift="lift" />
+            <LiftInfoDialog
+              @closeAndLeave="closeAndLeave"
+              v-model="infoDrawerOpen"
+              @input="infoDrawerOpen = false"
+              :lift="lift"
+            />
             <q-tab-panels
               v-model="infoDrawerOpen"
               animated
@@ -307,7 +322,6 @@
                     color="dark"
                     icon="notes"
                     @click="showQuickMessages = !showQuickMessages"
-                    v-touch-hold.mouse="reloadMessages"
                   />
                   <q-toolbar-title class="footer-toolbar-title-border">
                     <q-tab-panels
@@ -486,6 +500,18 @@ export default {
       return !this.messageText || this.messageText.slice(-1) == "@";
     },
 
+    myFbId() {
+      return this.$store.getters["auth/user"].uid;
+    },
+
+    isDriver() {
+      return this.lift.driver.id == this.myFbId;
+    },
+
+    allMembersOfLift() {
+      return this.lift.passengers.concat(this.lift.driver);
+    },
+
     emojis() {
       var stringArray = this.$store.state.emojis;
       //   betterArray = [];
@@ -541,6 +567,14 @@ export default {
           "blue-grey-10"
         ] // dark/colorful selection
       };
+    },
+
+    passengersAndDriverNames() {
+      var people = {};
+      this.lift.passengers.forEach(item => (people[item.id] = item.name));
+      var d = JSON.parse(JSON.stringify(this.lift.driver));
+      people[d.id] = d.name;
+      return people;
     }
   },
 
@@ -570,14 +604,22 @@ export default {
     },
 
     getNameFromId(userId) {
-      var people = [];
-      this.lift.passengers.forEach(item => people.push(item));
-      people.push(JSON.parse(JSON.stringify(this.lift.driver)));
-      return people.find(p => p.id == userId).name;
+      if (!userId) {
+        return "[SYSTEM]";
+      } else {
+        var name = this.passengersAndDriverNames[userId];
+        if (!name) return "[Ehemalig]";
+        else return name;
+      }
     },
 
     emit(val) {
       this.$emit("input", val);
+    },
+
+    closeAndLeave(event) {
+      this.infoDrawerOpen = false;
+      this.$emit("closeAndLeave", event);
     },
 
     emitShortLiftInfo() {
@@ -716,18 +758,16 @@ export default {
             reader.onloadend = _ => {
               msgObj.content = reader.result;
 
-              alert(reader.result);
               res();
             };
           });
           break;
       }
 
-      await this.$store.dispatch("auth/sendMessage", msgObj);
+      this.$store.dispatch("auth/sendMessage", msgObj);
       this.scrollToEnd(100);
 
       this.messageText = "";
-      setTimeout(() => window.scrollTo(0, 1000000), 100);
     },
 
     viewUserFromFbId(fbId) {
@@ -755,14 +795,13 @@ export default {
         })
         .catch(e => alert("Fehler beim Kopieren: " + e));
     },
-    reloadMessages() {
-      alert("got newest");
-
-      /* sendApiRequest({
-        path: 'getNewestMessages',
-        method: 'GET'
-      }, data => {
-      }) */
+    async reloadMessages(done) {
+      await this.$store.dispatch("auth/reloadChatLifts", {
+        res: done,
+        rej: _ => {
+          alert("Fehler");
+        }
+      });
     }
   },
 

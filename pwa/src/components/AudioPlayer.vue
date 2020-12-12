@@ -44,7 +44,7 @@ export default {
       audio: null,
       metaLoaded: false,
       current: 0,
-      duration: 0.1, // not to divide by zero
+      duration: 0.1 // not to divide by zero
     };
   },
   // model: {
@@ -54,8 +54,8 @@ export default {
   props: {
     src: {
       type: String,
-      required: true,
-    },
+      required: true
+    }
   },
   computed: {
     progress: {
@@ -65,9 +65,9 @@ export default {
       set(val) {
         if (this.audioReady) {
           var newPos = Math.floor(val * this.duration);
-          this.audio.currentTime = newPos != Infinity ? newPos : 1;
+          // this.audio.currentTime = newPos != Infinity ? newPos : 1;
         }
-      },
+      }
     },
 
     progressLabel() {
@@ -90,7 +90,7 @@ export default {
 
     isError() {
       return this.loadingError;
-    },
+    }
   },
   methods: {
     togglePlayPause() {
@@ -110,23 +110,23 @@ export default {
         this.current = a.currentTime;
         this.duration = a.duration;
       }
-    },
+    }
   },
 
   mounted() {
     var a = this.$refs.audio;
     this.audio = a;
-    a.onended = (_) => this.ended();
-    a.onerror = (_) => (this.error = true);
-    a.ontimeupdate = (_) => this.update();
+    a.onended = _ => this.ended();
+    a.onerror = _ => (this.error = true);
+    a.ontimeupdate = _ => this.update();
     a.currentTime = 10000;
     a.load();
     this.duration = a.duration;
     a.currentTime = 0;
-    a.onloadedmetadata = (_) =>
-      setTimeout((_) => {
+    a.onloadedmetadata = _ =>
+      setTimeout(_ => {
         this.metaLoaded = true;
       }, 200);
-  },
+  }
 };
 </script>
