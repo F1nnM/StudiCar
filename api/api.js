@@ -1,4 +1,3 @@
-const { off } = require('process');
 var runQuery = require('./db'),
   fs = require('fs')
 const newsPath = 'news/postillon/ticker.txt',
@@ -51,24 +50,18 @@ function blobToBase64 (blob) {
   }
 }
 
-function catchall (err, res, endpoint) {
-  isConstraintErr = _ => err.code == 'ER_ROW_IS_REFERENCED_2'
-
-  switch (endpoint) {
-    case 'removeCar': // cannot delete car
-
-      break
-    case 'getLegal':
-      console.log(err)
-      break
-    case 'removeAddress':
-
-      break
-    default: {
-    }
-  }
+async function catchall (err, res, endpoint) {
   console.log(`ERROR AT CALLING ${endpoint} : ${err}`)
-  if (isConstraintErr()) res.writeHead(424)
+
+  switch (err.code) {
+    case 'ER_ROW_IS_REFERENCED_2': res.writeHead(424) // constraint violated
+      break
+    case 'ER_DUP_ENTRY':
+      res.writeHead(409) // primary key violated
+      break
+    default:
+      res.writeHead(400) // not more specified
+  }
   res.end()
 }
 
@@ -408,7 +401,8 @@ async function getMarketplace (uuidOnly) {
   SELECT
     JSON_ARRAYAGG(
         JSON_OBJECT(
-            'id', lifts.ID,
+            'id', lifts.UUID,
+            'liftId', lifts.ID,
               'driver', JSON_OBJECT(
                 'id', lifts.DRIVER_FB_ID,
                 'name', lifts.DRIVER_NAME,
@@ -1054,9 +1048,12 @@ module.exports = {
       if (!isOptionMissing(options, ['liftId'], res) && isUserVerified(options.secretFbId)) {
         var userId = await getUserId(options.secretFbId),
           liftId = await getLiftId(options.liftId)
-        await runQuery('INSERT INTO lift_map (USER_ID, LIFT_ID) VALUES (?, ?)', [userId, liftId]).catch(err =>
-          catchall(err, res, 'addLiftRequest'))
-        res.end();
+        runQuery('INSERT INTO lift_map (USER_ID, LIFT_ID) VALUES (?, ?)', [userId, liftId])
+          .then(_ => {
+            console.log('then end')
+            res.end()
+          })
+          .catch(err => catchall(err, res, 'addLiftRequest'))
       }
     },
     '/respondRequest': async (req, res, options) => {
@@ -1150,7 +1147,7 @@ module.exports = {
       }
     },
     '/leaveLift': async (req, res, options) => {
-      if (!isOptionMissing(options, ['liftId', 'destroy'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['liftId'], res) && isUserVerified(options.secretFbId)) {
         var liftId = await getLiftId(options.liftId)
         userId = await getUserId(options.secretFbId)
         await runQuery('DELETE FROM lift_map WHERE LIFT_ID = ? AND USER_ID = ?', [liftId, userId])

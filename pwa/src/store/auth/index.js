@@ -139,7 +139,7 @@ export default {
     },
 
     REQUEST_TO_LIFT (state, liftId) {
-      state.user.marketplaceOffers.find(offer => offer.id == liftId).requested = true
+      state.user.marketplaceOffers.filter(offer => offer.id == liftId)
     }
   },
 
@@ -382,7 +382,9 @@ export default {
         liftId: payload
       }, data => {
         commit('REQUEST_TO_LIFT', payload)
-      }, err => errorNotify(err))
+      }, err => {
+        errorNotify('Konnte Anfrage nicht einstellen, möglicherweise hast du schon angefragt.')
+      })
     }
   }
 }

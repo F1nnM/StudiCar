@@ -585,6 +585,7 @@ export default {
         };
         this.step = 1;
         this.uploading = 2;
+        history.go(-1);
       });
     },
 

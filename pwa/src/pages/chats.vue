@@ -136,16 +136,17 @@
           />
         </q-list>
         <q-item-label header>Fahrten ohne Nachrichten</q-item-label>
-        <q-list class="row justify-evenly">
+        <q-list>
           <q-item
             clickable
             @click="openTheLift(m.liftId)"
-            class="col-5"
             v-for="(m) in withoutMessages"
             :key="m.timestamp + Math.random() + ''"
           >
             <q-item-section>
               <q-item-label>{{ m.start }} > {{ m.destination }}</q-item-label>
+            </q-item-section>
+            <q-item-section side>
               <q-item-label>In {{ m.daysLeft }} Tagen</q-item-label>
             </q-item-section>
           </q-item>
@@ -279,10 +280,7 @@ export default {
           });
         }
       });
-      returnedArray.sort(
-        (a, b) =>
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      ); // sort descending, so swap compared values
+      returnedArray.sort((a, b) => a.daysLeft - b.daysLeft);
 
       return returnedArray;
     },

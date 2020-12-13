@@ -642,49 +642,52 @@ export default {
     },
 
     checkDayBreak(messageItem) {
-      // when a parameter is given, return true or false. When no parameter is given, returns the text of the label
-      // currently function is always called with a parameter given
-      var messages = this.lift.messages,
-        pos = this.lift.messages.indexOf(messageItem),
-        label = false;
+      var messages = this.lift.messages;
+      if (!messages[0]) return false;
+      else {
+        // when a parameter is given, return true or false. When no parameter is given, returns the text of the label
+        // currently function is always called with a parameter given
+        var pos = this.lift.messages.indexOf(messageItem),
+          label = false;
 
-      if (!this.open) return;
+        if (!this.open) return;
 
-      var messageDate = new Date(messageItem.timestamp);
+        var messageDate = new Date(messageItem.timestamp);
 
-      if (pos > 0) {
-        var preceder = messages[pos - 1], // preceder is the older message
-          precederDate = new Date(preceder.timestamp);
+        if (pos > 0) {
+          var preceder = messages[pos - 1], // preceder is the older message
+            precederDate = new Date(preceder.timestamp);
 
-        var sameDay = date.isSameDate(messageDate, precederDate, "day"); // always newest time first at this function
-        var sameMonth = date.isSameDate(messageDate, precederDate, "month");
-      } else if (pos == 0) {
-        // though check timestamp of message
-        var sameDay = date.isSameDate(messageDate, new Date(), "day");
-        var sameMonth = date.isSameDate(messageDate, new Date(), "month");
-      }
-
-      var diff = date.getDateDiff(new Date(), messageDate, "days");
-
-      // if you have the order the other way round (newest on top of list and oldest on bottom), then just swap the two params
-
-      if (!sameDay) {
-        // checks whether the item and its preceder are not the same day (and not the same month)
-        switch (diff) {
-          case 0:
-            label = "Heute";
-            break;
-          case 1:
-            label = "Gestern";
-            break;
-          case 3:
-            label = "Vorgestern";
-            break;
-          default:
-            label = date.formatDate(messageDate, "DD.MM.YYYY");
+          var sameDay = date.isSameDate(messageDate, precederDate, "day"); // always newest time first at this function
+          var sameMonth = date.isSameDate(messageDate, precederDate, "month");
+        } else if (pos == 0) {
+          // though check timestamp of message
+          var sameDay = date.isSameDate(messageDate, new Date(), "day");
+          var sameMonth = date.isSameDate(messageDate, new Date(), "month");
         }
+
+        var diff = date.getDateDiff(new Date(), messageDate, "days");
+
+        // if you have the order the other way round (newest on top of list and oldest on bottom), then just swap the two params
+
+        if (!sameDay) {
+          // checks whether the item and its preceder are not the same day (and not the same month)
+          switch (diff) {
+            case 0:
+              label = "Heute";
+              break;
+            case 1:
+              label = "Gestern";
+              break;
+            case 3:
+              label = "Vorgestern";
+              break;
+            default:
+              label = date.formatDate(messageDate, "DD.MM.YYYY");
+          }
+        }
+        return label;
       }
-      return label;
     },
 
     formatAsTime(dateString) {
