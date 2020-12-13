@@ -17,7 +17,8 @@ function isOptionMissing (data, needed, res) {
 }
 
 async function getUserId (fbId) {
-  return (await runQuery("SELECT ID FROM users WHERE FB_ID = ?", [fbId])).result[0].ID;
+  let result = (await runQuery("SELECT ID FROM users WHERE FB_ID = ?", [fbId])).result[0]
+  return result ? result.ID : null;
 }
 
 async function getLiftId (liftUuid) {
@@ -339,7 +340,7 @@ async function getLiftRequests (uid) {
   return JSON.stringify(arr);
 }
 
-async function getMarketplace (uuidOnly) {
+async function getMarketplace (fbid, uuidOnly) {
   let JSON = (await runQuery(`
   WITH
   lifts as (
@@ -355,9 +356,9 @@ async function getMarketplace (uuidOnly) {
           driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
           lift.DEPART_AT AS LIFT_DEPART,
           lift.ARRIVE_BY AS LIFT_ARRIVE,
-          destination.CITY AS DESTINATION_CITY,
+          (IF(destination.ID <= 3, destination.NICKNAME, destination.CITY)) AS DESTINATION_CITY,
       	  (IF(destination.ID <= 3, destination.ID, -1)) AS DESTINATION_ID,
-          start_point.CITY AS START_CITY,
+          (IF(start_point.ID <= 3, start_point.NICKNAME, start_point.CITY)) AS START_CITY,
       	  (IF(start_point.ID <= 3, start_point.ID, -1)) AS START_ID,
           lift.OFFERED_SEATS,
           IFNULL(counts.OCCUPIED_SEATS, 0) AS OCCUPIED_SEATS,
@@ -378,6 +379,12 @@ async function getMarketplace (uuidOnly) {
           JOIN
               addresses start_point 
               ON lift.START = start_point.ID 
+          JOIN 
+      		  lift_map map_user_filter
+      		  ON lift.ID = map_user_filter.LIFT_ID
+          JOIN
+              users user_filter
+              ON user_filter.ID = map_user_filter.USER_ID
           LEFT OUTER JOIN
               (
                   SELECT
@@ -395,6 +402,7 @@ async function getMarketplace (uuidOnly) {
       WHERE
           (lift.FIRST_DATE >= CURRENT_DATE() 
           OR lift.REPEATS_ON_WEEKDAY != 0)
+          AND user_filter.FB_ID != ?
           AND ${uuidOnly && (typeof uuidOnly == 'Number') ? `lift.UUID = ${uuidOnly}` : 'TRUE'}
   )
   
@@ -432,7 +440,7 @@ async function getMarketplace (uuidOnly) {
       ) AS JSON
   FROM
     lifts
-        `, [])).result[0].JSON
+        `, [fbid])).result[0].JSON
   return JSON
 }
 
@@ -731,7 +739,7 @@ module.exports = {
         }
         data.stats.liftsOffered = Math.floor(Math.random() * 100)
         data.stats.liftsAll = data.stats.liftsOffered + Math.floor(Math.random() * 200)
-        data.marketplaceOffers = JSON.parse(await getMarketplace())
+        data.marketplaceOffers = JSON.parse(await getMarketplace(options.secretFbId))
 
         endWithJSON(res, JSON.stringify(data))
 
@@ -941,10 +949,10 @@ module.exports = {
     '/marketplace': async (req, res, options) => {
       if (isUserVerified(options.secretFbId)) {
         if (!options.uuid) {
-          endWithJSON(res, await getMarketplace(options.uuid)) // normal, simple marketplace offers are wanted
+          endWithJSON(res, await getMarketplace(options.secretFbId)) // normal, simple marketplace offers are wanted
         }
         else {
-          var offers = JSON.parse(await getMarketplace()),
+          var offers = JSON.parse(await getMarketplace(options.secretFbId, options.uuid)),
             wantedOffer = offers[0] // when specific uuid is wanted, then only one result will be there, which should be returned as single object and not as array with just one element
           var invitingUserName = (await runQuery('SELECT NAME FROM users where FB_ID = ?', [options.invitingUserId])).result[0].NAME
           endWithJSON(res, JSON.stringify({
@@ -1140,6 +1148,10 @@ module.exports = {
           "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`, `PENDING`) VALUES (?, ?, 1, 0)", [newLiftId, userId]).catch(error => {
             throw error;
           })
+        await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, ?, ?, current_timestamp())", [message.content, userId, liftId]).catch(error => {
+          throw error
+        })
+        
 
         /* INSERT INTO `messages` (`ID`, `UUID`, `CONTENT`, `AUDIO`, `PICTURE`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (NULL, '6516515156313513', 'Hallo! Schön, dass ihr da seid!', NULL, NULL, '1', '1', current_timestamp()) */
 
