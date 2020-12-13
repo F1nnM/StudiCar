@@ -17,7 +17,8 @@ function isOptionMissing (data, needed, res) {
 }
 
 async function getUserId (fbId) {
-  return (await runQuery("SELECT ID FROM users WHERE FB_ID = ?", [fbId])).result[0].ID;
+  let result = (await runQuery("SELECT ID FROM users WHERE FB_ID = ?", [fbId])).result[0]
+  return result ? result.ID : null;
 }
 
 async function getLiftId (liftUuid) {
@@ -1147,6 +1148,10 @@ module.exports = {
           "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`, `PENDING`) VALUES (?, ?, 1, 0)", [newLiftId, userId]).catch(error => {
             throw error;
           })
+        await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, ?, ?, current_timestamp())", [message.content, userId, liftId]).catch(error => {
+          throw error
+        })
+        
 
         /* INSERT INTO `messages` (`ID`, `UUID`, `CONTENT`, `AUDIO`, `PICTURE`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (NULL, '6516515156313513', 'Hallo! Schön, dass ihr da seid!', NULL, NULL, '1', '1', current_timestamp()) */
 
