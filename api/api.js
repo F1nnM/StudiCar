@@ -339,7 +339,7 @@ async function getLiftRequests (uid) {
   return JSON.stringify(arr);
 }
 
-async function getMarketplace (uuidOnly) {
+async function getMarketplace (fbid, uuidOnly) {
   let JSON = (await runQuery(`
   WITH
   lifts as (
@@ -378,6 +378,12 @@ async function getMarketplace (uuidOnly) {
           JOIN
               addresses start_point 
               ON lift.START = start_point.ID 
+          JOIN 
+      		  lift_map map_user_filter
+      		  ON lift.ID = map_user_filter.LIFT_ID
+          JOIN
+              users user_filter
+              ON user_filter.ID = map_user_filter.USER_ID
           LEFT OUTER JOIN
               (
                   SELECT
@@ -395,6 +401,7 @@ async function getMarketplace (uuidOnly) {
       WHERE
           (lift.FIRST_DATE >= CURRENT_DATE() 
           OR lift.REPEATS_ON_WEEKDAY != 0)
+          AND user_filter.FB_ID != ?
           AND ${uuidOnly && (typeof uuidOnly == 'Number') ? `lift.UUID = ${uuidOnly}` : 'TRUE'}
   )
   
@@ -432,7 +439,7 @@ async function getMarketplace (uuidOnly) {
       ) AS JSON
   FROM
     lifts
-        `, [])).result[0].JSON
+        `, [fbid])).result[0].JSON
   return JSON
 }
 
@@ -731,7 +738,7 @@ module.exports = {
         }
         data.stats.liftsOffered = Math.floor(Math.random() * 100)
         data.stats.liftsAll = data.stats.liftsOffered + Math.floor(Math.random() * 200)
-        data.marketplaceOffers = JSON.parse(await getMarketplace())
+        data.marketplaceOffers = JSON.parse(await getMarketplace(options.secretFbId))
 
         endWithJSON(res, JSON.stringify(data))
 
@@ -941,10 +948,10 @@ module.exports = {
     '/marketplace': async (req, res, options) => {
       if (isUserVerified(options.secretFbId)) {
         if (!options.uuid) {
-          endWithJSON(res, await getMarketplace(options.uuid)) // normal, simple marketplace offers are wanted
+          endWithJSON(res, await getMarketplace(options.secretFbId)) // normal, simple marketplace offers are wanted
         }
         else {
-          var offers = JSON.parse(await getMarketplace()),
+          var offers = JSON.parse(await getMarketplace(options.secretFbId, options.uuid)),
             wantedOffer = offers[0] // when specific uuid is wanted, then only one result will be there, which should be returned as single object and not as array with just one element
           var invitingUserName = (await runQuery('SELECT NAME FROM users where FB_ID = ?', [options.invitingUserId])).result[0].NAME
           endWithJSON(res, JSON.stringify({
