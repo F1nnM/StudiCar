@@ -870,7 +870,7 @@ module.exports = {
     },
     '/getTeamInfo': async (req, res, options) => {
       if (isUserVerified(options.secretFbId)) {
-        var team = (await runQuery('SELECT * from team where ID <> 0')).result,
+        var team = (await runQuery('SELECT * from team')).result,
           about = '',
           teamArr = []
 

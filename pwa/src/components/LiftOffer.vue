@@ -171,10 +171,22 @@ export default {
             "Samstag"
           ]
         }),
-        nextWeekText =
-          date.getDateDiff(new Date(), dateObj, "days") < 7 ? "kommenden " : "";
+        daysLeft = date.getDateDiff(dateObj, new Date(), "days"),
+        nextWeekText = "Am";
+      switch (daysLeft) {
+        case 0:
+          nextWeekText = "Heute -";
+          break;
+        case 1:
+          nextWeekText = "Morgen -";
+          break;
+          nextWeekText = "Übermorgen -";
+          break;
+        default:
+          if (daysLeft < 7) nextWeekText += " kommenden";
+      }
 
-      return "Am " + nextWeekText + dateFormatted;
+      return nextWeekText + " " + dateFormatted;
     },
 
     prefsDocu() {

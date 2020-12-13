@@ -2,106 +2,48 @@
   <div class="q-pa-md">
     <div class="q-gutter-y-md">
       <div class="absolute-top-right q-mt-xl q-mr-xl q-pt-md">
-        <q-btn
-          dense
-          class="col-3"
-          flat
-          color="primary"
-          :icon="openEditSort ? 'done' : 'filter_list'"
-          @click="openEditSort = !openEditSort"
-        />
+        <q-btn dense flat color="primary" @click="$refs.select.showPopup()" icon="sort">
+          <q-icon size="xs" :name="sort.icon" />
+        </q-btn>
       </div>
 
-      <q-slide-transition>
-        <div
-          v-show="openEditSort"
-          class="q-ma-none"
-          :style="'transition: .1s; border-bottom: 1px solid ' + (openEditSort ? 'gray' : 'white')"
-        >
-          <q-select
-            v-model="sort"
-            options-selected-class="border-right border-right-green"
-            rounded
-            transition-show="jump-up"
-            transition-hide="jump-down"
-            outlined
-            map-options
-            :class="sort ? '' : 'shadow-3'"
-            :style="'border-radius: ' + (sort ? 0 : 100) + 'px'"
-            label="Sortierung"
-            :options="sortOptions"
-          >
-            <template v-slot:prepend>
-              <q-icon name="sort" />
-            </template>
-            <template v-if="sort" v-slot:append>
-              <q-icon name="cancel" @click.stop="sort = null" class="cursor-pointer" />
-            </template>
-            <template v-slot:option="scope">
-              <q-item
-                v-bind="scope.itemProps"
-                v-on="scope.itemEvents"
-                :disable="scope.opt.disabled"
-              >
-                <q-item-section avatar>
-                  <q-icon :name="scope.opt.icon" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label v-html="scope.opt.label" />
-                  <q-item-label caption>{{ scope.opt.caption }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </template>
-          </q-select>
-          <br />
-          <q-select
-            v-model="filter"
-            rounded
-            transition-show="jump-up"
-            transition-hide="jump-down"
-            :class="filter.length ? '' : 'shadow-3'"
-            :style="'border-radius: ' + (filter.length ? 0 : 100) + 'px'"
-            outlined
-            map-options
-            multiple
-            label="Filter"
-            :options="filterOptions"
-          >
-            <template v-slot:prepend>
-              <q-icon name="filter_list" />
-            </template>
-            <template v-if="filter.length" v-slot:append>
-              <q-icon name="cancel" @click.stop="filter = []" class="cursor-pointer" />
-            </template>
-            <!-- <template v-if="filter" v-slot:append>
-              <q-icon name="cancel" @click.stop="filter = []" class="cursor-pointer" />
-            </template>-->
-            <template v-slot:option="scope">
-              <q-item
-                v-bind="scope.itemProps"
-                v-on="scope.itemEvents"
-                :disable="scope.opt.disabled"
-              >
-                <q-item-section avatar>
-                  <q-icon :name="scope.opt.icon" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label v-html="scope.opt.label" />
-
-                  <q-item-label caption>{{ scope.opt.caption }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </template>
-          </q-select>
-          <br />
-        </div>
-      </q-slide-transition>
-
       <div :key="offerIndexToRefresh">
-        <!-- key is to re-render component -->
+        <q-select
+          v-model="sort"
+          ref="select"
+          options-selected-class="border-right border-right-green"
+          rounded
+          transition-show="jump-up"
+          transition-hide="jump-down"
+          outlined
+          map-options
+          class="hidden"
+          :style="'border-radius: ' + (sort ? 0 : 100) + 'px'"
+          label="Angebote sortieren"
+          :options="sortOptions"
+        >
+          <template v-slot:prepend>
+            <q-icon name="sort" />
+          </template>
+          <template v-if="sort" v-slot:append>
+            <q-icon name="cancel" @click.stop="sort = null" class="cursor-pointer" />
+          </template>
+          <template v-slot:option="scope">
+            <q-item v-bind="scope.itemProps" v-on="scope.itemEvents" :disable="scope.opt.disabled">
+              <q-item-section avatar>
+                <q-icon :name="scope.opt.icon" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label v-html="scope.opt.label" />
+                <q-item-label caption>{{ scope.opt.caption }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
+        <!-- </q-menu> -->
         <LiftOffer
           class="q-mb-sm"
-          v-for="lift in getFilteredAndSortedOffers"
+          v-for="lift in getSortedOffers"
           :key="lift.index"
           v-bind:lift="lift"
           @request="triggerLiftRequest"
@@ -109,12 +51,12 @@
       </div>
       <div
         class="text-caption"
-        v-show="!(getFilteredAndSortedOffers.length || filter.length)"
+        v-show="!(getSortedOffers.length || filter.length)"
       >Im Moment gibt es für dich gerade keine Angebote. Schau einfach später nochmal vorbei.</div>
       <!-- above case for neither offers nor filter applied -->
       <div
         class="text-caption"
-        v-show="!getFilteredAndSortedOffers.length && filter.length"
+        v-show="!getSortedOffers.length && filter.length"
       >Es gibt keine Angebote, die deinen Filterkriterien entsprechen.</div>
       <!-- above case for offers all not matching selected filter settings -->
     </div>
@@ -129,25 +71,11 @@ export default {
   data() {
     return {
       openEditSort: false,
-      sort: { value: "distance", label: "niedrigste Entfernung" }, //default sorting order
-      filter: [],
-      filterOptions: [
-        {
-          label: "Nur noch nicht angefragte Angebote",
-          caption:
-            "Nur Fahrten anzeigen, bei denen du noch nicht um Mitnahme gebeten hast",
-          value: "notRequested",
-          icon: "device_unknown"
-        },
-        {
-          label: "Meine Präferenzen streng berücksichtigen",
-          caption:
-            "Nur Fahrten mit absolut denselben (!) Präferenzen werden angezeigt",
-          value: "prefs",
-          icon: "face"
-        }
-        // here an additional option will be dynamically generated in mounted()
-      ],
+      sort: {
+        label: "nach Sitzen (Standard)",
+        icon: "person",
+        value: "seats" // value is enough info
+      },
       offerIndexToRefresh: 1
     };
   },
@@ -168,23 +96,24 @@ export default {
           label: "niedrigste Entfernung",
           caption: "Sortiert aufsteigend nach Luftlinie",
           icon: "location_on",
-          value: "distance"
+          value: "distance",
+          disabled: true
         },
         {
           label: "wenigste Sitze belegt",
-          caption: "Sortiert nach wenigsten Sitzen",
+          caption: "Sortiert nach freien Plätzen",
           value: "seats",
-          icon: "airline_seat_recline_normal"
+          icon: "person"
         },
         {
           label: "Toleranz",
-          caption: "Sortiert nach Präferenzen, alle gleichwertig",
+          caption: "Sortiert nach der Toleranz des Fahrers",
           value: "prefs",
           icon: "insert_emoticon"
         },
         {
           label: "Zeit",
-          caption: "Sortiert aufsteigend nach Zeit der Fahrt",
+          caption: "Sortiert nach Zeit der Fahrt",
           value: "timeDiff",
           icon: "departure_board"
         },
@@ -198,37 +127,8 @@ export default {
       ];
     },
 
-    getFilteredAndSortedOffers() {
+    getSortedOffers() {
       var offers = JSON.parse(JSON.stringify(this.allOffers));
-
-      // filter code
-      if (this.filter.length) {
-        this.filter.forEach(item => {
-          item = item.value;
-          switch (item) {
-            case "notRequested":
-              offers = offers.filter(offer => !offer.requested);
-              break;
-            case "gender":
-              offers.filter(offer => {
-                return true; // API not implemented yet
-              });
-              break;
-            case "prefs":
-              var userPrefs = this.$store.getters["auth/user"].prefs;
-              offers = offers.filter(offer => {
-                var prefValues = Object.keys(offer.driver.prefs);
-                var atLeastOneDifferent = prefValues.some(pref => {
-                  if (userPrefs[pref] != offer.driver.prefs[pref]) return true;
-                });
-
-                return !atLeastOneDifferent; // when at least one different, remove that element
-              });
-
-              break;
-          }
-        });
-      }
 
       // here comes the sorting code
 
@@ -241,7 +141,10 @@ export default {
             break;
           case "seats":
             offers.sort((a, b) => {
-              return a.seatsOccupied - b.seatsOccupied;
+              if (a.seatsOccupied == b.seatsOccupied)
+                return b.seatsOffered - a.seatsOffered;
+              // when same seats, then descending to avaiable seats
+              else return a.seatsOccupied - b.seatsOccupied;
             });
             break;
           case "prefs":
@@ -282,12 +185,16 @@ export default {
             break;
           case "timeDiff":
             offers.sort((a, b) => {
-              var aTime = a.departAt ? a.departAt : a.arriveBy,
-                bTime = b.departAt ? b.departAt : b.arriveBy;
-              return (
-                new Date(aTime).getUTCMilliseconds() -
-                new Date(bTime).getUTCMilliseconds()
-              );
+              var aTime =
+                  a.date +
+                  " " +
+                  (a.departAt != "00:00:00" ? a.departAt : a.arriveBy),
+                bTime =
+                  b.date +
+                  " " +
+                  (b.departAt != "00:00:00" ? b.departAt : b.arriveBy);
+
+              return new Date(aTime).getTime() - new Date(bTime).getTime();
             });
         }
       }
@@ -334,17 +241,6 @@ export default {
       name: this.title,
       navTitle: "Marktplatz"
     });
-
-    /* this.filterOptions.push({
-      label: "Nur reine " + this.genderName + "-Autos",
-      value: "gender",
-      caption:
-        "Nur Autos anzeigen, bei denen nur " + this.genderName + " mitfahren",
-      icon: "wc",
-      disabled: true // genderCarsAvaiable ? this.$store.getters['auth/user'].gender == 'X'
-    });
- */
-    // this.filter.push(this.filterOptions[0]); // only show not yet requested offers by default
   }
 };
 </script>
