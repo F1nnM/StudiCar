@@ -1124,7 +1124,7 @@ module.exports = {
           userId = await getUserId(options.secretFbId)
 
         await runQuery(
-          "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `START`, `DESTINATION`, `UUID`, `REPEATS_ON_WEEKDAY`, `FIRST_DATE`, `DEPART_AT`, `ARRIVE_BY`) VALUES (current_timestamp(), ?, ?, ?, ?, UUID_SHORT(), ?, ? ,?, ?)",
+          "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `START`, `DESTINATION`, `UUID`, `REPEATS_ON_WEEKDAY`, `FIRST_DATE`, `DEPART_AT`, `ARRIVE_BY`) VALUES (current_timestamp(), ?, ?, ?, ?, FLOOR(UUID_SHORT() / 1000), ?, ? ,?, ?)",
           [lift.seats, lift.carId, lift.startAddressId, lift.destinationAddressId, lift.repeats ? lift.weekday : 0, lift.datestamp, isdepartAt ? lift.timestamp : '', isdepartAt ? '' : lift.timestamp]).catch(error => {
             throw error;
           })
