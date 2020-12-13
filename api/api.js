@@ -875,8 +875,8 @@ module.exports = {
       endWithJSON(res, JSON.stringify(obj))
     },
     '/getTeamInfo': async (req, res, options) => {
-      if (await isUserVerified(options.secretFbId)) {
-        var team = (await runQuery('SELECT * from team where ID <> 0')).result,
+      if (isUserVerified(options.secretFbId)) {
+        var team = (await runQuery('SELECT * from team')).result,
           about = '',
           teamArr = []
 
