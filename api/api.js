@@ -896,17 +896,8 @@ module.exports = {
             function: m.FUNCTION,
             funcShort: m.FUNC_SHORT || null,
             bio: m.BIO,
-            picture: null
+            picture: Buffer.from(m.PICTURE).toString('base64')
           }
-
-          teamElem.picture = await new Promise((resolve, reject) => {
-            let reader = new FileReader();
-            reader.onloadend = function () {
-              resolve(reader.result)
-            }
-            reader.readAsDataURL(m.PICTURE)
-          })
-
           teamArr.push(teamElem)
         })
 
