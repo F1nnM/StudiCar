@@ -135,7 +135,7 @@ export default {
 
     DENY_LIFT_REQUEST (state, payload) {
       var requestedLift = state.user.liftRequests.find(l => l.liftId == payload.liftId)
-      requestedLiftift.requestingUsers = requestedLift.requestingUsers.filter(u => u.id != payload.userId)
+      requestedLift.requestingUsers = requestedLift.requestingUsers.filter(u => u.id != payload.userId)
     },
 
     REQUEST_TO_LIFT (state, liftId) {
@@ -354,27 +354,33 @@ export default {
     },
 
     async respondLiftRequest ({ commit }, payload) {
-      var obj = {
-        liftId: payload.liftId,
-        userId: payload.user.id,
-        accepted: payload.accepted
+      if (typeof payload == 'number') {
+        alert('Wäre angenommen worden, aber ist noch in Bearbeitung')
       }
-      sendApiRequest(SQL_RESPOND_REQUEST, obj, _ => {
-        if (payload.accepted) {
-          obj = { // re-build object to make local changes
-            liftId: obj.liftId,
-            user: payload.user
-          }
-          commit('ACCEPT_LIFT_REQUEST', obj)
+      else {
+        var obj = {
+          liftId: payload.liftId,
+          userId: payload.user.id,
+          accepted: payload.accepted
         }
-        else {
-          obj = {
-            liftId: payload.liftId,
-            userId: payload.user.id
+
+        sendApiRequest(SQL_RESPOND_REQUEST, obj, _ => {
+          if (payload.accepted) {
+            obj = { // re-build object to make local changes
+              liftId: obj.liftId,
+              user: payload.user
+            }
+            commit('ACCEPT_LIFT_REQUEST', obj)
           }
-          commit('DENY_LIFT_REQUEST', obj)
-        }
-      }, err => errorNotify(err))
+          else {
+            obj = {
+              liftId: payload.liftId,
+              userId: payload.user.id
+            }
+            commit('DENY_LIFT_REQUEST', obj)
+          }
+        }, err => errorNotify(err))
+      }
     },
 
     async requestToLift ({ commit }, payload) {

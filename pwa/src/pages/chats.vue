@@ -67,6 +67,7 @@
                 <LiftOfferForRequest
                   :lift="getLiftFromId(lift.liftId)"
                   :numberOfRequests="lift.requestingUsers.length"
+                  @acceptAll="respondLiftRequest"
                   @left="switchTab"
                   @right="switchTab(true)"
                 />
@@ -80,8 +81,8 @@
                 >
                   <span
                     class="text-negative"
-                    v-if="canAcceptAllRequests(lift)"
-                  >Achtung: Du hast mehr Anfragen als noch Plätze frei sind!</span>
+                    v-if="!canAcceptAllRequests(lift) && (seatsLeft(lift.liftId) > 0)"
+                  >Du hast mehr Anfragen als noch Plätze frei sind!</span>
                   <q-slide-item
                     left-color="white"
                     right-color="white"
@@ -89,7 +90,7 @@
                     v-for="r in lift.requestingUsers"
                     :key="r.id"
                   >
-                    <template v-slot:left>
+                    <!-- <template v-slot:left>
                       <q-avatar>
                         <q-icon name="thumb_up" color="positive" size="sm" />
                       </q-avatar>
@@ -104,7 +105,7 @@
                       <span class="text-dark text-h6 text-uppercase">Ne</span>
 
                       <p class="text-grey-9">Anfrage von {{ r.name }} ablehnen</p>
-                    </template>
+                    </template>-->
                     <div>
                       <IncomingLiftRequest
                         :requestingUser="r"

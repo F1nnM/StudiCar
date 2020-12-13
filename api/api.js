@@ -319,7 +319,7 @@ async function getLiftRequests (uid) {
       me.FB_ID = ?
       GROUP BY
       my_lifts.LIFT_ID
-  );
+  )
   `, [uid])).result
   var arr = [], liftsSaved = []
   db_requests.forEach(r => {
@@ -1056,9 +1056,8 @@ module.exports = {
       if (!isOptionMissing(options, ['liftId'], res) && isUserVerified(options.secretFbId)) {
         var userId = await getUserId(options.secretFbId),
           liftId = await getLiftId(options.liftId)
-        runQuery('INSERT INTO lift_map (USER_ID, LIFT_ID) VALUES (?, ?)', [userId, liftId])
+        runQuery('INSERT INTO lift_map (USER_ID, LIFT_ID, PENDING) VALUES (?, ?, 1)', [userId, liftId])
           .then(_ => {
-            console.log('then end')
             res.end()
           })
           .catch(err => catchall(err, res, 'addLiftRequest'))
@@ -1151,7 +1150,7 @@ module.exports = {
         await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, ?, ?, current_timestamp())", [message.content, userId, liftId]).catch(error => {
           throw error
         })
-        
+
 
         /* INSERT INTO `messages` (`ID`, `UUID`, `CONTENT`, `AUDIO`, `PICTURE`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (NULL, '6516515156313513', 'Hallo! Schön, dass ihr da seid!', NULL, NULL, '1', '1', current_timestamp()) */
 

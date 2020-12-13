@@ -36,7 +36,7 @@
 
     <div class="full-width q-py-sm">
       <div class="q-ml-md full-width bg-grey-4">
-        <q-slide-item left-color="white">
+        <q-slide-item left-color="white" @left="acceptAll">
           <template v-slot:left v-if="enoughSeatsLeft">
             <div class="bg-positive q-pa-sm" style="border-radius: 20px">
               <q-icon name="done_all" class="q-mr-sm" />Alle annehmen
@@ -153,6 +153,19 @@ export default {
 
     emit(type) {
       this.$emit(type);
+    },
+
+    acceptAll() {
+      this.$q
+        .dialog({
+          title: "Alle annehmen",
+          message: "Willst du alle Anfragen direkt annehmen?",
+          cancel: true,
+          persistent: true
+        })
+        .onOk(() => {
+          this.$emit("acceptAll", this.lift.id);
+        });
     }
   },
   mounted() {}

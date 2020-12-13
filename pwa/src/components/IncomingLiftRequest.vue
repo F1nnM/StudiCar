@@ -108,23 +108,13 @@ export default {
         responseReason = await new Promise((res, rej) => {
           this.$q
             .dialog({
-              dark: true,
-              title: "Absagen",
-              message: `Magst du ${user.name} mitteilen, warum du sie nicht mitnimmst?`,
+              title: "Ablehnen",
+              message: `Willst du die Anfrage von ${user.name} ablehnen?`,
               ok: {
                 color: "negative"
               },
               cancel: {
-                color: "white"
-              },
-              options: {
-                type: "radio",
-                model: "prefs",
-                // inline: true
-                items: [
-                  { label: "Präferenzen passen nicht", value: "prefs" },
-                  { label: "Nein, keine Mitteilung", value: "private" }
-                ]
+                color: "positive"
               },
               cancel: true,
               persistent: true
