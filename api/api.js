@@ -1134,7 +1134,7 @@ module.exports = {
           })).result[0]
         var newLiftId = insertedResult.ID
         await runQuery(
-          "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`, `PENDING`) VALUES (?, ?, 1, 0)", [newLiftId, userId]).catch(error => {
+          "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`) VALUES (?, ?, 1)", [newLiftId, userId]).catch(error => {
             throw error;
           })
         await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, 0, ?, current_timestamp())", ['Wilkommen', liftId]).catch(error => {
