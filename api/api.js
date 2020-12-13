@@ -450,10 +450,10 @@ function endWithJSON (res, JSON) {
 }
 
 async function isUserVerified (fbid) {
-  var verified = (await runQuery(`
+  let result =  (await runQuery(`
   SELECT VERIFIED FROM users WHERE FB_ID = ?
-  `, [fbid])).result[0].VERIFIED
-  return verified === 1
+  `, [fbid])).result[0]
+  return result ? result.VERIFIED === 1 : false
 }
 
 module.exports = {
@@ -466,30 +466,28 @@ module.exports = {
       res.end(JSON.stringify(result));
     },
     '/profilePicture': async (req, res, options) => {
-      if (!isOptionMissing(options, ['fbid'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['fbid'], res) && await isUserVerified(options.secretFbId)) {
         let result = await runQuery("SELECT PICTURE FROM `users` WHERE users.FB_ID = ?", [options.fbid]);
         res.setHeader('Content-Type', 'image/png');
         res.end(result.result[0].PICTURE, 'binary');
       }
     },
     '/getNewsticker': async (req, res, options) => {
-      if (isUserVerified(options.secretFbId)) {
-        fs.readFile(newsPath, 'utf8', (err, data) => {
-          if (err) throw err;
-          var news = data.toString().split("\n");
-          news = news.filter(line => !line.includes('//') && line.length) // ignore all lines containing // and all empty lines
+      fs.readFile(newsPath, 'utf8', (err, data) => {
+        if (err) throw err;
+        var news = data.toString().split("\n");
+        news = news.filter(line => !line.includes('//') && line.length) // ignore all lines containing // and all empty lines
 
-          var rnd = Math.floor(Math.random() * news.length)
-          const ticker = news[rnd].split('+++')[1].trim()
+        var rnd = Math.floor(Math.random() * news.length)
+        const ticker = news[rnd].split('+++')[1].trim()
 
-          endWithJSON(res, JSON.stringify({
-            ticker: ticker
-          }))
-        })
-      }
+        endWithJSON(res, JSON.stringify({
+          ticker: ticker
+        }))
+      })
     },
     '/getUserData': async (req, res, options) => {
-      if (!isOptionMissing(options, ['fbid'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['fbid'], res) && await isUserVerified(options.secretFbId)) {
         var data;
         if (options.secretFbId == options.fbid) { // ACCESSING PRIVATE PROFILE
           data = (await runQuery(`
@@ -746,7 +744,7 @@ module.exports = {
       }
     },
     '/getCarModels': async (req, res, options) => {
-      if (isUserVerified(options.secretFbId)) {
+      if (await isUserVerified(options.secretFbId)) {
         let result = await runQuery("SELECT BRAND, MODEL FROM car_models", []);
         let cars = result.result
         let carsObj = {}
@@ -765,7 +763,7 @@ module.exports = {
       }
     },
     '/getMessages': async (req, res, options) => {
-      if (isUserVerified(options.secretFbId)) {
+      if (await isUserVerified(options.secretFbId)) {
         var a = await getChatLifts(options.secretFbId)
 
         endWithJSON(res, a)
@@ -792,7 +790,7 @@ module.exports = {
       })
     },
     '/getLiftInfo': async (req, res, options) => {
-      if (!isOptionMissing(options, ['liftId'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['liftId'], res) && await isUserVerified(options.secretFbId)) {
         var liftId = options.id
         let carInfo = await runQuery("SELECT car_models.BRAND, car_models.MODEL, car.COLOR, car.TYPE, car.LICENSE_PLATE, lift.OFFERED_SEATS FROM lift JOIN car ON lift.CAR_ID = car.ID JOIN car_models ON car_models.ID = car.MODEL_ID WHERE lift.ID = ?;", [liftId])
         carInfo = carInfo.result[0]
@@ -898,17 +896,8 @@ module.exports = {
             function: m.FUNCTION,
             funcShort: m.FUNC_SHORT || null,
             bio: m.BIO,
-            picture: null
+            picture: Buffer.from(m.PICTURE).toString('base64')
           }
-
-          teamElem.picture = await new Promise((resolve, reject) => {
-            let reader = new FileReader();
-            reader.onloadend = function () {
-              resolve(reader.result)
-            }
-            reader.readAsDataURL(m.PICTURE)
-          })
-
           teamArr.push(teamElem)
         })
 
@@ -921,7 +910,7 @@ module.exports = {
       }
     },
     '/chatPicture': async (req, res, options) => {
-      if (!isOptionMissing(options, ['msgId'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['msgId'], res) && await isUserVerified(options.secretFbId)) {
         let pic = (await runQuery(`
         SELECT messages.PICTURE from messages
         join lift_map on messages.LIFT_ID = lift_map.LIFT_ID
@@ -934,7 +923,7 @@ module.exports = {
       }
     },
     '/chatAudio': async (req, res, options) => {
-      if (!isOptionMissing(options, ['msgId'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['msgId'], res) && await isUserVerified(options.secretFbId)) {
         let audio = (await runQuery(`
         SELECT messages.AUDIO from messages
         join lift_map on messages.LIFT_ID = lift_map.LIFT_ID
@@ -947,7 +936,7 @@ module.exports = {
       }
     },
     '/marketplace': async (req, res, options) => {
-      if (isUserVerified(options.secretFbId)) {
+      if (await isUserVerified(options.secretFbId)) {
         if (!options.uuid) {
           endWithJSON(res, await getMarketplace(options.secretFbId)) // normal, simple marketplace offers are wanted
         }
@@ -968,7 +957,7 @@ module.exports = {
       }
     },
     '/liftRequests': async (req, res, options) => {
-      if (isUserVerified(options.secretFbId)) {
+      if (await isUserVerified(options.secretFbId)) {
         endWithJSON(res, JSON.stringify({
           requests: JSON.parse(await getLiftRequests(options.secretFbId))
         }));
@@ -992,7 +981,7 @@ module.exports = {
       }
     },
     '/updateDescription': async (req, res, options) => {
-      if (!isOptionMissing(options, ['description'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['description'], res) && await isUserVerified(options.secretFbId)) {
         await runQuery(
           "UPDATE `users` SET `DESCRIPTION` = ? WHERE `users`.`FB_ID` = ?", [options.description, options.secretFbId]).catch(error => {
             throw error;
@@ -1001,7 +990,7 @@ module.exports = {
       }
     },
     '/updateGender': async (req, res, options) => {
-      if (!isOptionMissing(options, ['gender'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['gender'], res) && await isUserVerified(options.secretFbId)) {
         await runQuery(
           "UPDATE `users` SET `GENDER` = ? WHERE `users`.`FB_ID` = ?", [options.gender, options.secretFbId]).catch(error => {
             throw error;
@@ -1010,7 +999,7 @@ module.exports = {
       }
     },
     '/updateLiftMaxDistance': async (req, res, options) => {
-      if (!isOptionMissing(options, ['liftMaxDistance'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['liftMaxDistance'], res) && await isUserVerified(options.secretFbId)) {
         await runQuery(
           "UPDATE `users` SET `LIFT_MAX_DISTANCE` = ? WHERE `users`.`FB_ID` = ?", [options.liftMaxDistance, options.secretFbId]).catch(error => {
             throw error;
@@ -1019,7 +1008,7 @@ module.exports = {
       }
     },
     '/updateProfilePicture': async (req, res, options) => {
-      if (!isOptionMissing(options, ['imageData'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['imageData'], res) && await isUserVerified(options.secretFbId)) {
         var img = Buffer.from(options.imageData.substr(22), 'base64');
         var dimensions = require('image-size')(img);
         if (!(dimensions.width == 300 && dimensions.height == 300)) {
@@ -1034,7 +1023,7 @@ module.exports = {
       }
     },
     '/resetProfilePicture': async (req, res, options) => {
-      if (isUserVerified(options.secretFbId)) {
+      if (await isUserVerified(options.secretFbId)) {
         var name = (await runQuery("SELECT NAME FROM `users` WHERE users.FB_ID = ?", [options.secretFbId])).result[0].NAME
         await runQuery(
           "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?", [generateJdenticon(name), options.secretFbId]).catch(error => {
@@ -1044,7 +1033,7 @@ module.exports = {
       }
     },
     '/updatePrefs': async (req, res, options) => {
-      if (!isOptionMissing(options, ['prefs'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['prefs'], res) && await isUserVerified(options.secretFbId)) {
         await runQuery(
           "UPDATE users SET PREF_TALK = ?, PREF_TALK_MORNING = ?, PREF_SMOKING = ?, PREF_MUSIC = ? WHERE FB_ID = ?;", [options.prefs.talk, options.prefs.talkMorning, options.prefs.smoking, options.prefs.music, options.secretFbId]).catch(error => {
             throw error;
@@ -1053,7 +1042,7 @@ module.exports = {
       }
     },
     '/addLiftRequest': async (req, res, options) => {
-      if (!isOptionMissing(options, ['liftId'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['liftId'], res) && await isUserVerified(options.secretFbId)) {
         var userId = await getUserId(options.secretFbId),
           liftId = await getLiftId(options.liftId)
         runQuery('INSERT INTO lift_map (USER_ID, LIFT_ID, PENDING) VALUES (?, ?, 1)', [userId, liftId])
@@ -1064,7 +1053,7 @@ module.exports = {
       }
     },
     '/respondRequest': async (req, res, options) => {
-      if (!isOptionMissing(options, ['accepted', 'liftId', 'userId'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['accepted', 'liftId', 'userId'], res) && await isUserVerified(options.secretFbId)) {
         var requestingUserId = await getUserId(options.userId),
           accepted = options.accepted,
           liftId = await getLiftId(options.liftId)
@@ -1074,7 +1063,7 @@ module.exports = {
       }
     },
     '/addAddress': async (req, res, options) => {
-      if (!isOptionMissing(options, ['address'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['address'], res) && await isUserVerified(options.secretFbId)) {
         var userId = await getUserId(options.secretFbId)
         a = options.address
         await runQuery(
@@ -1091,7 +1080,7 @@ module.exports = {
       }
     },
     '/removeAddress': async (req, res, options) => {
-      if (!isOptionMissing(options, ['id'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['id'], res) && await isUserVerified(options.secretFbId)) {
         await runQuery(
           "DELETE FROM `addresses` WHERE `addresses`.`ID` = ?", [options.id]).catch(err => {
             catchall(err, res, 'removeAddress')
@@ -1101,7 +1090,7 @@ module.exports = {
       }
     },
     '/addCar': async (req, res, options) => {
-      if (!isOptionMissing(options, ['car'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['car'], res) && await isUserVerified(options.secretFbId)) {
 
         var car = options.car,
           modelId = (await runQuery('SELECT ID FROM car_models WHERE BRAND = ? AND MODEL = ?', [car.brand, car.model])).result[0].ID
@@ -1119,7 +1108,7 @@ module.exports = {
       }
     },
     '/removeCar': async (req, res, options) => {
-      if (!isOptionMissing(options, ['id'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['id'], res) && await isUserVerified(options.secretFbId)) {
         await runQuery(
           "DELETE FROM car WHERE ID = ?", [options.id]).catch(err => {
             catchall(err, res, 'removeCar')
@@ -1128,13 +1117,13 @@ module.exports = {
       }
     },
     '/addLift': async (req, res, options) => {
-      if (!isOptionMissing(options, ['lift'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['lift'], res) && await isUserVerified(options.secretFbId)) {
         var lift = options.lift,
           isdepartAt = lift.departAt,
           userId = await getUserId(options.secretFbId)
 
         await runQuery(
-          "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `START`, `DESTINATION`, `UUID`, `REPEATS_ON_WEEKDAY`, `FIRST_DATE`, `DEPART_AT`, `ARRIVE_BY`) VALUES (current_timestamp(), ?, ?, ?, ?, UUID_SHORT(), ?, ? ,?, ?)",
+          "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `START`, `DESTINATION`, `UUID`, `REPEATS_ON_WEEKDAY`, `FIRST_DATE`, `DEPART_AT`, `ARRIVE_BY`) VALUES (current_timestamp(), ?, ?, ?, ?, FLOOR(UUID_SHORT() / 1000), ?, ? ,?, ?)",
           [lift.seats, lift.carId, lift.startAddressId, lift.destinationAddressId, lift.repeats ? lift.weekday : 0, lift.datestamp, isdepartAt ? lift.timestamp : '', isdepartAt ? '' : lift.timestamp]).catch(error => {
             throw error;
           })
@@ -1144,10 +1133,10 @@ module.exports = {
           })).result[0]
         var newLiftId = insertedResult.ID
         await runQuery(
-          "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`, `PENDING`) VALUES (?, ?, 1, 0)", [newLiftId, userId]).catch(error => {
+          "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`) VALUES (?, ?, 1)", [newLiftId, userId]).catch(error => {
             throw error;
           })
-        await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, ?, ?, current_timestamp())", [message.content, userId, liftId]).catch(error => {
+        await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, 0, ?, current_timestamp())", ['Wilkommen', liftId]).catch(error => {
           throw error
         })
 
@@ -1158,7 +1147,7 @@ module.exports = {
       }
     },
     '/leaveLift': async (req, res, options) => {
-      if (!isOptionMissing(options, ['liftId'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['liftId'], res) && await isUserVerified(options.secretFbId)) {
         var liftId = await getLiftId(options.liftId)
         userId = await getUserId(options.secretFbId)
         await runQuery('DELETE FROM lift_map WHERE LIFT_ID = ? AND USER_ID = ?', [liftId, userId])
@@ -1167,7 +1156,7 @@ module.exports = {
       }
     },
     '/sendMessage': async (req, res, options) => {
-      if (!isOptionMissing(options, ['message'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['message'], res) && await isUserVerified(options.secretFbId)) {
         var message = options.message
         var userId = await getUserId(options.secretFbId),
           liftId = await getLiftId(options.message.liftId)
@@ -1207,7 +1196,7 @@ module.exports = {
       }
     },
     '/addQuestion': async (req, res, options) => {
-      if (!isOptionMissing(options, ['question', 'category', 'uid'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['question', 'category', 'uid'], res) && await isUserVerified(options.secretFbId)) {
         var cat = options.category
 
         await runQuery("INSERT INTO `faq` (`QUESTION`, `CATEGORY`, `ASKED_BY`) VALUES (?, ?, ?)", [options.question, cat, uid])
@@ -1215,7 +1204,7 @@ module.exports = {
       }
     },
     '/updateQuestion': async (req, res, options) => {
-      if (!isOptionMissing(options, ['data', 'mode'], res) && isUserVerified(options.secretFbId)) {
+      if (!isOptionMissing(options, ['data', 'mode'], res) && await isUserVerified(options.secretFbId)) {
         var d = options.data
         if (options.mode == 1) { // normal mode
           await runQuery("UPDATE faq SET ANSWER = ?, ANSWERED_BY = ?, IS_PUBLIC = ? WHERE ID = ?;", [d.answer, d.orgaId, d.instantPublish, d.id])
