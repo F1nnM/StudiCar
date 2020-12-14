@@ -623,7 +623,7 @@
             />
             <q-slide-transition>
               <div v-if="!validNumberPlate()">
-                <span class="text-negative q-pt-md">Noch keine gültige Eingabe</span>
+                <div class="text-negative q-mt-md">Noch keine gültige Eingabe</div>
               </div>
             </q-slide-transition>
           </q-step>

@@ -473,18 +473,12 @@ module.exports = {
       }
     },
     '/getNewsticker': async (req, res, options) => {
-      fs.readFile(newsPath, 'utf8', (err, data) => {
-        if (err) throw err;
-        var news = data.toString().split("\n");
-        news = news.filter(line => !line.includes('//') && line.length) // ignore all lines containing // and all empty lines
+      var tickerJS = require('./news/postillon/ticker.js'),
+        line = tickerJS[Math.floor(Math.random() * tickerJS.length)]
 
-        var rnd = Math.floor(Math.random() * news.length)
-        const ticker = news[rnd].split('+++')[1].trim()
-
-        endWithJSON(res, JSON.stringify({
-          ticker: ticker
-        }))
-      })
+      endWithJSON(res, JSON.stringify({
+        ticker: line
+      }))
     },
     '/getUserData': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid'], res) && await isUserVerified(options.secretFbId)) {
