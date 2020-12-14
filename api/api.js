@@ -834,11 +834,11 @@ module.exports = {
         })
       })
       result = (await runQuery('SELECT ID, TITLE, CAPTION, URL FROM tutorials WHERE PUBLIC = 1')).result
-      result.forEach(video => {
+      if (result[0]) result.forEach(video => {
         tutArr.push({
           id: video.ID,
           title: video.TITLE,
-          caption: video.SUBTITLE || '',
+          caption: video.CAPTION || '',
           url: video.URL
         })
       })

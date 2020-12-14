@@ -193,41 +193,40 @@
           </q-form>
         </q-tab-panel>
         <q-tab-panel name="tutorials">
-          <q-expansion-item dense class="q-my-md">
-            <template v-slot:header>
-              <q-item dense class="q-px-none">
-                <q-item-section class="text-h5">Video-Tutorials</q-item-section>
-                <q-item-section side>
-                  <q-icon name="help_outline" size="sm" />
-                </q-item-section>
-              </q-item>
-            </template>
-            <q-card>
-              <q-card-section
-                class="text-caption"
-              >Wir haben zu allen wichtigen Bereichen Video-Tutorials erstellt.</q-card-section>
-            </q-card>
-          </q-expansion-item>
-          <div class="rounded-borders" v-for="v in supportData.tutorials" :key="v.id">
-            <q-expansion-item class="full-width">
-              <template v-slot:header class="text-subtitle1 full-width">{{ v.title }}</template>
+          <q-list>
+            <q-expansion-item dense class="q-my-md">
+              <template v-slot:header>
+                <q-item dense class="q-px-none">
+                  <q-item-section class="text-h5">Video-Tutorials</q-item-section>
+                  <q-item-section side>
+                    <q-icon name="help_outline" size="sm" />
+                  </q-item-section>
+                </q-item>
+              </template>
               <q-card>
-                <q-card-section>
-                  <q-list>
-                    <q-item v-if="v.caption">
-                      <q-item-section avatar>
-                        <q-icon name="info" size="sm" outline />
-                      </q-item-section>
-                      <q-item-section>
-                        <q-item-label caption>{{ v.caption }}</q-item-label>
-                      </q-item-section>
-                    </q-item>
-                    <q-video :ratio="v.ratio || 16/9" :src="v.url" class="q-mb-lg rounded-borders" />
-                  </q-list>
-                </q-card-section>
+                <q-card-section
+                  class="text-caption"
+                >Wir haben zu allen wichtigen Bereichen Video-Tutorials erstellt.</q-card-section>
               </q-card>
             </q-expansion-item>
-          </div>
+            <div class="rounded-borders" v-for="v in supportData.tutorials" :key="v.id">
+              <q-expansion-item style="width: 80vw">
+                <template v-slot:header class="text-subtitle1 full-width">{{ v.title }}</template>
+                <q-card>
+                  <q-item v-if="v.caption" class="q-pb-md">
+                    <q-item-section avatar>
+                      <q-icon name="info" size="sm" outline />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label caption>{{ v.caption }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                  <q-video :ratio="v.ratio || 16/9" :src="v.url" class="q-mb-lg rounded-borders" />
+                </q-card>
+              </q-expansion-item>
+              <q-separator />
+            </div>
+          </q-list>
         </q-tab-panel>
       </q-tab-panels>
     </div>
@@ -277,6 +276,9 @@ export default {
     }
   },
   methods: {
+    refreshContent(res) {
+      this.loadFAQ(res);
+    },
     sendQuestion() {
       this.sendProgress = 1;
       sendApiRequest(
@@ -294,8 +296,12 @@ export default {
         }
       );
     },
-    loadFAQ() {
-      if (this.tab == "faq" && !this.$store.getters["getSupportData"]) {
+    loadFAQ(res) {
+      if (
+        this.tab == "faq" &&
+        (!this.$store.getters["getSupportData"] || res)
+      ) {
+        // when res give, then force and use it as resolver
         sendApiRequest(
           SQL_GET_SUPPORT_DATA,
           {},
@@ -337,6 +343,7 @@ export default {
                 }, 100);
               }, 100); // wait 100ms until rendered
             }
+            res();
           },
           error => {}
         );
