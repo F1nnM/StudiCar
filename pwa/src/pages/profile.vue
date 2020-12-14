@@ -897,9 +897,9 @@ export default {
   methods: {
     validNumberPlate() {
       this.newCar.licensePlate = this.newCar.licensePlate.toUpperCase();
-      var pattern = /[A-Z]{1,3} [A-Z]{1,2} \d{1,4}$/gm;
-      var match = this.newCar.licensePlate.match(pattern);
-      return match;
+      var pattern = /[A-ZÄÖÜ]{1,3} [A-ZÄÖÜ]{1,2} \d{1,4}$/gm;
+      var matches = this.newCar.licensePlate.match(pattern);
+      return !!matches; // returns null if no matches, otherwise array, so have to double-negate it
     },
 
     toggleOpenEditDescription() {

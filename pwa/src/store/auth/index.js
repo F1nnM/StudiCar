@@ -211,7 +211,7 @@ export default {
       sendApiRequest(
         SQL_GET_MARKETPLACE,
         {},
-        (offers, statuscode) => {
+        (offers) => {
           commit('UPDATE_MARKETPLACE_OFFERS', offers)
           callbacks.res()
         },
@@ -287,6 +287,7 @@ export default {
         _ => commit('REMOVE_ADDRESS', payload),
         error => {
           if (error.status == 424) errorNotify('Kann Adresse noch nicht entfernen: Eine Mitfahrgelegenheit hängt davon ab')
+          else errorNotify(error)
         }
       )
     },
@@ -313,6 +314,7 @@ export default {
         },
         error => {
           if (error.status == 424) errorNotify('Kann Fahrzeug noch nicht entfernen: Eine Mitfahrgelegenheit hängt davon ab')
+          else errorNotify(error)
         }
       )
     },
@@ -340,7 +342,7 @@ export default {
         SQL_UPDATE_GENDER,
         { gender: gender },
         _ => commit('UPDATE_GENDER', gender),
-        error => alert(error)
+        error => errorNotify(error)
       )
     },
 
@@ -349,7 +351,7 @@ export default {
         SQL_UPDATE_LIFT_MAX_DISTANCE,
         { liftMaxDistance: payload },
         _ => commit('UPDATE_LIFT_MAX_DISTANCE', payload),
-        error => alert(error)
+        error => errorNotify(error)
       );
     },
 
@@ -386,9 +388,9 @@ export default {
     async requestToLift ({ commit }, payload) {
       sendApiRequest(SQL_ADD_LIFT_REQUEST, {
         liftId: payload
-      }, data => {
+      }, _ => {
         commit('REQUEST_TO_LIFT', payload)
-      }, err => {
+      }, _ => {
         errorNotify('Konnte Anfrage nicht einstellen, möglicherweise hast du schon angefragt.')
       })
     }
