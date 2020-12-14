@@ -344,7 +344,7 @@ async function getMarketplace (fbid, uuidOnly) {
   let JSON = (await runQuery(`
   WITH
   lifts as (
-      SELECT
+      SELECT DISTINCT
       lift.ID AS ID,
           lift.UUID AS UUID,
           driver.FB_ID AS DRIVER_FB_ID,
