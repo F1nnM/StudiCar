@@ -381,7 +381,8 @@ async function getMarketplace (fbid, uuidOnly) {
               ON lift.START = start_point.ID 
           JOIN 
       		  lift_map map_user_filter
-      		  ON lift.ID = map_user_filter.LIFT_ID
+            ON lift.ID = map_user_filter.LIFT_ID
+            AND map_user_filter.IS_DRIVER = 1
           JOIN
               users user_filter
               ON user_filter.ID = map_user_filter.USER_ID
