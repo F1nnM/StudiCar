@@ -25,8 +25,6 @@ files.forEach(filename => {
 });
 
 
-var runQuery = require('./db')
-
 // copy all postillon tickers from TXT file to array in JS to get better access
 
 const newsPath = 'news/postillon/ticker.txt'
