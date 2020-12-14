@@ -30,7 +30,12 @@
                     transition-prev="slide-right"
                     transition-next="slide-left"
                   >
-                    <q-tab-panel class="bg-primary q-pa-none text-white" :name="false">
+                    <q-tab-panel
+                      class="bg-primary q-pa-none text-white"
+                      :name="false"
+                      clickable
+                      @click="reloadPage"
+                    >
                       StudiCar
                       <!-- <q-btn label="reg" to="/auth/registrierung" /> -->
                       <q-chip
@@ -334,7 +339,7 @@ export default {
 
   methods: {
     reloadPage() {
-      location.reload(true);
+      location.reload();
     },
 
     async refresh(done) {

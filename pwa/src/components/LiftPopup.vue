@@ -599,14 +599,9 @@ export default {
       } catch (e) {}
     },
 
-    getImageOfUser(id) {
-      return require("../assets/sad.svg");
-    },
-
     getNameFromId(userId) {
-      if (!userId) {
-        return "[SYSTEM]";
-      } else {
+      if (userId == "NT7XvvMLjlXn0NJozPGb7WF4zac2") return "StudiCar";
+      else {
         var name = this.passengersAndDriverNames[userId];
         if (!name) return "[Ehemalig]";
         else return name;

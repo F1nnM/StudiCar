@@ -136,22 +136,6 @@
             @shortLiftInfo="openShortLiftInfo"
           />
         </q-list>
-        <q-item-label header>Fahrten ohne Nachrichten</q-item-label>
-        <q-list>
-          <q-item
-            clickable
-            @click="openTheLift(m.liftId)"
-            v-for="(m) in withoutMessages"
-            :key="m.timestamp + Math.random() + ''"
-          >
-            <q-item-section>
-              <q-item-label>{{ m.start }} > {{ m.destination }}</q-item-label>
-            </q-item-section>
-            <q-item-section side>
-              <q-item-label>In {{ m.daysLeft }} Tagen</q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
         <LiftPopup
           @shortLiftInfo="openShortLiftInfo"
           v-model="chatPopup.isOpen"
@@ -358,10 +342,8 @@ export default {
       var people = [];
       lift.passengers.forEach(item => people.push(item));
       people.push(JSON.parse(JSON.stringify(lift.driver)));
-      if (userId == -1) {
-        // no messages there yet
-        return "[SYSTEM]";
-      } else {
+      if (userId == "NT7XvvMLjlXn0NJozPGb7WF4zac2") return "StudiCar";
+      else {
         var a = people.find(p => p.id == userId);
         if (!a) return "[Ehemalig]";
         else return a.name;

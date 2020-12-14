@@ -450,7 +450,7 @@ function endWithJSON (res, JSON) {
 }
 
 async function isUserVerified (fbid) {
-  let result =  (await runQuery(`
+  let result = (await runQuery(`
   SELECT VERIFIED FROM users WHERE FB_ID = ?
   `, [fbid])).result[0]
   return result ? result.VERIFIED === 1 : false
@@ -876,7 +876,7 @@ module.exports = {
     },
     '/getTeamInfo': async (req, res, options) => {
       if (isUserVerified(options.secretFbId)) {
-        var team = (await runQuery('SELECT * from team')).result,
+        var team = (await runQuery('SELECT * from team WHERE ID != 0')).result,
           about = '',
           teamArr = []
 
@@ -1120,7 +1120,8 @@ module.exports = {
       if (!isOptionMissing(options, ['lift'], res) && await isUserVerified(options.secretFbId)) {
         var lift = options.lift,
           isdepartAt = lift.departAt,
-          userId = await getUserId(options.secretFbId)
+          userId = await getUserId(options.secretFbId),
+          content = 'Willkommen im Chat!'
 
         await runQuery(
           "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `START`, `DESTINATION`, `UUID`, `REPEATS_ON_WEEKDAY`, `FIRST_DATE`, `DEPART_AT`, `ARRIVE_BY`) VALUES (current_timestamp(), ?, ?, ?, ?, FLOOR(UUID_SHORT() / 1000), ?, ? ,?, ?)",
@@ -1132,13 +1133,14 @@ module.exports = {
             throw error;
           })).result[0]
         var newLiftId = insertedResult.ID
-        await runQuery(
+        runQuery(
           "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`, `PENDING`) VALUES (?, ?, 1, 0)", [newLiftId, userId]).catch(error => {
             throw error;
+          }).then(_ => {
+            runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, 0, ?, current_timestamp())", [content, newLiftId]).catch(error => {
+              throw error
+            })
           })
-        await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, 0, ?, current_timestamp())", ['Wilkommen', newLiftId]).catch(error => {
-          throw error
-        })
 
 
         /* INSERT INTO `messages` (`ID`, `UUID`, `CONTENT`, `AUDIO`, `PICTURE`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (NULL, '6516515156313513', 'Hallo! Schön, dass ihr da seid!', NULL, NULL, '1', '1', current_timestamp()) */

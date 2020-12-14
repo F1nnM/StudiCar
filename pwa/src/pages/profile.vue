@@ -434,14 +434,14 @@
                 <div class="col-5">
                   <q-input
                     required
-                    type="number"
+                    type="text"
                     v-model="newAddress.number"
                     label="Hausnummer"
                     lazy-rules
                     :rules="[
                       (val) =>
-                        (val > 0 && val < 1000) ||
-                        'Hausnummern können von 1 bis 999 gehen',
+                        (val.length > 0 && val.length < 10) ||
+                        'Bitte gib eine Hausnummer ein',
                     ]"
                   />
                 </div>
