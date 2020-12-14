@@ -4,6 +4,8 @@ server.pem
 firebaseAccountKey.json
 
 legal/*.html
+news/postillon/*.js
+news/postillon/*.json
 
 # ignoring all the modules
 node_modules/
