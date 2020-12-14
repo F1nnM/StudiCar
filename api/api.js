@@ -1124,7 +1124,7 @@ module.exports = {
 
         await runQuery(
           "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `START`, `DESTINATION`, `UUID`, `REPEATS_ON_WEEKDAY`, `FIRST_DATE`, `DEPART_AT`, `ARRIVE_BY`) VALUES (current_timestamp(), ?, ?, ?, ?, FLOOR(UUID_SHORT() / 1000), ?, ? ,?, ?)",
-          [lift.seats, lift.carId, lift.startAddressId, lift.destinationAddressId, lift.repeats ? lift.weekday : 0, lift.datestamp, isdepartAt ? lift.timestamp : '', isdepartAt ? '' : lift.timestamp]).catch(error => {
+          [lift.seats, lift.carId, lift.startAddressId, lift.destinationAddressId, lift.repeats ? lift.weekday : 0, lift.datestamp, isdepartAt ? lift.timestamp : 0, isdepartAt ? 0 : lift.timestamp]).catch(error => {
             throw error;
           })
         var insertedResult = (await runQuery(
@@ -1133,10 +1133,10 @@ module.exports = {
           })).result[0]
         var newLiftId = insertedResult.ID
         await runQuery(
-          "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`) VALUES (?, ?, 1)", [newLiftId, userId]).catch(error => {
+          "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`, `PENDING`) VALUES (?, ?, 1, 0)", [newLiftId, userId]).catch(error => {
             throw error;
           })
-        await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, 0, ?, current_timestamp())", ['Wilkommen', liftId]).catch(error => {
+        await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, 0, ?, current_timestamp())", ['Wilkommen', newLiftId]).catch(error => {
           throw error
         })
 
