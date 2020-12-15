@@ -140,6 +140,7 @@
           @shortLiftInfo="openShortLiftInfo"
           v-model="chatPopup.isOpen"
           :lift="chatPopup.data"
+          @closeLift="closeLift"
           @closeAndLeave="leave"
         />
         <QrGen
@@ -433,9 +434,13 @@ export default {
       this.$store.dispatch("auth/respondLiftRequest", eventObj);
     },
 
-    leave(liftId) {
+    closeLift() {
       this.chatPopup.data = null;
       this.chatPopup.isOpen = false;
+    },
+
+    leave(liftId) {
+      this.closeLift();
       this.$store.dispatch("auth/leaveLift", liftId);
     }
   },

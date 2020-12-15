@@ -6,13 +6,21 @@
     maximized
     @input="emit"
   >
-    <div v-if="lift" v-touch-swipe.mouse.right="swipedToRight">
+    <div v-if="lift" v-touch-swipe.mouse.right="swipedToRight" v-touch-swipe.mouse.left="closeLift">
       <div class="row justify-end">
         <div class="col-2 text-right column justify-center q-pr-md text-primary bg-white">Info</div>
         <div class="col-2 bg-white text-primary">
           <q-toolbar>
             <q-toolbar-title class="text-uppercase">
-              <q-btn v-ripple icon="close" flat round dense @click="emit(false)" />
+              <q-btn
+                v-ripple
+                icon="close"
+                flat
+                round
+                dense
+                @click="emit(false)"
+                v-touch-hold:300.mouse="closeLift"
+              />
             </q-toolbar-title>
           </q-toolbar>
         </div>
@@ -71,13 +79,9 @@
               >Tippe, um zum jeweiligen Profil zu kommen</small>
               <span class="text-caption float-right">
                 {{ lift.passengers.length + 1 }} / {{ lift.car.allSeats + 1 }}
-                <q-icon name="person" size="xs" />
+                <q-icon name="person" size="xs" v-if="lift.passengers.length < lift.car.allSeats" />
+                <q-icon name="how_to_reg" color="positive" size="xs" v-else />
               </span>
-
-              <p
-                class="text-right text-primary text-caption"
-                v-if="lift.passengers.length == lift.seats"
-              >Volles Auto. Wow!</p>
             </div>
             <span v-else class="text-caption float-right">
               0 / {{ lift.car.allSeats }}
@@ -94,7 +98,7 @@
               <p class="q-mb-none">
                 {{ lift.driver.name }}
                 <q-badge class="q-ml-sm" transparent color="white">
-                  <q-icon name="directions_car" size="xs" color="primary" />
+                  <q-icon name="directions_car" size="xs" color="black" />
                 </q-badge>
               </p>
 
@@ -309,6 +313,9 @@ export default {
   methods: {
     emit(val) {
       this.$emit("input", val);
+    },
+    closeLift() {
+      this.$emit("closeLift");
     },
     swipedToRight() {
       this.emit(false);

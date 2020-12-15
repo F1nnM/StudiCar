@@ -97,6 +97,7 @@
               @closeAndLeave="closeAndLeave"
               v-model="infoDrawerOpen"
               @input="infoDrawerOpen = false"
+              @closeLift="closeLift"
               :lift="lift"
             />
             <q-tab-panels
@@ -610,6 +611,10 @@ export default {
 
     emit(val) {
       this.$emit("input", val);
+    },
+
+    closeLift() {
+      this.$emit("closeLift");
     },
 
     closeAndLeave(event) {
