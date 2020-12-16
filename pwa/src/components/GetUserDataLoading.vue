@@ -2,7 +2,7 @@
   <div>
     <div class="q-pa-md">
       <q-dialog
-        v-model="open"
+        :value="open"
         persistent
         maximized
         transition-show="jump-up"
@@ -29,8 +29,8 @@
           </div>
 
           <div class="fixed-bottom overflow-hidden-y text-center">
-            <q-tab-panels v-model="showBranding" animated transition-show="jump-up">
-              <q-tab-panel :name="true">
+            <q-tab-panels :value="open || showBranding" animated transition-show="jump-up">
+              <q-tab-panel :name="true" class="text-grey-7">
                 Mit freundlicher Unterstützung des
                 ADAC e.V.
               </q-tab-panel>
@@ -82,7 +82,11 @@ export default {
       return this.loadingTexts[pos];
     }
   },
-  methods: {},
+  methods: {
+    async adac() {
+      return new Promise(res => setTimeout(res, 1000));
+    }
+  },
 
   mounted() {
     /* setInterval(_ => {
