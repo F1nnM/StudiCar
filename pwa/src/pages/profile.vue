@@ -54,7 +54,8 @@
               <div class="col-2">
                 <q-btn size="sm" flat color="black" icon="edit" @click="toggleOpenEditDescription" />
               </div>
-              <div class>{{ description }}</div>
+              <div v-if="description">{{ description }}</div>
+              <div v-else class="text-weight-light">- noch keine Beschreibung hinterlegt -</div>
             </div>
 
             <q-select

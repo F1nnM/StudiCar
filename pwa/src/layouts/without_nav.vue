@@ -17,13 +17,13 @@ import GetUserDataLoading from "components/GetUserDataLoading";
 
 export default {
   name: "without_nav",
-  components: {GetUserDataLoading},
+  components: { GetUserDataLoading },
   computed: {
     loadingScreenVisible() {
       return !this.$store.getters["auth/signinLoaded"];
     }
   }
-}
+};
 </script>
 
 <style scoped>

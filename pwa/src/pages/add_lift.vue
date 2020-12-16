@@ -25,7 +25,7 @@
             <q-btn
               icon="add"
               label="Zum Profil"
-              class="q-mt-sm"
+              class="q-mt-sm q-pr-sm"
               to="/profil?tab=reservoir"
               dense
               outline

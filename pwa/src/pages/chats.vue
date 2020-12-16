@@ -119,43 +119,46 @@
             </q-tab-panels>
           </div>
         </div>
-        <div v-else class="text-caption">
-          <q-item>Im Moment hast du keine Anfragen</q-item>
-        </div>
+        <div v-else class="text-caption">Im Moment hast du keine Anfragen.</div>
       </q-tab-panel>
 
       <q-tab-panel name="current" class="q-pa-none">
-        <q-list class="q-pb-sm">
-          <ChatItem
-            v-for="(m, index) in lastMessages"
-            :key="m.timestamp + Math.random() + ''"
-            :message="m"
-            :sentByName="getNameFromId(m.liftId, m.sentBy)"
-            :firstItem="index == 0"
-            @open="openTheLift"
+        <div v-if="lastMessages.length">
+          <q-list class="q-pb-sm">
+            <ChatItem
+              v-for="(m, index) in lastMessages"
+              :key="m.timestamp + Math.random() + ''"
+              :message="m"
+              :sentByName="getNameFromId(m.liftId, m.sentBy)"
+              :firstItem="index == 0"
+              @open="openTheLift"
+              @shortLiftInfo="openShortLiftInfo"
+            />
+          </q-list>
+          <LiftPopup
             @shortLiftInfo="openShortLiftInfo"
+            v-model="chatPopup.isOpen"
+            :lift="chatPopup.data"
+            @closeLift="closeLift"
+            @closeAndLeave="leave"
           />
-        </q-list>
-        <LiftPopup
-          @shortLiftInfo="openShortLiftInfo"
-          v-model="chatPopup.isOpen"
-          :lift="chatPopup.data"
-          @closeLift="closeLift"
-          @closeAndLeave="leave"
-        />
-        <QrGen
-          position="bottom"
-          v-model="shortLiftPopup.isOpen"
-          linearProgress
-          :input="'l' + (shortLiftPopup.data ? shortLiftPopup.data.id : '') + '#i' + ownId"
-          text="Über diesen Code kannst du eine Fahrgemeinschaft direkt teilen."
-        >
-          {{ shortLiftPopup.data ? shortLiftPopup.data.start.name : '' }}
-          <span class="q-mx-xs">›</span>
-          {{ shortLiftPopup.data ? shortLiftPopup.data.destination.name : '' }}
-        </QrGen>
+          <QrGen
+            position="bottom"
+            v-model="shortLiftPopup.isOpen"
+            linearProgress
+            :input="'l' + (shortLiftPopup.data ? shortLiftPopup.data.id : '') + '#i' + ownId"
+            text="Über diesen Code kannst du eine Fahrgemeinschaft direkt teilen."
+          >
+            {{ shortLiftPopup.data ? shortLiftPopup.data.start.name : '' }}
+            <span class="q-mx-xs">›</span>
+            {{ shortLiftPopup.data ? shortLiftPopup.data.destination.name : '' }}
+          </QrGen>
+        </div>
+        <div
+          v-else
+          class="text-caption"
+        >Du nimmst noch an keinen Fahrten teil. Frage auf dem Marktplatz bei einer Fahrt an oder biete selber eine an.</div>
       </q-tab-panel>
-      <q-tab-panel name="outgoing">Hier kommen dann die ausgehenden</q-tab-panel>
     </q-tab-panels>
   </div>
 </template>
@@ -196,21 +199,13 @@ export default {
       shortLiftPopup: {
         isOpen: false,
         data: null
-      },
-      liftRequestDayTab: null,
-      liftRequestTimeTab: null
+      }
     };
   },
 
   watch: {
-    liftRequestDayTab: function(newDay) {
-      if (!this.liftRequests[newDay][this.liftRequestTimeTab]) {
-        // if previous selected lift isn't present at that day, select first lift of that day
-        this.liftRequestTimeTab = Object.keys(this.liftRequests[newDay])[0];
-      }
-    },
     liftTab: function(newTab) {
-      if (newTab == "current") this.pendingRequestTab = 0;
+      if (newTab == "current") this.pendingRequestTab = 0; // fallback, because there are edge cases that hide incoming offers when this tab != 0
     }
   },
 
@@ -415,21 +410,6 @@ export default {
       }, 50);
     },
 
-    getDayLabel(stringOfDate) {
-      var array = stringOfDate.split("/"),
-        day = array[0],
-        month = array[1],
-        year = new Date().getFullYear(),
-        d = new Date(year, month, day);
-      return date.formatDate(d, "dd");
-    },
-
-    requestsOfDay(day) {
-      var a = 0;
-      Object.values(day).forEach(lift => (a += lift.length));
-      return a;
-    },
-
     respondLiftRequest(eventObj) {
       this.$store.dispatch("auth/respondLiftRequest", eventObj);
     },
@@ -449,11 +429,6 @@ export default {
     this.$store.commit("setPage", {
       name: "Fahrten"
     });
-
-    this.liftRequestDayTab = Object.keys(this.liftRequests)[0];
-    this.liftRequestTimeTab = Object.keys(
-      this.liftRequests[this.liftRequestDayTab]
-    )[0];
   }
 };
 </script>
