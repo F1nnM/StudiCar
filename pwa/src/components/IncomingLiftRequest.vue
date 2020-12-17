@@ -139,12 +139,12 @@ export default {
                 cancel: {
                   color: "white"
                 },
-                options: {
+                /* options: {
                   type: "checkbox",
                   model: [],
                   // inline: true
                   items: [{ label: "Nicht mehr fragen", value: true }]
-                },
+                }, */
                 cancel: true,
                 persistent: true
               })

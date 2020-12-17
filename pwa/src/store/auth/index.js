@@ -139,7 +139,7 @@ export default {
     },
 
     REQUEST_TO_LIFT (state, liftId) {
-      state.user.marketplaceOffers.filter(offer => offer.id == liftId)
+      state.user.marketplaceOffers = state.user.marketplaceOffers.filter(offer => offer.id != liftId)
     }
   },
 
