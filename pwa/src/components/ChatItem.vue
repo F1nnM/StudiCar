@@ -1,12 +1,17 @@
 <template>
   <div>
-    <q-slide-item>
+    <q-slide-item left-color="white" right-color="white" @left="onLeft" @right="onRight">
       <q-separator v-if="!firstItem" inset="item" />
       <template v-slot:left>
-        <q-icon name="delete_outline" backgroundColor="red" />
+        <div class="row items-center text-dark">
+          <q-icon left name="info" />Details
+        </div>
       </template>
       <template v-slot:right>
-        <q-icon name="delete_outline" />
+        <div class="row items-center text-primary">
+          StudiCar Code
+          <q-icon right name="select_all" />
+        </div>
       </template>
 
       <q-item
@@ -48,7 +53,6 @@
         >{{ generateTimeString(message.timestamp) }}</q-item-section>
       </q-item>
     </q-slide-item>
-    <audio></audio>
   </div>
 </template>
 
@@ -75,13 +79,13 @@ export default {
     onLeft({ reset }) {
       this.$emit("left", this.message.liftId);
 
-      this.finalize(reset);
+      reset();
     },
 
     onRight({ reset }) {
       this.$emit("right", this.message.liftId);
 
-      this.finalize(reset);
+      reset();
     },
 
     generateTimeString(time) {
@@ -121,12 +125,6 @@ export default {
         var this_year = date.isSameDate(time, new Date(), "year");
         return this_day && this_month && this_year;
       }
-    },
-
-    finalize(reset) {
-      this.timer = setTimeout(() => {
-        reset();
-      }, 200);
     },
 
     quickLiftInfo(info) {

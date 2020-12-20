@@ -34,6 +34,7 @@
               outline
               @click="respondLiftRequest(true)"
               no-caps
+              :disable="acceptDisabled"
               color="grey-7"
               class="q-px-xs"
               dense
@@ -90,7 +91,8 @@ export default {
   },
   props: {
     requestingUser: Object,
-    liftId: Number
+    liftId: Number,
+    acceptDisabled: Boolean
   },
   computed: {},
 

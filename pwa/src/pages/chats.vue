@@ -76,9 +76,7 @@
                   v-if="!(seatsLeft(lift.liftId) > 0)"
                   class="text-negative"
                 >Das Auto ist im Moment voll, du kannst keine Angebote annehmen.</div>
-                <div
-                  :class="'full-width ' + (!(seatsLeft(lift.liftId) > 0) ? 'no-pointer-events' : '')"
-                >
+                <div class="full-width">
                   <span
                     class="text-negative"
                     v-if="!canAcceptAllRequests(lift) && (seatsLeft(lift.liftId) > 0)"
@@ -90,7 +88,7 @@
                     v-for="r in lift.requestingUsers"
                     :key="r.id"
                   >
-                    <!-- <template v-slot:left>
+                    <!-- <template v-slot:left v-if="seatsLeft(lift.liftId) <= 0">
                       <q-avatar>
                         <q-icon name="thumb_up" color="positive" size="sm" />
                       </q-avatar>
@@ -110,6 +108,7 @@
                       <IncomingLiftRequest
                         :requestingUser="r"
                         :liftId="lift.liftId"
+                        :acceptDisabled="seatsLeft(lift.liftId) <= 0"
                         @respond="respondLiftRequest"
                       />
                     </div>
@@ -133,25 +132,28 @@
               :firstItem="index == 0"
               @open="openTheLift"
               @shortLiftInfo="openShortLiftInfo"
+              @right="openShortLiftInfo"
+              @left="openLiftWithDetails"
             />
           </q-list>
           <LiftPopup
             @shortLiftInfo="openShortLiftInfo"
             v-model="chatPopup.isOpen"
+            :detailsOpen="chatPopup.detailsOpen"
             :lift="chatPopup.data"
             @closeLift="closeLift"
             @closeAndLeave="leave"
           />
           <QrGen
             position="bottom"
-            v-model="shortLiftPopup.isOpen"
+            v-model="liftCodePopup.isOpen"
             linearProgress
-            :input="'l' + (shortLiftPopup.data ? shortLiftPopup.data.id : '') + '#i' + ownId"
+            :input="'l' + (liftCodePopup.data ? liftCodePopup.data.id : '') + '#i' + ownId"
             text="Über diesen Code kannst du eine Fahrgemeinschaft direkt teilen."
           >
-            {{ shortLiftPopup.data ? shortLiftPopup.data.start.name : '' }}
+            {{ liftCodePopup.data ? liftCodePopup.data.start.name : '' }}
             <span class="q-mx-xs">›</span>
-            {{ shortLiftPopup.data ? shortLiftPopup.data.destination.name : '' }}
+            {{ liftCodePopup.data ? liftCodePopup.data.destination.name : '' }}
           </QrGen>
         </div>
         <div
@@ -194,9 +196,10 @@ export default {
       pendingRequestTab: 0,
       chatPopup: {
         isOpen: false,
+        detailsOpen: false,
         data: null
       },
-      shortLiftPopup: {
+      liftCodePopup: {
         isOpen: false,
         data: null
       }
@@ -372,12 +375,12 @@ export default {
     },
 
     openTheLift(liftId) {
-      var enableDoubleTap = false;
+      /* var enableDoubleTap = false;
 
       if (!process.env.DEV) enableDoubleTap = false; // just to be sure
-      if (!enableDoubleTap) {
-        this.openLiftPopup(liftId);
-      } else {
+      if (!enableDoubleTap) { */
+      this.openLiftPopup(liftId);
+      /* } else {
         if (this.alreadyTappedOnItem) this.openShortLiftInfo(liftId);
         else {
           this.alreadyTappedOnItem = true;
@@ -388,20 +391,25 @@ export default {
             this.alreadyTappedOnItem = false;
           }, 200);
         }
-      }
+      } */
+    },
+
+    openLiftWithDetails(liftId) {
+      this.chatPopup.detailsOpen = true;
+      this.openLiftPopup(liftId);
     },
 
     openLiftPopup(liftId) {
       var lift = this.lifts.find(l => l.id == liftId);
       this.chatPopup.data = lift;
-      this.shortLiftPopup.isOpen = false; // just to be sure
+      this.liftCodePopup.isOpen = false; // just to be sure
       this.chatPopup.isOpen = true;
     },
 
     openShortLiftInfo(liftId) {
       var lift = this.lifts.find(l => l.id == liftId);
-      this.shortLiftPopup.data = lift;
-      this.shortLiftPopup.isOpen = true;
+      this.liftCodePopup.data = lift;
+      this.liftCodePopup.isOpen = true;
     },
 
     finalize(reset) {

@@ -473,6 +473,7 @@ export default {
   },
   props: {
     open: Boolean,
+    detailsOpen: Boolean,
     lift: Object
   },
   watch: {
@@ -485,7 +486,10 @@ export default {
         setTimeout(_ => {
           this.scrollToEnd();
         }, 50);
-      } else this.infoDrawerOpen = false;
+      } else {
+        this.infoDrawerOpen = false;
+        this.detailsOpen = false;
+      }
     },
 
     messageText: function(newText) {
@@ -494,6 +498,10 @@ export default {
       } else {
         this.showPassengersToBeMentioned = false;
       }
+    },
+
+    detailsOpen: function(newv) {
+      if (newv) this.infoDrawerOpen = true;
     }
   },
   computed: {
