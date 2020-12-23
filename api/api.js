@@ -1,8 +1,9 @@
-var runQuery = require('./db'),
-  fs = require('fs')
-const newsPath = 'news/postillon/ticker.txt',
-  longQueries = require('./longQueries'),
-  apiResponseSimulation = require('./simulation/apiResponse')
+const 
+  runQuery              = require('./db'),
+  fs                    = require('fs'),
+  longQueries           = require('./longQueries'),
+  apiResponseSimulation = require('./simulation/apiResponse'),
+  tickerJS              = require('./news/postillon/ticker.js')
 
 function isOptionMissing (data, needed, res) {
   return needed.some(key => {
@@ -474,8 +475,7 @@ module.exports = {
       }
     },
     '/getNewsticker': async (req, res, options) => {
-      var tickerJS = require('./news/postillon/ticker.js'),
-        line = tickerJS[Math.floor(Math.random() * tickerJS.length)]
+      let line = tickerJS[Math.floor(Math.random() * tickerJS.length)]
 
       endWithJSON(res, JSON.stringify({
         ticker: line
