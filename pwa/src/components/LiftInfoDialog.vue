@@ -258,7 +258,7 @@ export default {
       var search = `${car.brand}+${car.model.replace(" ", "")}+${
         car.type
       }+${humanColor}`;
-      search = search.replace("+", "%20");
+      search = search.replaceAll("+", "%20");
       return "https://www.pexels.com/search/" + search;
     },
 
