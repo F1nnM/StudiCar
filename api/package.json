@@ -12,7 +12,7 @@
   "author": "Finn Melzer <studicar@mfinn.de>",
   "license": "ISC",
   "dependencies": {
-    "firebase-admin": "^8.10.0",
+    "firebase-admin": "^9.4.2",
     "image-size": "^0.8.3",
     "jdenticon": "^2.2.0",
     "mariadb": "^2.3.1",
