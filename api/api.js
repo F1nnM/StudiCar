@@ -821,6 +821,7 @@ module.exports = {
       var result = (await runQuery(longQueries.getFAQ, [])).result,
         faqArr = [],
         tutArr = []
+      console.log(result)
       result.forEach(item => {
         faqArr.push({
           id: item.ID,

@@ -80,12 +80,14 @@
                       <template v-slot:header>
                         <q-item class="text-right full-width">
                           <q-item-section>
-                            <q-item-label caption>Antwort von {{ q.answeredBy.name }}</q-item-label>
+                            <q-item-label caption>
+                              Antwort von {{ q.answeredBy.name }}
+                              <small>({{ q.answeredBy.function }})</small>
+                            </q-item-label>
                           </q-item-section>
                         </q-item>
                       </template>
                       <q-item-label caption class="text-right q-pb-sm">
-                        <p>({{ q.answeredBy.function }})</p>
                         <q-btn
                           :to="'/das-team?orgaId=' + q.answeredBy.id"
                           dense
