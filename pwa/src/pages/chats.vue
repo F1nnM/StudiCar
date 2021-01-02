@@ -341,7 +341,7 @@ export default {
       var people = [];
       lift.passengers.forEach(item => people.push(item));
       people.push(JSON.parse(JSON.stringify(lift.driver)));
-      if (userId == "NT7XvvMLjlXn0NJozPGb7WF4zac2") return "StudiCar";
+      if (userId == "Go6vlU74gFgz5GgM5eRnWPPt2Cf1") return "StudiCar";
       else {
         var a = people.find(p => p.id == userId);
         if (!a) return "[Ehemalig]";

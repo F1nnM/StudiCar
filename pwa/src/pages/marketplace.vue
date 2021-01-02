@@ -51,33 +51,50 @@
       </div>
       <div
         class="text-caption"
-        v-show="!(getSortedOffers.length || filter.length)"
+        v-if="!(getSortedOffers.length || filter.length)"
       >Im Moment gibt es für dich gerade keine Angebote. Schau einfach später nochmal vorbei.</div>
       <!-- above case for neither offers nor filter applied -->
       <div
         class="text-caption"
-        v-show="!getSortedOffers.length && filter.length"
+        v-else-if="!getSortedOffers.length && filter.length"
       >Es gibt keine Angebote, die deinen Filterkriterien entsprechen.</div>
       <!-- above case for offers all not matching selected filter settings -->
     </div>
+    <QrLiftDisplay @request="triggerLiftRequest" />
   </div>
 </template>
 
 <script>
 import { sendApiRequest } from "../ApiAccess";
 import LiftOffer from "../components/LiftOffer";
+import QrLiftDisplay from "components/QrLiftDisplay";
+
 export default {
-  components: { LiftOffer },
+  components: { LiftOffer, QrLiftDisplay },
   data() {
     return {
       openEditSort: false,
       sort: {
         label: "nach Sitzen (Standard)",
         icon: "person",
-        value: "seats" // value is enough info
+        value: "seats"
       },
       offerIndexToRefresh: 1
     };
+  },
+
+  /* updated() {
+    this.recomputeView();
+  },
+
+  created() {
+    this.recomputeView();
+  }, */
+
+  watch: {
+    /* $route(to) {
+      this.recomputeView();
+    } */
   },
 
   computed: {
@@ -230,6 +247,18 @@ export default {
       });
     },
 
+    hide() {
+      this.qrLiftData = "";
+    },
+
+    recomputeView() {
+      var locArr = window.location.href.split("?qrLiftData=");
+      if (locArr.length > 1 && this.qrLiftData != "") {
+        this.qrLiftData = locArr[1];
+        console.warn("changed to " + locArr[1]);
+      }
+    },
+
     triggerLiftRequest(liftId) {
       this.$store.dispatch("auth/requestToLift", liftId);
       this.offerIndexToRefresh++; // to re-render component, wasn't working otherwise
@@ -241,6 +270,7 @@ export default {
       name: this.title,
       navTitle: "Marktplatz"
     });
+    /*  this.recomputeView(); */
   }
 };
 </script>

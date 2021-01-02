@@ -108,9 +108,9 @@
           <div v-if="pageName">
             <q-scroll-observer @scroll="scrollHandler" />
 
-            <div class="text-h5 q-pl-md q-py-md" v-if="!titleOnlyInNav">
+            <div class="text-h5 q-py-md" v-if="!titleOnlyInNav">
               <span
-                class="custom-underline c-u-l c-u-2 c-u-md"
+                class="custom-underline q-ml-md c-u-l c-u-2 c-u-md"
                 transition="slide-left"
               >{{ pageName }}</span>
             </div>
@@ -121,7 +121,6 @@
         </q-page-container>
       </div>
     </q-pull-to-refresh>
-    <QrLiftDisplay v-model="liftQrId" />
 
     <q-dialog
       :value="!hideUpdateField && oldVersionRunning"
@@ -180,7 +179,13 @@
         class="text-black bg-white"
         align="center"
       >
-        <q-route-tab exact icon="home" to="/" label="Marktplatz" replace />
+        <q-route-tab
+          exact
+          icon="home"
+          to="/?qrLiftData=99034233762217#iwG3cG4M7NFMJzJYcreFjLrJC9Q23"
+          label="Marktplatz"
+          replace
+        />
         <q-route-tab icon="add_circle_outline" to="/add-lift" replace label="Anbieten" />
         <q-route-tab icon="directions_car" to="/chats" replace label="Fahrten" />
         <q-route-tab icon="account_box" to="/profil" replace label="Profil" />
@@ -196,7 +201,6 @@ import { scroll } from "quasar";
 
 import EssentialLink from "components/EssentialLink";
 import DrawerWelcomeImage from "components/DrawerWelcomeImage";
-import QrLiftDisplay from "components/QrLiftDisplay";
 import ExtHr from "components/ExtendedHr";
 
 import { sendApiRequest, GET_NEWSTICKER } from "../ApiAccess";
@@ -208,7 +212,6 @@ export default {
     EssentialLink,
     QrScanner,
     DrawerWelcomeImage,
-    QrLiftDisplay,
     ExtHr
   },
 
@@ -371,6 +374,10 @@ export default {
       this.scrolled = !this.scannerOpen ? info.position > 30 : false;
     },
 
+    goBack() {
+      window.location.goBack();
+    },
+
     gotScanResult(e) {
       this.scannerOpen = false;
       switch (e.type) {
@@ -378,8 +385,7 @@ export default {
           window.location.href = "#/benutzerinfo?userFbId=" + e.res;
           break;
         case "l":
-          this.liftQrId = e.res;
-          window.location.href = "#/";
+          window.location.href = "#/?qrLiftData=" + e.res;
           break;
       }
     },

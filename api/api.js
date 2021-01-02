@@ -404,7 +404,7 @@ async function getMarketplace (fbid, uuidOnly) {
           (lift.FIRST_DATE >= CURRENT_DATE() 
           OR lift.REPEATS_ON_WEEKDAY != 0)
           AND user_filter.FB_ID != ?
-          AND ${uuidOnly && (typeof uuidOnly == 'Number') ? `lift.UUID = ${uuidOnly}` : 'TRUE'}
+          ${uuidOnly && (typeof uuidOnly == 'Number') ? `AND lift.UUID = ${uuidOnly}` : ''}
   )
   
   SELECT
@@ -821,7 +821,6 @@ module.exports = {
       var result = (await runQuery(longQueries.getFAQ, [])).result,
         faqArr = [],
         tutArr = []
-      console.log(result)
       result.forEach(item => {
         faqArr.push({
           id: item.ID,

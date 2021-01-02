@@ -609,7 +609,7 @@ export default {
     },
 
     getNameFromId(userId) {
-      if (userId == "NT7XvvMLjlXn0NJozPGb7WF4zac2") return "StudiCar";
+      if (userId == "Go6vlU74gFgz5GgM5eRnWPPt2Cf1") return "StudiCar";
       else {
         var name = this.passengersAndDriverNames[userId];
         if (!name) return "[Ehemalig]";

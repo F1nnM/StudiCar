@@ -32,7 +32,6 @@ export default {
   components: {},
   data() {
     return {
-      loc: window.location.href,
       content: "",
       loaded: false,
       view: null
@@ -52,6 +51,7 @@ export default {
       if (locArr.length > 1) this.view = locArr[1];
       // you can control the view via url
     },
+
     getContent(force) {
       const isViewContentStored = this.$store.getters["getLegalViews"].includes(
         this.view

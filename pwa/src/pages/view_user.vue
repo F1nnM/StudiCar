@@ -77,15 +77,15 @@
                   >{{ viewedUser.name.split(' ')[0] }}</span>
                 </q-item-section>
                 <q-item-section avatar class="q-mr-md">
-                  <q-btn
-                    dense
-                    flat
-                    :icon="friendIcon"
-                    size="md"
-                    @click="toggleFriend"
-                    :class="!friended.in && friended.out ? 'mirror-horiz' : ''"
-                    :color="!(friended.in || friended.out) ? 'grey-7' : 'dark'"
-                  />
+                  <q-btn icon="close" dense flat @click="$router.go(-1)">
+                    <q-tooltip
+                      anchor="top middle"
+                      :content-class="`bg-white text-dark`"
+                      content-style="border: 1px solid darkgrey"
+                      self="bottom middle"
+                      :offset="[10, 10]"
+                    >zur vorherigen Seite</q-tooltip>
+                  </q-btn>
                 </q-item-section>
               </q-item>
               <q-item-label header class="q-pt-xs q-pb-xs">
@@ -299,6 +299,15 @@ val: 'music', icon: 'music_note'
         </q-tab-panel>
         <q-tab-panel name="social">
           <p>Freunde</p>
+          <q-btn
+            dense
+            flat
+            :icon="friendIcon"
+            size="md"
+            @click="toggleFriend"
+            :class="!friended.in && friended.out ? 'mirror-horiz' : ''"
+            :color="!(friended.in || friended.out) ? 'grey-7' : 'dark'"
+          />
         </q-tab-panel>
       </q-tab-panels>
     </div>
