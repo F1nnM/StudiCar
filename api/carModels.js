@@ -1,7 +1,7 @@
 /*
 
 MOST OF THIS FILE IS NOT NEEDED AT MOMENT, ACTUALLY JUST COLORS
-
+ -> Please refactor to only keep used parts //TODO
 */
 
 
