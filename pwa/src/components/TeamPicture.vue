@@ -1,5 +1,5 @@
 <template>
-  <q-img :contain="!headFocused" :class="comClass" :src="src" />
+  <q-img :contain="!headFocused" :class="comClass" :src="imageData" />
 </template>
 
 <script>
@@ -7,21 +7,16 @@ export default {
   name: "TeamPicture",
   props: {
     headFocused: Boolean,
-    imageUrl: String,
+    imageData: String,
     cutBackground: Boolean
   },
   computed: {
-    comClass(){
-      var c = ''
-      if(this.headFocused) c += ' head-focused'
-      else c += ' body-focused'
-      if(this.cutBackground) c += ' cut'
-      return c
-    },
-
-    src(){
-      const path = ''
-      return require('../assets/team/' + this.imageUrl + '.jpg')
+    comClass() {
+      var c = "";
+      if (this.headFocused) c += " head-focused";
+      else c += " body-focused";
+      if (this.cutBackground) c += " cut";
+      return c;
     }
   }
 };

@@ -33,10 +33,11 @@
         class="q-px-none"
       >
         <q-tab-panel name="matrix" class="q-pa-none">
-          <div class="row q-px-sm q-pt-sm shadow-up-5">
+          <div class="col-12 text-right text-caption">Tippe jeweils für mehr Info</div>
+          <div class="row q-px-sm q-mt-sm q-pt-xs shadow-up-5">
             <q-list class="col-6 q-mb-xl" v-for="m in info.team" :key="m.id">
               <q-item dense clickable @click="showMember = m" class="q-pl-sm">
-                <q-badge floating transparent color="white">
+                <!-- <q-badge floating transparent color="white">
                   <q-btn
                     dense
                     outline
@@ -46,10 +47,10 @@
                     color="dark"
                     @click="showMember = m"
                   />
-                </q-badge>
+                </q-badge>-->
                 <q-item-section avatar class="q-ml-none column justify-top">
                   <q-avatar size="60px">
-                    <TeamPicture headFocused :imageUrl="m.name + ' ' + m.surname" />
+                    <TeamPicture headFocused :imageUrl="m.picture" />
                   </q-avatar>
                 </q-item-section>
 
@@ -106,7 +107,7 @@
             </div>
             <div class="col-5 flex flex-center">
               <q-avatar rounded size="35vw">
-                <TeamPicture :imageUrl="showMember.name + ' ' + showMember.surname" />
+                <TeamPicture :imageData="showMember.picture" />
               </q-avatar>
             </div>
           </div>

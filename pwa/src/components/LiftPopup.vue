@@ -21,9 +21,11 @@
                         <q-item-section class="text-white">
                           <q-item-label class="row no-wrap">
                             <div class="col-auto text-h6 text-weight-light ellipsis">
-                              {{ lift.start.name }}
-                              <span class="q-mx-sm">&rsaquo;</span>
-                              {{ lift.destination.name }}
+                              {{ getCampusLabel(lift.start.id, lift.start.name) }}
+                              <span
+                                class="q-mx-sm"
+                              >&rsaquo;</span>
+                              {{ getCampusLabel(lift.destination.id, lift.destination.name) }}
                             </div>
                           </q-item-label>
                           <q-slide-transition>
@@ -614,6 +616,19 @@ export default {
         var name = this.passengersAndDriverNames[userId];
         if (!name) return "[Ehemalig]";
         else return name;
+      }
+    },
+
+    getCampusLabel(campusId, name) {
+      switch (campusId) {
+        case 1:
+          return "Würfel";
+        case 2:
+          return "Alte DH";
+        case 3:
+          return "Kloster";
+        default:
+          return name;
       }
     },
 

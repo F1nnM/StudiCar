@@ -26,17 +26,25 @@
         </div>
       </div>
       <div class="bg-white q-pa-md" style="min-height: 100vh">
-        <p class="text-h6">Fahrtdetails</p>
-
         <q-list class="q-mt-md bg-white">
-          <q-item-label header>
-            Verlauf
+          <q-item dense class="q-mb-md">
+            <q-item-section>
+              <q-item-label class="text-h5 text-weight-light">Fahrtdetails</q-item-label>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label caption>{{ formattedDate }}</q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-item-label header>Verlauf</q-item-label>
+          <q-item-label>
             <q-badge
               v-if="(courseStations.length > 2)"
               class="q-ml-md"
             >noch {{ courseStations.length - 2 }} Zwischenstopp{{ courseStations.length > 3 ? 's' : '' }}</q-badge>
+            <q-chip :label="'jeden ' + getRepeatingWeekday" icon="refresh" v-if="lift.repeatsOn" />
           </q-item-label>
           <ExpansionLiftTimeline color="dark" :entries="courseStations"></ExpansionLiftTimeline>
+          <q-separator />
           <q-item-label header>Auto</q-item-label>
           <q-item>
             <q-item-section avatar>
@@ -266,48 +274,66 @@ export default {
       return !!this.$store.getters["auth/user"].liftRequests.length;
     },
 
+    getRepeatingWeekday() {
+      switch (this.lift.repeatsOn) {
+        case 1:
+          return "Montag";
+        case 2:
+          return "Dienstag";
+        case 3:
+          return "Mittwoch";
+        case 4:
+          return "Donnerstag";
+        case 5:
+          return "Freitag";
+        case 6:
+          return "Samstag";
+        case 7:
+          return "Sonntag";
+        case 0:
+        default:
+          return "Fehler";
+      }
+    },
+
     courseStations() {
       var arr = [],
         start = this.lift.start,
         dest = this.lift.destination,
-        arriveBy = this.lift.arriveBy,
-        departAt = this.lift.departAt;
-      addToCourse(
-        start.name,
-        start.id == -1 ? "home" : "school",
-        start.id == -1 ? "bei " + this.lift.driver.name : "",
-        departAt
-      );
+        startsAtSchool = this.lift.start.id == -1;
+      arr.push({
+        id: start.id,
+        city: start.name,
+        details: this.getStationLabel(start.id, start.name)
+      });
       if (this.lift.stations)
         this.lift.stations.forEach(station => {
-          addToCourse(
-            station.name,
-            "person_outline",
-            "bei " + station.passenger,
-            "- ? -"
-          );
+          arr.push({
+            id: -1, // cannot be a school
+            city: station.city,
+            passengerName: station.passengerName
+          });
         });
-      addToCourse(
-        dest.name,
-        dest.id == -1 ? "home" : "school",
-        dest.id == -1 ? "bei " + this.lift.driver.name : "",
-        arriveBy
-      );
-
-      function addToCourse(title, icon, text, time) {
-        arr.push({
-          title: title,
-          subtitle: time ? date.formatDate(new Date(time), "H:mm") : "- ? -",
-          icon: icon,
-          text: text
-        });
-      }
+      arr.push({
+        city: dest.name,
+        id: dest.id,
+        details: this.getStationLabel(dest.id, dest.name)
+      });
 
       return arr;
     },
 
     isDriver() {
       return this.lift.driver.id == this.$store.getters["auth/user"].uid;
+    },
+
+    formattedDate() {
+      var liftDate = new Date(this.lift.date + " " + this.lift.arriveBy),
+        daysLeft = date.getDateDiff(liftDate, new Date(), "days"),
+        text = date.formatDate(liftDate, "DD.MM."),
+        daysLeftText =
+          daysLeft > 7 ? "In über einer Woche" : "In " + daysLeft + " Tagen";
+      return daysLeftText + " am " + text;
     }
   },
   methods: {
@@ -320,6 +346,20 @@ export default {
     swipedToRight() {
       this.emit(false);
     },
+
+    getStationLabel(campusId, name) {
+      switch (campusId) {
+        case 1:
+          return "Würfel";
+        case 2:
+          return "Alte DH";
+        case 3:
+          return "Kloster";
+        default:
+          return "bei " + name;
+      }
+    },
+
     getImageOfUser(id) {
       buildGetRequestUrl(
         GET_USER_PROFILE_PIC,

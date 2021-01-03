@@ -230,8 +230,11 @@ export default {
           var lastMessage = lift.messages[lift.messages.length - 1];
           returnedArray.push({
             liftId: lift.id,
-            start: lift.start.name,
-            destination: lift.destination.name,
+            start: this.getCampusLabel(lift.start.id, lift.start.name),
+            destination: this.getCampusLabel(
+              lift.destination.id,
+              lift.destination.name
+            ),
             sentBy: lastMessage.sentBy,
             type: lastMessage.type,
             content: lastMessage.content,
@@ -346,6 +349,19 @@ export default {
         var a = people.find(p => p.id == userId);
         if (!a) return "[Ehemalig]";
         else return a.name;
+      }
+    },
+
+    getCampusLabel(campusId, name) {
+      switch (campusId) {
+        case 1:
+          return "Würfel";
+        case 2:
+          return "Alte DH";
+        case 3:
+          return "Kloster";
+        default:
+          return name;
       }
     },
 

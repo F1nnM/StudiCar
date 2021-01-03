@@ -1,39 +1,44 @@
 <template>
   <div>
-    <q-timeline clickable @click="value = !value" :color="color || 'primary'" layout="comfortable">
-      <div :style="borderLeft">
-        <q-timeline-entry :avatar="entries[0].avatar" :icon="entries[0].icon" v-if="entries[0]">
-          <template v-slot:title>{{ entries[0].title }}</template>
-          <template v-slot:subtitle>{{ entries[0].subtitle }}</template>
-
-          <div v-if="entries[0].text">{{ entries[0].text }}</div>
-        </q-timeline-entry>
-
-        <q-slide-transition>
-          <div v-if="value">
-            <q-timeline-entry
-              v-for="e in middleEntries"
-              :key="e.title"
-              :avatar="e.avatar"
-              :icon="e.icon"
-            >
-              <template v-slot:title>{{ e.title }}</template>
-              <template v-slot:subtitle>{{ e.subtitle }}</template>
-
-              <div v-if="e.text">{{ e.text }}</div>
-            </q-timeline-entry>
-          </div>
-        </q-slide-transition>
-      </div>
-      <div :style="borderLeft">
-        <q-timeline-entry :avatar="lastEntry.avatar" :icon="lastEntry.icon" v-if="lastEntry">
-          <template v-slot:title>{{ lastEntry.title }}</template>
-          <template v-slot:subtitle>{{ lastEntry.subtitle }}</template>
-
-          <div v-if="lastEntry.text">{{ lastEntry.text }}</div>
-        </q-timeline-entry>
-      </div>
-    </q-timeline>
+    <q-list>
+      <q-item class="timeline-border border-bottom">
+        <q-item-section>
+          <q-item-label>{{ firstEntry.city }}</q-item-label>
+        </q-item-section>
+        <q-item-section side>
+          <q-item-label header>bei {{ firstEntry.passengerName }}</q-item-label>
+        </q-item-section>
+        <q-item-section v-if="firstEntry.id != -1">
+          <q-icon name="school" size="xs" />
+        </q-item-section>
+      </q-item>
+      <q-expansion-item
+        v-if="!middleEntries.length"
+        v-model="showStations"
+        dense
+        label="Zwischenstopps"
+      >
+        <q-item dense v-for="s in middleEntries" :key="s.city + Math.random()">
+          <q-item-section>
+            <q-item-label>{{ s.city }}</q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-item-label header>bei {{ s.details }}</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-expansion-item>
+      <q-item class="timeline-border border-top">
+        <q-item-section>
+          <q-item-label>{{ lastEntry.city }}</q-item-label>
+        </q-item-section>
+        <q-item-section>
+          <q-item-label header>bei {{ lastEntry.details }}</q-item-label>
+        </q-item-section>
+        <q-item-section side v-if="lastEntry.id != -1">
+          <q-icon name="school" size="xs" />
+        </q-item-section>
+      </q-item>
+    </q-list>
   </div>
 </template>
 
@@ -46,44 +51,65 @@ export default {
     color: String,
     entries: Array
   },
-  data(){
+  data() {
     return {
-      value: false
-    }
+      showStations: false
+    };
   },
   computed: {
     borderLeft() {
-      return (
-        '' //"padding-left: 7px; border-left: 1px solid " + (this.color || "black")
-      );
+      return ""; //"padding-left: 7px; border-left: 1px solid " + (this.color || "black")
     },
 
-    lastEntry(){
-      var l = this.entries.length
-      if(!l) return null
+    firstEntry() {
+      return this.entries[0];
+    },
+
+    lastEntry() {
+      var l = this.entries.length;
+      if (!l) return null;
       else {
-        return this.entries[l-1]
+        return this.entries[l - 1];
       }
     },
 
-    middleEntries(){
-      var l = this.entries.length
-      if(l<3) return []
+    middleEntries() {
+      var l = this.entries.length;
+      if (l < 3) return [];
       else {
-        var newEns = JSON.parse(JSON.stringify(this.entries))
-        newEns.pop()
-        newEns.shift()
-        return newEns
+        var newEns = JSON.parse(JSON.stringify(this.entries));
+        newEns.pop();
+        newEns.shift();
+        return newEns;
       }
     }
   },
   methods: {
     emit() {
-      this.$emit("input", this.value);
-    },
-  },
+      this.$emit("input", this.showStations);
+    }
+  }
 };
 </script>
 
 <style lang="scss" scoped>
+.timeline-border {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    border-left: 1px dashed $primary;
+    height: 5px;
+    width: 10px;
+  }
+
+  &.border-top {
+    bottom: 80%;
+  }
+
+  &.border-bottom {
+    top: 80%;
+  }
+}
 </style>

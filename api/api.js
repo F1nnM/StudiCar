@@ -1,9 +1,9 @@
-const 
-  runQuery              = require('./db'),
-  fs                    = require('fs'),
-  longQueries           = require('./longQueries'),
+const
+  runQuery = require('./db'),
+  fs = require('fs'),
+  /* longQueries           = require('./longQueries'), */
   apiResponseSimulation = require('./simulation/apiResponse'),
-  tickerJS              = require('./news/postillon/ticker.js')
+  tickerJS = require('./news/postillon/ticker.js')
 
 function isOptionMissing (data, needed, res) {
   return needed.some(key => {
@@ -339,6 +339,111 @@ async function getLiftRequests (uid) {
   })
 
   return JSON.stringify(arr);
+}
+
+async function getMarketplaceOfferByUuid (fbid, uuidOnly) {
+  let JSON = (await runQuery(`
+  WITH
+  lifts as (
+      SELECT DISTINCT
+      lift.ID AS ID,
+          lift.UUID AS UUID,
+          driver.FB_ID AS DRIVER_FB_ID,
+          driver.NAME AS DRIVER_NAME,
+          driver.SURNAME AS DRIVER_SURNAME,
+          driver.PREF_TALK AS DRIVER_PREF_TALK,
+          driver.PREF_TALK_MORNING AS DRIVER_PREF_TALKMORNING,
+          driver.PREF_SMOKING AS DRIVER_PREF_SMOKING,
+          driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
+          lift.DEPART_AT AS LIFT_DEPART,
+          lift.ARRIVE_BY AS LIFT_ARRIVE,
+          (IF(destination.ID <= 3, destination.NICKNAME, destination.CITY)) AS DESTINATION_CITY,
+      	  (IF(destination.ID <= 3, destination.ID, -1)) AS DESTINATION_ID,
+          (IF(start_point.ID <= 3, start_point.NICKNAME, start_point.CITY)) AS START_CITY,
+      	  (IF(start_point.ID <= 3, start_point.ID, -1)) AS START_ID,
+          lift.OFFERED_SEATS,
+          IFNULL(counts.OCCUPIED_SEATS, 0) AS OCCUPIED_SEATS,
+      	  lift.REPEATS_ON_WEEKDAY AS REPEAT_DAY,
+      	  lift.FIRST_DATE AS FIRST_DATE
+      FROM
+          lift 
+          JOIN
+              lift_map 
+              ON lift_map.LIFT_ID = lift.ID 
+          JOIN
+              users driver 
+              ON lift_map.USER_ID = driver.ID 
+              AND lift_map.IS_DRIVER = 1 
+          JOIN
+              addresses destination 
+              ON lift.DESTINATION = destination.ID 
+          JOIN
+              addresses start_point 
+              ON lift.START = start_point.ID 
+          JOIN 
+      		  lift_map map_user_filter
+            ON lift.ID = map_user_filter.LIFT_ID
+            AND map_user_filter.IS_DRIVER = 1
+          JOIN
+              users user_filter
+              ON user_filter.ID = map_user_filter.USER_ID
+          LEFT OUTER JOIN
+              (
+                  SELECT
+                      lift_map.LIFT_ID,
+                      COUNT(*) AS OCCUPIED_SEATS 
+                  FROM
+                      lift_map 
+                  WHERE
+                      lift_map.PENDING != 0 
+                  GROUP BY
+                      lift_map.LIFT_ID
+              )
+              counts 
+              ON lift.ID = counts.LIFT_ID 
+      WHERE
+          (lift.FIRST_DATE >= CURRENT_DATE() 
+          OR lift.REPEATS_ON_WEEKDAY != 0)
+          AND user_filter.FB_ID != ?
+          AND lift.UUID = ?
+  )
+  
+  SELECT
+    JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'id', lifts.UUID,
+            'liftId', lifts.ID,
+              'driver', JSON_OBJECT(
+                'id', lifts.DRIVER_FB_ID,
+                'name', lifts.DRIVER_NAME,
+                'surname', lifts.DRIVER_SURNAME,
+                'prefs', JSON_OBJECT(
+                      'talk', DRIVER_PREF_TALK,
+                      'talkMorning', DRIVER_PREF_TALKMORNING,
+                      'smoking', DRIVER_PREF_SMOKING,
+                      'music', DRIVER_PREF_MUSIC
+                  )
+              ),
+              'departAt', lifts.LIFT_DEPART,
+              'arriveBy', lifts.LIFT_ARRIVE,
+              'destination', JSON_OBJECT(
+              	  'name', lifts.DESTINATION_CITY,
+                  'id', lifts.DESTINATION_ID
+              ),
+              'start', JSON_OBJECT(
+              	  'name', lifts.START_CITY,
+                  'id', lifts.START_ID
+              ),
+              'seatsOffered', lifts.OFFERED_SEATS,
+              'seatsOccupied', lifts.OCCUPIED_SEATS,
+              'repeatsOn', lifts.REPEAT_DAY,
+              'date', lifts.FIRST_DATE
+          )
+      ) AS JSON
+  FROM
+    lifts
+        `, [fbid, uuidOnly])).result[0].JSON
+  return JSON
 }
 
 async function getMarketplace (fbid, uuidOnly) {

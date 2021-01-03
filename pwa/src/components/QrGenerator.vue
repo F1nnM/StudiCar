@@ -13,14 +13,39 @@
       </q-toolbar>-->
       <q-card class="q-pa-none">
         <q-card-section class="text-center overflow-hidden-y q-pa-none q-ma-md">
-          <div class="text-center bg-white">
-            <q-chip outline size="md" color="primary" class="q-pa-sm q-mt-lg">
+          <div class="bg-white text-center">
+            <q-chip outline size="md" color="primary" class="q-ma-sm q-mt-lg col-6">
               <span class="text-subtitle1 text-dark">
                 <slot v-if="!label">Scan den Code</slot>
                 <span v-else>{{ label }}</span>
               </span>
-              <!-- (above is a fallback when no label is given, not be best but easiest way) -->
+              <!-- (above is a fallback when no label is given, not the best but easiest way) -->
+              <q-btn
+                rounded
+                icon="share"
+                size="sm"
+                color="primary"
+                @click="showPublicUrl = !showPublicUrl"
+                class="q-ml-sm q-pr-xs"
+                dense
+              />
             </q-chip>
+            <q-slide-transition>
+              <div v-if="showPublicUrl">
+                <q-item>
+                  <q-item-section>
+                    <q-item-label>Öffentlicher Link</q-item-label>
+                    <q-item-label
+                      caption
+                    >{{ publicUrl || '- es steht aktuell keine Url zur Verfügung -' }}</q-item-label>
+                  </q-item-section>
+                  <q-item-section avatar>
+                    <q-btn dense flat @click="copy(publicUrl)" icon="content_copy" />
+                  </q-item-section>
+                </q-item>
+              </div>
+            </q-slide-transition>
+
             <q-circular-progress
               v-if="!linearProgress && fakeRefresh"
               size="md"
@@ -102,7 +127,7 @@
 <script>
 import VueQrcode from "vue-qrcode"; // docs: https://github.com/rx-ts/vue/tree/master/packages/vue-qrcode
 import ExtHr from "components/ExtendedHr";
-import { colors } from "quasar";
+import { colors, copyToClipboard } from "quasar";
 
 export default {
   name: "QrGenerator",
@@ -116,6 +141,7 @@ export default {
       required: true
     },
     value: Boolean,
+    publicUrl: String,
     primColor: Boolean,
     text: String,
     label: String,
@@ -134,7 +160,8 @@ export default {
       qrProgress: 1,
       interval: null,
       progressColorWhite: false,
-      random: "01"
+      random: "01",
+      showPublicUrl: false
     };
   },
   watch: {
@@ -174,6 +201,17 @@ export default {
       this.qrProgress = 1.15;
       this.random = Math.round(Math.random() * 100) + "";
       /* this.progressColorWhite = !this.progressColorWhite */
+    },
+
+    copy(text) {
+      copyToClipboard(text)
+        .then(_ => {
+          /*  this.$q.notify({
+            message: "Inhalt wurde kopiert",
+            color: "white",
+          }); */
+        })
+        .catch(e => alert("Fehler beim Kopieren: " + e));
     }
   }
 };
