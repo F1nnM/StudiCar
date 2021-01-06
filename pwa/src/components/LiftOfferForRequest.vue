@@ -1,37 +1,42 @@
 <template>
   <div>
     <div class="row no-wrap">
-      <div class="self-center">
+      <!-- <div class="self-center">
+        <span class="text-primary">2</span>
         <q-btn icon="chevron_left" @click="emit('left')" dense flat />
-      </div>
+      </div>-->
       <div class="ellipsis col-9">
-        <q-toolbar>
-          <q-toolbar-title class="text-subtitle1">
-            <!-- <q-icon :name="lift.start.id > 3 ? 'home' : 'school'" size="sm" /> -->
-            <span>{{ getCampusLabel(lift.start.id, lift.start.name) }}</span>
-            <!-- <small>({{ lift.distance }}km entfernt)</small> -->
-            <span class="q-mx-sm">&rsaquo;</span>
-            <span>
-              {{ getCampusLabel(lift.destination.id, lift.destination.name) }}
-              <!-- <q-badge transparent floating color="white">
+        <q-expansion-item dense>
+          <template v-slot:header>
+            <q-toolbar>
+              <q-toolbar-title class="text-subtitle1">
+                <!-- <q-icon :name="lift.start.id > 3 ? 'home' : 'school'" size="sm" /> -->
+                <span>{{ getCampusLabel(lift.start.id, lift.start.name) }}</span>
+                <!-- <small>({{ lift.distance }}km entfernt)</small> -->
+                <span class="q-mx-sm">&rsaquo;</span>
+                <span>
+                  {{ getCampusLabel(lift.destination.id, lift.destination.name) }}
+                  <!-- <q-badge transparent floating color="white">
             <q-icon :name="lift.destination.id > 3 ? 'home' : 'school'" size="xs" color="grey-9" />
-              </q-badge>-->
-            </span>
-          </q-toolbar-title>
-        </q-toolbar>
-        <q-item>
-          <q-item-section>
-            <q-item-label caption>
-              <q-badge v-if="liftSoonLabel" color="grey-7" class="q-mr-sm">{{ liftSoonLabel }}</q-badge>
-              <div>Am {{ dateText }} (in {{ daysLeft }} Tage{{ daysLeft != 1 ? 'n' : '' }})</div>
-              <div>{{ timeText }} Uhr</div>
-            </q-item-label>
-          </q-item-section>
-        </q-item>
+                  </q-badge>-->
+                </span>
+              </q-toolbar-title>
+            </q-toolbar>
+          </template>
+          <q-item-label caption class="q-pb-sm">
+            <q-badge v-if="liftSoonLabel" color="grey-7" class="q-mr-sm">{{ liftSoonLabel }}</q-badge>
+            <div>Am {{ dateText }} (in {{ daysLeft }} Tage{{ daysLeft != 1 ? 'n' : '' }})</div>
+            <div>{{ timeText }} Uhr</div>
+          </q-item-label>
+        </q-expansion-item>
       </div>
-      <div class="self-center">
+      <div class="col-3">
+        <slot></slot>
+      </div>
+      <!-- <div class="self-center">
         <q-btn icon="chevron_right" @click="emit('right')" dense flat />
-      </div>
+        <span class="text-primary">1</span>
+      </div>-->
     </div>
 
     <div class="full-width q-py-sm">

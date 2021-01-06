@@ -50,6 +50,15 @@
           <!-- <p class="text-caption">Du hast Anfragen für die folgenden Mitfahrgelegenheiten:</p> -->
           <!-- <div class="order-last q-ml-md" style="border-left: 6px dotted gray"></div> -->
           <div>
+            <!-- <q-tabs
+              v-model="pendingRequestTab"
+              dense
+              align="justify"
+              class="text-grey-5 bg-white"
+              :breakpoint="0"
+            >
+              <q-tab v-for="(lift, index) in liftRequests" :key="index" :name="index" />
+            </q-tabs>-->
             <q-tab-panels
               swipeable
               animated
@@ -70,8 +79,33 @@
                   @acceptAll="acceptAllRequestsOfLift"
                   @left="switchTab(false)"
                   @right="switchTab(true)"
-                />
-                <ExtHr color="dark" size="xs" />
+                >
+                  <!--  <q-pagination
+                    :value="pendingRequestTab + 1"
+                    :max="liftRequests.length"
+                    @input="val => { pendingRequestTab = val - 1 }"
+                  ></q-pagination>-->
+                  <div class="self-center">
+                    <q-btn
+                      @click="switchTab(false)"
+                      icon="keyboard_arrow_left"
+                      dense
+                      flat
+                      size="md"
+                    />
+                    <span
+                      class="text-subtitle1"
+                    >{{ pendingRequestTab + 1 }}/{{ liftRequests.length }}</span>
+                    <q-btn
+                      @click="switchTab(true)"
+                      icon="keyboard_arrow_right"
+                      dense
+                      flat
+                      size="md"
+                    />
+                  </div>
+                </LiftOfferForRequest>
+                <ExtHr color="grey-3" size="xs" />
                 <div
                   v-if="!(seatsLeft(lift.liftId) > 0)"
                   class="text-negative"
