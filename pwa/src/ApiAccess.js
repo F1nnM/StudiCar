@@ -195,6 +195,11 @@ export const SQL_RESPOND_REQUEST = {
   method: "POST"
 }
 
+export const SQL_ACCEPT_ALL_REQUESTS = {
+  path: "/respondAllRequests",
+  method: "POST"
+}
+
 export const SQL_SEND_MESSAGE = {
   path: "/sendMessage",
   method: "POST"

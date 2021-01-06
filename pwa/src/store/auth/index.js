@@ -138,6 +138,23 @@ export default {
       requestedLift.requestingUsers = requestedLift.requestingUsers.filter(u => u.id != payload.userId)
     },
 
+    RESPOND_ALL_REQUESTS (state, payload) {
+      var chatLift = state.user.chatLifts.find(l => l.id == payload.liftId),
+        usersThatWouldBeAdded = null
+
+      state.user.liftRequests = state.user.liftRequests.filter(l => {
+        var isWanted = l.liftId == payload.liftId
+        if (payload.accepted && isWanted) usersThatWouldBeAdded = l.requestingUsers // before filtering it out, copy all the requesting users
+        return !isWanted // negate it so that all other lifts stay and only the wanted one is filtered
+      })
+
+      if (payload.accepted) {
+        var chatLift = state.user.chatLifts.find(l => l.id == payload.liftId)
+        chatLift.passengers = chatLift.passengers.concat(usersThatWouldBeAdded)
+      }
+
+    },
+
     REQUEST_TO_LIFT (state, liftId) {
       state.user.marketplaceOffers = state.user.marketplaceOffers.filter(offer => offer.id != liftId)
     }
@@ -356,20 +373,23 @@ export default {
     },
 
     async respondLiftRequest ({ commit }, payload) {
-      if (typeof payload == 'number') {
-        alert('Wäre angenommen worden, aber ist noch in Bearbeitung')
+      var obj = { // re-build object, was easier to debug the structures
+        liftId: payload.liftId,
+        userId: payload.user.id,
+        accepted: payload.accepted
       }
-      else {
-        var obj = {
-          liftId: payload.liftId,
-          userId: payload.user.id,
-          accepted: payload.accepted
-        }
 
-        sendApiRequest(SQL_RESPOND_REQUEST, obj, _ => {
+      sendApiRequest(SQL_RESPOND_REQUEST, obj, _ => {
+        if (payload.user.id == -1) { // respond all requests
+          commit('RESPOND_ALL_REQUESTS', {
+            liftId: payload.liftId,
+            accepted: payload.accepted
+          })
+        }
+        else {
           if (payload.accepted) {
             obj = { // re-build object to make local changes
-              liftId: obj.liftId,
+              liftId: payload.liftId,
               user: payload.user
             }
             commit('ACCEPT_LIFT_REQUEST', obj)
@@ -381,8 +401,9 @@ export default {
             }
             commit('DENY_LIFT_REQUEST', obj)
           }
-        }, err => errorNotify(err))
-      }
+        }
+
+      }, err => errorNotify(err))
     },
 
     async requestToLift ({ commit }, payload) {

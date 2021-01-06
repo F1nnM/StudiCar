@@ -8,11 +8,11 @@
         <q-toolbar>
           <q-toolbar-title class="text-subtitle1">
             <!-- <q-icon :name="lift.start.id > 3 ? 'home' : 'school'" size="sm" /> -->
-            <span>{{ lift.start.name }}</span>
+            <span>{{ getCampusLabel(lift.start.id, lift.start.name) }}</span>
             <!-- <small>({{ lift.distance }}km entfernt)</small> -->
             <span class="q-mx-sm">&rsaquo;</span>
             <span>
-              {{ lift.destination.name }}
+              {{ getCampusLabel(lift.destination.id, lift.destination.name) }}
               <!-- <q-badge transparent floating color="white">
             <q-icon :name="lift.destination.id > 3 ? 'home' : 'school'" size="xs" color="grey-9" />
               </q-badge>-->
@@ -155,17 +155,30 @@ export default {
       this.$emit(type);
     },
 
+    getCampusLabel(campusId, name) {
+      switch (campusId) {
+        case 1:
+          return "Würfel";
+        case 2:
+          return "Alte DH";
+        case 3:
+          return "Kloster";
+        default:
+          return name;
+      }
+    },
+
     acceptAll() {
-      this.$q
+      /* this.$q
         .dialog({
           title: "Alle annehmen",
           message: "Willst du alle Anfragen direkt annehmen?",
           cancel: true,
           persistent: true
         })
-        .onOk(() => {
-          this.$emit("acceptAll", this.lift.id);
-        });
+        .onOk(() => { */
+      this.$emit("acceptAll", this.lift.id);
+      /* }); */
     }
   },
   mounted() {}

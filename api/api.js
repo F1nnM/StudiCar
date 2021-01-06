@@ -1154,11 +1154,14 @@ module.exports = {
     },
     '/respondRequest': async (req, res, options) => {
       if (!isOptionMissing(options, ['accepted', 'liftId', 'userId'], res) && await isUserVerified(options.secretFbId)) {
-        var requestingUserId = await getUserId(options.userId),
-          accepted = options.accepted,
-          liftId = await getLiftId(options.liftId)
-        if (accepted) await runQuery('UPDATE lift_map SET PENDING = 0 WHERE LIFT_ID = ? AND USER_ID = ?', [liftId, requestingUserId])
-        else await runQuery('DELETE FROM lift_map WHERE LIFT_ID = ? AND USER_ID = ?', [liftId, requestingUserId])
+        if (options.userId == -1) { // all requests of specific lift should be responded
+          if (options.accepted) await runQuery('UPDATE lift_map SET PENDING = 0 WHERE lift_map.LIFT_ID = (SELECT ID FROM lift WHERE UUID = ?)', [options.liftId])
+          else res.writeHead(500)
+        }
+        else {
+          if (accepted) await runQuery('UPDATE lift_map SET PENDING = 0 WHERE LIFT_ID = ( SELECT ID FROM lift WHERE lift.UUID = ? ) AND USER_ID = ( SELECT ID FROM users WHERE users.FB_ID = ? )', [options.liftId, options.userId])
+          else await runQuery('DELETE FROM lift_map WHERE LIFT_ID = ( SELECT ID FROM lift WHERE lift.UUID = ? ) AND USER_ID = ( SELECT ID FROM users WHERE users.FB_ID = ? )', [options.liftId, options.liftId])
+        }
         res.end();
       }
     },

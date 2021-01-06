@@ -20,14 +20,7 @@
         </q-item-section>
         <q-item-section side class="q-px-none">
           <div class="row justify-between">
-            <q-btn
-              outline
-              @click="respondLiftRequest(false)"
-              no-caps
-              class="q-px-xs q-mr-md"
-              color="grey-7"
-              dense
-            >
+            <q-btn outline @click="(false)" no-caps class="q-px-xs q-mr-md" color="grey-7" dense>
               <q-icon color="negative" name="thumb_down" />
             </q-btn>
             <q-btn
@@ -151,7 +144,8 @@ export default {
                 persistent: true
               })
               .onOk(data => {
-                res(data[0]);
+                // via data setting can be saved
+                res();
               })
               .onCancel(rej);
           });
@@ -163,12 +157,11 @@ export default {
         user: {
           // on purpose NOT copying user obj, because containing much not needed data
           id: user.id,
-          fbId: user.fbId,
           name: user.name,
           surname: user.surname
         },
         accepted: accepted,
-        reason: responseReason
+        reason: responseReason || null
       });
     }
   },

@@ -67,8 +67,8 @@
                 <LiftOfferForRequest
                   :lift="getLiftFromId(lift.liftId)"
                   :numberOfRequests="lift.requestingUsers.length"
-                  @acceptAll="respondLiftRequest"
-                  @left="switchTab"
+                  @acceptAll="acceptAllRequestsOfLift"
+                  @left="switchTab(false)"
                   @right="switchTab(true)"
                 />
                 <ExtHr color="dark" size="xs" />
@@ -85,10 +85,12 @@
                     left-color="white"
                     right-color="white"
                     class="q-my-sm"
+                    @left="quickRespondLiftRequest(lift.liftId, r, true)"
+                    @right="quickRespondLiftRequest(lift.liftId, r, false)"
                     v-for="r in lift.requestingUsers"
                     :key="r.id"
                   >
-                    <!-- <template v-slot:left v-if="seatsLeft(lift.liftId) <= 0">
+                    <template v-slot:left v-if="seatsLeft(lift.liftId) > 0">
                       <q-avatar>
                         <q-icon name="thumb_up" color="positive" size="sm" />
                       </q-avatar>
@@ -103,8 +105,8 @@
                       <span class="text-dark text-h6 text-uppercase">Ne</span>
 
                       <p class="text-grey-9">Anfrage von {{ r.name }} ablehnen</p>
-                    </template>-->
-                    <div>
+                    </template>
+                    <div :key="keyToBeIncremented">
                       <IncomingLiftRequest
                         :requestingUser="r"
                         :liftId="lift.liftId"
@@ -202,7 +204,8 @@ export default {
       liftCodePopup: {
         isOpen: false,
         data: null
-      }
+      },
+      keyToBeIncremented: 0
     };
   },
 
@@ -366,7 +369,7 @@ export default {
     },
 
     canAcceptAllRequests(lift) {
-      return this.seatsLeft(lift.liftId) > lift.requestingUsers.length;
+      return this.seatsLeft(lift.liftId) >= lift.requestingUsers.length;
     },
 
     getPassengerNameFromId(lift, userId) {
@@ -387,6 +390,7 @@ export default {
     seatsLeft(liftId) {
       const lift = this.getLiftFromId(liftId);
       var a = lift.car.allSeats - lift.passengers.length;
+      if (a < 0) a = 0; // negative number as left seats makes no sence
       return a;
     },
 
@@ -434,8 +438,39 @@ export default {
       }, 50);
     },
 
+    quickRespondLiftRequest(liftId, requestingUser, accepted) {
+      this.respondLiftRequest({
+        liftId: liftId,
+        user: {
+          id: requestingUser.id,
+          name: requestingUser.name,
+          surname: requestingUser.surname
+        },
+        accepted: accepted,
+        reason: null // no reason or futher information when doing quick response
+      });
+    },
+
+    acceptAllRequestsOfLift(liftId) {
+      this.respondLiftRequest({
+        liftId: liftId,
+        user: {
+          id: -1 // when transferring this as userId, API will affect changes to all current requests on that lift
+        },
+        accepted: true,
+        reason: null
+      });
+    },
+
     respondLiftRequest(eventObj) {
       this.$store.dispatch("auth/respondLiftRequest", eventObj);
+      this.$store.dispatch("auth/getLiftRequests", {
+        res: _ => {},
+        rej: _ => {
+          alert("error at reloading after responding a lift request");
+        }
+      });
+      this.keyToBeIncremented++;
     },
 
     closeLift() {

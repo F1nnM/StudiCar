@@ -176,19 +176,29 @@
         active-color="primary"
         indicator-color="primary"
         v-model="tab"
-        class="text-black bg-white"
+        class="text-grey-10 bg-white text-weight-light"
         align="center"
       >
         <q-route-tab
           exact
-          icon="home"
-          to="/?qrLiftData=99034233762217#iwG3cG4M7NFMJzJYcreFjLrJC9Q23"
-          label="Marktplatz"
+          :to="'/' /* + ?qrLiftData=99034233762217#iwG3cG4M7NFMJzJYcreFjLrJC9Q23 */"
           replace
-        />
-        <q-route-tab icon="add_circle_outline" to="/add-lift" replace label="Anbieten" />
-        <q-route-tab icon="directions_car" to="/chats" replace label="Fahrten" />
-        <q-route-tab icon="account_box" to="/profil" replace label="Profil" />
+        >
+          <q-icon name="home" size="sm" />Marktplatz
+        </q-route-tab>
+        <q-route-tab to="/add-lift" replace>
+          <q-icon name="add_circle_outline" size="sm" />Anbieten
+        </q-route-tab>
+        <q-route-tab to="/chats" replace>
+          <q-icon name="directions_car" size="sm" />Fahrten
+        </q-route-tab>
+        <q-route-tab to="/profil">
+          <q-icon name="account_box" size="sm" />
+          <!-- <q-avatar v-else size="sm">
+            <q-img class="rounded-borders" :src="profilePictureUrl" />
+          </q-avatar>-->
+          Profil
+        </q-route-tab>
       </q-tabs>
     </q-footer>
   </q-layout>
@@ -203,7 +213,12 @@ import EssentialLink from "components/EssentialLink";
 import DrawerWelcomeImage from "components/DrawerWelcomeImage";
 import ExtHr from "components/ExtendedHr";
 
-import { sendApiRequest, GET_NEWSTICKER } from "../ApiAccess";
+import {
+  sendApiRequest,
+  GET_NEWSTICKER,
+  buildGetRequestUrl,
+  GET_USER_PROFILE_PIC
+} from "../ApiAccess";
 
 export default {
   name: "MainLayout",
@@ -228,7 +243,8 @@ export default {
       show: true,
       liftQrId: null,
       refreshErr: null,
-      hideUpdateField: false
+      hideUpdateField: false,
+      profilePictureUrl: null
     };
   },
 
@@ -428,6 +444,13 @@ export default {
 
   mounted() {
     setTimeout(this.reloadNews, 50); // simple call was buggy, no idea why
+    buildGetRequestUrl(
+      GET_USER_PROFILE_PIC,
+      { fbid: this.$store.getters["auth/user"].uid },
+      url => {
+        this.profilePictureUrl = url;
+      }
+    );
   }
 };
 </script>
