@@ -130,10 +130,22 @@
                     :key="m.timestamp"
                     :ref="messageIndex == lift.messages.length - 1 ? 'last_message': ''"
                   >
-                    <p
+                    <!-- <p
                       class="custom-chat-label text-caption text-center q-mt-xl text-grey-7"
-                      v-if="checkDayBreak(m) != ''"
-                    >{{ checkDayBreak(m) }}</p>
+                    </p>-->
+                    <p class="text-center">
+                      <span
+                        class="rounded-borders bg-grey-3 text-dark q-pa-xs text-weight-light"
+                        style="font-size:0.8em"
+                        v-if="checkDayBreak(m) != ''"
+                      >{{ checkDayBreak(m) }}</span>
+                    </p>
+                    <p class="text-center" v-if="getNameFromId(m.sentBy) == 'StudiCar'">
+                      <span
+                        class="rounded-borders bg-grey-4 text-dark q-pa-xs text-weight-light"
+                        style="font-size:1.0em"
+                      >{{ m.content }}</span>
+                    </p>
                     <div>
                       <q-menu
                         touch-position
@@ -173,6 +185,7 @@
                         </q-list>
                       </q-menu>
                       <q-chat-message
+                        v-if="getNameFromId(m.sentBy) != 'StudiCar'"
                         :name="m.sentBy == user ? '' : getNameFromId(m.sentBy)"
                         :sent="m.sentBy == user"
                         size="8"

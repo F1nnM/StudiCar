@@ -1,8 +1,8 @@
 <template>
   <div>
     <div
-      v-show="!$store.getters['auth/signinLoaded']"
-      :class="'loading-screen-background z-top fixed-full fullscreen ' + $store.getters['auth/signinLoaded']?'hide-screen':''"
+      v-if="showLoadingScreen"
+      :class="'loading-screen-background z-top fixed-full fullscreen ' + showLoadingScreen ? 'hide-screen':''"
     >
       <div class="text-caption full-width text-center q-mt-xl q-pt-xl">
         <p class="text-h4">
@@ -30,8 +30,15 @@
 
 <script>
 export default {
-    
-}
+  data() {
+    return {};
+  },
+  computed: {
+    showLoadingScreen() {
+      return !this.$store.getters["auth/signinLoaded"];
+    }
+  }
+};
 </script>
 
 <style scoped lang="scss">

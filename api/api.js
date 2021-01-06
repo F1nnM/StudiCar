@@ -25,6 +25,10 @@ async function getUserId (fbId) {
 async function getLiftId (liftUuid) {
   return (await runQuery("SELECT ID FROM lift WHERE UUID = ?", [liftUuid])).result[0].ID;
 }
+/* 
+async function sendAsSystem(liftUuid, content){
+  await runQuery('', []
+} */
 
 function generateJdenticon (seed) {
   var jdenticon = require("jdenticon")
@@ -1159,7 +1163,9 @@ module.exports = {
           else res.writeHead(500)
         }
         else {
-          if (accepted) await runQuery('UPDATE lift_map SET PENDING = 0 WHERE LIFT_ID = ( SELECT ID FROM lift WHERE lift.UUID = ? ) AND USER_ID = ( SELECT ID FROM users WHERE users.FB_ID = ? )', [options.liftId, options.userId])
+          if (accepted) {
+            await runQuery('UPDATE lift_map SET PENDING = 0 WHERE LIFT_ID = ( SELECT ID FROM lift WHERE lift.UUID = ? ) AND USER_ID = ( SELECT ID FROM users WHERE users.FB_ID = ? )', [options.liftId, options.userId])
+          }
           else await runQuery('DELETE FROM lift_map WHERE LIFT_ID = ( SELECT ID FROM lift WHERE lift.UUID = ? ) AND USER_ID = ( SELECT ID FROM users WHERE users.FB_ID = ? )', [options.liftId, options.liftId])
         }
         res.end();

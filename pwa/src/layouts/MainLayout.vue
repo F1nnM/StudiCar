@@ -444,13 +444,12 @@ export default {
 
   mounted() {
     setTimeout(this.reloadNews, 50); // simple call was buggy, no idea why
-    buildGetRequestUrl(
-      GET_USER_PROFILE_PIC,
-      { fbid: this.$store.getters["auth/user"].uid },
-      url => {
+    var user = this.$store.getters["auth/user"];
+    if (!user) location.reload();
+    else
+      buildGetRequestUrl(GET_USER_PROFILE_PIC, { fbid: user.uid }, url => {
         this.profilePictureUrl = url;
-      }
-    );
+      });
   }
 };
 </script>
