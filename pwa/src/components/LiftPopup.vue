@@ -553,12 +553,12 @@ export default {
     },
 
     passengersThatCanBeMentioned() {
-      // return ["Günther", "Robert", "Alicia", "Sebastian", "Jonas", "Merdan"];
-      var all = [],
-        nameOfThisUser = this.$store.getters["auth/user"].name.split(" ")[0];
-      this.lift.passengers.forEach(p => all.push(p.name));
-      all.push(this.lift.driver.name);
-      all = all.filter(name => name != nameOfThisUser);
+      var all = [];
+      this.lift.passengers.forEach(p => {
+        if (p.id != this.myFbId) all.push(p.name);
+      });
+      if (!this.isDriver) all.push(this.lift.driver.name);
+
       return all;
     },
 
@@ -594,10 +594,36 @@ export default {
     },
 
     passengersAndDriverNames() {
-      var people = {};
-      this.lift.passengers.forEach(item => (people[item.id] = item.name));
-      var d = JSON.parse(JSON.stringify(this.lift.driver));
-      people[d.id] = d.name;
+      var people = {},
+        firstNamesAlreadyFound = [],
+        firstNamesNotUnique = [];
+      this.lift.passengers.forEach(p => {
+        // we first have to get an overview and do a pre-sorting
+        if (firstNamesAlreadyFound.includes(p.name)) {
+          firstNamesNotUnique.push(p.name);
+        } else firstNamesAlreadyFound.push(p.name);
+      });
+
+      var driverName = this.lift.driver.name; // have coded it separately to make special handling on driver easier
+      if (firstNamesAlreadyFound.includes(driverName)) {
+        firstNamesNotUnique.push(driverName);
+      } else firstNamesAlreadyFound.push(driverName);
+
+      // now we know which names are not unique
+
+      var allPeopleToBeHandled = JSON.parse(
+        JSON.stringify(this.lift.passengers)
+      );
+      allPeopleToBeHandled.unshift(
+        JSON.parse(JSON.stringify(this.lift.driver))
+      );
+      var isDriver = this.isDriver;
+      allPeopleToBeHandled.forEach(p => {
+        var nameToBeShown = p.name;
+        if (firstNamesNotUnique.includes(p.name))
+          nameToBeShown += " " + p.surname;
+        people[p.id] = nameToBeShown;
+      });
       return people;
     }
   },

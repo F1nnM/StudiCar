@@ -104,13 +104,13 @@
             </q-item-section>
             <q-item-section>
               <p class="q-mb-none">
-                {{ lift.driver.name }}
+                {{ !isDriver ? lift.driver.name : 'Du' }}
                 <q-badge class="q-ml-sm" transparent color="white">
                   <q-icon name="directions_car" size="xs" color="black" />
                 </q-badge>
               </p>
 
-              <small>{{ lift.driver.surname }}</small>
+              <small v-if="!isDriver">{{ lift.driver.surname }}</small>
             </q-item-section>
             <q-item-section side>
               <div class="row justify-around">
@@ -157,13 +157,16 @@ val: 'music', icon: 'music_note'
                   </q-avatar>
                 </q-item-section>
 
-                <q-item-section>
+                <q-item-section v-if="item.id != myFbId">
                   <q-item-label>
                     {{ item.name }}
                     <br />
                     <small>{{ item.surname }}</small>
                   </q-item-label>
                   <q-item-label caption></q-item-label>
+                </q-item-section>
+                <q-item-section v-else>
+                  <q-item-label>Du</q-item-label>
                 </q-item-section>
 
                 <!-- <q-item-section side>
@@ -325,6 +328,10 @@ export default {
 
     isDriver() {
       return this.lift.driver.id == this.$store.getters["auth/user"].uid;
+    },
+
+    myFbId() {
+      return this.$store.getters["auth/user"].uid;
     },
 
     formattedDate() {
