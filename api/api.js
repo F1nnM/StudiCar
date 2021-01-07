@@ -48,14 +48,6 @@ function generateJdenticon (seed) {
   return jdenticon.toPng(seed, size);
 }
 
-function blobToBase64 (blob) {
-  var reader = new FileReader();
-  reader.readAsDataURL(blob);
-  reader.onloadend = function () {
-    return reader.result;
-  }
-}
-
 async function catchall (err, res, endpoint) {
   console.log(`ERROR AT CALLING ${endpoint} : ${err}`)
 
@@ -106,9 +98,11 @@ async function getChatLifts (uid) {
               JSON_OBJECT('type',
                   IF(
                       ISNULL(messages.CONTENT),
-                      IF(ISNULL(messages.AUDIO),
-                      3,
-                      2),
+                      IF(
+                        ISNULL(messages.AUDIO),
+                        3,
+                        2
+                      ),
                       1
                   ),
                   'content',
@@ -589,6 +583,16 @@ module.exports = {
       endWithJSON(res, JSON.stringify({
         ticker: line
       }))
+    },
+    '/loadMessageMedia': async (req, res, options) => {
+      if (!isOptionMissing(options, ['uuid'], res) && await isUserVerified(options.secretFbId)) {
+        var content = (await runQuery("SELECT IFNULL(messages.AUDIO, messages.PICTURE) AS CONTENT FROM messages WHERE messages.UUID = ?", [options.uuid])).result[0].CONTENT
+
+        /* res.setHeader('Content-Type', 'image/png');
+        res.end(result.result[0].PICTURE, 'binary'); */
+
+        res.end(content)
+      }
     },
     '/getUserData': async (req, res, options) => {
       if (!isOptionMissing(options, ['fbid'], res) && await isUserVerified(options.secretFbId)) {
@@ -1280,7 +1284,7 @@ module.exports = {
               })
               break
             case 2: // audio blob
-              var blob = Buffer.from(message.content)
+              var blob = await (await fetch(dataURI)).blob()
               await runQuery("INSERT INTO `messages` (`UUID`, `AUDIO`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, ?, ?, current_timestamp())", [blob, userId, liftId]).catch(error => {
                 throw error
               })

@@ -131,12 +131,12 @@ val: 'music', icon: 'music_note'
                   outline
                   rounded
                   dense
-                  :icon="pref.icon"
                   class="q-pa-xs"
                   :color="betterPrefColor(pref.val)"
                   size="sm"
-                />
-                <!-- <q-btn icon="arrow_forward_ios" outline dense rounded size="sm" /> -->
+                >
+                  <q-icon :name="pref.icon" color="grey-7" />
+                </q-btn>
               </div>
             </q-item-section>
           </q-item>

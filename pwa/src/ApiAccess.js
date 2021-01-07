@@ -120,6 +120,11 @@ export const SQL_GET_LIFT_REQUESTS = {
   method: "GET"
 }
 
+export const SQL_LOAD_MESSAGE_MEDIA = {
+  path: "/loadMessageMedia",
+  method: "GET"
+}
+
 export const SQL_CREATE_USER_IF_NOT_EXISTING = {
   path: "/createUserIfNotExisting",
   method: "POST"

@@ -195,7 +195,29 @@
                         :bg-color="getColor(m.sentBy)"
                       >
                         <div v-if="m.type == 2">
-                          <AudioPlayer :src="m.content" />
+                          <div v-if="m.content.length < 40 && !medias[m.content]">
+                            <q-item dense>
+                              <q-item-section avatar>
+                                <q-btn
+                                  @click="loadMedia(m.content)"
+                                  icon="get_app"
+                                  flat
+                                  size="md"
+                                  color="dark"
+                                />
+                              </q-item-section>
+                              <q-item-section>
+                                <!-- <q-icon name="play_arrow" disable size="sm" flat color="grey-7" /> -->
+                                <span class="text-caption">Memo herunterladen</span>
+                              </q-item-section>
+                            </q-item>
+                          </div>
+                          <div v-else>
+                            <audio controls>
+                              <source type="audio/wav" :src="medias[m.content]" />
+                              <!-- <AudioPlayer :src="m.content" /> -->
+                            </audio>
+                          </div>
                         </div>
                       </q-chat-message>
                     </div>
@@ -440,14 +462,14 @@ import AudioPlayer from "components/AudioPlayer";
 import {
   sendApiRequest,
   SQL_SEND_MESSAGE,
-  SQL_GET_LIFT_INFO
+  SQL_GET_LIFT_INFO,
+  SQL_LOAD_MESSAGE_MEDIA
 } from "../ApiAccess";
 
 export default {
   name: "LiftPopup",
   components: {
-    LiftInfoDialog,
-    AudioPlayer
+    LiftInfoDialog
   },
   data() {
     return {
@@ -479,7 +501,8 @@ export default {
       //   seats: 0, // all "empty" data just to avoid errors when calling variables
       // },
       loading: 0, // as always: 0 means not loading, 1 means in progress, 2 means success and -1 error.
-      bottomReached: false
+      bottomReached: false,
+      medias: {}
     };
   },
   model: {
@@ -833,6 +856,19 @@ export default {
       this.scrollToEnd(100);
 
       this.messageText = "";
+    },
+
+    async loadMedia(uuid) {
+      sendApiRequest(
+        SQL_LOAD_MESSAGE_MEDIA,
+        {
+          uuid: uuid
+        },
+        media => {
+          this.medias[uuid] = media;
+        },
+        err => {}
+      );
     },
 
     viewUserFromFbId(fbId) {
