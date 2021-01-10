@@ -20,7 +20,8 @@ module.exports = function (ctx) {
       'auth',
       'axios',
       'firebase',
-      'boot'
+      'boot',
+      'addressbar-color'
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
@@ -64,7 +65,8 @@ module.exports = function (ctx) {
       // Quasar plugins
       plugins: [
         'Dialog',
-        'Notify'
+        'Notify',
+        'AddressbarColor'
       ]
     },
 

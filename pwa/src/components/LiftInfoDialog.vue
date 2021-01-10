@@ -31,25 +31,21 @@
             <q-item-section>
               <q-item-label class="text-h5 text-weight-light">Fahrtdetails</q-item-label>
             </q-item-section>
-            <q-item-section>
-              <q-item-label caption>{{ formattedDate }}</q-item-label>
-            </q-item-section>
           </q-item>
-          <q-item-label header>Verlauf</q-item-label>
-          <q-item-label>
-            <q-badge
-              v-if="(courseStations.length > 2)"
-              class="q-ml-md"
-            >noch {{ courseStations.length - 2 }} Zwischenstopp{{ courseStations.length > 3 ? 's' : '' }}</q-badge>
-            <q-chip :label="'jeden ' + getRepeatingWeekday" icon="refresh" v-if="lift.repeatsOn" />
+          <q-item-label header>
+            <div class="row justify-between">
+              <span>Verlauf</span>
+              <q-item-label caption>{{ formattedDate }}</q-item-label>
+            </div>
           </q-item-label>
-          <ExpansionLiftTimeline color="dark" :entries="courseStations"></ExpansionLiftTimeline>
+
+          <ExpansionLiftTimeline :lift="lift"></ExpansionLiftTimeline>
           <q-separator />
           <q-item-label header>Auto</q-item-label>
           <q-item>
             <q-item-section avatar>
-              <q-avatar :style="'border: 1px solid ' + lift.car.color">
-                <q-icon name="directions_car" size="sm" />
+              <q-avatar>
+                <q-icon name="directions_car" size="sm" color="grey-9" />
               </q-avatar>
             </q-item-section>
             <q-item-section>
@@ -61,6 +57,7 @@
                   </span>
 
                   <q-badge class="q-ml-sm" color="dark" transparent>{{ lift.car.type }}</q-badge>
+                  <ExtHr size="xs" :color="'#' + lift.car.color" class="q-pr-xl q-mr-lg" hex />
                 </p>
               </q-item-label>
               <q-item-label
@@ -73,9 +70,9 @@
                 {{ lift.car.licensePlate }}
               </q-item-label>
             </q-item-section>
-            <q-item-section side top>
+            <!--  <q-item-section side top>
               <q-btn icon="help_outline" flat @click="showModelFrame = true" />
-            </q-item-section>
+            </q-item-section>-->
           </q-item>
           <q-item-label header>
             <div v-if="lift.passengers">
@@ -243,7 +240,8 @@ import ExpansionLiftTimeline from "components/ExpansionLiftTimeline";
 export default {
   name: "LiftInfoDialog",
   components: {
-    ExpansionLiftTimeline
+    ExpansionLiftTimeline,
+    ExtHr
   },
   props: {
     value: Boolean,
@@ -299,33 +297,6 @@ export default {
       }
     },
 
-    courseStations() {
-      var arr = [],
-        start = this.lift.start,
-        dest = this.lift.destination,
-        startsAtSchool = this.lift.start.id == -1;
-      arr.push({
-        id: start.id,
-        city: start.name,
-        details: this.getStationLabel(start.id, start.name)
-      });
-      if (this.lift.stations)
-        this.lift.stations.forEach(station => {
-          arr.push({
-            id: -1, // cannot be a school
-            city: station.city,
-            passengerName: station.passengerName
-          });
-        });
-      arr.push({
-        city: dest.name,
-        id: dest.id,
-        details: this.getStationLabel(dest.id, dest.name)
-      });
-
-      return arr;
-    },
-
     isDriver() {
       return this.lift.driver.id == this.$store.getters["auth/user"].uid;
     },
@@ -352,19 +323,6 @@ export default {
     },
     swipedToRight() {
       this.emit(false);
-    },
-
-    getStationLabel(campusId, name) {
-      switch (campusId) {
-        case 1:
-          return "Würfel";
-        case 2:
-          return "Alte DH";
-        case 3:
-          return "Kloster";
-        default:
-          return "bei " + name;
-      }
     },
 
     getImageOfUser(id) {

@@ -38,7 +38,9 @@
                 class="col-8 text-h5 text-weight-light text-left q-mt-none q-mb-xs custom-overline c-o-1 c-o-l c-o-sm"
               >{{ username }}</div>
               <p class="col-4">
-                <q-btn icon="select_all" @click="shareProfileQR = true" flat />
+                <q-btn @click="shareProfileQR = true" flat>
+                  <QrIcon size="sm" :type="4" showLogo />
+                </q-btn>
               </p>
             </q-card-section>
           </q-card>
@@ -285,6 +287,7 @@ import { date } from "quasar";
 import ExtHr from "components/ExtendedHr";
 import ColoredMeter from "components/ColoredMeter";
 import QrGen from "components/QrGenerator";
+import QrIcon from "components/QrIcon";
 
 import {
   buildGetRequestUrl,
@@ -298,7 +301,8 @@ export default {
   name: "ProfileTopSection",
   components: {
     ExtHr,
-    QrGen
+    QrGen,
+    QrIcon
   },
   props: {
     username: String,

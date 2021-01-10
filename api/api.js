@@ -73,11 +73,11 @@ async function getChatLifts (uid) {
           lift.UUID AS LIFT_ID,
           car_models.BRAND AS CAR_BRAND,
           car_models.MODEL AS CAR_MODEL,
-          car.COLOR AS CAR_COLOR,
           car.SEATS AS CAR_SEATS,
           car.LICENSE_PLATE AS CAR_LICENSE_PLATE,
           car.YEAR AS CAR_BUILT,
           car.TYPE AS CAR_TYPE,
+          car.COLOR AS CAR_COLOR,
           lift.DEPART_AT AS LIFT_DEPART,
           lift.ARRIVE_BY AS LIFT_ARRIVE,
           destination.CITY AS DESTINATION_CITY,
@@ -192,7 +192,8 @@ SELECT
                     'allSeats', CAR_SEATS,
                     'licensePlate', CAR_LICENSE_PLATE,
                     'built', CAR_BUILT,
-                    'type', CAR_TYPE
+                    'type', CAR_TYPE,
+                    'color', CAR_COLOR
                 ),
                 'departAt', LIFT_DEPART,
                 'arriveBy', LIFT_ARRIVE,

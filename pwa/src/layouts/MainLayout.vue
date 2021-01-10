@@ -62,12 +62,37 @@
               </q-tab-panels>
             </div>
             <div class="col-xs-2 col-md-1">
-              <q-btn
-                flat
-                dense
-                :icon="!scannerOpen ? 'filter_center_focus' : 'cancel_presentation'"
-                @click="toggleScannerOpen"
-              />
+              <q-btn flat dense @click="toggleScannerOpen">
+                <!-- <q-icon v-if="scannerOpen" name="cancel_presentation" /> -->
+                <div>
+                  <q-avatar square size="1.4em">
+                    <svg
+                      version="1.1"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlns:xlink="http://www.w3.org/1999/xlink"
+                      x="0px"
+                      y="0px"
+                      width="100%"
+                      height="100%"
+                      viewBox="0 0 1000 1000"
+                      enable-background="new 0 0 1000 1000"
+                      xml:space="preserve"
+                    >
+                      <metadata>Svg Vector Icons : http://www.onlinewebfonts.com/icon</metadata>
+                      <g fill="white">
+                        <path
+                          v-if="!scannerOpen"
+                          d="M292.7,104.2H104.2v188.5c0,20.8-16.9,37.7-37.7,37.7c-20.8,0-37.7-16.9-37.7-37.7V66.5c0-20.8,16.9-37.7,37.7-37.7h226.2c20.8,0,37.7,16.9,37.7,37.7C330.4,87.4,313.5,104.2,292.7,104.2z M292.7,971.2H66.5c-20.8,0-37.7-16.9-37.7-37.7V707.3c0-20.8,16.9-37.7,37.7-37.7c20.8,0,37.7,16.9,37.7,37.7v188.5h188.5c20.8,0,37.7,16.9,37.7,37.7C330.4,954.3,313.5,971.2,292.7,971.2z M933.5,330.4c-20.8,0-37.7-16.9-37.7-37.7V104.2H707.3c-20.8,0-37.7-16.9-37.7-37.7c0-20.8,16.9-37.7,37.7-37.7h226.2c20.8,0,37.7,16.9,37.7,37.7v226.2C971.2,313.5,954.3,330.4,933.5,330.4z M933.5,971.2H707.3c-20.8,0-37.7-16.9-37.7-37.7c0-20.8,16.9-37.7,37.7-37.7h188.5V707.3c0-20.8,16.9-37.7,37.7-37.7c20.8,0,37.7,16.9,37.7,37.7v226.2C971.2,954.3,954.3,971.2,933.5,971.2z"
+                        />
+
+                        <path
+                          d="M10,509.4c0-26,20.9-47.1,47.3-47.1h885.5c26.1,0,47.3,20.9,47.3,47.1c0,26-20.9,47.1-47.3,47.1H57.3C31.2,556.5,10,535.6,10,509.4z"
+                        />
+                      </g>
+                    </svg>
+                  </q-avatar>
+                </div>
+              </q-btn>
             </div>
           </q-toolbar-title>
         </q-toolbar>
@@ -440,6 +465,10 @@ export default {
         }
       );
     }
+  },
+
+  created() {
+    this.$q.addressbarColor.set();
   },
 
   mounted() {

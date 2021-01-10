@@ -86,23 +86,27 @@
                     @input="val => { pendingRequestTab = val - 1 }"
                   ></q-pagination>-->
                   <div class="self-center">
-                    <q-btn
-                      @click="switchTab(false)"
-                      icon="keyboard_arrow_left"
-                      dense
-                      flat
-                      size="md"
-                    />
-                    <span
-                      class="text-subtitle1"
-                    >{{ pendingRequestTab + 1 }}/{{ liftRequests.length }}</span>
-                    <q-btn
-                      @click="switchTab(true)"
-                      icon="keyboard_arrow_right"
-                      dense
-                      flat
-                      size="md"
-                    />
+                    <div
+                      class="text-center text-overline"
+                    >Seite {{ pendingRequestTab + 1 }}/{{ liftRequests.length }}</div>
+                    <div class="row justify-between">
+                      <q-btn
+                        @click="switchTab(false)"
+                        :disable="pendingRequestTab == 0"
+                        icon="keyboard_arrow_left"
+                        dense
+                        flat
+                        size="md"
+                      />
+                      <q-btn
+                        @click="switchTab(true)"
+                        :disable="pendingRequestTab == liftRequests.length - 1"
+                        icon="keyboard_arrow_right"
+                        dense
+                        flat
+                        size="md"
+                      />
+                    </div>
                   </div>
                 </LiftOfferForRequest>
                 <ExtHr color="grey-3" size="xs" />

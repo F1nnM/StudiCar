@@ -10,7 +10,8 @@
       <template v-slot:right>
         <div class="row items-center text-primary">
           StudiCar Code
-          <q-icon right name="select_all" />
+          <QrIcon size="xs" class="q-ml-xs" :type="4" showLogo />
+          <!-- <q-icon right name="select_all" /> -->
         </div>
       </template>
 
@@ -58,9 +59,14 @@
 
 <script>
 import { date } from "quasar";
+import QrIcon from "components/QrIcon";
 
 export default {
   name: "chat_item",
+  components: {
+    QrIcon
+  },
+
   props: {
     message: {
       type: Object,

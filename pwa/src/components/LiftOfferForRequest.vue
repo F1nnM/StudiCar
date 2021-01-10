@@ -6,8 +6,8 @@
         <q-btn icon="chevron_left" @click="emit('left')" dense flat />
       </div>-->
       <div class="ellipsis col-9">
-        <q-expansion-item dense>
-          <template v-slot:header>
+        <q-item dense class="q-px-none" clickable @click="showLiftDetails = !showLiftDetails">
+          <q-item-section>
             <q-toolbar>
               <q-toolbar-title class="text-subtitle1">
                 <!-- <q-icon :name="lift.start.id > 3 ? 'home' : 'school'" size="sm" /> -->
@@ -20,24 +20,33 @@
             <q-icon :name="lift.destination.id > 3 ? 'home' : 'school'" size="xs" color="grey-9" />
                   </q-badge>-->
                 </span>
+                <q-slide-transition>
+                  <div v-if="!showLiftDetails" class="text-caption">Tippe für Details</div>
+                </q-slide-transition>
               </q-toolbar-title>
             </q-toolbar>
-          </template>
-          <q-item-label caption class="q-pb-sm">
-            <q-badge v-if="liftSoonLabel" color="grey-7" class="q-mr-sm">{{ liftSoonLabel }}</q-badge>
-            <div>Am {{ dateText }} (in {{ daysLeft }} Tage{{ daysLeft != 1 ? 'n' : '' }})</div>
-            <div>{{ timeText }} Uhr</div>
-          </q-item-label>
-        </q-expansion-item>
+          </q-item-section>
+        </q-item>
       </div>
       <div class="col-3">
-        <slot></slot>
+        <q-item dense class="q-px-none">
+          <slot></slot>
+        </q-item>
       </div>
       <!-- <div class="self-center">
         <q-btn icon="chevron_right" @click="emit('right')" dense flat />
         <span class="text-primary">1</span>
       </div>-->
     </div>
+    <q-slide-transition>
+      <div v-if="showLiftDetails">
+        <div class="q-pl-sm q-pb-sm">
+          <q-badge v-if="liftSoonLabel" color="grey-7" class="q-mr-sm">{{ liftSoonLabel }}</q-badge>
+          <div>Am {{ dateText }} (in {{ daysLeft }} Tage{{ daysLeft != 1 ? 'n' : '' }})</div>
+          <div>{{ timeText }} Uhr</div>
+        </div>
+      </div>
+    </q-slide-transition>
 
     <div class="full-width q-py-sm">
       <div class="q-ml-md full-width bg-grey-4">
@@ -80,7 +89,9 @@ export default {
     numberOfRequests: Number
   },
   data() {
-    return {};
+    return {
+      showLiftDetails: false
+    };
   },
   computed: {
     enoughSeatsLeft() {
