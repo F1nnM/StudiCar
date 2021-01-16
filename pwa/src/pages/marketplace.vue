@@ -69,8 +69,9 @@
             <q-tab-panels
               v-model="sortFilterDialog.tab"
               animated
-              transition-next="jump-left"
-              transition-prev="jump-right"
+              transition-next="slide-left"
+              transition-prev="slide-right"
+              swipeable
             >
               <q-tab-panel name="sort">
                 <q-list>
@@ -112,6 +113,7 @@
                   <q-item class="q-mb-sm">
                     <q-item-section avatar>
                       <q-btn-toggle
+                        disable
                         v-model="filter.friends"
                         no-caps
                         rounded
@@ -183,7 +185,7 @@
                       <q-item-label caption>
                         <span
                           v-if="filter.dest == 'home'"
-                        >nur Fahrten in Richtung deiner Standardadresse werden angezeigt</span>
+                        >nur Fahrten von der DH weg werden angezeigt</span>
                         <span
                           v-else-if="filter.dest == 'school'"
                         >nur Fahrten in Richtung DH werden angezeigt</span>
@@ -200,6 +202,20 @@
                       <q-item-label caption>
                         <span v-if="filter.prefs">Im Moment werden deine Präferenzen berücksichtigt</span>
                         <span v-else>Im Moment werden deine Präferenzen nicht beachtet</span>
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                  <q-item tag="label">
+                    <q-item-section avatar>
+                      <q-toggle v-model="filter.defaultHome" disable />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label>Nur Fahrten {{ filterDefaultHomePreposition }} meiner Standardadresse anzeigen</q-item-label>
+                      <q-item-label caption>
+                        <span
+                          v-if="filter.defaultHome"
+                        >Im Moment werden nur Fahrten {{ filterDefaultHomePreposition }} {{ defaultHomeCity }} angezeigt</span>
+                        <span v-else>Im Moment werden Fahrten zu all deinen Adressen angezeigt</span>
                       </q-item-label>
                     </q-item-section>
                   </q-item>
@@ -252,7 +268,8 @@ export default {
       filter: {
         friends: 0,
         prefs: true,
-        dest: 0
+        dest: 0,
+        defaultHome: false
       },
       sortFilterDialog: {
         open: false,
@@ -269,6 +286,26 @@ export default {
       var greeting = this.$store.state.greeting;
       var name = this.$store.getters["auth/user"].name.split(" ")[0];
       return greeting + ", " + name;
+    },
+
+    filterDefaultHomePreposition() {
+      if (!this.filter.dest) return "ab/zu";
+      else {
+        if (this.filter.dest == "home") return "zu";
+        else return "ab";
+      }
+    },
+
+    defaultHomeCity() {
+      var defaultAddress = this.$store.getters["auth/user"].addresses.find(
+        a => a.isDefault
+      );
+      if (defaultAddress) return defaultAddress.city;
+      else return "- ERR: NO DEFAULT ADDRESS FOUND -";
+    },
+
+    userPrefs() {
+      return this.$store.getters["auth/user"].prefs;
     },
 
     sortOptions() {
@@ -318,7 +355,7 @@ export default {
     },
 
     getSortedOffers() {
-      var offers = JSON.parse(JSON.stringify(this.allOffers));
+      var offers = this.getFilteredOffers;
 
       // here comes the sorting code
 
@@ -392,6 +429,31 @@ export default {
       return offers;
     },
 
+    getFilteredOffers() {
+      var allOffers = JSON.parse(JSON.stringify(this.allOffers)),
+        userPrefs = this.$store.getters["auth/user"].prefs,
+        filter = this.filter;
+
+      allOffers = allOffers.filter(offer => {
+        // prefs matching?
+        if (filter.prefs) {
+          if (!this.arePrefsMatching(offer.driver.prefs)) return false;
+        }
+        if (filter.dest) {
+          var endsAtHome = offer.destination.id == -1;
+          if (filter.dest == "home") {
+            if (!endsAtHome) return false;
+          } else {
+            // filter.dest is 'school'
+            if (endsAtHome) return false;
+          }
+        }
+
+        return true; // stay in results otherwise
+      });
+      return allOffers;
+    },
+
     genderName() {
       switch (this.$store.getters["auth/user"].gender) {
         case "M":
@@ -445,6 +507,28 @@ export default {
     triggerLiftRequest(liftId) {
       this.$store.dispatch("auth/requestToLift", liftId);
       this.offerIndexToRefresh++; // to re-render component, wasn't working otherwise
+    },
+
+    arePrefsMatching(driverPrefsObj) {
+      var liftPrefs = driverPrefsObj,
+        matching = Object.keys(liftPrefs).every(pref => {
+          var liftPrefValue = prefToInt(liftPrefs[pref]),
+            userPrefValue = prefToInt(this.userPrefs[pref]);
+
+          return liftPrefValue >= userPrefValue;
+          function prefToInt(val) {
+            switch (val) {
+              case "GREEN":
+                return 0;
+              case "YELLOW":
+                return 1;
+              case "RED":
+                return 2;
+            }
+          }
+        });
+
+      return matching;
     }
   },
 

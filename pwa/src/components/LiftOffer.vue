@@ -241,7 +241,7 @@ export default {
         .onCancel();
     }
   },
-  mounted() {
+  created() {
     buildGetRequestUrl(
       GET_USER_PROFILE_PIC,
       { fbid: this.lift.driver.id },

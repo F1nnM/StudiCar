@@ -144,37 +144,40 @@
               class="text-weight-light"
             >Du hast noch keine Adressen hinzugefügt</div>
             <q-list v-else>
-              <div v-for="item in addresses" :key="item.id">
-                <q-item>
-                  <div class="row">
-                    <q-item-section class="q-pl-md" style="border-left: 1px solid lightgray">
-                      <p class="text-overline text-weight-light">{{ item.nickname }}</p>
-                    </q-item-section>
-                    <q-item-section class="q-pl-md overflow-hidden">
-                      <q-item-label>{{ item.street }} {{ item.number }}</q-item-label>
-                      <q-item-label caption>
-                        {{ item.postcode }}
-                        <span style="display: inline-block; max-width: 70%">
-                          {{
-                          item.city
-                          }}
-                        </span>
-                      </q-item-label>
-                    </q-item-section>
-                    <q-item-section side top>
-                      <q-slide-transition>
-                        <q-btn
-                          v-if="openEditAddresses"
-                          @click="removeAddress(item.id)"
-                          flat
-                          class="float-right"
-                          icon="remove_circle_outline"
-                          color="red"
-                          size="md"
-                        />
-                      </q-slide-transition>
-                    </q-item-section>
-                  </div>
+              <div>
+                <q-item v-for="item in addresses" :key="item.id">
+                  <q-item-section>
+                    <div class="row">
+                      <q-item-label v-html="item.nickname" v-if="item.nickname"></q-item-label>
+                      <q-item-label v-else>{{ item.city }}</q-item-label>
+                      <q-icon
+                        name="home"
+                        size=".9em"
+                        color="primary"
+                        class="q-ml-sm"
+                        v-if="!item.default"
+                      />
+                    </div>
+
+                    <q-item-label caption class="q-mt-xs">
+                      <span>{{ item.street }} {{ item.number }}</span>
+                      <span class="q-mx-xs">-</span>
+                      <span>{{ item.postcode }} {{ item.city }}</span>
+                    </q-item-label>
+                  </q-item-section>
+                  <q-item-section side top>
+                    <q-slide-transition>
+                      <q-btn
+                        v-if="openEditAddresses"
+                        @click="removeAddress(item.id)"
+                        flat
+                        class="float-right"
+                        icon="remove_circle_outline"
+                        color="red"
+                        size="md"
+                      />
+                    </q-slide-transition>
+                  </q-item-section>
                 </q-item>
               </div>
             </q-list>
