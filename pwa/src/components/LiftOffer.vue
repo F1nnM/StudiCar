@@ -239,16 +239,25 @@ export default {
           this.$emit("request", this.lift.id);
         })
         .onCancel();
+    },
+
+    refreshImage() {
+      buildGetRequestUrl(
+        GET_USER_PROFILE_PIC,
+        { fbid: this.lift.driver.id },
+        url => {
+          this.imageUrl = url;
+        }
+      );
     }
   },
-  created() {
-    buildGetRequestUrl(
-      GET_USER_PROFILE_PIC,
-      { fbid: this.lift.driver.id },
-      url => {
-        this.imageUrl = url;
-      }
-    );
+
+  mounted() {
+    this.refreshImage();
+  },
+
+  updated() {
+    this.refreshImage();
   }
 };
 </script>

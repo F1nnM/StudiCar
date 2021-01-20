@@ -165,13 +165,7 @@
 
         <q-card-section>
           Stelle sicher, dass du immer die neueste Version verwendest.
-          <q-btn
-            label="Warum ist das wichtig?"
-            outline
-            no-caps
-            class="q-mt-xs"
-            to="/hilfe?faq-id=30"
-          />
+          <q-btn label="Warum ist das wichtig?" outline no-caps class="q-mt-xs" to="/hilfe" />
         </q-card-section>
         <q-card-actions align="around" class="q-mt-sm">
           <q-btn flat color="white" label="Später" @click="hideUpdateField = true" />

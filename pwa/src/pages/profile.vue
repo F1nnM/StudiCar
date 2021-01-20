@@ -157,6 +157,12 @@
                         class="q-ml-sm"
                         v-if="!item.default"
                       />
+                      <!-- <q-icon
+                        name="roofing"
+                        size=".9em"
+                        color="primary"
+                        class="q-ml-sm"
+                      />-->
                     </div>
 
                     <q-item-label caption class="q-mt-xs">
@@ -662,10 +668,7 @@
             <p>Bitte vergewissere dich, dass die Daten korrekt und vollständig sind.</p>
             <CarInfo :car="newCar" />
             <br />
-            <q-toggle
-              v-model="agbAccepted"
-              label="Datenschutzerklärung und Allgemeine Geschäftsbedingungen akzeptieren"
-            />
+            <p>Wenn du ein Auto hinzufügst, erklärst du dich mit unseren AGBs und Datenschutzverordnung (im Hauptmenü in der linken Seitenleiste zu finden) einverstanden.</p>
           </q-step>
 
           <template v-slot:navigation>
@@ -678,7 +681,7 @@
                       else addCar()
                     "
                 color="primary"
-                :disable="openNewCarTab == 8 && !agbAccepted"
+                :disable="openNewCarTab == 8"
                 :label="openNewCarTab == 8 ? 'Hinzufügen' : 'Weiter'"
               />
               <q-btn
@@ -784,7 +787,6 @@ export default {
         seats: 3,
         licensePlate: ""
       },
-      agbAccepted: false,
       newCarOptions: {},
       openNewCarTab: 1,
       openEditCars: false,

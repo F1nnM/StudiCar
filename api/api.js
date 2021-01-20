@@ -932,7 +932,9 @@ module.exports = {
       }
     },
     '/getSupportData': async (req, res, options) => {
-      var result = (await runQuery(longQueries.getFAQ, [])).result,
+      var result = (await runQuery(`SELECT faq.ID, faq.QUESTION, faq.CATEGORY, faq.ANSWER, users.NAME AS ORGAS_NAME, team.FUNCTION, team.ID AS ORGA_ID 
+      FROM faq JOIN team ON team.ID = faq.ANSWERED_BY LEFT JOIN users ON users.ID = faq.ANSWERED_BY	
+    WHERE IS_PUBLIC = 1`, [])).result,
         faqArr = [],
         tutArr = []
       result.forEach(item => {
@@ -964,7 +966,9 @@ module.exports = {
       }))
     },
     '/getAllFAQ': async (req, res, options) => {
-      var result = (await runQuery(longQueries.getAllFAQ, [])).result,
+      var result = (await runQuery(`SELECT faq.*, users.NAME AS ORGAS_NAME, orgas.FUNCTION 	
+    FROM faq JOIN orgas ON orgas.ID = faq.ANSWERED_BY 	
+    JOIN users ON users.ID = faq.ANSWERED_BY`, [])).result,
         obj = {
           'bedienung': [],
           'sonstiges': []
