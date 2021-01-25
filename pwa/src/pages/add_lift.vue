@@ -262,17 +262,10 @@
               </q-stepper-navigation>
             </q-step>
             <q-step :name="7" title="Zeit festlegen" icon="schedule" :done="step > 7">
-              <p class="text-caption">Wähle aus, wann du planst zu fahren.</p>
-              <q-tabs
-                v-model="departAtText"
-                dense
-                no-caps
-                inline-label
-                class="bg-white text-grey-9 q-mb-sm q-pa-none"
-              >
-                <q-tab name="true" icon="time_to_leave" label="Abfahrt ab" />
-                <q-tab name="a" icon="keyboard_tab" label="Ankunft bis" />
-              </q-tabs>
+              <p
+                class="text-caption"
+              >Wann planst du {{ departing ? 'von der DH wegzufahren' : 'an der DH anzukommen' }}?</p>
+
               <q-input
                 clickable
                 @click="_=> $refs.timepicker.toggle()"
@@ -333,7 +326,6 @@
               full-height
               persistent
               transition-show="slide-up"
-              :transition-hide="flipAddLiftConfirm ? 'flip-up' : 'slide-up'"
             >
               <q-card>
                 <q-card-section>
@@ -436,7 +428,6 @@ export default {
         destinationAddressId: 0,
         startAddressId: 0,
         carId: null,
-        departAt: true,
         timestamp: "",
         datestamp: "",
         seats: 0, // just to avoid error when rendering slider
@@ -454,7 +445,6 @@ export default {
       step: 1,
       showTimePicker: false,
       openAddLiftConfirm: false,
-      flipAddLiftConfirm: true,
       overviewExpanded: false,
       uploading: 0 // 0 means not uploading, 1 means upload in progress, 2 means upload successful and -1 means error
     };
@@ -512,15 +502,6 @@ export default {
       }
     },
 
-    departAtText: {
-      get() {
-        return this.lift.departAt ? "true" : "a";
-      },
-      set(value) {
-        this.lift.departAt = value.length > 1; // '.' is false, any longer string true
-      }
-    },
-
     getExactAddresses() {
       if (this.lift.destination == "school") {
         return this.allAddresses.filter(item => item.id < 4); // filter only the schools, which have IDs 1 to 3
@@ -541,6 +522,13 @@ export default {
         return this.allAddresses.filter(item => item.id > 3); // filter only private adresses, IDs 1 to 3 are reserved for schools
       }
       return null;
+    },
+
+    departing() {
+      var dest = this.lift.destination;
+      if (dest == "home") return true;
+      else if (dest == "school") return false;
+      else return null;
     }
   },
 
@@ -559,22 +547,13 @@ export default {
     },
 
     async addLift() {
-      new Promise(_ => {
-        this.flipAddLiftConfirm = false;
-      })
-        .then(_ => {
-          this.openAddLiftConfirm = false;
-        })
-        .then(_ => {
-          this.flipAddLiftConfirm = true;
-        }); // this is just to get a cool effect, flip when process is canceled and swipe up when lift shall be published.
-
       if (this.lift.seats == 0) {
         // case when user didn't want to change number of seats at this lift
         this.lift.seats = this.getCarData.seats;
       }
       this.step = 1;
-      this.uploading = 1;
+      /* this.uploading = 1; */
+      this.lift.departAt = this.departing;
       this.$store.dispatch("auth/addLift", this.lift).then(_ => {
         this.lift = {
           destination: "school", // default set to school, user selects first home/school, then exact address
@@ -584,7 +563,7 @@ export default {
           seats: 0 // just to avoid error when rendering slider
         };
         this.step = 1;
-        this.uploading = 2;
+        /* this.uploading = 2; */
         history.go(-1);
       });
     },

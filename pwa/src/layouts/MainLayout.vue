@@ -163,13 +163,10 @@
           <!-- <q-btn icon="close" flat round dense v-close-popup /> -->
         </q-toolbar>
 
-        <q-card-section>
-          Stelle sicher, dass du immer die neueste Version verwendest.
-          <q-btn label="Warum ist das wichtig?" outline no-caps class="q-mt-xs" to="/hilfe" />
-        </q-card-section>
+        <q-card-section>Bitte starte die App neu, damit die neue Version fertig geladen werden kann.</q-card-section>
         <q-card-actions align="around" class="q-mt-sm">
-          <q-btn flat color="white" label="Später" @click="hideUpdateField = true" />
-          <q-btn color="primary" label="Aktualisieren" @click="reloadPage" />
+          <!-- <q-btn flat color="white" label="Später" @click="hideUpdateField = true" /> -->
+          <q-btn color="primary" label="Ok, neu laden" @click="reloadPage" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -297,10 +294,11 @@ export default {
     },
 
     oldVersionRunning() {
-      const bypass = false; // page will be auto-reloaded when in dev mode and no bypass
+      const reloadWithoutPrompt = true;
 
-      var old = this.$store.state.oldVersionRunning;
-      if (old && process.env.DEV && !bypass) {
+      var old = this.$store.state.oldVersionRunning,
+        isDev = process.env.DEV;
+      if (old && (reloadWithoutPrompt ? true : isDev)) {
         this.reloadPage();
         return false;
       } else return old;
@@ -469,6 +467,7 @@ export default {
     setTimeout(this.reloadNews, 50); // simple call was buggy, no idea why
     var user = this.$store.getters["auth/user"];
     if (!user) location.reload();
+    // bug: when other user first signs in, no data are displayed. Reloading is then the second sign-in and everything is working properly
     else
       buildGetRequestUrl(GET_USER_PROFILE_PIC, { fbid: user.uid }, url => {
         this.profilePictureUrl = url;

@@ -30,6 +30,13 @@ function errorNotify (msg) {
   });
 }
 
+function successNotify (msg) {
+  Notify.create({
+    type: 'positive',
+    message: msg
+  });
+}
+
 export default {
   namespaced: true,
 
@@ -271,7 +278,10 @@ export default {
       sendApiRequest(
         SQL_UPDATE_PREFS,
         { prefs: payload },
-        _ => commit('UPDATE_PREFS', payload),
+        _ => {
+          commit('UPDATE_PREFS', payload)
+          successNotify('Deine Präferenzen wurden aktualisiert')
+        },
         error => alert(error)
       );
     },
@@ -280,9 +290,12 @@ export default {
       sendApiRequest(
         SQL_ADD_ADDRESS,
         { address: payload },
-        data => commit('ADD_ADDRESS', Object.assign(
-          payload, data
-        )),
+        data => {
+          commit('ADD_ADDRESS', Object.assign(
+            payload, data
+          ))
+          successNotify('Adresse wurde hinzugefügt')
+        },
         error => alert(error)
       )
     },
@@ -293,6 +306,7 @@ export default {
         { lift: payload },
         data => {
           commit('UPDATE_CHAT_LIFTS', data)
+          successNotify('Mitfahrgelegenheit wurde veröffentlicht')
         },
         error => errorNotify(error)
       )
@@ -301,7 +315,10 @@ export default {
       sendApiRequest(
         SQL_REMOVE_ADDRESS,
         { id: payload },
-        _ => commit('REMOVE_ADDRESS', payload),
+        _ => {
+          successNotify('Adresse wurde entfernt.')
+          commit('REMOVE_ADDRESS', payload)
+        },
         error => {
           if (error.status == 424) errorNotify('Kann Adresse noch nicht entfernen: Eine Mitfahrgelegenheit hängt davon ab')
           else errorNotify(error)
@@ -315,10 +332,12 @@ export default {
         { car: payload },
         data => {
           payload.carId = data.id
-
           commit('ADD_CAR', payload)
+          successNotify('Fahrzeug wurde hinzugefügt')
         },
-        error => alert(err)
+        err => {
+          errorNotify(err)
+        }
       )
     },
 
@@ -328,6 +347,7 @@ export default {
         { id: payload },
         _ => {
           commit('REMOVE_CAR', payload)
+          successNotify('Fahrzeug wurde entfernt')
         },
         error => {
           if (error.status == 424) errorNotify('Kann Fahrzeug noch nicht entfernen: Eine Mitfahrgelegenheit hängt davon ab')
@@ -367,7 +387,10 @@ export default {
       sendApiRequest(
         SQL_UPDATE_LIFT_MAX_DISTANCE,
         { liftMaxDistance: payload },
-        _ => commit('UPDATE_LIFT_MAX_DISTANCE', payload),
+        _ => {
+          commit('UPDATE_LIFT_MAX_DISTANCE', payload)
+          successNotify('Maximale Entfernung wurde aktualisiert')
+        },
         error => errorNotify(error)
       );
     },
@@ -385,6 +408,7 @@ export default {
             liftId: payload.liftId,
             accepted: payload.accepted
           })
+          successNotify('Alle Anfragen zu dieser Mitfahrgelegenheit wurden ' + accepted ? 'akzeptiert' : 'abgelehnt')
         }
         else {
           if (payload.accepted) {

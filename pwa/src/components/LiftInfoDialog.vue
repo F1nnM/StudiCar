@@ -42,38 +42,7 @@
           <ExpansionLiftTimeline :lift="lift"></ExpansionLiftTimeline>
           <q-separator />
           <q-item-label header>Auto</q-item-label>
-          <q-item>
-            <q-item-section avatar>
-              <q-avatar>
-                <q-icon name="directions_car" size="sm" color="grey-9" />
-              </q-avatar>
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>
-                <p class="q-mb-none">
-                  <span class="text-subtitle1">
-                    <span class="text-bold">{{ lift.car.brand }}</span>
-                    {{ lift.car.model}}
-                  </span>
-
-                  <q-badge class="q-ml-sm" color="dark" transparent>{{ lift.car.type }}</q-badge>
-                  <ExtHr size="xs" :color="'#' + lift.car.color" class="q-pr-xl q-mr-lg" hex />
-                </p>
-              </q-item-label>
-              <q-item-label
-                caption
-                class="q-pt-xs"
-                :style="'border-top: 1px solid ' + lift.car.color"
-              >
-                Baujahr {{ lift.car.built }}
-                <span class="q-mx-sm">-</span>
-                {{ lift.car.licensePlate }}
-              </q-item-label>
-            </q-item-section>
-            <!--  <q-item-section side top>
-              <q-btn icon="help_outline" flat @click="showModelFrame = true" />
-            </q-item-section>-->
-          </q-item>
+          <CompactCarInfo :car="lift.car" expandable />
           <q-item-label header>
             <div v-if="lift.passengers">
               Teilnehmer
@@ -228,12 +197,12 @@ val: 'music', icon: 'music_note'
 
 <script>
 import { openURL, date } from "quasar";
-import ExtHr from "components/ExtendedHr";
 import Vue from "vue";
 import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
 import VueFriendlyIframe from "vue-friendly-iframe";
 Vue.use(VueFriendlyIframe);
 
+import CompactCarInfo from "components/CompactCarInfo";
 import ExpansionLiftTimeline from "components/ExpansionLiftTimeline";
 /* import { sendApiRequest } from "../ApiAccess"; */
 
@@ -241,7 +210,7 @@ export default {
   name: "LiftInfoDialog",
   components: {
     ExpansionLiftTimeline,
-    ExtHr
+    CompactCarInfo
   },
   props: {
     value: Boolean,

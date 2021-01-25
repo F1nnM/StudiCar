@@ -189,23 +189,22 @@
             </q-list>
           </div>
           <div class="q-mt-sm q-pa-sm shadow-1">
-            <div class="row">
+            <div class="row justify-between">
               <p
-                class="text-uppercase text-caption q-mt-none q-mb-xs col-5"
+                class="text-uppercase text-caption q-mt-none q-mb-xs"
               >Mein{{ cars.length != 1 ? 'e' : '' }} Fahrzeug{{ cars.length != 1 ? 'e' : '' }}</p>
-              <div class="col-5">
-                <q-btn
-                  flat
-                  v-show="openEditCars"
-                  @click="openAddCar = true"
-                  dense
-                  icon="add"
-                  color="green"
-                />
-              </div>
-              <p class="col-2">
-                <q-btn size="sm" flat @click="openEditCars = !openEditCars" icon="edit" />
-              </p>
+
+              <q-btn
+                flat
+                v-show="openEditCars"
+                @click="openAddCar = true"
+                dense
+                icon="add"
+                color="green"
+              />
+
+              <q-btn size="sm" flat @click="openEditCars = !openEditCars" icon="edit" />
+
               <!-- <q-slide-transition>
                 <p v-if="openEditCars" dense class="q-ma-none text-caption">
                   Hinweis: Deine Aktionen werden sofort synchronisiert, der
@@ -217,17 +216,14 @@
                 v-if="!cars.length"
                 class="text-weight-light"
               >Du hast noch keine Autos hinzugefügt</div>
-              <q-card
-                class="col-6 q-pa-xs no-shadow relative"
+              <div
+                class="row justify-between nowrap full-width"
                 v-for="item in cars"
                 :key="item.licensePlate"
               >
+                <CompactCarInfo :expandable="!openEditCars" :car="item" />
                 <q-slide-transition>
-                  <div
-                    class="bg-white absolute z-fullscreen"
-                    style="top: 0; right: 0; border-bottom-left-radius: 5px"
-                    v-show="openEditCars"
-                  >
+                  <div v-if="openEditCars">
                     <q-btn
                       @click="removeCar(item.carId, item.brand, item.model)"
                       flat
@@ -238,16 +234,7 @@
                     />
                   </div>
                 </q-slide-transition>
-                <q-img src="~assets/app-logo.svg" style="height: 15vh">
-                  <div class="absolute-bottom">
-                    <div class="text-h6">{{ item.brand }}</div>
-                    <div class="text-caption">
-                      {{ item.model }}
-                      <q-btn icon="info" @click="showCarInfo(item)" flat size="md" />
-                    </div>
-                  </div>
-                </q-img>
-              </q-card>
+              </div>
             </div>
           </div>
         </q-tab-panel>
@@ -666,7 +653,9 @@
           </q-step>
           <q-step :name="8" title="Überprüfen" icon="visibility">
             <p>Bitte vergewissere dich, dass die Daten korrekt und vollständig sind.</p>
+
             <CarInfo :car="newCar" />
+
             <br />
             <p>Wenn du ein Auto hinzufügst, erklärst du dich mit unseren AGBs und Datenschutzverordnung (im Hauptmenü in der linken Seitenleiste zu finden) einverstanden.</p>
           </q-step>
@@ -681,7 +670,6 @@
                       else addCar()
                     "
                 color="primary"
-                :disable="openNewCarTab == 8"
                 :label="openNewCarTab == 8 ? 'Hinzufügen' : 'Weiter'"
               />
               <q-btn
@@ -709,6 +697,7 @@ import ExtHr from "../components/ExtendedHr";
 import QrGen from "../components/QrGenerator";
 import CarInfo from "../components/CarInfo";
 import TitleButtonAnchor from "../components/TitleButtonAnchor";
+import CompactCarInfo from "../components/CompactCarInfo";
 import { mdiAccountGroupOutline } from "@quasar/extras/mdi-v5";
 
 import {
@@ -725,7 +714,8 @@ export default {
     ImageColorPicker,
     ProfileTopSection,
     CarInfo,
-    TitleButtonAnchor
+    TitleButtonAnchor,
+    CompactCarInfo
   },
 
   data() {
