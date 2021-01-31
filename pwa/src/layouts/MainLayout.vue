@@ -123,7 +123,10 @@
       </q-list>
       <ExtHr color="grey-7" size="xs" />
       <div class="q-pa-md text-grey-7 row justify-between">
-        <span>StudiCar</span>
+        <span>
+          StudiCar
+          <q-chip v-if="isDev" label="DEV" size="sm" color="primary"></q-chip>
+        </span>
         <span>Quasar v{{ $q.version }}</span>
       </div>
     </q-drawer>
@@ -302,6 +305,10 @@ export default {
         this.reloadPage();
         return false;
       } else return old;
+    },
+
+    isDev() {
+      return process.env.DEV;
     },
 
     navigationLinks() {

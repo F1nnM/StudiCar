@@ -37,25 +37,35 @@
     <q-dialog
       v-else
       :value="true"
-      maximized
+      :maximized="uploading == 0"
       persistent
       transition-show="slide-up"
       transition-hide="slide-down"
       @hide="goHome"
     >
-      <div class="bg-white">
-        <div class="row">
-          <span class="col-2"></span>
-          <q-toolbar class="q-pt-md col-8">
-            <q-toolbar-title class="text-center bg-white">Eine Fahrt anbieten</q-toolbar-title>
-          </q-toolbar>
-          <div class="col-2 bg-primary text-center">
-            <q-btn flat size="md" class="text-white full-height" icon="close" v-close-popup />
-          </div>
-        </div>
+      <q-tab-panels
+        v-model="uploading"
+        class="q-pa-none"
+        animated
+        transition-next="jump-up"
+        transition-prev="flip-up"
+      >
+        <q-tab-panel :name="0" class="q-pa-none">
+          <!-- screen for not uploading, normal editing -->
 
-        <div class="q-pa-sm">
-          <!-- <q-card v-show="uploading == -1">
+          <div class="bg-white">
+            <div class="row">
+              <span class="col-2"></span>
+              <q-toolbar class="q-pt-md col-8">
+                <q-toolbar-title class="text-center bg-white">Eine Fahrt anbieten</q-toolbar-title>
+              </q-toolbar>
+              <div class="col-2 bg-primary text-center">
+                <q-btn flat size="md" class="text-white full-height" icon="close" v-close-popup />
+              </div>
+            </div>
+
+            <div class="q-pa-sm">
+              <!-- <q-card v-show="uploading == -1">
           <q-card-section>
             <p>
               <q-icon name="error_outline" size="md" color="negative" />Beim Upload ist ein Fehler aufgetreten. Wenn das Problem öfter auftritt, dann
@@ -64,350 +74,411 @@
               >schreib uns</a> bitte.
             </p>
           </q-card-section>
-          </q-card>-->
-          <q-stepper
-            v-model="step"
-            vertical
-            class="overflow-scroll shadow-0"
-            color="primary"
-            animated
-          >
-            <q-step :name="1" title="Wähle dein Ziel aus" icon="near_me" :done="step > 1">
-              <p class="text-caption">Fährst du zur Hochschule oder nach Hause?</p>
-              <q-list>
-                <q-item tag="label">
-                  <q-item-section avatar>
-                    <q-radio v-model="lift.destination" val="school" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>Zur Hochschule</q-item-label>
-                    <q-item-label
-                      caption
-                    >Du kannst dann noch auswählen, zu welchem Gebäude und wo du losfährst.</q-item-label>
-                  </q-item-section>
-                </q-item>
-
-                <q-item tag="label">
-                  <q-item-section avatar>
-                    <q-radio v-model="lift.destination" val="home" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>Nach Hause</q-item-label>
-                    <q-item-label
-                      caption
-                    >Du kannst dann noch aus deinen Adressen auswählen und wo du losfährst.</q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-
-              <q-stepper-navigation>
-                <q-btn @click="step++" color="primary" label="Weiter" />
-              </q-stepper-navigation>
-            </q-step>
-
-            <q-step :name="2" title="Genaue Adresse auswählen" icon="location_on" :done="step > 2">
-              <p class="text-caption">Wo fährst du genau hin?</p>
-              <q-list>
-                <q-item tag="label" v-for="address in getExactAddresses" :key="address.id">
-                  <q-radio v-model="lift.destinationAddressId" :val="address.id" />
-                  <q-item-section v-show="getImagePath(address.id)" avatar>
-                    <q-avatar rounded>
-                      <img class="shadow-3 q-ma-none" :src="getImagePath(address.id)" />
-                    </q-avatar>
-                  </q-item-section>
-
-                  <q-item-section>
-                    <q-item-label>{{address.nickname ? address.nickname : 'nach ' + address.city}}</q-item-label>
-                    <q-item-label caption class="row">
-                      <div class="overflow-hidden">{{address.street}} {{address.number}}</div>
-                    </q-item-label>
-                    <q-item-label caption class="row">
-                      <div class="col-auto overflow-hidden">{{address.postcode}} {{address.city}}</div>
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-              <q-stepper-navigation>
-                <q-btn flat @click="step--" color="primary" label="Eins zurück" class="q-ml-sm" />
-                <q-btn
-                  @click="step++"
-                  color="primary"
-                  :disable="!lift.destinationAddressId"
-                  label="Weiter"
-                />
-              </q-stepper-navigation>
-            </q-step>
-
-            <q-step :name="3" title="Abfahrtsort festlegen" icon="near_me" :done="step > 3">
-              <p class="text-caption">Und wo fährst du los?</p>
-              <q-list>
-                <q-item tag="label" v-for="address in getExactStartingPoints" :key="address.id">
-                  <q-radio v-model="lift.startAddressId" :val="address.id" />
-                  <q-item-section v-show="getImagePath(address.id)" avatar>
-                    <q-avatar rounded>
-                      <img class="shadow-3 q-ma-none" :src="getImagePath(address.id)" />
-                    </q-avatar>
-                  </q-item-section>
-
-                  <q-item-section>
-                    <q-item-label>{{address.nickname ? address.nickname : 'in ' + address.city}}</q-item-label>
-                    <q-item-label caption class="row">
-                      <div class="overflow-hidden">{{address.street}} {{address.number}}</div>
-                    </q-item-label>
-                    <q-item-label caption class="row">
-                      <div class="col-auto overflow-hidden">{{address.postcode}} {{address.city}}</div>
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-              <q-stepper-navigation>
-                <q-btn flat @click="step--" color="primary" label="Eins zurück" class="q-ml-sm" />
-                <q-btn
-                  @click="step++"
-                  :disable="!lift.startAddressId"
-                  color="primary"
-                  label="Weiter"
-                />
-              </q-stepper-navigation>
-            </q-step>
-
-            <q-step :name="4" title="Auto auswählen" icon="emoji_transportation" :done="step > 4">
-              <p class="text-caption">Mit welchem Auto fährst du?</p>
-              <q-list>
-                <q-item tag="label" v-for="car in userCars" :key="car.carId" class="q-pr-none">
-                  <q-radio v-model="lift.carId" :val="car.carId" />
-
-                  <q-item-section>
-                    <q-item-label>
-                      {{car.brand}} {{car.model}}
-                      <ExtHr class="q-my-sm q-pr-xl" hex :color="car.color" size="1px" />
-                    </q-item-label>
-                    <q-item-label caption>
-                      <q-icon name="person" size="xs" />
-                      {{car.seats}}
-                      weitere Plätze
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-              <q-stepper-navigation>
-                <q-btn flat @click="step--" color="primary" label="Eins Zurück" class="q-ml-sm" />
-                <q-btn @click="step ++" color="primary" :disable="!lift.carId" label="Weiter" />
-              </q-stepper-navigation>
-            </q-step>
-
-            <q-step :name="5" title="Sitze bearbeiten" icon="person_add" :done="step > 5">
-              <p class="text-caption">
-                Willst du die Anzahl an Mitfahrern für diese Fahrt ändern?
-                (Hinweis: Wenn du hier 0 beibehältst, dann speichern wir für diese Fahrt {{ getCarData.seats }} Mitfahrer, also die übliche Kapazität dieses Autos)
-              </p>
-              <q-item>
-                <q-item-section avatar>
-                  <q-icon
-                    color="primary"
-                    name="edit"
-                    v-if="lift.seats || getCarData.seats == lift.seats"
-                  />
-                  <q-icon color="primary" name="how_to_reg" v-else />
-                </q-item-section>
-                <q-item-section>
-                  <q-slider
-                    markers
-                    :thumb-path="''/* M7.59 5.41c-.78-.78-.78-2.05 0-2.83.78-.78 2.05-.78 2.83 0 .78.78.78 2.05 0 2.83-.79.79-2.05.79-2.83 0zM6 16V7H4v9c0 2.76 2.24 5 5 5h6v-2H9c-1.66 0-3-1.34-3-3zm14 4.07L14.93 15H11.5v-3.68c1.4 1.15 3.6 2.16 5.5 2.16v-2.16c-1.66.02-3.61-.87-4.67-2.04l-1.4-1.55c-.19-.21-.43-.38-.69-.5-.29-.14-.62-.23-.96-.23h-.03C8.01 7 7 8.01 7 9.25V15c0 1.66 1.34 3 3 3h5.07l3.5 3.5L20 20.07z*/"
-                    v-model="lift.seats"
-                    :min="0"
-                    :max="9"
-                    :step="1"
-                    snap
-                    label
-                    label-always
-                  />
-                </q-item-section>
-              </q-item>
-
-              <q-stepper-navigation>
-                <q-btn flat @click="step--" color="primary" label="Eins Zurück" class="q-ml-sm" />
-                <q-btn @click="step ++" color="primary" label="Weiter" />
-              </q-stepper-navigation>
-            </q-step>
-            <q-step :name="6" title="Tag festlegen" icon="event" :done="step > 6">
-              <p class="text-caption">Wähle aus, wann du planst zu fahren.</p>
-              <q-input
-                clickable
-                @click="_=> $refs.datepicker.toggle()"
-                outlined
-                readonly
-                :value="lift.datestamp || '- fehlt -'"
+              </q-card>-->
+              <q-stepper
+                v-model="step"
+                vertical
+                class="overflow-scroll shadow-0"
+                color="primary"
+                animated
               >
-                <template v-slot:append>
-                  <q-btn icon="edit" color="grey-9" flat>
-                    <q-menu ref="datepicker" transition-show="jump-down" transition-hide="jump-up">
-                      <q-date
-                        title="Tag auswählen"
-                        :subtitle="`Maximal ${maxDaysAhead} Tage im Voraus`"
-                        event-color="primary"
-                        mask="YYYY-MM-DD"
-                        v-model="lift.datestamp"
-                        :events="[todayString]"
-                        :options="dateOptions"
+                <q-step :name="1" title="Wähle dein Ziel aus" icon="near_me" :done="step > 1">
+                  <p class="text-caption">Fährst du zur Hochschule oder nach Hause?</p>
+                  <q-list>
+                    <q-item tag="label">
+                      <q-item-section avatar>
+                        <q-radio v-model="lift.destination" val="school" />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>Zur Hochschule</q-item-label>
+                        <q-item-label
+                          caption
+                        >Du kannst dann noch auswählen, zu welchem Gebäude und wo du losfährst.</q-item-label>
+                      </q-item-section>
+                    </q-item>
+
+                    <q-item tag="label">
+                      <q-item-section avatar>
+                        <q-radio v-model="lift.destination" val="home" />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>Nach Hause</q-item-label>
+                        <q-item-label
+                          caption
+                        >Du kannst dann noch aus deinen Adressen auswählen und wo du losfährst.</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+
+                  <q-stepper-navigation>
+                    <q-btn @click="step++" color="primary" label="Weiter" />
+                  </q-stepper-navigation>
+                </q-step>
+
+                <q-step
+                  :name="2"
+                  title="Genaue Adresse auswählen"
+                  icon="location_on"
+                  :done="step > 2"
+                >
+                  <p class="text-caption">Wo fährst du genau hin?</p>
+                  <q-list>
+                    <q-item tag="label" v-for="address in getExactAddresses" :key="address.id">
+                      <q-radio v-model="lift.destinationAddressId" :val="address.id" />
+                      <q-item-section v-show="getImagePath(address.id)" avatar>
+                        <q-avatar rounded>
+                          <img class="shadow-3 q-ma-none" :src="getImagePath(address.id)" />
+                        </q-avatar>
+                      </q-item-section>
+
+                      <q-item-section>
+                        <q-item-label>{{address.nickname ? address.nickname : 'nach ' + address.city}}</q-item-label>
+                        <q-item-label caption class="row">
+                          <div class="overflow-hidden">{{address.street}} {{address.number}}</div>
+                        </q-item-label>
+                        <q-item-label caption class="row">
+                          <div
+                            class="col-auto overflow-hidden"
+                          >{{address.postcode}} {{address.city}}</div>
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                  <q-stepper-navigation>
+                    <q-btn
+                      flat
+                      @click="step--"
+                      color="primary"
+                      label="Eins zurück"
+                      class="q-ml-sm"
+                    />
+                    <q-btn
+                      @click="step++"
+                      color="primary"
+                      :disable="!lift.destinationAddressId"
+                      label="Weiter"
+                    />
+                  </q-stepper-navigation>
+                </q-step>
+
+                <q-step :name="3" title="Abfahrtsort festlegen" icon="near_me" :done="step > 3">
+                  <p class="text-caption">Und wo fährst du los?</p>
+                  <q-list>
+                    <q-item tag="label" v-for="address in getExactStartingPoints" :key="address.id">
+                      <q-radio v-model="lift.startAddressId" :val="address.id" />
+                      <q-item-section v-show="getImagePath(address.id)" avatar>
+                        <q-avatar rounded>
+                          <img class="shadow-3 q-ma-none" :src="getImagePath(address.id)" />
+                        </q-avatar>
+                      </q-item-section>
+
+                      <q-item-section>
+                        <q-item-label>{{address.nickname ? address.nickname : 'in ' + address.city}}</q-item-label>
+                        <q-item-label caption class="row">
+                          <div class="overflow-hidden">{{address.street}} {{address.number}}</div>
+                        </q-item-label>
+                        <q-item-label caption class="row">
+                          <div
+                            class="col-auto overflow-hidden"
+                          >{{address.postcode}} {{address.city}}</div>
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                  <q-stepper-navigation>
+                    <q-btn
+                      flat
+                      @click="step--"
+                      color="primary"
+                      label="Eins zurück"
+                      class="q-ml-sm"
+                    />
+                    <q-btn
+                      @click="step++"
+                      :disable="!lift.startAddressId"
+                      color="primary"
+                      label="Weiter"
+                    />
+                  </q-stepper-navigation>
+                </q-step>
+
+                <q-step
+                  :name="4"
+                  title="Auto auswählen"
+                  icon="emoji_transportation"
+                  :done="step > 4"
+                >
+                  <p class="text-caption">Mit welchem Auto fährst du?</p>
+                  <q-list>
+                    <q-item tag="label" v-for="car in userCars" :key="car.carId" class="q-pr-none">
+                      <q-radio v-model="lift.carId" :val="car.carId" />
+
+                      <q-item-section>
+                        <q-item-label>
+                          {{car.brand}} {{car.model}}
+                          <ExtHr class="q-my-sm q-pr-xl" hex :color="car.color" size="1px" />
+                        </q-item-label>
+                        <q-item-label caption>
+                          <q-icon name="person" size="xs" />
+                          {{car.seats}}
+                          weitere Plätze
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                  <q-stepper-navigation>
+                    <q-btn
+                      flat
+                      @click="step--"
+                      color="primary"
+                      label="Eins Zurück"
+                      class="q-ml-sm"
+                    />
+                    <q-btn @click="step ++" color="primary" :disable="!lift.carId" label="Weiter" />
+                  </q-stepper-navigation>
+                </q-step>
+
+                <q-step :name="5" title="Sitze bearbeiten" icon="person_add" :done="step > 5">
+                  <p class="text-caption">
+                    Willst du die Anzahl an Mitfahrern für diese Fahrt ändern?
+                    (Hinweis: Wenn du hier 0 beibehältst, dann speichern wir für diese Fahrt {{ getCarData.seats }} Mitfahrer, also die übliche Kapazität dieses Autos)
+                  </p>
+                  <q-item>
+                    <q-item-section avatar>
+                      <q-icon
+                        color="primary"
+                        name="edit"
+                        v-if="lift.seats || getCarData.seats == lift.seats"
                       />
-                    </q-menu>
-                  </q-btn>
-                </template>
-              </q-input>
+                      <q-icon color="primary" name="how_to_reg" v-else />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-slider
+                        markers
+                        :thumb-path="''/* M7.59 5.41c-.78-.78-.78-2.05 0-2.83.78-.78 2.05-.78 2.83 0 .78.78.78 2.05 0 2.83-.79.79-2.05.79-2.83 0zM6 16V7H4v9c0 2.76 2.24 5 5 5h6v-2H9c-1.66 0-3-1.34-3-3zm14 4.07L14.93 15H11.5v-3.68c1.4 1.15 3.6 2.16 5.5 2.16v-2.16c-1.66.02-3.61-.87-4.67-2.04l-1.4-1.55c-.19-.21-.43-.38-.69-.5-.29-.14-.62-.23-.96-.23h-.03C8.01 7 7 8.01 7 9.25V15c0 1.66 1.34 3 3 3h5.07l3.5 3.5L20 20.07z*/"
+                        v-model="lift.seats"
+                        :min="0"
+                        :max="9"
+                        :step="1"
+                        snap
+                        label
+                        label-always
+                      />
+                    </q-item-section>
+                  </q-item>
 
-              <q-stepper-navigation>
-                <q-btn flat @click="step--" color="primary" label="Eins Zurück" class="q-ml-sm" />
-                <q-btn @click="step ++" color="primary" :disable="!lift.datestamp" label="Weiter" />
-              </q-stepper-navigation>
-            </q-step>
-            <q-step :name="7" title="Zeit festlegen" icon="schedule" :done="step > 7">
-              <p
-                class="text-caption"
-              >Wann planst du {{ departing ? 'von der DH wegzufahren' : 'an der DH anzukommen' }}?</p>
+                  <q-stepper-navigation>
+                    <q-btn
+                      flat
+                      @click="step--"
+                      color="primary"
+                      label="Eins Zurück"
+                      class="q-ml-sm"
+                    />
+                    <q-btn @click="step ++" color="primary" label="Weiter" />
+                  </q-stepper-navigation>
+                </q-step>
+                <q-step :name="6" title="Tag festlegen" icon="event" :done="step > 6">
+                  <p class="text-caption">Wähle aus, wann du planst zu fahren.</p>
+                  <q-input
+                    clickable
+                    @click="_=> $refs.datepicker.toggle()"
+                    outlined
+                    readonly
+                    :value="lift.datestamp || '- fehlt -'"
+                  >
+                    <template v-slot:append>
+                      <q-btn icon="edit" color="grey-9" flat>
+                        <q-menu
+                          ref="datepicker"
+                          transition-show="jump-down"
+                          transition-hide="jump-up"
+                        >
+                          <q-date
+                            title="Tag auswählen"
+                            :subtitle="`Maximal ${maxDaysAhead} Tage im Voraus`"
+                            event-color="primary"
+                            mask="YYYY-MM-DD"
+                            v-model="lift.datestamp"
+                            :events="[todayString]"
+                            :options="dateOptions"
+                          />
+                        </q-menu>
+                      </q-btn>
+                    </template>
+                  </q-input>
 
-              <q-input
-                clickable
-                @click="_=> $refs.timepicker.toggle()"
-                outlined
-                readonly
-                :value="lift.timestamp || '- fehlt -'"
-              >
-                <template v-slot:append>
-                  <q-btn icon="edit" color="grey-9" flat>
-                    <q-menu ref="timepicker" transition-show="jump-down" transition-hide="jump-up">
-                      <q-time format24h v-model="lift.timestamp" mask="HH:mm" color="primary" />
-                    </q-menu>
-                  </q-btn>
-                </template>
-              </q-input>
+                  <q-stepper-navigation>
+                    <q-btn
+                      flat
+                      @click="step--"
+                      color="primary"
+                      label="Eins Zurück"
+                      class="q-ml-sm"
+                    />
+                    <q-btn
+                      @click="step ++"
+                      color="primary"
+                      :disable="!lift.datestamp"
+                      label="Weiter"
+                    />
+                  </q-stepper-navigation>
+                </q-step>
+                <q-step :name="7" title="Zeit festlegen" icon="schedule" :done="step > 7">
+                  <p
+                    class="text-caption"
+                  >Wann planst du {{ departing ? 'von der DH wegzufahren' : 'an der DH anzukommen' }}?</p>
 
-              <q-stepper-navigation>
-                <q-btn color="primary" @click="step --" label="Zurück" flat />
-                <q-btn
-                  @click="step ++"
-                  color="primary"
-                  :disable="!lift.timestamp"
-                  label="Abschließen"
-                  class="q-ml-sm"
-                />
-              </q-stepper-navigation>
-            </q-step>
+                  <q-input
+                    clickable
+                    @click="_=> $refs.timepicker.toggle()"
+                    outlined
+                    readonly
+                    :value="lift.timestamp || '- fehlt -'"
+                  >
+                    <template v-slot:append>
+                      <q-btn icon="edit" color="grey-9" flat>
+                        <q-menu
+                          ref="timepicker"
+                          transition-show="jump-down"
+                          transition-hide="jump-up"
+                        >
+                          <q-time format24h v-model="lift.timestamp" mask="HH:mm" color="primary" />
+                        </q-menu>
+                      </q-btn>
+                    </template>
+                  </q-input>
 
-            <q-step :name="8" title="Überprüfen" icon="visibility" :done="step > 8">
-              <p class="text-subtitle1">Vorschau</p>
-              <q-list>
-                <p>{{ lift.destinationAddressId }} > {{ lift.startAddressId }}</p>
-              </q-list>
+                  <q-stepper-navigation>
+                    <q-btn color="primary" @click="step --" label="Zurück" flat />
+                    <q-btn
+                      @click="step ++"
+                      color="primary"
+                      :disable="!lift.timestamp"
+                      label="Abschließen"
+                      class="q-ml-sm"
+                    />
+                  </q-stepper-navigation>
+                </q-step>
 
-              <q-stepper-navigation>
-                <q-btn color="primary" @click="step --" label="Zurück" flat />
-                <q-btn @click="addLift" color="primary" label="Veröffentlichen" class="q-ml-sm" />
-              </q-stepper-navigation>
-            </q-step>
-            <q-card v-show="uploading == 1">
-              <q-card-section>
-                <p>Bitte hab noch einen Moment Geduld...</p>
+                <q-step
+                  :name="8"
+                  class="q-pr-none"
+                  title="Überprüfen"
+                  icon="visibility"
+                  :done="step > 8"
+                >
+                  <p
+                    class="text-caption"
+                  >Wirf noch einen Blick auf die Übersicht, bevor du dein Angebot veröffentlichst</p>
 
-                <q-linear-progress indeterminate color="primary" class="q-mt-sm" />
-              </q-card-section>
-            </q-card>
-            <q-card v-show="uploading == 2">
-              <q-card-section>
-                <p>
-                  <q-icon name="check" size="md" color="primary" />Dein Angebot ist jetzt online.
-                </p>
-              </q-card-section>
-            </q-card>
-
-            <q-dialog
-              v-model="openAddLiftConfirm"
-              full-width
-              full-height
-              persistent
-              transition-show="slide-up"
-            >
-              <q-card>
-                <q-card-section>
-                  <div class="text-h6">Überprüfe deine Angaben</div>
-                  <div class="row overview">
-                    <div class="col-6">
-                      <p class="text-subtitle1 q-mb-sm">
-                        {{ getDataFromAddressId(lift.startAddressId).nickname }}
-                        <span
-                          class="text-caption q-ml-sm"
-                        >{{ getDataFromAddressId(lift.startAddressId).city }}</span>
-                      </p>
-                    </div>
-                    <div class="col-6 text-right">
-                      <q-item>
+                  <q-tabs
+                    indicator-color="primary"
+                    narrow-indicator
+                    v-model="overviewTab"
+                    dense
+                    class="bg-white text-dark"
+                  >
+                    <q-tab name="route" icon="map" />
+                    <q-tab name="car" icon="directions_car" />
+                  </q-tabs>
+                  <q-tab-panels v-model="overviewTab" class="q-pa-none q-mt-sm">
+                    <q-tab-panel name="route" class="q-pa-none">
+                      <q-item class="q-mb-sm">
                         <q-item-section>
-                          <q-item-label>{{ getCarFromId(lift.carId).brand }} {{ getCarFromId(lift.carId).model }}</q-item-label>
-                          <ExtHr class="q-my-sm" :color="getCarData.color" size="1px" />
+                          <q-item-label>{{ startCity }}</q-item-label>
+                          <q-icon
+                            class="q-ml-md"
+                            v-if="lift.destination == 'home'"
+                            name="school"
+                            size="xs"
+                          />
+                        </q-item-section>
+                        <q-item-section class="text-center">
+                          <q-item-label>
+                            <div v-if="lift.destination == 'home'" class="text-primary">
+                              <span class="text-subtitle2">|</span>
+                              <q-icon name="arrow_forward" size="xs" />
+                            </div>
+                            <q-icon v-else name="keyboard_tab" color="primary" size="xs" />
+                          </q-item-label>
                           <q-item-label caption>
-                            {{lift.seats ? lift.seats : getCarData.seats}}
-                            <q-icon name="person"></q-icon>frei
+                            {{ lift.destination == 'home' ? 'Abfahrt' : 'Ankunft' }}
+                            <br />
+                            um {{ lift.timestamp }}
                           </q-item-label>
                         </q-item-section>
+                        <q-item-section>
+                          <q-item-label>{{ destCity }}</q-item-label>
+                          <q-icon
+                            class="q-ml-md"
+                            v-if="lift.destination == 'school'"
+                            name="school"
+                            size="xs"
+                          />
+                        </q-item-section>
                       </q-item>
-                    </div>
-                    <div class="col-2 text-right text-overline">14:35</div>
+                    </q-tab-panel>
+                    <q-tab-panel name="car" class="q-pa-none">
+                      <CompactCarInfo :car="getCarData" compactView />
+                    </q-tab-panel>
+                  </q-tab-panels>
 
-                    <div class="col-10">
-                      <!-- placeholder -->
-                    </div>
-                    <div class="col-12">
-                      <q-slide-transition>
-                        <div v-show="overviewExpanded">
-                          <div
-                            v-for="stop in lift.stops"
-                            :key="stop.addressId"
-                            class="row overview"
-                          >
-                            <div class="col-2 text-right text-overline">{{ getStopTime(stop.time )}}</div>
-                            <q-item class="col-10">
-                              <q-item-section>
-                                <q-item-label>{{ getDataFromAddressId(stop.addressId).city }}</q-item-label>
-                                <q-item-label
-                                  caption
-                                >{{ getDataFromAddressId(stop.addressId).street }} {{ getDataFromAddressId(stop.addressId).number }}</q-item-label>
-                              </q-item-section>
-                            </q-item>
-                          </div>
-                        </div>
-                      </q-slide-transition>
-                    </div>
+                  <q-stepper-navigation>
+                    <q-btn color="primary" @click="step --" label="Zurück" flat />
+                    <q-btn
+                      @click="addLift"
+                      color="primary"
+                      label="Veröffentlichen"
+                      class="q-ml-sm"
+                    />
+                  </q-stepper-navigation>
+                </q-step>
+              </q-stepper>
+            </div>
+          </div>
+        </q-tab-panel>
+        <q-tab-panel :name="1" class="q-pa-none text-center">
+          <q-card>
+            <q-card-section>
+              <q-circular-progress
+                show-value
+                font-size="16px"
+                class="text-primary q-ma-md"
+                indeterminate
+                size="xl"
+                :thickness="0.05"
+                color="primary"
+                track-color="white"
+              >
+                <q-icon name="publish" size="md" color="dark" />
+              </q-circular-progress>
+              <p>Dein Angebot wird veröffentlicht</p>
+            </q-card-section>
+          </q-card>
+        </q-tab-panel>
 
-                    <div class="col-2 text-right text-overline q-pt-md">14:38</div>
-                    <div class="col-10 q-pt-md" v-if="!lift.stops">
-                      <q-expansion-item expand-separator v-model="overviewExpanded">
-                        <template v-slot:header>
-                          <small>
-                            <div class="text-weight-light">Zwischenstopps anzeigen</div>
-                          </small>
-                        </template>
-                      </q-expansion-item>
-                    </div>
-
-                    <div class="col-12">
-                      <p class="text-subtitle1 q-mt-sm">
-                        {{ getDataFromAddressId(lift.destinationAddressId).nickname }}
-                        <span
-                          class="text-caption q-ml-sm"
-                        >{{ getDataFromAddressId(lift.destinationAddressId).city }}</span>
-                      </p>
-                    </div>
-                  </div>
-                </q-card-section>
-                <q-card-actions align="right">
-                  <q-btn flat label="Bearbeiten" @click="openAddLiftConfirm = false" v-close-popup />
-                  <q-btn color="primary" label="Freigeben" @click="addLift" v-close-popup />
-                </q-card-actions>
-              </q-card>
-            </q-dialog>
-          </q-stepper>
-        </div>
-      </div>
+        <q-tab-panel :name="2" class="q-pa-none text-center">
+          <q-card>
+            <q-card-section>
+              <q-circular-progress
+                show-value
+                font-size="16px"
+                class="text-primary q-ma-md"
+                :value="uploadingDoneValue"
+                size="xl"
+                :thickness="0.05"
+                color="primary"
+                track-color="white"
+              >
+                <q-icon name="check" size="md" color="dark" />
+              </q-circular-progress>
+              <p>Dein Angebot ist jetzt online</p>
+              <p class="text-caption q-mb-none">Du wirst automatisch zum Marktplatz weitergeleitet.</p>
+            </q-card-section>
+          </q-card>
+        </q-tab-panel>
+      </q-tab-panels>
     </q-dialog>
   </div>
 </template>
@@ -415,10 +486,12 @@
 <script>
 import { sendApiRequest, SQL_ADD_LIFT } from "../ApiAccess";
 import ExtHr from "components/ExtendedHr";
+import CompactCarInfo from "components/CompactCarInfo";
+
 import { date } from "quasar";
 
 export default {
-  components: { ExtHr },
+  components: { ExtHr, CompactCarInfo },
 
   data() {
     return {
@@ -446,8 +519,19 @@ export default {
       showTimePicker: false,
       openAddLiftConfirm: false,
       overviewExpanded: false,
-      uploading: 0 // 0 means not uploading, 1 means upload in progress, 2 means upload successful and -1 means error
+      uploadingDoneValue: 0,
+      uploading: 0, // 0 means not uploading, 1 means upload in progress, 2 means upload successful and -1 means error
+      overviewTab: "route"
     };
+  },
+  watch: {
+    uploading: function(newv) {
+      if (newv == 2) {
+        setTimeout(_ => {
+          this.uploadingDoneValue = 100;
+        }, 100); // when uploading done, this value is set to 100 to make cool check animation possible
+      } else this.uploadingDoneValue = 0;
+    }
   },
   computed: {
     todayString() {
@@ -492,6 +576,18 @@ export default {
           }; // fallback when no car has been selected yet
     },
 
+    startCity() {
+      var start = this.lift.startAddressId || 1,
+        address = this.allAddresses.find(a => a.id == start);
+      return address.city;
+    },
+
+    destCity() {
+      var dest = this.lift.destinationAddressId || 1,
+        address = this.allAddresses.find(a => a.id == dest);
+      return address.city;
+    },
+
     liftValue: {
       get() {
         return this.lift;
@@ -533,6 +629,29 @@ export default {
   },
 
   methods: {
+    fillAndJump() {
+      this.lift = {
+        destination: "school", // default set to school, user selects first home/school, then exact address
+        destinationAddressId: 2,
+        startAddressId: -1,
+        carId: 47,
+        timestamp: "18:30",
+        datestamp: "2021-01-31",
+        seats: 0, // just to avoid error when rendering slider
+        stops: [
+          {
+            addressId: 31,
+            time: 1593684157000
+          },
+          {
+            addressId: 34,
+            time: 1593684175000
+          }
+        ]
+      };
+      this.step = 8;
+    },
+
     goHome() {
       window.location.href = "/#/";
     },
@@ -551,8 +670,7 @@ export default {
         // case when user didn't want to change number of seats at this lift
         this.lift.seats = this.getCarData.seats;
       }
-      this.step = 1;
-      /* this.uploading = 1; */
+      this.uploading = 1;
       this.lift.departAt = this.departing;
       this.$store.dispatch("auth/addLift", this.lift).then(_ => {
         this.lift = {
@@ -562,9 +680,11 @@ export default {
           car: null,
           seats: 0 // just to avoid error when rendering slider
         };
+        this.uploading = 2;
         this.step = 1;
-        /* this.uploading = 2; */
-        history.go(-1);
+        new Promise(res => setTimeout(res, 1500)).then(_ => {
+          this.goHome();
+        });
       });
     },
 
@@ -573,20 +693,16 @@ export default {
     },
 
     getImagePath(id) {
-      let pathBegin = "../assets/school_images/";
+      /* let pathBegin = "../assets/school_images/"; */
       switch (id) {
         case 1:
           return require("../assets/school_images/HDH_cube_resized.jpg");
-          break;
         case 2:
           return require("../assets/school_images/HDH_old_resized.jpg");
-          break;
         case 3:
           return require("../assets/school_images/WIB_ext_resized.jpg");
-          break;
-
         default:
-          return false; // this computed property is being called by school adresses and home adresses. When returning false, no image is shown.
+          return false; // When returning false, no image is shown as fallback.
       }
     },
 

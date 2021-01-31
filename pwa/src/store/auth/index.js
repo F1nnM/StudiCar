@@ -306,7 +306,7 @@ export default {
         { lift: payload },
         data => {
           commit('UPDATE_CHAT_LIFTS', data)
-          successNotify('Mitfahrgelegenheit wurde veröffentlicht')
+          /* successNotify('Mitfahrgelegenheit wurde veröffentlicht') // has been commented out because extra popup shows state and success messages */
         },
         error => errorNotify(error)
       )
@@ -408,7 +408,7 @@ export default {
             liftId: payload.liftId,
             accepted: payload.accepted
           })
-          successNotify('Alle Anfragen zu dieser Mitfahrgelegenheit wurden ' + accepted ? 'akzeptiert' : 'abgelehnt')
+          successNotify('Alle Anfragen zu dieser Mitfahrgelegenheit wurden ' + (accepted ? 'akzeptiert' : 'abgelehnt'))
         }
         else {
           if (payload.accepted) {

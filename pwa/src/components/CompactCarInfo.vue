@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-item>
+    <q-item class="q-pr-none">
       <q-item-section avatar class="q-pa-sm">
         <svg
           height="28px"
@@ -22,10 +22,14 @@
           <span>{{ car.model }}</span>
         </q-item-label>
         <q-item-label caption>
-          <span>{{ car.licensePlate }}</span>
+          <div class="row" v-if="compactView">
+            <!-- <q-chip color="black" text-color="white" size="sm">{{ car.type }}</q-chip> -->
+            <q-chip icon="event_seat" size="sm">{{ car.seats || car.allSeats }}</q-chip>
+          </div>
+          <span v-else>{{ car.licensePlate }}</span>
         </q-item-label>
       </q-item-section>
-      <q-item-section side top>
+      <q-item-section side top v-if="!compactView">
         <div class="row justify-between">
           <q-chip icon="event_seat" size="sm">{{ car.seats || car.allSeats }} verfügbar</q-chip>
         </div>
@@ -69,7 +73,8 @@ export default {
       type: Object,
       required: true
     },
-    expandable: Boolean
+    expandable: Boolean,
+    compactView: Boolean
   },
   data() {
     return {

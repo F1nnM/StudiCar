@@ -36,7 +36,7 @@ export default {
     },
 
     randomImage() {
-      if (this.$store.getters["auth/user"].dataSaver) {
+      /* if (this.$store.getters["auth/user"].dataSaver) {
         switch (this.timeText) {
           case "Guten Morgen":
             img = "morning/sunrise";
@@ -54,7 +54,7 @@ export default {
           return require("../assets/sad.svg");
         }
         return require("../assets/drawer_images/" + img + ".svg");
-      }
+      } */
 
       var morningMax = 8;
       var dayMax = 14;

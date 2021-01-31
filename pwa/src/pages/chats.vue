@@ -263,7 +263,7 @@ export default {
     lastMessages() {
       var returnedArray = [];
       var lifts = JSON.parse(JSON.stringify(this.lifts));
-      lifts.forEach((lift, index) => {
+      lifts.forEach(lift => {
         if (
           lift.messages.length > 0 &&
           lift.messages[lift.messages.length - 1].content
