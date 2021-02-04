@@ -424,9 +424,13 @@ export default {
         case "u":
           window.location.href = "#/benutzerinfo?userFbId=" + e.res;
           break;
-        case "l":
-          window.location.href = "#/?qrLiftData=" + e.res;
+        case "l": {
+          var suffix = "";
+          if (window.location.href.includes(e.res))
+            suffix = "#" + Math.random().toFixed(5);
+          window.location.href = "#/?qrLiftData=" + e.res + suffix;
           break;
+        }
       }
     },
 

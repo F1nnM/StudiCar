@@ -340,7 +340,7 @@ async function getLiftRequests (uid) {
   return JSON.stringify(arr);
 }
 
-async function getMarketplaceOfferByUuid (fbid, uuidOnly) {
+async function getMarketplace (fbid) {
   let JSON = (await runQuery(`
   WITH
   lifts as (
@@ -404,112 +404,6 @@ async function getMarketplaceOfferByUuid (fbid, uuidOnly) {
           (lift.FIRST_DATE >= CURRENT_DATE() 
           OR lift.REPEATS_ON_WEEKDAY != 0)
           AND user_filter.FB_ID != ?
-          AND lift.UUID = ?
-  )
-  
-  SELECT
-    JSON_ARRAYAGG(
-        JSON_OBJECT(
-            'id', lifts.UUID,
-            'liftId', lifts.ID,
-              'driver', JSON_OBJECT(
-                'id', lifts.DRIVER_FB_ID,
-                'name', lifts.DRIVER_NAME,
-                'surname', lifts.DRIVER_SURNAME,
-                'prefs', JSON_OBJECT(
-                      'talk', DRIVER_PREF_TALK,
-                      'talkMorning', DRIVER_PREF_TALKMORNING,
-                      'smoking', DRIVER_PREF_SMOKING,
-                      'music', DRIVER_PREF_MUSIC
-                  )
-              ),
-              'departAt', lifts.LIFT_DEPART,
-              'arriveBy', lifts.LIFT_ARRIVE,
-              'destination', JSON_OBJECT(
-              	  'name', lifts.DESTINATION_CITY,
-                  'id', lifts.DESTINATION_ID
-              ),
-              'start', JSON_OBJECT(
-              	  'name', lifts.START_CITY,
-                  'id', lifts.START_ID
-              ),
-              'seatsOffered', lifts.OFFERED_SEATS,
-              'seatsOccupied', lifts.OCCUPIED_SEATS,
-              'repeatsOn', lifts.REPEAT_DAY,
-              'date', lifts.FIRST_DATE
-          )
-      ) AS JSON
-  FROM
-    lifts
-        `, [fbid, uuidOnly])).result[0].JSON
-  return JSON
-}
-
-async function getMarketplace (fbid, uuidOnly) {
-  let JSON = (await runQuery(`
-  WITH
-  lifts as (
-      SELECT DISTINCT
-      lift.ID AS ID,
-          lift.UUID AS UUID,
-          driver.FB_ID AS DRIVER_FB_ID,
-          driver.NAME AS DRIVER_NAME,
-          driver.SURNAME AS DRIVER_SURNAME,
-          driver.PREF_TALK AS DRIVER_PREF_TALK,
-          driver.PREF_TALK_MORNING AS DRIVER_PREF_TALKMORNING,
-          driver.PREF_SMOKING AS DRIVER_PREF_SMOKING,
-          driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
-          lift.DEPART_AT AS LIFT_DEPART,
-          lift.ARRIVE_BY AS LIFT_ARRIVE,
-          (IF(destination.ID <= 3, destination.NICKNAME, destination.CITY)) AS DESTINATION_CITY,
-      	  (IF(destination.ID <= 3, destination.ID, -1)) AS DESTINATION_ID,
-          (IF(start_point.ID <= 3, start_point.NICKNAME, start_point.CITY)) AS START_CITY,
-      	  (IF(start_point.ID <= 3, start_point.ID, -1)) AS START_ID,
-          lift.OFFERED_SEATS,
-          IFNULL(counts.OCCUPIED_SEATS, 0) AS OCCUPIED_SEATS,
-      	  lift.REPEATS_ON_WEEKDAY AS REPEAT_DAY,
-      	  lift.FIRST_DATE AS FIRST_DATE
-      FROM
-          lift 
-          JOIN
-              lift_map 
-              ON lift_map.LIFT_ID = lift.ID 
-          JOIN
-              users driver 
-              ON lift_map.USER_ID = driver.ID 
-              AND lift_map.IS_DRIVER = 1 
-          JOIN
-              addresses destination 
-              ON lift.DESTINATION = destination.ID 
-          JOIN
-              addresses start_point 
-              ON lift.START = start_point.ID 
-          JOIN 
-      		  lift_map map_user_filter
-            ON lift.ID = map_user_filter.LIFT_ID
-            AND map_user_filter.IS_DRIVER = 1
-          JOIN
-              users user_filter
-              ON user_filter.ID = map_user_filter.USER_ID
-          LEFT OUTER JOIN
-              (
-                  SELECT
-                      lift_map.LIFT_ID,
-                      COUNT(*) AS OCCUPIED_SEATS 
-                  FROM
-                      lift_map 
-                  WHERE
-                      lift_map.PENDING != 0 
-                  GROUP BY
-                      lift_map.LIFT_ID
-              )
-              counts 
-              ON lift.ID = counts.LIFT_ID 
-      WHERE
-          (lift.FIRST_DATE >= CURRENT_DATE() 
-          OR lift.REPEATS_ON_WEEKDAY != 0)
-          AND user_filter.FB_ID != ?
-          ${uuidOnly && (typeof uuidOnly == 'Number') ? `AND lift.UUID = ${uuidOnly}` : ''}
   )
   
   SELECT
@@ -547,6 +441,151 @@ async function getMarketplace (fbid, uuidOnly) {
   FROM
     lifts
         `, [fbid])).result[0].JSON
+  return JSON
+}
+
+
+async function getMarketplaceOfferByUuid (uuidOnly, invitingUserId) {
+  let JSON = (await runQuery(`
+  WITH
+    lifts AS(
+    SELECT DISTINCT
+        lift.ID AS ID,
+        lift.UUID AS UUID,
+        driver.FB_ID AS DRIVER_FB_ID,
+        driver.NAME AS DRIVER_NAME,
+        driver.SURNAME AS DRIVER_SURNAME,
+        driver.PREF_TALK AS DRIVER_PREF_TALK,
+        driver.PREF_TALK_MORNING AS DRIVER_PREF_TALKMORNING,
+        driver.PREF_SMOKING AS DRIVER_PREF_SMOKING,
+        driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
+        lift.DEPART_AT AS LIFT_DEPART,
+        lift.ARRIVE_BY AS LIFT_ARRIVE,
+        (
+            IF(
+                destination.ID <= 3,
+                destination.NICKNAME,
+                destination.CITY
+            )
+        ) AS DESTINATION_CITY,
+        (
+            IF(
+                destination.ID <= 3,
+                destination.ID,
+                -1
+            )
+        ) AS DESTINATION_ID,
+        (
+            IF(
+                start_point.ID <= 3,
+                start_point.NICKNAME,
+                start_point.CITY
+            )
+        ) AS START_CITY,
+        (
+            IF(
+                start_point.ID <= 3,
+                start_point.ID,
+                -1
+            )
+        ) AS START_ID,
+        lift.OFFERED_SEATS,
+        IFNULL(counts.OCCUPIED_SEATS, 0) AS OCCUPIED_SEATS,
+        lift.REPEATS_ON_WEEKDAY AS REPEAT_DAY,
+        lift.FIRST_DATE AS FIRST_DATE,
+        inviting_user.NAME AS INVITING_USER_NAME
+    FROM
+        lift
+    JOIN lift_map ON lift_map.LIFT_ID = lift.ID
+    JOIN users driver ON
+        lift_map.USER_ID = driver.ID AND lift_map.IS_DRIVER = 1
+    JOIN users inviting_user ON
+    	inviting_user.FB_ID = ?
+    JOIN addresses destination ON
+        lift.DESTINATION = destination.ID
+    JOIN addresses start_point ON
+        lift.START = start_point.ID
+    JOIN lift_map map_user_filter ON
+        lift.ID = map_user_filter.LIFT_ID AND map_user_filter.IS_DRIVER = 1
+    JOIN users user_filter ON
+        user_filter.ID = map_user_filter.USER_ID
+    LEFT OUTER JOIN(
+        SELECT lift_map.LIFT_ID,
+            COUNT(*) AS OCCUPIED_SEATS
+        FROM
+            lift_map
+        WHERE
+            lift_map.PENDING != 0
+        GROUP BY
+            lift_map.LIFT_ID
+    ) counts
+ON
+    lift.ID = counts.LIFT_ID
+WHERE
+    -- AND user_filter.FB_ID != 
+    lift.UUID = ?
+)
+SELECT
+    JSON_ARRAYAGG(
+        JSON_OBJECT(
+          'invitingUserName',
+          lifts.INVITING_USER_NAME,
+            'id',
+            lifts.UUID,
+            'liftId',
+            lifts.ID,
+            'driver',
+            JSON_OBJECT(
+                'id',
+                lifts.DRIVER_FB_ID,
+                'name',
+                lifts.DRIVER_NAME,
+                'surname',
+                lifts.DRIVER_SURNAME,
+                'prefs',
+                JSON_OBJECT(
+                    'talk',
+                    DRIVER_PREF_TALK,
+                    'talkMorning',
+                    DRIVER_PREF_TALKMORNING,
+                    'smoking',
+                    DRIVER_PREF_SMOKING,
+                    'music',
+                    DRIVER_PREF_MUSIC
+                )
+            ),
+            'departAt',
+            lifts.LIFT_DEPART,
+            'arriveBy',
+            lifts.LIFT_ARRIVE,
+            'destination',
+            JSON_OBJECT(
+                'name',
+                lifts.DESTINATION_CITY,
+                'id',
+                lifts.DESTINATION_ID
+            ),
+            'start',
+            JSON_OBJECT(
+                'name',
+                lifts.START_CITY,
+                'id',
+                lifts.START_ID
+            ),
+            'seatsOffered',
+            lifts.OFFERED_SEATS,
+            'seatsOccupied',
+            lifts.OCCUPIED_SEATS,
+            'repeatsOn',
+            lifts.REPEAT_DAY,
+            'date',
+            lifts.FIRST_DATE
+        )
+    ) AS JSON
+FROM
+    lifts
+        `, [invitingUserId, uuidOnly]))
+  JSON = JSON.result[0].JSON
   return JSON
 }
 
@@ -1059,9 +1098,10 @@ module.exports = {
     },
     '/specificMarketplaceOffer': async (req, res, options) => {
       if (await isUserVerified(options.secretFbId)) {
-        var offers = JSON.parse(await getMarketplaceOfferByUuid(options.secretFbId, options.uuid)),
-          wantedOffer = offers[0] // when specific uuid is wanted, then only one result will be there, which should be returned as single object and not as array with just one element
-        var invitingUserName = (await runQuery('SELECT NAME FROM users where FB_ID = ?', [options.invitingUserId])).result[0].NAME
+        var offers = JSON.parse(await getMarketplaceOfferByUuid(options.uuid, options.invitingUserId)),
+          wantedOffer = offers[0], // when specific uuid is wanted, then only one result will be there, which should be returned as single object and not as array with just one element
+          invitingUserName = wantedOffer.invitingUserName
+        delete wantedOffer.invitingUserName
         endWithJSON(res, JSON.stringify({
           lift: wantedOffer,
           invitingUserName: invitingUserName
@@ -1157,7 +1197,7 @@ module.exports = {
       if (!isOptionMissing(options, ['liftId'], res) && await isUserVerified(options.secretFbId)) {
         var uid = options.secretFbId,
           liftId = options.liftId
-        runQuery('INSERT INTO lift_map (USER_ID, LIFT_ID, PENDING) VALUES ((SELECT ID FROM users WHERE FB_ID = ?), (SELECT ID FROM lift WHERE UUID = ?), 1)', [userId, liftId])
+        runQuery('INSERT INTO lift_map (USER_ID, LIFT_ID, PENDING) VALUES ((SELECT ID FROM users WHERE FB_ID = ?), (SELECT ID FROM lift WHERE UUID = ?), 1)', [uid, liftId])
           .then(_ => {
             res.end()
           })
@@ -1166,13 +1206,27 @@ module.exports = {
     },
     '/respondRequest': async (req, res, options) => {
       if (!isOptionMissing(options, ['accepted', 'liftId', 'userId'], res) && await isUserVerified(options.secretFbId)) {
-        if (options.userId == -1) { // all requests of specific lift should be responded
-          if (options.accepted) await runQuery('UPDATE lift_map SET PENDING = 0 WHERE lift_map.LIFT_ID = (SELECT ID FROM lift WHERE UUID = ?)', [options.liftId])
+        var uid = options.secretFbId,
+          liftId = options.liftId,
+          accepted = options.accepted,
+          requestingUserId = options.userId
+        if (requestingUserId == -1) { // all requests of specific lift should be responded
+          if (accepted) {
+            await runQuery(`INSERT INTO messages( UUID, CONTENT, FROM_USER_ID, LIFT_ID, TIMESTAMP )
+            VALUES(
+              MD5(NOW(6)),
+                'Alle anfragenden Nutzer wurden der Fahrt hinzugefügt',
+                0,
+                ( SELECT ID FROM lift WHERE lift.UUID = ? ),
+                CURRENT_TIMESTAMP())`,
+              [liftId])
+            await runQuery('UPDATE lift_map SET PENDING = 0 WHERE lift_map.LIFT_ID = (SELECT ID FROM lift WHERE UUID = ?)', [liftId]) // simply set all relations of that lift to 1
+          }
           else res.writeHead(500)
         }
         else {
-          if (options.accepted) {
-            await runQuery('UPDATE lift_map SET PENDING = 0 WHERE LIFT_ID = ( SELECT ID FROM lift WHERE lift.UUID = ? ) AND USER_ID = ( SELECT ID FROM users WHERE users.FB_ID = ? )', [options.liftId, options.userId])
+          if (accepted) {
+            await runQuery('UPDATE lift_map SET PENDING = 0 WHERE LIFT_ID = ( SELECT ID FROM lift WHERE lift.UUID = ? ) AND USER_ID = ( SELECT ID FROM users WHERE users.FB_ID = ? ) AND ', [liftId, requestingUserId])
             await runQuery(`INSERT INTO messages( UUID, CONTENT, FROM_USER_ID, LIFT_ID, TIMESTAMP )
             VALUES(
               MD5(NOW(6)), 
@@ -1182,9 +1236,9 @@ module.exports = {
                 0,
                 ( SELECT ID FROM lift WHERE lift.UUID = ? ),
                 CURRENT_TIMESTAMP())`,
-              [options.userId, options.liftId])
+              [requestingUserId, liftId])
           }
-          else await runQuery('DELETE FROM lift_map WHERE LIFT_ID = ( SELECT ID FROM lift WHERE lift.UUID = ? ) AND USER_ID = ( SELECT ID FROM users WHERE users.FB_ID = ? )', [options.liftId, options.liftId])
+          else await runQuery('DELETE FROM lift_map WHERE LIFT_ID = ( SELECT ID FROM lift WHERE lift.UUID = ? ) AND USER_ID = ( SELECT ID FROM users WHERE users.FB_ID = ? )', [liftId, requestingUserId])
         }
         res.end();
       }

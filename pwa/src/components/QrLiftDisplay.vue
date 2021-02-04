@@ -40,7 +40,6 @@
             <q-item-label caption>Ihr seid bereits beide in der Fahrgemeinschaft.</q-item-label>
           </q-item-section>
         </q-item>
-
         <div v-else>
           <q-item>
             <q-item-section avatar>
@@ -57,7 +56,7 @@
         </div>
       </q-card-section>
       <q-card-section actions class="text-right" bordered>
-        <q-btn @click="denied = true" label="Ablehnen" class="q-my-none" flat color="negative" />
+        <q-btn @click="denied = true" label="Abbrechen" class="q-my-none" flat color="negative" />
       </q-card-section>
     </q-card>
   </q-dialog>
@@ -65,10 +64,9 @@
 
 <script>
 import { date } from "quasar";
-import ExtHR from "components/ExtendedHr";
+import ExtHr from "components/ExtendedHr";
 import LiftOffer from "components/LiftOffer";
-import { sendApiRequest, SQL_GET_MARKETPLACE } from "../ApiAccess";
-import ExtendedHr from "./ExtendedHr.vue";
+import { sendApiRequest, SQL_GET_MARKETPLACE_OFFER } from "../ApiAccess";
 
 export default {
   name: "QRLiftDisplay",
@@ -78,11 +76,12 @@ export default {
   data() {
     return {
       viewTab: "info",
-      lift: null,
+      lift: null, // is the lift object returned by the server
       err: null,
       alreadyMemberOfLift: false,
       invitingUserName: null,
-      denied: false
+      denied: false,
+      liftData: "" // computed property makes no sence because url as depending value is not reactive as well
     };
   },
   computed: {
@@ -117,26 +116,14 @@ export default {
       });
 
       return matching;
-    },
-
-    liftData() {
-      var locArr = window.location.href.split("?qrLiftData=");
-      if (locArr.length > 1) {
-        console.warn("changed to " + locArr[1]);
-        return locArr[1];
-      } else return "";
     }
   },
   watch: {
-    liftData: function(val) {
-      if (val) this.refresh();
-    },
+    $route() {
+      // const forceReloadData = true
 
-    $route(to, from) {
-      if (this.liftData) {
-        this.denied = false; // new play, new luck
-        this.refresh();
-      }
+      this.denied = false; // new round, new luck
+      this.refresh();
     }
   },
   methods: {
@@ -145,11 +132,18 @@ export default {
     },
 
     hide() {
-      /* this.liftData = ""; */
+      this.denied = true; // just to be sure, in case user made it to close without denying
     },
 
     refresh() {
-      if (this.liftData) {
+      var locArr = window.location.href.split("?qrLiftData=");
+      if (locArr.length > 1) {
+        var data = locArr[1];
+        data = data.split("#0.")[0]; // cut the random part
+        if (this.liftData != data) {
+          this.liftData = data;
+          this.lift = null; // when new data wanted, vars are reset again
+        }
         var currentLifts = this.$store.getters["auth/user"].chatLifts,
           a = currentLifts.find(l => l.id == this.liftId);
         if (a) {
@@ -158,12 +152,12 @@ export default {
         } else {
           this.callServer();
         }
-      }
+      } else this.liftData = "";
     },
 
     callServer() {
       sendApiRequest(
-        SQL_GET_MARKETPLACE,
+        SQL_GET_MARKETPLACE_OFFER,
         {
           uuid: this.liftId, // a uuid, is as a longer and more secure liftId
           invitingUserId: this.invitingUserId
@@ -179,7 +173,7 @@ export default {
     }
   },
   mounted() {
-    if (this.liftData) this.refresh();
+    this.refresh();
   }
 };
 </script>

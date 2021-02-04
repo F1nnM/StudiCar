@@ -320,7 +320,7 @@ export default {
           commit('REMOVE_ADDRESS', payload)
         },
         error => {
-          if (error.status == 424) errorNotify('Kann Adresse noch nicht entfernen: Eine Mitfahrgelegenheit hängt davon ab')
+          if (error.status == 424) errorNotify('Kann Adresse noch nicht entfernen: mindestens eine Mitfahrgelegenheit hängt davon ab')
           else errorNotify(error)
         }
       )
@@ -350,7 +350,7 @@ export default {
           successNotify('Fahrzeug wurde entfernt')
         },
         error => {
-          if (error.status == 424) errorNotify('Kann Fahrzeug noch nicht entfernen: Eine Mitfahrgelegenheit hängt davon ab')
+          if (error.status == 424) errorNotify('Kann Fahrzeug noch nicht entfernen: mindestens eine Mitfahrgelegenheit hängt davon ab')
           else errorNotify(error)
         }
       )
@@ -408,7 +408,7 @@ export default {
             liftId: payload.liftId,
             accepted: payload.accepted
           })
-          successNotify('Alle Anfragen zu dieser Mitfahrgelegenheit wurden ' + (accepted ? 'akzeptiert' : 'abgelehnt'))
+          successNotify('Alle Anfragen zu dieser Mitfahrgelegenheit wurden ' + (payload.accepted ? 'akzeptiert' : 'abgelehnt'))
         }
         else {
           if (payload.accepted) {
@@ -421,7 +421,7 @@ export default {
           else {
             obj = {
               liftId: payload.liftId,
-              userId: payload.user.id
+              userId: payload.user.id // ATTENTION! HERE WILL ONLY USERID BE TRANSFERRED
             }
             commit('DENY_LIFT_REQUEST', obj)
           }

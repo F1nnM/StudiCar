@@ -115,6 +115,11 @@ export const SQL_GET_MARKETPLACE = {
   method: "GET"
 }
 
+export const SQL_GET_MARKETPLACE_OFFER = {
+  path: "/specificMarketplaceOffer",
+  method: "GET"
+}
+
 export const SQL_GET_LIFT_REQUESTS = {
   path: "/liftRequests",
   method: "GET"

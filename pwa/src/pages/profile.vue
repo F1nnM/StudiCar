@@ -212,29 +212,29 @@
                   <br />
                 </p>
               </q-slide-transition>-->
-              <div
-                v-if="!cars.length"
-                class="text-weight-light"
-              >Du hast noch keine Autos hinzugefügt</div>
-              <div
-                class="row justify-between nowrap full-width"
-                v-for="item in cars"
-                :key="item.licensePlate"
-              >
-                <CompactCarInfo :expandable="!openEditCars" :car="item" />
-                <q-slide-transition>
-                  <div v-if="openEditCars">
-                    <q-btn
-                      @click="removeCar(item.carId, item.brand, item.model)"
-                      flat
-                      dense
-                      icon="remove_circle_outline"
-                      color="red"
-                      size="md"
-                    />
-                  </div>
-                </q-slide-transition>
-              </div>
+            </div>
+            <div
+              v-if="!cars.length"
+              class="text-weight-light"
+            >Du hast noch keine Fahrzeuge hinzugefügt</div>
+            <div
+              class="row justify-between nowrap full-width"
+              v-for="item in cars"
+              :key="item.licensePlate"
+            >
+              <CompactCarInfo :expandable="!openEditCars" :car="item" />
+              <q-slide-transition>
+                <div v-if="openEditCars">
+                  <q-btn
+                    @click="removeCar(item.carId, item.brand, item.model)"
+                    flat
+                    dense
+                    icon="remove_circle_outline"
+                    color="red"
+                    size="md"
+                  />
+                </div>
+              </q-slide-transition>
             </div>
           </div>
         </q-tab-panel>

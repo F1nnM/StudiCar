@@ -213,7 +213,6 @@ import ExtHr from "components/ExtendedHr";
 import TitleButtonAnchor from "components/TitleButtonAnchor";
 import IncomingLiftRequest from "components/IncomingLiftRequest";
 import LiftOfferForRequest from "components/LiftOfferForRequest";
-import TextPagination from "components/TextPagination";
 
 import { date } from "quasar";
 
