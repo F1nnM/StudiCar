@@ -19,7 +19,7 @@
             v-if="lift.requested"
             class="text-caption text-red"
           >Du hast hier schon angefragt, Antwort steht noch aus</p>
-          <LiftOffer :lift="lift" noShadow />
+          <LiftOffer :lift="lift" @request="emitRequest" noShadow />
           <q-item v-if="!prefsMatching">
             <q-item-section avatar>
               <q-icon name="warning" color="negative" />
@@ -127,8 +127,9 @@ export default {
     }
   },
   methods: {
-    emit(val) {
-      this.$emit("input", val ? this.liftData : ""); // model is string
+    emitRequest(val) {
+      this.$emit("request", val); // model is string
+      this.hide(); // close it after requesting
     },
 
     hide() {

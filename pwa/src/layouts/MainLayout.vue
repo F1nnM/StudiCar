@@ -62,7 +62,12 @@
               </q-tab-panels>
             </div>
             <div class="col-xs-2 col-md-1">
-              <q-btn flat dense @click="toggleScannerOpen">
+              <q-btn
+                flat
+                dense
+                @click="toggleScannerOpen"
+                v-touch-hold:300.mouse="forceOpenScanner"
+              >
                 <!-- <q-icon v-if="scannerOpen" name="cancel_presentation" /> -->
                 <div>
                   <q-avatar square size="1.4em">
@@ -231,6 +236,7 @@ import { scroll } from "quasar";
 import EssentialLink from "components/EssentialLink";
 import DrawerWelcomeImage from "components/DrawerWelcomeImage";
 import ExtHr from "components/ExtendedHr";
+import ConfirmDialog from "components/dialogs/Confirm";
 
 import {
   sendApiRequest,
@@ -372,7 +378,8 @@ export default {
               title: "Spielwiese",
               caption: "Endlich wieder Kind sein",
               icon: "toys",
-              link: "/#/spielwiese"
+              link: "/#/spielwiese",
+              onlyDev: true
             }
           ]
         }
@@ -418,6 +425,58 @@ export default {
       window.location.goBack();
     },
 
+    askAndReadClipboard(e) {
+      var duration = e ? e.duration : null, // makes duration handling possible
+        clipboard = navigator.clipboard;
+      if (!!clipboard) {
+        return new Promise((res, rej) => {
+          clipboard
+            .readText()
+            .then(content => {
+              console.warn(content);
+
+              this.$q
+                .dialog({
+                  component: ConfirmDialog,
+                  parent: this,
+                  cancelLabel: "Egal, scannen",
+                  okLabel: "Ok, übernehmen",
+                  title: "Daten gefunden",
+                  message:
+                    "StudiCar hat Daten in deiner Zwischenablage gefunden",
+                  persistent: true,
+                  animation: "fade"
+                })
+                .onOk(() => {
+                  res(content);
+                })
+                .onCancel(() => {
+                  res(""); // when no confirm, return empty string
+                })
+                .onDismiss(() => {
+                  // console.log('I am triggered on both OK and Cancel')
+                });
+            })
+            .catch(err => {
+              this.error(err);
+              rej();
+            });
+        });
+      }
+
+      function error(err) {
+        if (err) err = "[ERR: " + err + "] ";
+        else err = "";
+        alert("Clipboard error");
+        this.$q.notify({
+          type: "negative",
+          message:
+            err +
+            "StudiCar kann nicht auf deine Zwischenablage zugreifen. Bitte sieh im Support nach, oft haben wir schon eine andere Lösung veröffentlicht."
+        });
+      }
+    },
+
     gotScanResult(e) {
       this.scannerOpen = false;
       switch (e.type) {
@@ -427,7 +486,7 @@ export default {
         case "l": {
           var suffix = "";
           if (window.location.href.includes(e.res))
-            suffix = "#" + Math.random().toFixed(5);
+            suffix = "#" + Math.random().toFixed(5); // when already a qrLift is shown:
           window.location.href = "#/?qrLiftData=" + e.res + suffix;
           break;
         }
@@ -441,10 +500,32 @@ export default {
       }
     },
 
-    toggleScannerOpen() {
-      this.scannerOpen = !this.scannerOpen;
-      if (this.scannerOpen) {
-        this.leftDrawerOpen = false;
+    forceOpenScanner() {
+      this.toggleScannerOpen(true);
+    },
+
+    async toggleScannerOpen(force) {
+      // first check whether clipboard contains data to be processed
+      var clipboardContent;
+      if (!this.scannerOpen && force !== true)
+        // force makes it possible to bypass clipboard
+        clipboardContent = await this.askAndReadClipboard();
+      if (clipboardContent) {
+        clipboardContent = clipboardContent.replace("/$/", "/#/"); // resetting the workaround needed on mobile phones
+        if (clipboardContent.includes("/#/"))
+          clipboardContent = clipboardContent.split("/#/")[1];
+        if (clipboardContent.includes("#i")) {
+          window.location.href = "#/"; // when detecting a lift, first go to marketplace
+        }
+        await new Promise(res => {
+          setTimeout(res, 100); // has to wait until site has loaded
+        });
+        this.$router.replace(clipboardContent).catch(_ => {});
+      } else {
+        this.scannerOpen = !this.scannerOpen;
+        if (this.scannerOpen) {
+          this.leftDrawerOpen = false;
+        }
       }
     },
 

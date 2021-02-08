@@ -298,7 +298,7 @@ val: 'music', icon: 'music_note'
           </div>
         </q-tab-panel>
         <q-tab-panel name="social">
-          <p>Freunde</p>
+          <p>Hier kommen dann die Freunde</p>
           <q-btn
             dense
             flat

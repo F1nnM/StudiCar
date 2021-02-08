@@ -58,6 +58,14 @@ const store = new Vuex.Store({
 
     setEnablePostillonNewsFeed (state, show) {
       state.settings.enablePostillonNewsFeed = show
+    },
+
+    setWantedPage (state, payload) {
+      state.nextPage = payload
+    },
+
+    resetWantedPage (state) {
+      state.nextPage = ''
     }
   },
   actions: {
@@ -69,6 +77,10 @@ const store = new Vuex.Store({
 
     getStudiCarInfo (state) {
       return state.info
+    },
+
+    getNextPage (state) {
+      return state.nextPage
     },
 
     getLegalViews (state) {
@@ -88,7 +100,7 @@ const store = new Vuex.Store({
     supportData: null,
     info: null,
     scroll: 0,
-    message: 'Hello',
+    nextPage: '',
     oldVersionRunning: false,
     settings: {
       askAgainWhenAppreciatingNewPassenger: true, // when true, user has to confirm action at appreciating new passenger

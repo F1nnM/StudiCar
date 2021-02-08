@@ -188,7 +188,7 @@
             position="bottom"
             v-model="liftCodePopup.isOpen"
             linearProgress
-            :input="'l' + (liftCodePopup.data ? liftCodePopup.data.id : '') + '#i' + ownId"
+            :input="qrInput"
             text="Über diesen Code kannst du eine Fahrgemeinschaft direkt teilen."
           >
             {{ liftCodePopup.data ? liftCodePopup.data.start.name : '' }}
@@ -346,6 +346,14 @@ export default {
         backgroundColor: "#027be3",
         width: "9px",
         opacity: 0.2
+      };
+    },
+
+    qrInput() {
+      var data = this.liftCodePopup.data;
+      return {
+        type: "lift",
+        data: (data ? data.id : "") + "#i" + this.ownId
       };
     },
 

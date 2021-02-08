@@ -1,7 +1,7 @@
 <template>
   <div>
     <TitleButtonAnchor class="q-mt-md q-mr-md">
-      <q-btn :icon="groupIcon" label="Freunde" no-caps outline color="primary" />
+      <!-- <q-btn :icon="groupIcon" label="Freunde" no-caps outline color="primary" /> -->
       <!-- <q-btn-toggle
         v-model="statsFriendsTab"
         rounded

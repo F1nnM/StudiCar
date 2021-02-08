@@ -1,9 +1,6 @@
 <template>
   <div class="q-pa-md">
     <q-btn label="Feuer" @click="go" />
-    <q-btn label="Variablenfeuer" @click="open = !open" />
-    <QrIcon size="xl" :type="icon" />
-    <q-slider v-model="icon" :min="0" :max="6" />
 
     <p v-for="n in 20" :key="n">Lorem</p>
   </div>
@@ -11,24 +8,38 @@
 
 <script>
 import { scroll } from "quasar";
-import QrIcon from "components/QrIcon";
+import ConfirmDialog from "components/dialogs/Confirm";
 
 import { sendApiRequest, PING } from "../ApiAccess";
 
 export default {
-  components: {
-    QrIcon
-  },
+  components: {},
   data() {
-    return {
-      open: true,
-      icon: 4,
-      value: "one"
-    };
+    return {};
   },
   computed: {},
   methods: {
-    go() {}
+    go() {
+      this.$q
+        .dialog({
+          component: ConfirmDialog,
+          parent: this,
+          cancelLabel: "Nein, scannen",
+          okLabel: "Ok, übernehmen",
+          title: "Daten gefunden",
+          message: "StudiCar hat Daten in deiner Zwischenablage gefunden",
+          persistent: true
+        })
+        .onOk(() => {
+          alert("ok");
+        })
+        .onCancel(() => {
+          alert("damn");
+        })
+        .onDismiss(() => {
+          // console.log('I am triggered on both OK and Cancel')
+        });
+    }
   },
 
   mounted() {

@@ -58,12 +58,12 @@ export default {
   props: {
     open: {
       type: Boolean,
-      required: true,
-    },
+      required: true
+    }
   },
   model: {
     prop: "open",
-    event: "input",
+    event: "input"
   },
 
   data() {
@@ -72,7 +72,7 @@ export default {
       otherQR: false,
       error: "",
       scannerReady: false,
-      scannerHelp: false,
+      scannerHelp: false
     };
   },
   computed: {},
@@ -81,8 +81,8 @@ export default {
       immediate: true,
       handler(new_, old_) {
         if (new_ == true && old_ == false) this.scannerReady = false; // so that we always have fade animation on scanner init
-      },
-    },
+      }
+    }
   },
   methods: {
     emit() {
@@ -94,32 +94,41 @@ export default {
         await promise;
         this.scannerReady = true;
       } catch (error) {
+        this.scannerReady = false;
+        var errText = "";
         if (error.name === "NotAllowedError") {
-          this.error = "ERROR: you need to grant camera access permisson";
+          errText = "Der Kamerazugriff ist blockiert";
         } else if (error.name === "NotFoundError") {
-          this.error = "ERROR: no camera on this device";
+          errText = "StudiCar konnte keine Kamera finden";
         } else if (error.name === "NotSupportedError") {
-          this.error = "ERROR: secure context required (HTTPS, localhost)";
+          errText = "Zertifikatsfehler: Bitte melde dich beim Support";
         } else if (error.name === "NotReadableError") {
-          this.error = "ERROR: is the camera already in use?";
+          errText = "Kamera wird schon von einem anderen Prozess verwendet";
         } else if (error.name === "OverconstrainedError") {
-          this.error = "ERROR: installed cameras are not suitable";
+          errText = "Die gefundene Kamera ist nicht mit StudiCar kompatibel";
         } else if (error.name === "StreamApiNotSupportedError") {
-          this.error = "ERROR: Stream API is not supported in this browser";
+          errText = "Dein Browser unterstützt die Stream API nicht";
         }
-        alert(error);
+        this.errorMessage(errText);
+        this.emit();
       }
+    },
+
+    errorMessage(text) {
+      this.$q.notify({
+        type: "negative",
+        message: text
+      });
     },
 
     decoded(res) {
       const type = res.slice(0, 1),
-       key = res.slice(1);
-
+        key = res.slice(1);
 
       if ("ul".includes(type))
         this.$emit("result", {
           type: type,
-          res: key,
+          res: key
         });
       else {
         this.otherQR = true;
@@ -131,12 +140,12 @@ export default {
 
     swiped(info) {
       this.$emit("swipe", info);
-    },
+    }
   },
 
   ready() {
     this.scannerReady = false;
-  },
+  }
 };
 </script>
 

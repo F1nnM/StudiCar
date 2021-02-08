@@ -1,5 +1,5 @@
 <template>
-  <q-item clickable tag="a" :href="link">
+  <q-item v-if="!isDisabled" clickable tag="a" :href="link">
     <q-item-section v-if="icon" avatar>
       <q-icon :name="icon" />
     </q-item-section>
@@ -13,27 +13,35 @@
 
 <script>
 export default {
-  name: 'EssentialLink',
+  name: "EssentialLink",
   props: {
     title: {
       type: String,
       required: true
     },
 
+    onlyDev: Boolean,
+
     caption: {
       type: String,
-      default: ''
+      default: ""
     },
 
     link: {
       type: String,
-      default: '#'
+      default: "#"
     },
 
     icon: {
       type: String,
-      default: ''
+      default: ""
+    }
+  },
+  computed: {
+    isDisabled() {
+      if (!process.env.DEV) return this.onlyDev;
+      else return false;
     }
   }
-}
+};
 </script>

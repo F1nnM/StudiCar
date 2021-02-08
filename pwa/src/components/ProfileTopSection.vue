@@ -186,7 +186,7 @@
       :label="username"
       linearProgress
       :input="qrInput"
-      text="Über diesen Code kannst du von jedem anderen Nutzer gefunden werden."
+      text="Lass einen anderen StudiCar Nutzer den Code mit der integrierten Kamera scannen oder teile die Daten direkt über WhatsApp"
     />
 
     <q-dialog v-model="openUpload" full-width>
@@ -369,7 +369,10 @@ export default {
       const uid = this.$store.getters["auth/user"].uid,
         host = process.env.DEV ? "localhost:3000" : "dev.pwa.studicar.mfinn.de";
 
-      return "u" + uid;
+      return {
+        type: "user",
+        data: uid
+      };
     }
   },
   methods: {
