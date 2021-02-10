@@ -10,22 +10,48 @@
       <q-card-section class="row items-center q-pb-none">
         <div class="text-h6" v-if="title">{{ title }}</div>
         <q-space />
+        <!-- <q-tabs
+          v-model="viewTab"
+          dense
+          v-if="details"
+          class="bg-white text-grey-7"
+          indicator-color="primary"
+          narrow-indicator
+        >
+          <q-tab :ripple="false" name="info" icon="info" />
+          <q-tab :ripple="false" name="details" icon="more_horiz" />
+        </q-tabs>-->
         <q-btn v-if="!persistent" icon="close" flat round dense v-close-popup />
       </q-card-section>
-      <q-card-section class="row items-center">
-        <q-avatar v-if="icon" :icon="icon" color="primary" text-color="white" />
-        <span class="q-ml-sm">{{ message }}</span>
-      </q-card-section>
-
-      <q-card-actions align="right">
-        <q-btn outline color="negative" class="q-mr-sm" @click="onCancelClick">
-          <span class="text-dark">{{ cancelLabel || 'Abbrechen' }}</span>
-        </q-btn>
-        <q-btn outline color="primary" @click="onOKClick">
-          <span class="text-dark">{{ okLabel || 'Ok' }}</span>
-        </q-btn>
-        <!-- actually wanted to work with v-html, but did affect styling -->
-      </q-card-actions>
+      <q-tab-panels
+        v-model="viewTab"
+        animated
+        vertical
+        infinite
+        :swipeable="!!details"
+        class="q-pa-none"
+        transition-next="jump-up"
+        transition-prev="jump-down"
+      >
+        <q-tab-panel name="info" class="q-pa-none">
+          <q-card-section class="row items-center">
+            <q-avatar v-if="icon" :icon="icon" color="primary" class="q-mr-sm" text-color="white" />
+            <span>{{ message }}</span>
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn outline color="negative" class="q-mr-sm" @click="onCancelClick">
+              <span class="text-dark">{{ cancelLabel || 'Abbrechen' }}</span>
+            </q-btn>
+            <q-btn outline color="primary" @click="onOKClick">
+              <span class="text-dark">{{ okLabel || 'Ok' }}</span>
+            </q-btn>
+            <!-- actually wanted to work with v-html, but did affect styling -->
+          </q-card-actions>
+        </q-tab-panel>
+        <q-tab-panel name="details" class="q-pa-none" style="word-break: break-all;">
+          <q-card-section>{{ details }}</q-card-section>
+        </q-tab-panel>
+      </q-tab-panels>
     </q-card>
   </q-dialog>
 </template>
@@ -42,7 +68,13 @@ export default {
     persistent: Boolean,
     title: String,
     icon: String,
-    animation: String
+    animation: String,
+    details: String
+  },
+  data() {
+    return {
+      viewTab: "info"
+    };
   },
 
   methods: {

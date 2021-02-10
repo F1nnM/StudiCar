@@ -433,36 +433,45 @@ export default {
           clipboard
             .readText()
             .then(content => {
-              console.warn(content);
+              content = content.trim();
+              if (!this.isClipboardValid(content)) {
+                res("");
+              } else {
+                content = content.replace("/$/", "/#/"); // resetting the workaround needed on mobile phones
 
-              this.$q
-                .dialog({
-                  component: ConfirmDialog,
-                  parent: this,
-                  cancelLabel: "Egal, scannen",
-                  okLabel: "Ok, übernehmen",
-                  title: "Daten gefunden",
-                  message:
-                    "StudiCar hat Daten in deiner Zwischenablage gefunden",
-                  persistent: true,
-                  animation: "fade"
-                })
-                .onOk(() => {
-                  res(content);
-                })
-                .onCancel(() => {
-                  res(""); // when no confirm, return empty string
-                })
-                .onDismiss(() => {
-                  // console.log('I am triggered on both OK and Cancel')
-                });
+                this.$q
+                  .dialog({
+                    component: ConfirmDialog,
+                    parent: this,
+                    cancelLabel: "Egal, scannen",
+                    okLabel: "Ok, übernehmen",
+                    title: "Daten gefunden",
+                    message: `StudiCar hat passende Daten in deiner Zwischenablage gefunden. Daten übernehmen oder
+                    trotzdem einen StudiCar Code scannen?`,
+                    persistent: true,
+                    animation: "fade",
+                    details:
+                      content.length > 1000
+                        ? content.substr(0, 1000) + "..."
+                        : content
+                  })
+                  .onOk(() => {
+                    res(content);
+                  })
+                  .onCancel(() => {
+                    res(""); // when no confirm, return empty string
+                  })
+                  .onDismiss(() => {
+                    // console.log('I am triggered on both OK and Cancel')
+                  });
+              }
             })
             .catch(err => {
               this.error(err);
               rej();
             });
         });
-      }
+      } else return Promise.resolve("");
 
       function error(err) {
         if (err) err = "[ERR: " + err + "] ";
@@ -475,6 +484,14 @@ export default {
             "StudiCar kann nicht auf deine Zwischenablage zugreifen. Bitte sieh im Support nach, oft haben wir schon eine andere Lösung veröffentlicht."
         });
       }
+    },
+
+    isClipboardValid(text) {
+      var conditions = [
+        text.length > 10,
+        text.startsWith("https://" + window.location.hostname)
+      ];
+      return conditions.every(item => item == true);
     },
 
     gotScanResult(e) {
@@ -511,7 +528,6 @@ export default {
         // force makes it possible to bypass clipboard
         clipboardContent = await this.askAndReadClipboard();
       if (clipboardContent) {
-        clipboardContent = clipboardContent.replace("/$/", "/#/"); // resetting the workaround needed on mobile phones
         if (clipboardContent.includes("/#/"))
           clipboardContent = clipboardContent.split("/#/")[1];
         if (clipboardContent.includes("#i")) {

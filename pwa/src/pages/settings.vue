@@ -14,11 +14,26 @@
             <q-item-label>Benachrichtigungen testen</q-item-label>
             <q-item-label
               caption
-            >Wenn du keine Benachrichtigungen erhältst, musst du sie eventuell erst erlauben.</q-item-label>
+            >Wenn du von StudiCar keine Benachrichtigungen erhältst, musst du den Zugriff eventuell erst erlauben.</q-item-label>
           </q-item-section>
           <q-item-section side>
             <q-icon v-if="notificationTestPassed" name="done" color="positive" />
             <q-btn v-else label="Test" outline @click="testNotification" />
+          </q-item-section>
+        </q-item>
+        <q-item tag="label">
+          <q-item-section avatar>
+            <q-icon name="content_paste" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Zugriff auf die Zwischenablage</q-item-label>
+            <q-item-label
+              caption
+            >Wenn der StudiCar Scanner die Zwischenablage nicht lesen kann, musst du den Zugriff eventuell erst erlauben.</q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-icon v-if="clipboardTestPassed" name="done" color="positive" />
+            <q-btn v-else label="Test" outline @click="testClipboardAccess" />
           </q-item-section>
         </q-item>
         <!-- <q-item-label header>Datennutzung</q-item-label>
@@ -66,7 +81,8 @@ export default {
   data() {
     return {
       notificationTestRunning: false,
-      notificationTestPassed: false
+      notificationTestPassed: false,
+      clipboardTestPassed: false
     };
   },
   components: {
@@ -144,14 +160,44 @@ export default {
               );
             })
             .catch(_ => {
-              alert(
-                `Bitte starte den Test erneut und akzeptiere dann die Anfrage. Wenn keine Anfrage kommt,
+              this.$q.dialog({
+                title: "Zugriff weiterhin blockiert",
+                message: `Bitte starte den Test erneut und akzeptiere dann die Anfrage. Wenn keine Anfrage kommt,
                 kann es sein, dass die Website schon blockiert wurde, in diesem Fall musst du das über 
                 die Browser-Einstellungen rückgängig machen.`
-              );
+              });
             });
         });
       });
+    },
+
+    async testClipboardAccess() {
+      try {
+        var board = navigator.clipboard;
+        if (!board) throw Error;
+        board
+          .readText()
+          .then(_ => {
+            this.clipboardTestPassed = true;
+            this.$q.dialog({
+              title: "Test erfolgreich",
+              message: `StudiCar hat Zugriff auf deine Zwischenablage. 
+            Jetzt kannst du Inhalte daraus über den StudiCar Scanner verarbeiten lassen.`
+            });
+          })
+          .catch(err => {
+            this.$q.notify({
+              type: "Zugriff verweigert",
+              message: `Bitte erlaube den Zugriff auf die Zwischenablage, wenn danach gefragt wird
+              und stelle in den Einstellungen sicher, dass du den Zugriff nicht bereits blockiert hast.`
+            });
+          });
+      } catch (e) {
+        this.$q.notify({
+          type: "Test fehlgeschlagen",
+          message: `Ein ungewöhnlicher Fehler ist aufgetreten, bitte melde dich beim Support`
+        });
+      }
     },
 
     async requestNotificationPermission() {
