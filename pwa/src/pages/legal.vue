@@ -117,3 +117,17 @@ export default {
   }
 };
 </script>
+
+<style lang="scss">
+// no h1 tags there so far
+h2 {
+  font-size: 1.7em !important;
+  font-weight: normal !important;
+  line-height: 1.2em !important;
+}
+h3 {
+  font-size: 1.3em !important;
+  font-weight: bold !important;
+  line-height: 1.2em !important;
+}
+</style>

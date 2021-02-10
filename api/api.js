@@ -585,8 +585,7 @@ SELECT
 FROM
     lifts
         `, [invitingUserId, uuidOnly]))
-  JSON = JSON.result[0].JSON
-  return JSON
+  return JSON == null ? null : JSON.result[0].JSON
 }
 
 function endWithJSON (res, JSON) {
@@ -1098,14 +1097,20 @@ module.exports = {
     },
     '/specificMarketplaceOffer': async (req, res, options) => {
       if (await isUserVerified(options.secretFbId)) {
-        var offers = JSON.parse(await getMarketplaceOfferByUuid(options.uuid, options.invitingUserId)),
+        var offers = JSON.parse(await getMarketplaceOfferByUuid(options.uuid, options.invitingUserId))
+        if (offers != null) {
           wantedOffer = offers[0], // when specific uuid is wanted, then only one result will be there, which should be returned as single object and not as array with just one element
-          invitingUserName = wantedOffer.invitingUserName
-        delete wantedOffer.invitingUserName
-        endWithJSON(res, JSON.stringify({
-          lift: wantedOffer,
-          invitingUserName: invitingUserName
-        }))
+            invitingUserName = wantedOffer.invitingUserName
+          delete wantedOffer.invitingUserName
+          endWithJSON(res, JSON.stringify({
+            lift: wantedOffer,
+            invitingUserName: invitingUserName
+          }))
+        }
+        else {
+          res.writeHead(404)
+          res.end('Database returned no data')
+        }
       }
     },
     '/liftRequests': async (req, res, options) => {

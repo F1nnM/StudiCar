@@ -40,6 +40,17 @@
             <q-item-label caption>Ihr seid bereits beide in der Fahrgemeinschaft.</q-item-label>
           </q-item-section>
         </q-item>
+        <q-item v-else-if="err">
+          <q-item-section avatar>
+            <q-avatar size="4em">
+              <q-icon name="error_outline" color="negative" />
+            </q-avatar>
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Anfrage fehlgeschlagen</q-item-label>
+            <q-item-label caption>Fehler {{ err.status }}: {{ err.data }}</q-item-label>
+          </q-item-section>
+        </q-item>
         <div v-else>
           <q-item>
             <q-item-section avatar>
@@ -50,9 +61,6 @@
               <q-item-label caption>Bitte hab einen Moment Geduld</q-item-label>
             </q-item-section>
           </q-item>
-        </div>
-        <div v-if="err">
-          <p class="text-negative text-caption">{{ err }}</p>
         </div>
       </q-card-section>
       <q-card-section actions class="text-right" bordered>
@@ -160,7 +168,7 @@ export default {
       sendApiRequest(
         SQL_GET_MARKETPLACE_OFFER,
         {
-          uuid: this.liftId, // a uuid, is as a longer and more secure liftId
+          uuid: 890313450283334, //  this.liftId, // a uuid, is as a longer and more secure liftId
           invitingUserId: this.invitingUserId
         },
         data => {
