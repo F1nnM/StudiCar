@@ -203,11 +203,7 @@
         class="text-grey-10 bg-white text-weight-light"
         align="center"
       >
-        <q-route-tab
-          exact
-          :to="'/' /* + ?qrLiftData=99034233762217#iwG3cG4M7NFMJzJYcreFjLrJC9Q23 */"
-          replace
-        >
+        <q-route-tab exact to="/" replace>
           <q-icon name="home" size="sm" />Marktplatz
         </q-route-tab>
         <q-route-tab to="/add-lift" replace>
@@ -437,7 +433,7 @@ export default {
               if (!this.isClipboardValid(content)) {
                 res("");
               } else {
-                content = content.replace("/$/", "/#/"); // resetting the workaround needed on mobile phones
+                content = content.replaceAll("$", "#"); // resetting the workaround needed on mobile phones
 
                 this.$q
                   .dialog({

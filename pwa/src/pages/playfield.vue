@@ -33,7 +33,7 @@ export default {
   methods: {
     go() {
       var uid = "wG3cG4M7NFMJzJYcreFjLrJC9Q23";
-      /* uid += "a"; */
+      uid += "a";
       sendApiRequest(
         SQL_GET_MARKETPLACE_OFFER,
         {

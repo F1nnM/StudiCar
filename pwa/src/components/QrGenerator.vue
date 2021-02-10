@@ -270,6 +270,7 @@ export default {
             : "dev.pwa.studicar.mfinn.de"),
         path = "",
         data = this.input.data;
+      data = data.replaceAll("#", "$");
       if (process.env.DEV) domainEtc += ":3000";
       domainEtc += "/$/"; // '/#/' didn't work on mobile phones, will be replaced when decoding
       switch (this.input.type) {

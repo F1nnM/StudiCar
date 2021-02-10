@@ -3,7 +3,8 @@ const
   fs = require('fs'),
   /* longQueries           = require('./longQueries'), */
   apiResponseSimulation = require('./simulation/apiResponse'),
-  tickerJS = require('./news/postillon/ticker.js')
+  tickerJS = require('./news/postillon/ticker.js'),
+  errorLogDatabase = require('./errorHandler')
 
 function isOptionMissing (data, needed, res) {
   return needed.some(key => {
@@ -585,7 +586,8 @@ SELECT
 FROM
     lifts
         `, [invitingUserId, uuidOnly]))
-  return JSON == null ? null : JSON.result[0].JSON
+  if (JSON == null) return null
+  else return JSON.result[0].JSON
 }
 
 function endWithJSON (res, JSON) {
@@ -1108,6 +1110,7 @@ module.exports = {
           }))
         }
         else {
+          errorLogDatabase('specificMarketplaceOffer', options)
           res.writeHead(404)
           res.end('Database returned no data')
         }
@@ -1206,7 +1209,10 @@ module.exports = {
           .then(_ => {
             res.end()
           })
-          .catch(err => catchall(err, res, 'addLiftRequest'))
+          .catch(err => {
+            catchall(err, res, 'addLiftRequest')
+            errorLogDatabase('addLiftRequest', options)
+          })
       }
     },
     '/respondRequest': async (req, res, options) => {
