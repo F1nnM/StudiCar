@@ -97,7 +97,16 @@ export default {
     },
 
     LEAVE_LIFT (state, payload) {
-      state.user.chatLifts = state.user.chatLifts.filter(l => l.id != payload)
+      var wasDriver = false,
+        uid = state.user.uid
+      state.user.chatLifts = state.user.chatLifts.filter(l => {
+        if (l.id == payload) {
+          if (l.driver.id == uid) wasDriver = true
+          return true
+        }
+        else return false
+      })
+      return wasDriver
     },
 
     SEND_MESSAGE (state, payload) {
@@ -254,7 +263,9 @@ export default {
       sendApiRequest(SQL_LEAVE_LIFT, {
         liftId: payload
       }, _ => {
-        commit('LEAVE_LIFT', payload)
+        var wasDriver = commit('LEAVE_LIFT', payload)
+        if (wasDriver) successNotify('Fahrt wurde aufgelöst')
+        else successNotify('Fahrt wurde verlassen')
       }, err => errorNotify(err))
     },
 
@@ -316,7 +327,7 @@ export default {
         SQL_REMOVE_ADDRESS,
         { id: payload },
         _ => {
-          successNotify('Adresse wurde entfernt.')
+          successNotify('Adresse wurde entfernt')
           commit('REMOVE_ADDRESS', payload)
         },
         error => {

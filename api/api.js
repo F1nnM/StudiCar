@@ -1352,7 +1352,14 @@ module.exports = {
               ( SELECT ID FROM lift WHERE lift.UUID = ? ),
               CURRENT_TIMESTAMP())`,
           [uid, liftId])
-        await runQuery('DELETE FROM lift_map WHERE LIFT_ID = (SELECT ID FROM lift WHERE UUID = ?) AND USER_ID = (SELECT ID FROM users WHERE FB_ID = ?)', [liftId, uid])
+        await runQuery(`DELETE
+        FROM lift
+        WHERE ID = (
+        SELECT LIFT_ID
+        FROM lift_map
+        WHERE USER_ID = (SELECT ID FROM users WHERE FB_ID = ?) AND PENDING = 0 AND IS_DRIVER = 1 AND LIFT_ID =(SELECT ID FROM lift WHERE UUID = ?)
+        )`, [uid, liftId]) // when lift found where uuid, driver and fbId are matching, then delete that lift. DB is set to cascade, so messages, lift_map, that stuff will be deleted.
+        await runQuery('DELETE FROM lift_map WHERE LIFT_ID = (SELECT ID FROM lift WHERE UUID = ?) AND USER_ID = (SELECT ID FROM users WHERE FB_ID = ?)', [liftId, uid]) // when lift has been deleted in previous line, this query will affect nothing
 
         res.end()
       }
@@ -1395,6 +1402,26 @@ module.exports = {
         else res.end()
       }
     },
+    '/changeFriendRelation': async (req, res, options) => {
+      if (!isOptionMissing(options, ['otherFbId', 'isRisingEdge'], res) && await isUserVerified(options.secretFbId)) {
+        var ownId = options.secretFbId,
+          otherFbId = options.otherFbId,
+          isRisingEdge = options.isRisingEdge // contains all needed information about the state transition
+
+        if (isRisingEdge) { // rising edge -> insert relation, when already exists catch and do nothing
+          runQuery(`INSERT INTO friends (FROM, TO) VALUES
+          (
+            (SELECT ID FROM users WHERE FB_ID = ?),
+            (SELECT ID FROM users WHERE FB_ID = ?)
+            )
+          `, [ownId, otherFbId]).catch(_ => { /* relation already there */ })
+        }
+        else {
+          runQuery(`DELETE FROM friends WHERE FROM = (SELECT ID FROM users WHERE FB_ID = ?) AND TO = (SELECT ID FROM users WHERE FB_ID = ?)`, [ownId, otherFbId]).catch(_ => { /* relation not there any more */ })
+        }
+        res.end()
+      }
+    },
     '/addQuestion': async (req, res, options) => {
       if (!isOptionMissing(options, ['question', 'category', 'uid'], res) && await isUserVerified(options.secretFbId)) {
         var cat = options.category
@@ -1407,9 +1434,9 @@ module.exports = {
       if (!isOptionMissing(options, ['data', 'mode'], res) && await isUserVerified(options.secretFbId)) {
         var d = options.data
         if (options.mode == 1) { // normal mode
-          await runQuery("UPDATE faq SET ANSWER = ?, ANSWERED_BY = ?, IS_PUBLIC = ? WHERE ID = ?;", [d.answer, d.orgaId, d.instantPublish, d.id])
+          await runQuery("UPDATE faq SET ANSWER = ?, ANSWERED_BY = ?, IS_PUBLIC = ? WHERE ID = ?", [d.answer, d.orgaId, d.instantPublish, d.id])
         } else { // mode is 2, special mode just to set publicity
-          await runQuery("UPDATE faq SET IS_PUBLIC = ? WHERE ID = ?;", [d.newValue, d.id])
+          await runQuery("UPDATE faq SET IS_PUBLIC = ? WHERE ID = ?", [d.newValue, d.id])
         }
 
         res.end()

@@ -1,6 +1,7 @@
 const runQuery = require('./db')
 
 module.exports = async function databaseLog (endpoint, options) {
+    if (process.env.DEV) return // when in DEV mode, logging is not needed
     var causedFbId = options.secretFbId
     delete options.secretFbId
     delete options.idtoken // just to keep data cleaner
