@@ -168,7 +168,7 @@ export default {
       sendApiRequest(
         SQL_GET_MARKETPLACE_OFFER,
         {
-          uuid: 890313450283334, //  this.liftId, // a uuid, is as a longer and more secure liftId
+          uuid: this.liftId, // a uuid, is as a longer and more secure liftId
           invitingUserId: this.invitingUserId
         },
         data => {

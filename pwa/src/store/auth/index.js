@@ -102,9 +102,9 @@ export default {
       state.user.chatLifts = state.user.chatLifts.filter(l => {
         if (l.id == payload) {
           if (l.driver.id == uid) wasDriver = true
-          return true
+          return false
         }
-        else return false
+        else return true
       })
       return wasDriver
     },
@@ -168,7 +168,6 @@ export default {
         var chatLift = state.user.chatLifts.find(l => l.id == payload.liftId)
         chatLift.passengers = chatLift.passengers.concat(usersThatWouldBeAdded)
       }
-
     },
 
     REQUEST_TO_LIFT (state, liftId) {

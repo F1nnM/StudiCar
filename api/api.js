@@ -1318,19 +1318,13 @@ module.exports = {
           [lift.seats, lift.carId, lift.startAddressId, lift.destinationAddressId, lift.repeats ? lift.weekday : 0, lift.datestamp, isdepartAt ? lift.timestamp : 0, isdepartAt ? 0 : lift.timestamp]).catch(error => {
             throw error;
           })
-        var insertedResult = (await runQuery(
-          "SELECT MAX(ID) AS ID, UUID FROM lift WHERE CAR_ID = ? AND START = ?", [lift.carId, lift.startAddressId]).catch(error => {
+        await runQuery(
+          "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`, `PENDING`) SELECT MAX(ID) AS ID, ? AS USER_ID, 1 AS IS_DRIVER, 0 AS PENDING FROM lift", [userId]).catch(error => {
             throw error;
-          })).result[0]
-        var newLiftId = insertedResult.ID
-        runQuery(
-          "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`, `PENDING`) VALUES (?, ?, 1, 0)", [newLiftId, userId]).catch(error => {
-            throw error;
-          }).then(_ => {
-            runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, 0, ?, current_timestamp())", [content, newLiftId]).catch(error => {
-              catchall(error, res, 'addLift')
-            })
           })
+        await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, 0, ?, current_timestamp())", [content, newLiftId]).catch(error => {
+          catchall(error, res, 'addLift')
+        })
 
 
         /* INSERT INTO `messages` (`ID`, `UUID`, `CONTENT`, `AUDIO`, `PICTURE`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (NULL, '6516515156313513', 'Hallo! Schön, dass ihr da seid!', NULL, NULL, '1', '1', current_timestamp()) */
