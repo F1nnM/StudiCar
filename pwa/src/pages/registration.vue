@@ -14,7 +14,7 @@
           rounded
         />
       </div>
-      <span>Erstelle einen Account, damit wir dich in unser System aufnehmen können.</span>
+      <span>Erstelle einen Account, damit StudiCar dich ins System aufnehmen kann.</span>
     </div>
     <div class="q-mt-xl">
       <q-form @submit="dialog = true" class="q-gutter-md">

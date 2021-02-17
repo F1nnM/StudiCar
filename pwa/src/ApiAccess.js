@@ -50,6 +50,11 @@ export const SQL_TEST_READ = {
   method: "GET"
 }
 
+export const PING = {
+  path: "/ping",
+  method: "GET"
+}
+
 export const GET_USER_PROFILE_PIC = {
   path: "/profilePicture",
   method: "GET"
@@ -77,11 +82,6 @@ export const GET_MESSAGES = {
 
 export const GET_LEGAL = {
   path: "/getLegal",
-  method: "GET"
-}
-
-export const SQL_GET_LIFT_INFO = {
-  path: "/getLiftInfo",
   method: "GET"
 }
 
@@ -172,6 +172,11 @@ export const SQL_ADD_ADDRESS = {
 
 export const SQL_REMOVE_ADDRESS = {
   path: "/removeAddress",
+  method: "POST"
+}
+
+export const SQL_UPDATE_DEFAULT_ADDRESS = {
+  path: "/updateDefaultAddress",
   method: "POST"
 }
 

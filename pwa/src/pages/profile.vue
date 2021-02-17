@@ -152,17 +152,21 @@
                       <q-item-label v-else>{{ item.city }}</q-item-label>
                       <q-icon
                         name="home"
-                        size=".9em"
+                        size="xs"
                         color="primary"
                         class="q-ml-sm"
-                        v-if="!item.default"
+                        v-if="item.isDefault"
                       />
-                      <!-- <q-icon
-                        name="roofing"
-                        size=".9em"
-                        color="primary"
+                      <q-btn
+                        icon="home"
+                        flat
+                        dense
+                        size="xs"
+                        color="grey-5"
                         class="q-ml-sm"
-                      />-->
+                        v-if="!item.isDefault && openEditAddresses"
+                        @click="updateDefaultAddress(item.id)"
+                      />
                     </div>
 
                     <q-item-label caption class="q-mt-xs">
@@ -285,7 +289,7 @@
               sein?
               <br />
               <small>
-                Bitte hab Verständnis, dass wir noch mit Luftlinien rechnen.
+                Bitte hab Verständnis, dass StudiCar noch mit Luftlinien rechnet.
                 Echte Routen sollen aber bald kommen.
               </small>
             </p>
@@ -467,17 +471,17 @@
                   :rules="[
                     (val) =>
                       (val !== null && val !== '') ||
-                      'Ohne Stadt können wir lange suchen...',
+                      'Ohne Stadt kann StudiCar lange suchen...',
                   ]"
                 />
                 <q-input
                   class="col-12"
                   type="text"
                   v-model="newAddress.nickname"
-                  label="Beschreibung"
+                  label="Private Beschreibung"
                   lazy-rules
                   :rules="[(val) => val.length <= 10 || 'Maximal 10 Zeichen']"
-                  hint="Optional, wird groß vor der Adresse angezeigt."
+                  hint="Optional, kann dir helfen Adressen leichter zu unterscheiden. Ist nur für dich selber sichtbar."
                 />
               </div>
             </q-card-section>
@@ -649,7 +653,7 @@
             />
             <p
               class="text-caption q-mt-lg"
-            >Wir werden dich vor jeder Fahrt fragen, ob es dabei bleibt.</p>
+            >StudiCar werden dich vor jeder Fahrt fragen, ob es dabei bleibt.</p>
           </q-step>
           <q-step :name="8" title="Überprüfen" icon="visibility">
             <p>Bitte vergewissere dich, dass die Daten korrekt und vollständig sind.</p>
@@ -973,6 +977,10 @@ export default {
 
     removeAddress(id) {
       if (id) this.$store.dispatch("auth/removeAddress", id);
+    },
+
+    updateDefaultAddress(id) {
+      this.$store.dispatch("auth/updateDefaultAddress", id);
     },
 
     async addCar() {

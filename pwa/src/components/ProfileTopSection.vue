@@ -14,7 +14,7 @@
                 >
                   <template v-slot:error>
                     <div class="absolute-full flex flex-center text-white">
-                      Wir konnten dein Bild nicht laden. Bitte stelle eine
+                      StudiCar konnte dein Bild nicht laden. Bitte stelle eine
                       Internetverbindung her, um dein Profilbild zu sehen.
                     </div>
                   </template>
@@ -265,7 +265,7 @@
               </div>
             </div>
             <div v-else class="text-caption">
-              Wir haben dein Bild etwas zugeschnitten, damit es den
+              StudiCar hat dein Bild etwas zugeschnitten, damit es den
               Abmessungen für Profilbilder entspricht.
             </div>
           </div>
@@ -442,7 +442,7 @@ export default {
         .dialog({
           title: "Bild zurücksetzen",
           message:
-            "Willst du dein Bild wirklich zurücksetzen? Wir speichern dann ein anonymes Ersatzbild.",
+            "Willst du dein Bild wirklich zurücksetzen? StudiCar speichert dann ein anonymes Ersatzbild.",
           cancel: true,
           persistent: true
         })

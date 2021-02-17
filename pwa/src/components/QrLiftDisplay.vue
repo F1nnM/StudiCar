@@ -57,7 +57,7 @@
               <q-circular-progress indeterminate size="md" color="primary" class="q-ma-md" />
             </q-item-section>
             <q-item-section>
-              <q-item-label class="text-subtitle1">Einladung wird überprüft</q-item-label>
+              <q-item-label class="text-subtitle1">StudiCar überprüft deine Einladung</q-item-label>
               <q-item-label caption>Bitte hab einen Moment Geduld</q-item-label>
             </q-item-section>
           </q-item>

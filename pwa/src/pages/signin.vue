@@ -64,12 +64,12 @@
           <ul>
             <li>
               Mit einem ganz normalen StudiCar Account. Dafür musst du dir zuerst über "Registrierung" einen
-              StudiCar Account erstellen. Wir brauchen dazu nur eine Mail, ein Passwort und deinen Namen.
+              StudiCar Account erstellen. Du brauchst dazu nur eine Mail, ein Passwort und deinen Namen.
               Wenn du registriert bist, kannst du loslegen.
             </li>
             <li>
               Mit einem Google-Account. Du gehst auf "über Google" und wählst im aufgehenden Fenster dann den
-              Account aus, mit dem du dich anmelden willst. Deinen Namen und deine Mail fragen wir dann bei Google ab.
+              Account aus, mit dem du dich anmelden willst. Deinen Namen und deine Mail frägt StudiCar dann bei Google ab.
             </li>
           </ul>
         </q-card-section>

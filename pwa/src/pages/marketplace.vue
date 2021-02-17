@@ -1,6 +1,9 @@
 <template>
   <div class="q-pa-md">
-    <TitleButton>
+    <TitleButton
+      :style="!hasUserAdresses ? 'filter: blur(6px)' : ''"
+      :class="!hasUserAdresses ? 'no-pointer-events' : ''"
+    >
       <q-btn dense flat @click="openSortFilterDialog('sort')" icon="sort">
         <q-icon size="xs" :name="sort.icon" />
       </q-btn>
@@ -36,7 +39,13 @@
         >
           <q-card>
             <div class="row justify-between">
-              <q-item-label header>{{ sortFilterDialog.tab == 'sort' ? 'Sortieren' : 'Filtern' }}</q-item-label>
+              <q-item-label header>
+                {{ sortFilterDialog.tab == 'sort' ? 'Sortieren' : 'Filtern' }}
+                <small
+                  class="q-ml-sm"
+                  v-if="sortFilterDialog.tab == 'filter'"
+                >- {{ getFilteredOffers.length }} Angebot{{ getFilteredOffers.length != 1 ? 'e' : '' }} verbleib{{ getFilteredOffers.length != 1 ? 'en' : 't' }} -</small>
+              </q-item-label>
               <q-tabs
                 v-model="sortFilterDialog.tab"
                 narrow-indicator
@@ -185,7 +194,7 @@
                       <q-item-label caption>
                         <span
                           v-if="filter.dest == 'home'"
-                        >nur Fahrten von der DH weg werden angezeigt</span>
+                        >nur Fahrten in Richtung deiner Adressen werden angezeigt</span>
                         <span
                           v-else-if="filter.dest == 'school'"
                         >nur Fahrten in Richtung DH werden angezeigt</span>
@@ -205,12 +214,15 @@
                       </q-item-label>
                     </q-item-section>
                   </q-item>
-                  <q-item tag="label">
+                  <q-item tag="label" :disable="(typeof defaultHomeCity) != 'string'">
                     <q-item-section avatar>
-                      <q-toggle v-model="filter.defaultHome" disable />
+                      <q-toggle
+                        v-model="filter.defaultHome"
+                        :disable="(typeof defaultHomeCity) != 'string'"
+                      />
                     </q-item-section>
-                    <q-item-section>
-                      <q-item-label>Nur Fahrten {{ filterDefaultHomePreposition }} meiner Standardadresse anzeigen</q-item-label>
+                    <q-item-section v-if="defaultHomeCity != null">
+                      <q-item-label>Nur Fahrten {{ filterDefaultHomePreposition }} {{ defaultHomeCity }} anzeigen</q-item-label>
                       <q-item-label caption>
                         <span
                           v-if="filter.defaultHome"
@@ -218,20 +230,51 @@
                         <span v-else>Im Moment werden Fahrten zu all deinen Adressen angezeigt</span>
                       </q-item-label>
                     </q-item-section>
+                    <q-item-section v-else>
+                      <q-item-label>nur Fahrten mit der Stadt meiner Standardadresse anzeigen</q-item-label>
+                      <q-item-label
+                        caption
+                        class="text-negative"
+                      >Diese Option ist deaktiviert, weil du im Profil noch keine Standardadresse eingestellt hast</q-item-label>
+                    </q-item-section>
                   </q-item>
                 </q-list>
               </q-tab-panel>
             </q-tab-panels>
           </q-card>
         </q-dialog>
-        <!-- </q-menu> -->
-        <LiftOffer
-          class="q-mb-sm"
-          v-for="lift in getSortedOffers"
-          :key="lift.index"
-          v-bind:lift="lift"
-          @request="triggerLiftRequest"
-        />
+        <div v-if="hasUserAdresses">
+          <LiftOffer
+            class="q-mb-sm"
+            v-for="lift in getSortedOffers"
+            :key="lift.index"
+            v-bind:lift="lift"
+            @request="triggerLiftRequest"
+          />
+        </div>
+        <div v-else class="relative-position">
+          <div class="absolute absolute-top">
+            <q-item class="bg-white q-mt-xl shadow-2 rounded-borders">
+              <q-item-section avatar>
+                <q-icon name="report_problem" color="negative" size="sm" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Noch keine Adressen verfügbar</q-item-label>
+                <q-item-label
+                  caption
+                >In deinem Profil sind noch keine Adressen hinterlegt, StudiCar kann dir also noch keine passenden Angebote anzeigen.</q-item-label>
+              </q-item-section>
+            </q-item>
+          </div>
+          <div style="filter: blur(6px)" class="no-pointer-events">
+            <LiftOffer
+              class="q-mb-sm"
+              v-for="lift in loremOffers"
+              :key="lift.index"
+              v-bind:lift="lift"
+            />
+          </div>
+        </div>
       </div>
       <div
         class="text-caption"
@@ -289,19 +332,26 @@ export default {
     },
 
     filterDefaultHomePreposition() {
-      if (!this.filter.dest) return "ab/zu";
+      if (!this.filter.dest) return "ab/nach";
       else {
-        if (this.filter.dest == "home") return "zu";
+        if (this.filter.dest == "home") return "nach";
         else return "ab";
       }
     },
 
     defaultHomeCity() {
       var defaultAddress = this.$store.getters["auth/user"].addresses.find(
-        a => a.isDefault
+        a => a.isDefault && a.id > 3
       );
       if (defaultAddress) return defaultAddress.city;
-      else return "- ERR: NO DEFAULT ADDRESS FOUND -";
+      else return null;
+    },
+
+    hasUserAdresses() {
+      var all = this.$store.getters["auth/user"].addresses.filter(
+        ad => ad.id > 3
+      );
+      return all.length > 0;
     },
 
     userPrefs() {
@@ -344,6 +394,35 @@ export default {
           disabled: true
         }
       ];
+    },
+
+    loremOffers() {
+      var arr = [],
+        loremOffer = {
+          id: 99018780353225,
+          liftId: 31,
+          driver: {
+            id: "oRdhQyF8j5Mx9uwKNNMhICdkmy42",
+            name: "Julian",
+            surname: "Essl",
+            prefs: {
+              talk: "RED",
+              talkMorning: "RED",
+              smoking: "RED",
+              music: "RED"
+            }
+          },
+          departAt: "18:00:00",
+          arriveBy: "00:00:00",
+          destination: { name: "Würfel", id: 1 },
+          start: { name: "Offingen", id: -1 },
+          seatsOffered: 3,
+          seatsOccupied: 0,
+          repeatsOn: 0,
+          date: "2021-02-24"
+        };
+      arr = [loremOffer, loremOffer, loremOffer, loremOffer, loremOffer]; // 5 should be enough
+      return arr;
     },
 
     filtersActive() {
@@ -434,6 +513,13 @@ export default {
         userPrefs = this.$store.getters["auth/user"].prefs,
         filter = this.filter;
 
+      if (filter.defaultHome) {
+        var city = this.defaultHomeCity,
+          postcode = this.$store.getters["auth/user"].addresses.find(
+            a => a.isDefault
+          );
+      }
+
       allOffers = allOffers.filter(offer => {
         // prefs matching?
         if (filter.prefs) {
@@ -447,6 +533,21 @@ export default {
             // filter.dest is 'school'
             if (endsAtHome) return false;
           }
+        }
+
+        if (filter.defaultHome) {
+          var focusedPoint = "";
+          switch (filter.dest) {
+            case "home":
+              focusedPoint = offer.destination.name; // when lift goes home, filtered can only by destination (city)
+              break;
+            case "school":
+              focusedPoint = offer.start.name;
+              break;
+            default:
+              focusedPoint = offer.start.name + "|" + offer.destination.name;
+          }
+          return focusedPoint.includes(this.defaultHomeCity);
         }
 
         return true; // stay in results otherwise

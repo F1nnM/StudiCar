@@ -241,7 +241,7 @@
                 <q-step :name="5" title="Sitze bearbeiten" icon="person_add" :done="step > 5">
                   <p class="text-caption">
                     Willst du die Anzahl an Mitfahrern für diese Fahrt ändern?
-                    (Hinweis: Wenn du hier 0 beibehältst, dann speichern wir für diese Fahrt {{ getCarData.seats }} Mitfahrer, also die übliche Kapazität dieses Autos)
+                    (Hinweis: Wenn du hier 0 beibehältst, dann speichert StudiCar für diese Fahrt {{ getCarData.seats }} Mitfahrer, also die übliche Kapazität dieses Autos)
                   </p>
                   <q-item>
                     <q-item-section avatar>

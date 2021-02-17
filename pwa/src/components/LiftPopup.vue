@@ -462,7 +462,6 @@ import AudioPlayer from "components/AudioPlayer";
 import {
   sendApiRequest,
   SQL_SEND_MESSAGE,
-  SQL_GET_LIFT_INFO,
   SQL_LOAD_MESSAGE_MEDIA
 } from "../ApiAccess";
 

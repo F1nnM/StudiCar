@@ -4,7 +4,7 @@ const
   /* longQueries           = require('./longQueries'), */
   apiResponseSimulation = require('./simulation/apiResponse'),
   tickerJS = require('./news/postillon/ticker.js'),
-  errorLogDatabase = require('./errorHandler')
+  errorHandler = require('./errorHandler')
 
 function isOptionMissing (data, needed, res) {
   return needed.some(key => {
@@ -47,21 +47,6 @@ function generateJdenticon (seed) {
 
   let size = 300
   return jdenticon.toPng(seed, size);
-}
-
-async function catchall (err, res, endpoint) {
-  console.log(`ERROR AT CALLING ${endpoint} : ${err}`)
-
-  switch (err.code) {
-    case 'ER_ROW_IS_REFERENCED_2': res.writeHead(424) // constraint violated
-      break
-    case 'ER_DUP_ENTRY':
-      res.writeHead(409) // primary key violated
-      break
-    default:
-      res.writeHead(400) // not more specified
-  }
-  res.end()
 }
 
 async function getChatLifts (uid) {
@@ -227,7 +212,7 @@ SELECT
     )
     AS JSON
 FROM lifts
-  `, [uid])).result[0].JSON
+  `, [uid]).catch(err => { throw err })).result[0].JSON
   return lift_data
 }
 
@@ -604,7 +589,7 @@ async function isUserVerified (fbid) {
 
 module.exports = {
   'GET': {
-    '/ping': (req, res, options) => {
+    '/ping': async (req, res, options) => {
       res.end('pong');
     },
     '/sqlTest': async (req, res, options) => {
@@ -660,7 +645,8 @@ module.exports = {
                   users.PREF_MUSIC,
                   users.PREF_TALK,
                   users.PREF_TALK_MORNING,
-                  users.LIFT_MAX_DISTANCE 
+                  users.LIFT_MAX_DISTANCE,
+                  users.DEFAULT_ADDRESS
               FROM
                   users 
               WHERE
@@ -762,7 +748,8 @@ module.exports = {
                                   'postcode', user_addresses.POSTCODE,
                                   'city', user_addresses.CITY,
                                   'street', user_addresses.STREET,
-                                  'number', user_addresses.NUMBER
+                                  'number', user_addresses.NUMBER,
+                                  'isDefault', IF(user_addresses.ID = data.DEFAULT_ADDRESS, TRUE, FALSE)
                               )
                           ) from user_addresses
                      )
@@ -795,7 +782,9 @@ module.exports = {
                   rides USING(USER_ID) 
               LEFT OUTER JOIN
                   drives USING(USER_ID)
-            `, [options.fbid])).result[1][0].JSON
+            `, [options.fbid]).catch(err => {
+            errorHandler.database('getUserData', options, err, 'Could not get user data', res)
+          })).result[1][0].JSON
 
           data = JSON.parse(data)
           data.chatLifts = JSON.parse(await getChatLifts(options.fbid))
@@ -880,7 +869,9 @@ module.exports = {
                   rides USING(USER_ID) 
               LEFT OUTER JOIN
                   drives USING(USER_ID)
-            `, [options.fbid])).result[1][0].JSON
+            `, [options.fbid]).catch(err => {
+            errorHandler.database('getUserData', options, err, 'Could not get public user data', res)
+          })).result[1][0].JSON
 
           data = JSON.parse(data)
         }
@@ -907,7 +898,6 @@ module.exports = {
           } // basically grouped all cars in object array	
         })
 
-
         endWithJSON(res, JSON.stringify(carsObj))
       }
     },
@@ -931,45 +921,11 @@ module.exports = {
         res.writeHead(404)
       }
       else fs.readFile(`legal/${filename}.html`, 'utf8', (err, data) => {
-        if (err) catchall(err, res, 'getLegal')
-
+        if (err) errorHandler.file('getLegal', err, 'Could not read file "' + filename + '.html', res)
         else endWithJSON(res, JSON.stringify({
           text: data
         }))
       })
-    },
-    '/getLiftInfo': async (req, res, options) => {
-      if (!isOptionMissing(options, ['liftId'], res) && await isUserVerified(options.secretFbId)) {
-        var liftId = options.id
-        let carInfo = await runQuery("SELECT car_models.BRAND, car_models.MODEL, car.COLOR, car.TYPE, car.LICENSE_PLATE, lift.OFFERED_SEATS FROM lift JOIN car ON lift.CAR_ID = car.ID JOIN car_models ON car_models.ID = car.MODEL_ID WHERE lift.ID = ?;", [liftId])
-        carInfo = carInfo.result[0]
-        var car = {
-          brand: carInfo.BRAND,
-          model: carInfo.MODEL,
-          color: carModels.allColors()[carInfo.COLOR.split(':')[0]][carInfo.COLOR.split(':')[1]],
-          type: carInfo.TYPE,
-          licensePlate: carInfo.LICENSE_PLATE,
-        }
-        let usersInfo = await runQuery("SELECT users.ID, users.NAME, users.PREF_TALK, users.PREF_TALK_MORNING, users.PREF_SMOKING, users.PREF_MUSIC FROM users JOIN lift_map ON lift_map.USER_ID = users.ID WHERE lift_map.PENDING = 0 AND lift_map.IS_DRIVER = 0 AND lift_map.LIFT_ID = ?", [liftId])
-        usersInfo = usersInfo.result
-        var passengers = []
-        usersInfo.forEach(item => {
-          passengers.push({
-            userId: item.ID,
-            nameOfUser: item.NAME.split(' ')[0], // as always only take the first name
-            talk: item.PREF_TALK,
-            talkMorning: item.PREF_TALK_MORNING,
-            smoking: item.PREF_SMOKING,
-            music: item.PREF_MUSIC
-          })
-        })
-
-        endWithJSON(res, JSON.stringify({
-          car: car,
-          passengers: passengers,
-          seats: carInfo.OFFERED_SEATS
-        }))
-      }
     },
     '/getSupportData': async (req, res, options) => {
       var result = (await runQuery(`SELECT faq.ID, faq.QUESTION, faq.CATEGORY, faq.ANSWER, users.NAME AS ORGAS_NAME, team.FUNCTION, team.ID AS ORGA_ID 
@@ -1036,7 +992,7 @@ module.exports = {
         about = await new Promise((resolve, reject) => fs.readFile('legal/about.html', 'utf8', (err, data) => {
           if (err) {
             about = err
-            catchall(err, res, 'getTeamInfo')
+            errorHandler.file('getTeamInfo', err, 'Could not read the about file', res)
           }
           else resolve(data)
         }))
@@ -1176,8 +1132,8 @@ module.exports = {
           res.end("Image must be 300x300");
         }
         await runQuery(
-          "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?", [img, options.secretFbId]).catch(error => {
-            throw error;
+          "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?", [img, options.secretFbId]).catch(err => {
+            errorHandler.database('updateProfilePicture', options, err, 'Could not update profile picture', res)
           });
         res.end()
       }
@@ -1187,7 +1143,7 @@ module.exports = {
         var name = (await runQuery("SELECT NAME FROM `users` WHERE users.FB_ID = ?", [options.secretFbId])).result[0].NAME
         await runQuery(
           "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?", [generateJdenticon(name), options.secretFbId]).catch(error => {
-            throw error;
+            errorHandler.database('resetProfilePicture', options, err, 'Could not reset profile picture', res)
           });
         res.end()
       }
@@ -1205,14 +1161,11 @@ module.exports = {
       if (!isOptionMissing(options, ['liftId'], res) && await isUserVerified(options.secretFbId)) {
         var uid = options.secretFbId,
           liftId = options.liftId
-        runQuery('INSERT INTO lift_map (USER_ID, LIFT_ID, PENDING) VALUES ((SELECT ID FROM users WHERE FB_ID = ?), (SELECT ID FROM lift WHERE UUID = ?), 1)', [uid, liftId])
-          .then(_ => {
-            res.end()
-          })
+        await runQuery('INSERT INTO lift_map (USER_ID, LIFT_ID, PENDING) VALUES ((SELECT ID FROM users WHERE FB_ID = ?), (SELECT ID FROM lift WHERE UUID = ?), 1)', [uid, liftId])
           .catch(err => {
-            catchall(err, res, 'addLiftRequest')
-            errorLogDatabase('addLiftRequest', options)
+            errorHandler.database('addLiftRequest', options, err, '', res)
           })
+        res.end()
       }
     },
     '/respondRequest': async (req, res, options) => {
@@ -1233,7 +1186,10 @@ module.exports = {
               [liftId])
             await runQuery('UPDATE lift_map SET PENDING = 0 WHERE lift_map.LIFT_ID = (SELECT ID FROM lift WHERE UUID = ?)', [liftId]) // simply set all relations of that lift to 1
           }
-          else res.writeHead(500)
+          else {
+            res.writeHead(500)
+            res.end('Not implemented yet')
+          }
         }
         else {
           if (accepted) {
@@ -1260,7 +1216,7 @@ module.exports = {
           a = options.address
         await runQuery(
           "INSERT INTO `addresses` (`ID`, `NICKNAME`, `POSTCODE`, `CITY`, `NUMBER`, `STREET`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, (SELECT ID FROM users WHERE FB_ID = ?));", [a.nickname || '', a.postcode, a.city, a.number, a.street, uid]).catch(err => {
-            catchall(err, res, 'addAddress')
+            errorHandler(err, res, 'addAddress')
           });
         var a = (await runQuery('SELECT MAX(b.ID) AS MAX FROM ( SELECT ID FROM addresses a WHERE a.CITY = ? AND a.NUMBER = ? AND a.STREET = ? ORDER BY a.ID DESC ) as b', [
           a.city, a.number, a.street
@@ -1274,8 +1230,18 @@ module.exports = {
     '/removeAddress': async (req, res, options) => {
       if (!isOptionMissing(options, ['id'], res) && await isUserVerified(options.secretFbId)) {
         await runQuery(
-          "DELETE FROM `addresses` WHERE `addresses`.`ID` = ?", [options.id]).catch(err => {
-            catchall(err, res, 'removeAddress')
+          "DELETE FROM `addresses` WHERE `addresses`.`ID` = ?", [options.id]).catch(async err => {
+            await errorHandler.database('removeAddress', options, err, '', res)
+          });
+
+        res.end();
+      }
+    },
+    '/updateDefaultAddress': async (req, res, options) => {
+      if (!isOptionMissing(options, ['id'], res) && await isUserVerified(options.secretFbId)) {
+        await runQuery(
+          "UPDATE `users` SET DEFAULT_ADDRESS = ? WHERE users.FB_ID = ?", [options.id, options.secretFbId]).catch(async err => {
+            await errorHandler.database('removeAddress', options, err, '', res)
           });
 
         res.end();
@@ -1288,7 +1254,7 @@ module.exports = {
 
         await runQuery("INSERT INTO car (`ID`, `LICENSE_PLATE`, `SEATS`, `MODEL_ID`, `TYPE`, `COLOR`, `YEAR`, `USER_ID`) VALUES (NULL, ?, ?, (SELECT ID FROM car_models WHERE BRAND = ? AND MODEL = ?), ?, ?, ?, (SELECT ID FROM users WHERE FB_ID = ?))",
           [car.licensePlate, car.seats, car.brand, car.model, car.type, car.color.replace('#', ''), car.year, uid]).catch(error => {
-            catchall(error, res, '/addCar')
+            errorHandler(error, res, '/addCar')
           })
         var createdId = (await runQuery('SELECT ID FROM car WHERE LICENSE_PLATE = ? AND COLOR = ?', [car.licensePlate, car.color.replace('#', '')])).result[0].ID
 
@@ -1301,7 +1267,7 @@ module.exports = {
       if (!isOptionMissing(options, ['id'], res) && await isUserVerified(options.secretFbId)) {
         await runQuery(
           "DELETE FROM car WHERE ID = ?", [options.id]).catch(err => {
-            catchall(err, res, 'removeCar')
+            errorHandler.database('removeCar', options, err, 'Could not remove car', res)
           })
         res.end()
       }
@@ -1310,8 +1276,8 @@ module.exports = {
       if (!isOptionMissing(options, ['lift'], res) && await isUserVerified(options.secretFbId)) {
         var lift = options.lift,
           isdepartAt = lift.departAt,
-          userId = await getUserId(options.secretFbId),
-          content = 'Willkommen im Chat!'
+          uid = options.secretFbId
+        content = 'Willkommen im Chat!'
 
         await runQuery(
           "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `START`, `DESTINATION`, `UUID`, `REPEATS_ON_WEEKDAY`, `FIRST_DATE`, `DEPART_AT`, `ARRIVE_BY`) VALUES (current_timestamp(), ?, ?, ?, ?, FLOOR(UUID_SHORT() / 1000), ?, ? ,?, ?)",
@@ -1319,15 +1285,12 @@ module.exports = {
             throw error;
           })
         await runQuery(
-          "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`, `PENDING`) SELECT MAX(ID) AS ID, ? AS USER_ID, 1 AS IS_DRIVER, 0 AS PENDING FROM lift", [userId]).catch(error => {
-            throw error;
+          "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`, `PENDING`) SELECT MAX(ID) AS ID, (SELECT ID FROM users WHERE FB_ID = ?) AS USER_ID, 1 AS IS_DRIVER, 0 AS PENDING FROM lift", [uid]).catch(error => {
+            errorHandler.database('addLift', options, err, '', res)
           })
         await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, 0, ?, current_timestamp())", [content, newLiftId]).catch(error => {
-          catchall(error, res, 'addLift')
+          throw err
         })
-
-
-        /* INSERT INTO `messages` (`ID`, `UUID`, `CONTENT`, `AUDIO`, `PICTURE`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (NULL, '6516515156313513', 'Hallo! Schön, dass ihr da seid!', NULL, NULL, '1', '1', current_timestamp()) */
 
         endWithJSON(res, await getChatLifts(options.secretFbId))
       }
@@ -1366,7 +1329,7 @@ module.exports = {
           switch (message.type) {
             case 1: // text
               await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, (SELECT ID FROM users WHERE FB_ID = ?), (SELECT ID FROM lift WHERE UUID = ?), current_timestamp())", [message.content, options.secretFbId, message.liftId]).catch(error => {
-                catchall(error, res, 'sendMessage')
+                throw error
               })
               break
             case 2: // audio blob

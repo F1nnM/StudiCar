@@ -19,7 +19,8 @@ import {
   SQL_LEAVE_LIFT,
   SQL_GET_LIFT_REQUESTS,
   SQL_RESPOND_REQUEST,
-  SQL_ADD_LIFT_REQUEST
+  SQL_ADD_LIFT_REQUEST,
+  SQL_UPDATE_DEFAULT_ADDRESS
 } from '../../ApiAccess'
 
 import { Notify } from 'quasar'
@@ -127,6 +128,14 @@ export default {
 
     REMOVE_ADDRESS (state, payload) {
       state.user.addresses = state.user.addresses.filter(item => item.id != payload) // filters the one with matching id out
+    },
+
+    UPDATE_DEFAULT_ADDRESS (state, payload) {
+      state.user.addresses = state.user.addresses.map(item => {
+        item.isDefault = false // set no to default first
+        if (item.id == payload) item.isDefault = true // and then set default where matching. Easy, isn't it?
+        return item
+      })
     },
 
     ADD_CAR (state, payload) {
@@ -332,6 +341,19 @@ export default {
         error => {
           if (error.status == 424) errorNotify('Kann Adresse noch nicht entfernen: mindestens eine Mitfahrgelegenheit hängt davon ab')
           else errorNotify(error)
+        }
+      )
+    },
+    async updateDefaultAddress ({ commit }, payload) {
+      sendApiRequest(
+        SQL_UPDATE_DEFAULT_ADDRESS,
+        { id: payload },
+        _ => {
+          successNotify('Standardadresse wurde aktualisiert')
+          commit('UPDATE_DEFAULT_ADDRESS', payload)
+        },
+        error => {
+          errorNotify(error)
         }
       )
     },
