@@ -45,7 +45,7 @@
             dense
             flat
           />-->
-          <div class="q-px-md q-py-sm">
+          <div class="q-px-md q-py-sm q-mb-md">
             <q-card>
               <q-img
                 clickable
@@ -88,17 +88,62 @@
                   </q-btn>
                 </q-item-section>
               </q-item>
-              <q-item-label header class="q-pt-xs q-pb-xs">
-                <span class="text-uppercase text-caption">Dabei seit</span>
-              </q-item-label>
-              <q-item>{{ since }}</q-item>
+              <q-tab-panels
+                v-model="viewTab"
+                class="q-pa-none"
+                animated
+                transition-prev="slide-right"
+                transition-next="slide-left"
+              >
+                <q-tab-panel name="data" class="q-pa-none">
+                  <q-item-label header class="q-pt-xs q-pb-xs">
+                    <span class="text-uppercase text-caption">Dabei seit</span>
+                  </q-item-label>
+                  <q-item>{{ since }}</q-item>
+                </q-tab-panel>
+                <q-tab-panel name="social" class="q-pa-none">
+                  <div class="row q-pl-md">
+                    <q-icon
+                      name="arrow_back_ios"
+                      size="sm"
+                      color="grey-5"
+                      style="transform: rotate(-45deg); transform-origin: right center"
+                    />
+                    <q-btn @click="toggleFriend" flat dense :ripple="false">
+                      <q-avatar>
+                        <div class="relative-position">
+                          <q-icon
+                            class="absolute absolute-center"
+                            size="md"
+                            name="favorite"
+                            color="grey-5"
+                          />
+                          <q-icon
+                            dense
+                            flat
+                            v-if="friended.in || friended.me"
+                            size="md"
+                            name="favorite"
+                            style="z-index: 3000"
+                            :class="heartIconHalf + ' absolute absolute-center'"
+                            color="dark"
+                          />
+                        </div>
+                      </q-avatar>
+                    </q-btn>
+                    <q-icon name="minimize" size="md" color="grey-5" />
+                    <div class="vertical-middle q-pt-sm q-mt-xs q-ml-xs text-subtitle1">Du</div>
+                  </div>
+                </q-tab-panel>
+              </q-tab-panels>
+
               <!-- <q-item dense clickable @click="toggleFriend">
                 <q-item-section avatar>
                   <q-icon
                     :name="friendIcon"
                     size="sm"
-                    :class="friended.in && !friended.out ? 'mirror-horiz' : ''"
-                    :color="!(friended.in || friended.out) ? 'grey-7' : 'dark'"
+                    :class="friended.in && !friended.me ? 'mirror-horiz' : ''"
+                    :color="!(friended.in || friended.me) ? 'grey-7' : 'dark'"
                   />
                 </q-item-section>
                 <q-item-section>
@@ -299,15 +344,6 @@ val: 'music', icon: 'music_note'
         </q-tab-panel>
         <q-tab-panel name="social">
           <p>Hier kommen dann die Freunde</p>
-          <q-btn
-            dense
-            flat
-            :icon="friendIcon"
-            size="md"
-            @click="toggleFriend"
-            :class="!friended.in && friended.out ? 'mirror-horiz' : ''"
-            :color="!(friended.in || friended.out) ? 'grey-7' : 'dark'"
-          />
         </q-tab-panel>
       </q-tab-panels>
     </div>
@@ -375,7 +411,7 @@ export default {
       imageUrl: "",
       friended: {
         in: true,
-        out: false
+        me: false
       },
       showFriendGuide: false,
       hearts: {
@@ -402,13 +438,6 @@ export default {
       return this.$store.state.prefsDocu;
     },
 
-    friendIcon() {
-      const f = this.friended;
-      if (f.in && f.out) return ionMdHeart;
-      else if (f.in || f.out) return ionMdHeartHalf;
-      else return "favorite_border";
-    },
-
     since() {
       return date.formatDate(this.viewedUser.stats.createdAt, "MMMM YYYY", {
         months: [
@@ -433,14 +462,18 @@ export default {
       switch (gender) {
         case "M":
           return "";
-          break;
         case "W":
           return "in";
-          break;
         default:
           return "/in";
-          break;
       }
+    },
+
+    heartIconHalf() {
+      var f = this.friended;
+      if (f.in && !f.me) return "only-left-half";
+      else if (!f.in && f.me) return "only-right-half";
+      else return "";
     }
   },
 
@@ -463,22 +496,24 @@ export default {
     },
 
     toggleFriend() {
-      if (this.friended.out) {
+      if (this.friended.me) {
         this.$q
           .dialog({
             title: "Freundschaft beenden",
-            message: `Willst du die Freundschaft mit ${
-              this.viewedUser.name.split(" ")[0]
-            } wirklich beenden?`,
+            message: `Willst du die ${
+              this.friended.in ? "Freundschaft" : "Verbindung"
+            } mit ${this.viewedUser.name.split(" ")[0]} wirklich ${
+              this.friended.in ? "beenden" : "löschen"
+            }?`,
             cancel: true,
             persistent: true
           })
           .onOk(() => {
-            this.friended.out = false;
+            this.friended.me = false;
           });
       } else {
         // request code
-        this.friended.out = true;
+        this.friended.me = true;
       }
     }
   },
@@ -515,8 +550,17 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.mirror-horiz {
-  transform: rotateY(180deg);
+.only-left-half {
+  clip-path: polygon(
+    50% 0%,
+    50% 100%,
+    0 100%,
+    0 0
+  ); // displays only half of the image
+}
+
+.only-right-half {
+  clip-path: polygon(100% 0, 100% 100%, 50% 100%, 50% 0); // and only right half
 }
 
 .other-user-image {

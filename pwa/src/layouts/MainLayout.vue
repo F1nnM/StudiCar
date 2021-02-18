@@ -220,14 +220,17 @@
           Profil
         </q-route-tab>
       </q-tabs>
+      <div
+        v-touch-hold:1500.mouse="hideBottomSpace"
+        v-if="!forceHideBottomSpace"
+        class="platform-ios-only platform-android-hide bg-white q-pb-md"
+      />
     </q-footer>
   </q-layout>
 </template>
 
 <script>
 import QrScanner from "components/QrScanner";
-
-import { scroll } from "quasar";
 
 import EssentialLink from "components/EssentialLink";
 import DrawerWelcomeImage from "components/DrawerWelcomeImage";
@@ -265,7 +268,8 @@ export default {
       liftQrId: null,
       refreshErr: null,
       hideUpdateField: false,
-      profilePictureUrl: null
+      profilePictureUrl: null,
+      forceHideBottomSpace: false
     };
   },
 
@@ -419,6 +423,10 @@ export default {
 
     goBack() {
       window.location.goBack();
+    },
+
+    hideBottomSpace() {
+      this.forceHideBottomSpace = true;
     },
 
     askAndReadClipboard(e) {

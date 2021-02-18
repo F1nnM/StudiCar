@@ -222,7 +222,7 @@
               class="text-weight-light"
             >Du hast noch keine Fahrzeuge hinzugefügt</div>
             <div
-              class="row justify-between nowrap full-width"
+              class="row justify-between text-no-wrap full-width"
               v-for="item in cars"
               :key="item.licensePlate"
             >

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-item class="q-pr-none">
+    <q-item class="q-pr-none full-width">
       <q-item-section avatar class="q-pa-sm">
         <svg
           height="28px"
@@ -19,6 +19,8 @@
       <q-item-section>
         <q-item-label>
           <span class="text-bold q-mr-xs">{{ car.brand }}</span>
+        </q-item-label>
+        <q-item-label>
           <span>{{ car.model }}</span>
         </q-item-label>
         <q-item-label caption>
@@ -34,7 +36,7 @@
           <q-chip icon="event_seat" size="sm">{{ car.seats || car.allSeats }} verfügbar</q-chip>
         </div>
       </q-item-section>
-      <q-item-section>
+      <q-item-section side>
         <q-btn
           v-if="expandable"
           @click="showDetails = !showDetails"

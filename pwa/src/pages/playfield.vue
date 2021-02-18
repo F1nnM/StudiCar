@@ -1,10 +1,12 @@
 <template>
   <div class="q-pa-md">
     <q-btn label="Feuer" @click="go" />
-    <div v-if="lift">
-      <LiftOffer :lift="lift" />
-      <p>username: {{ name }}</p>
-    </div>
+    <q-avatar>
+      <div class="relative-position">
+        <q-icon class="absolute absolute-center" size="sm" name="favorite" color="grey-5" />
+        <q-icon class="absolute absolute-center" size="sm" name="favorite" color="positive" />
+      </div>
+    </q-avatar>
 
     <p v-for="n in 20" :key="n">Lorem</p>
   </div>
@@ -18,9 +20,7 @@ import LiftOffer from "components/LiftOffer";
 import { sendApiRequest, PING, SQL_GET_MARKETPLACE_OFFER } from "../ApiAccess";
 
 export default {
-  components: {
-    LiftOffer
-  },
+  components: {},
   data() {
     return {
       lift: null,
