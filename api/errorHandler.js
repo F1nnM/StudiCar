@@ -35,6 +35,14 @@ module.exports = {
 		res.end(message)
 
 		res.end = _ => { } // see explation above
+	},
+
+	isDuplicateEntry: (dbErr) => {
+		return dbErr.code == 'ER_DUP_ENTRY'
+	},
+
+	isConstraintViolated: (dbErr) => {
+		return dbErr.code == 'ER_ROW_IS_REFERENCED_2'
 	}
 }
 

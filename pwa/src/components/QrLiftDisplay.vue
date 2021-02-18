@@ -1,7 +1,6 @@
 <template>
   <q-dialog
     :value="!!liftData && !denied"
-    @input="emit"
     persistent
     @hide="hide"
     full-width

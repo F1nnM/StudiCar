@@ -1161,9 +1161,10 @@ module.exports = {
       if (!isOptionMissing(options, ['liftId'], res) && await isUserVerified(options.secretFbId)) {
         var uid = options.secretFbId,
           liftId = options.liftId
-        await runQuery('INSERT INTO lift_map (USER_ID, LIFT_ID, PENDING) VALUES ((SELECT ID FROM users WHERE FB_ID = ?), (SELECT ID FROM lift WHERE UUID = ?), 1)', [uid, liftId])
+        await runQuery('INSERT INTO lift_map (USER_ID, LIFT_ID) VALUES ((SELECT ID FROM users WHERE FB_ID = ?), (SELECT ID FROM lift WHERE UUID = ?))', [uid, liftId])
           .catch(err => {
-            errorHandler.database('addLiftRequest', options, err, '', res)
+            if (!errorHandler.isDuplicateEntry(err)) errorHandler.database('addLiftRequest', options, err, '', res)
+            // when duplicate entry, don't inform the client, but continue on, client will then remove offer from marketplace and is fine
           })
         res.end()
       }
@@ -1280,7 +1281,7 @@ module.exports = {
         content = 'Willkommen im Chat!'
 
         await runQuery(
-          "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `START`, `DESTINATION`, `UUID`, `REPEATS_ON_WEEKDAY`, `FIRST_DATE`, `DEPART_AT`, `ARRIVE_BY`) VALUES (current_timestamp(), ?, ?, ?, ?, FLOOR(UUID_SHORT() / 1000), ?, ? ,?, ?)",
+          "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `START`, `DESTINATION`, `UUID`, `REPEATS_ON_WEEKDAY`, `FIRST_DATE`, `DEPART_AT`, `ARRIVE_BY`) VALUES (current_timestamp(), ?, ?, ?, ?, SUBSTRING(UUID_SHORT(), -14, 14), ?, ? ,?, ?)",
           [lift.seats, lift.carId, lift.startAddressId, lift.destinationAddressId, lift.repeats ? lift.weekday : 0, lift.datestamp, isdepartAt ? lift.timestamp : 0, isdepartAt ? 0 : lift.timestamp]).catch(error => {
             throw error;
           })
@@ -1288,7 +1289,7 @@ module.exports = {
           "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`, `PENDING`) SELECT MAX(ID) AS ID, (SELECT ID FROM users WHERE FB_ID = ?) AS USER_ID, 1 AS IS_DRIVER, 0 AS PENDING FROM lift", [uid]).catch(error => {
             errorHandler.database('addLift', options, err, '', res)
           })
-        await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, 0, ?, current_timestamp())", [content, newLiftId]).catch(error => {
+        await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, 0, (SELECT MAX(ID) AS ID FROM lift), current_timestamp())", [content]).catch(error => {
           throw err
         })
 

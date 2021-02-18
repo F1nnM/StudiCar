@@ -20,7 +20,14 @@
         </q-item-section>
         <q-item-section side class="q-px-none">
           <div class="row justify-between">
-            <q-btn outline @click="(false)" no-caps class="q-px-xs q-mr-md" color="grey-7" dense>
+            <q-btn
+              outline
+              @click="respondLiftRequest(false)"
+              no-caps
+              class="q-px-xs q-mr-md"
+              color="grey-7"
+              dense
+            >
               <q-icon color="negative" name="thumb_down" />
             </q-btn>
             <q-btn

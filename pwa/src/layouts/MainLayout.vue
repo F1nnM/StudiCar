@@ -130,7 +130,7 @@
       <div class="q-pa-md text-grey-7 row justify-between">
         <span>
           StudiCar
-          <q-chip v-if="isDev" label="DEV" size="sm" color="primary"></q-chip>
+          <q-chip v-if="isDev" label="LOCAL" size="sm" color="primary"></q-chip>
         </span>
         <span>Quasar v{{ $q.version }}</span>
       </div>
@@ -156,7 +156,7 @@
     </q-pull-to-refresh>
 
     <q-dialog
-      :value="!hideUpdateField && oldVersionRunning"
+      :value="oldVersionRunning"
       transition-show="fade"
       transition-hide="fade"
       persistent
@@ -223,7 +223,7 @@
       <div
         v-touch-hold:1500.mouse="hideBottomSpace"
         v-if="!forceHideBottomSpace"
-        class="platform-ios-only platform-android-hide bg-white q-pb-md"
+        class="platform-ios-only platform-android-hide desktop-hide bg-white q-pb-md"
       />
     </q-footer>
   </q-layout>

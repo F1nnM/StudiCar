@@ -1,14 +1,23 @@
 <template>
   <div class="q-pa-md">
-    <TitleButton
-      :style="!hasUserAdresses ? 'filter: blur(6px)' : ''"
-      :class="!hasUserAdresses ? 'no-pointer-events' : ''"
-    >
-      <q-btn dense flat @click="openSortFilterDialog('sort')" icon="sort">
+    <TitleButton>
+      <q-btn
+        dense
+        flat
+        @click="openSortFilterDialog('sort')"
+        icon="sort"
+        :disable="!hasUserAddresses"
+      >
         <q-icon size="xs" :name="sort.icon" />
       </q-btn>
       <span class="q-mx-xs">|</span>
-      <q-btn color="primary" dense flat @click="openSortFilterDialog('filter')">
+      <q-btn
+        color="primary"
+        dense
+        flat
+        @click="openSortFilterDialog('filter')"
+        :disable="!hasUserAddresses"
+      >
         <!-- filter icon, didn't work the normal way -->
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -243,7 +252,7 @@
             </q-tab-panels>
           </q-card>
         </q-dialog>
-        <div v-if="hasUserAdresses">
+        <div v-if="hasUserAddresses">
           <LiftOffer
             class="q-mb-sm"
             v-for="lift in getSortedOffers"
@@ -253,27 +262,26 @@
           />
         </div>
         <div v-else class="relative-position">
-          <div class="absolute absolute-top">
-            <q-item class="bg-white q-mt-xl shadow-2 rounded-borders">
-              <q-item-section avatar>
-                <q-icon name="report_problem" color="negative" size="sm" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>Noch keine Adressen verfügbar</q-item-label>
-                <q-item-label
-                  caption
-                >In deinem Profil sind noch keine Adressen hinterlegt, StudiCar kann dir also noch keine passenden Angebote anzeigen.</q-item-label>
-              </q-item-section>
-            </q-item>
-          </div>
-          <div style="filter: blur(6px)" class="no-pointer-events">
+          <q-item class="bg-white q-mt-xl shadow-2 rounded-borders">
+            <q-item-section avatar>
+              <q-icon name="report_problem" color="negative" size="sm" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Noch keine Adressen verfügbar</q-item-label>
+              <q-item-label
+                caption
+              >In deinem Profil sind noch keine Adressen hinterlegt, StudiCar kann dir also noch keine passenden Angebote anzeigen.</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <!--  <div style="filter: blur(6px)" class="no-pointer-events">
             <LiftOffer
               class="q-mb-sm"
               v-for="lift in loremOffers"
               :key="lift.index"
               v-bind:lift="lift"
             />
-          </div>
+          </div>-->
         </div>
       </div>
       <div
@@ -347,7 +355,7 @@ export default {
       else return null;
     },
 
-    hasUserAdresses() {
+    hasUserAddresses() {
       var all = this.$store.getters["auth/user"].addresses.filter(
         ad => ad.id > 3
       );
@@ -577,10 +585,12 @@ export default {
   methods: {
     async refreshContent(res, rej) {
       // check whether new LiftOffers can be loaded
-      this.$store.dispatch("auth/reloadMarketplaceOffers", {
-        res: res,
-        rej: rej
-      });
+      if (this.hasUserAddresses)
+        this.$store.dispatch("auth/reloadMarketplaceOffers", {
+          res: res,
+          rej: rej
+        });
+      else res(); // when no addresses there, just resolve the promise
     },
 
     hide() {
