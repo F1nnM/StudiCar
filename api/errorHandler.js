@@ -1,27 +1,52 @@
-const runQuery = require('./db')
-/* var sendmail = require('../sendmail')({ silent: true }) */
+const db = require('./db')
+const runQuery = require('./db'),
+	sendmail = require('./sendmail')
+
+function toHTMLTableString (obj) {
+	var s = '<table><tr><th>key</th><th>value</th></tr>'
+	Object.entries(obj).forEach(([key, value]) => {
+		s += `<tr><td class="pr">${key}</td><td>${value}</td></tr>`
+	})
+	s += '</table>'
+	return s
+}
+
+function closeRequest (res, http, message) {
+	res.writeHead(http)
+	res.end(message)
+
+	// in earlier versions res.setHeader function was overwritten, but didn't work propery, so decided to work with a flag in property
+	res.sent = true
+	return res
+}
 
 module.exports = {
 	file: async (endpoint, err, errMsg, res) => {
 		/* if (process.env.DEV) return // when in DEV mode, logging is not needed */
 		var message = errMsg || 'File procession error',
 			httpCode = 400 // not more specified
-		await runQuery(`INSERT INTO file_errors (ID, ENDPOINT, FILE_MESSAGE, TIMESTAMP) VALUES (NULL, ?, ?, current_timestamp())`, [endpoint, message])
+		await runQuery(`INSERT INTO file_errors (ID, ENDPOINT, ERROR, DETAILS, TIMESTAMP) VALUES (NULL, ?, ?, ?, current_timestamp())`,
+			[endpoint, err, errMsg])
 
-		res.writeHead(httpCode)
-		res.end(message)
+		var objToBeSent = {
+			endpoint: endpoint,
+			error: err
+		}
+		if (errMsg.length > 0) objToBeSent.details = errMsg
 
-		res.send = _ => {
-			/* console.log('Skipped res.end(): was already called before') */
-		} // overwrite with empty function, will be called when normal code continues on
+		await sendmail(toHTMLTableString(objToBeSent), 0, 'File processing error', true)
+
+		res = closeRequest(res, httpCode, message)
+		return Promise.resolve(res)
 	},
 
 	database: async (endpoint, options, dbError, errMsg, res) => {
 		/* if (process.env.DEV) return // when in DEV mode, logging is not needed */
-		var message = 'Database Error',
+		var message = errMsg || 'Database Error',
+			causedFbId = options.secretFbId,
 			httpCode = 400 // not more specified
-		if (errMsg) message = errMsg // when a message is already given, that message will be taken and db error be ignored
-		else switch (dbError.code) {
+
+		switch (dbError.code) {
 			case 'ER_ROW_IS_REFERENCED_2': message = 'Constraint violated'
 				httpCode = 424
 				break
@@ -29,12 +54,26 @@ module.exports = {
 				httpCode = 409
 				break
 		}
-		await runQuery(`INSERT INTO database_errors (ID, ENDPOINT, CAUSED_BY, OPTIONS, TIMESTAMP) VALUES 
-			(NULL, ?, (SELECT ID FROM users WHERE FB_ID = ?), ?, current_timestamp())`, [endpoint, causedFbId, JSON.stringify(options)])
-		res.writeHead(httpCode)
-		res.end(message)
 
-		res.end = _ => { } // see explation above
+		delete options.idtoken
+		delete options.secretFbId
+		await runQuery(`INSERT INTO database_errors (ID, ENDPOINT, CAUSED_BY, OPTIONS, DB_ERR, DETAILS, TIMESTAMP) VALUES 
+			(NULL, ?, (SELECT ID FROM users WHERE FB_ID = ?), ?, ?, ?, current_timestamp())`,
+			[endpoint, causedFbId, JSON.stringify(options), dbError, errMsg])
+
+		var objToBeSent = {
+			endpoint: endpoint,
+			causedFbId: causedFbId,
+			options: JSON.stringify(options),
+			error: dbError
+		}
+		if (errMsg.length > 0) objToBeSent.details = errMsg
+
+		await sendmail(toHTMLTableString(objToBeSent), 0, 'Database error', true)
+
+
+		res = closeRequest(res, httpCode, message)
+		return Promise.resolve(res)
 	},
 
 	isDuplicateEntry: (dbErr) => {
@@ -44,16 +83,4 @@ module.exports = {
 	isConstraintViolated: (dbErr) => {
 		return dbErr.code == 'ER_ROW_IS_REFERENCED_2'
 	}
-}
-
-function mail (text) { // made for better reactions, will be implemented in future
-	sendmail({
-		from: 'studicar-dev@mfinn.de',
-		to: 'studicar-error@bernd.one',
-		replyTo: 'jason@yourdomain.com',
-		subject: 'StudiCar DEV Query Error',
-		html: text
-	}, (err, reply) => {
-
-	})
 }

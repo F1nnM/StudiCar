@@ -441,6 +441,7 @@
                 </q-toolbar>
               </div>
             </q-form>
+             <BottomSpaceForiOS />
           </q-footer>
         </q-layout>
       </q-dialog>
@@ -455,9 +456,9 @@ Vue.use(VueRecord);
 
 import { openURL, date, copyToClipboard, Notify } from "quasar";
 import ExtHr from "components/ExtendedHr";
-import VueQrcode from "vue-qrcode";
 import LiftInfoDialog from "components/LiftInfoDialog";
 import AudioPlayer from "components/AudioPlayer";
+import BottomSpaceForiOS from "components/BottomSpaceForiOS";
 
 import {
   sendApiRequest,
@@ -468,7 +469,8 @@ import {
 export default {
   name: "LiftPopup",
   components: {
-    LiftInfoDialog
+    LiftInfoDialog,
+    BottomSpaceForiOS
   },
   data() {
     return {

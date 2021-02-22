@@ -1,41 +1,69 @@
 <template>
   <div class="q-pa-md">
-    <vue-record-audio @result="onResult" />
-    <p>
-      Audio:
-      <audio controls :src="result"></audio>
-    </p>
-
-    <p v-for="n in 20" :key="n">Lorem</p>
+    <q-btn @click="call" label="Request" />
+    <div>
+      <span class="text-negative q-mr-xs" v-if="err">Fehler:</span>
+      <q-table
+        title="Rückgabe"
+        :dense="result.length > 10"
+        :data="result"
+        :columns="columns"
+        row-key="name"
+      ></q-table>
+    </div>
   </div>
 </template>
 
 <script>
-
-import { scroll } from 'quasar'
+import { scroll } from "quasar";
+import * as api from "../ApiAccess";
 
 export default {
-  components: {
-    
-  },
+  components: {},
   data() {
     return {
-      show: false,
-      titleSize: null,
-      result: null
+      result: [],
+      err: null,
+      columns: [
+        {
+          name: "key",
+          align: "center",
+          label: "Variable",
+          field: "key",
+          sortable: true
+        },
+        { name: "value", label: "Wert", field: "value", sortable: true }
+      ]
     };
   },
+  computed: {},
   methods: {
-    onResult (data) {
-      
-      console.warn('The blob data:', data);
-      console.warn('Downloadable audio', window.URL.createObjectURL(data));
-      this.result = window.URL.createObjectURL(data)
+    call() {
+      this.result = [];
+      this.err = false; // simple reset
+      api.sendApiRequest(
+        api.TEST_API,
+        {},
+        data => {
+          this.result = Object.entries(data).map(([key, value]) => ({
+            key,
+            value
+          }));
+          // taken from https://stackoverflow.com/questions/36411566/how-to-transpose-a-javascript-object-into-a-key-value-array
+        },
+        err => {
+          this.result = Object.entries(data).map(([key, value]) => ({
+            key,
+            value
+          }));
+          this.err = true;
+        }
+      );
     }
   },
 
-  mounted(){
-      this.$store.commit('setPage', 'Spielhölle')
+  mounted() {
+    this.$store.commit("setPage", "Spielhölle");
   }
-}
+};
 </script>

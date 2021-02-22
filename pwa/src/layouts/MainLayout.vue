@@ -220,11 +220,7 @@
           Profil
         </q-route-tab>
       </q-tabs>
-      <div
-        v-touch-hold:1500.mouse="hideBottomSpace"
-        v-if="!forceHideBottomSpace"
-        class="platform-ios-only platform-android-hide desktop-hide bg-white q-pb-md"
-      />
+      <BottomSpaceForiOS />
     </q-footer>
   </q-layout>
 </template>
@@ -236,6 +232,7 @@ import EssentialLink from "components/EssentialLink";
 import DrawerWelcomeImage from "components/DrawerWelcomeImage";
 import ExtHr from "components/ExtendedHr";
 import ConfirmDialog from "components/dialogs/Confirm";
+import BottomSpaceForiOS from "components/BottomSpaceForiOS";
 
 import {
   sendApiRequest,
@@ -251,7 +248,8 @@ export default {
     EssentialLink,
     QrScanner,
     DrawerWelcomeImage,
-    ExtHr
+    ExtHr,
+    BottomSpaceForiOS
   },
 
   data() {
@@ -268,8 +266,7 @@ export default {
       liftQrId: null,
       refreshErr: null,
       hideUpdateField: false,
-      profilePictureUrl: null,
-      forceHideBottomSpace: false
+      profilePictureUrl: null
     };
   },
 
@@ -423,10 +420,6 @@ export default {
 
     goBack() {
       window.location.goBack();
-    },
-
-    hideBottomSpace() {
-      this.forceHideBottomSpace = true;
     },
 
     askAndReadClipboard(e) {

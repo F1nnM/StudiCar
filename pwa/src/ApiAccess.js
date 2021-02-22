@@ -130,6 +130,11 @@ export const SQL_LOAD_MESSAGE_MEDIA = {
   method: "GET"
 }
 
+export const TEST_API = {
+  path: "/apiTest",
+  method: "POST"
+}
+
 export const SQL_CREATE_USER_IF_NOT_EXISTING = {
   path: "/createUserIfNotExisting",
   method: "POST"

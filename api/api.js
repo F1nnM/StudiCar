@@ -4,7 +4,8 @@ const
   /* longQueries           = require('./longQueries'), */
   apiResponseSimulation = require('./simulation/apiResponse'),
   tickerJS = require('./news/postillon/ticker.js'),
-  errorHandler = require('./errorHandler')
+  errorHandler = require('./errorHandler'),
+  sendmail = require('./sendmail')
 
 function isOptionMissing (data, needed, res) {
   return needed.some(key => {
@@ -48,6 +49,8 @@ function generateJdenticon (seed) {
   let size = 300
   return jdenticon.toPng(seed, size);
 }
+
+
 
 async function getChatLifts (uid) {
   // TODO make query return Nickname if the querying user is offering the lift. Maybe https://stackoverflow.com/questions/1747750/select-column-if-blank-select-from-another
@@ -576,6 +579,7 @@ FROM
 }
 
 function endWithJSON (res, JSON) {
+  if (res.sent == true) return
   res.setHeader('Content-Type', 'application/json')
   res.end(JSON)
 }
@@ -869,8 +873,8 @@ module.exports = {
                   rides USING(USER_ID) 
               LEFT OUTER JOIN
                   drives USING(USER_ID)
-            `, [options.fbid]).catch(err => {
-            errorHandler.database('getUserData', options, err, 'Could not get public user data', res)
+            `, [options.fbid]).catch(async err => {
+            res = await errorHandler.database('getUserData', options, err, 'Could not get public user data', res)
           })).result[1][0].JSON
 
           data = JSON.parse(data)
@@ -1081,6 +1085,16 @@ module.exports = {
     }
   },
   'POST': {
+    '/apiTest': async (req, res, options) => {
+      var a;
+      await runQuery('SELECT * FROM fail', []).catch(async err => {
+        res = await errorHandler.file('apiTest', err, 'custom err', res)
+      })
+
+      // leave this part
+      if (typeof a == 'object') a = JSON.stringify(a)
+      endWithJSON(res, a)
+    },
     '/createUserIfNotExisting': async (req, res, options) => {
       if (!isOptionMissing(options, ['name', 'surname', 'mail'], res)) {
         let user = await getUserId(options.secretFbId)
@@ -1132,8 +1146,8 @@ module.exports = {
           res.end("Image must be 300x300");
         }
         await runQuery(
-          "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?", [img, options.secretFbId]).catch(err => {
-            errorHandler.database('updateProfilePicture', options, err, 'Could not update profile picture', res)
+          "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?", [img, options.secretFbId]).catch(async err => {
+            res = await errorHandler.database('updateProfilePicture', options, err, 'Could not update profile picture', res)
           });
         res.end()
       }
@@ -1142,8 +1156,8 @@ module.exports = {
       if (await isUserVerified(options.secretFbId)) {
         var name = (await runQuery("SELECT NAME FROM `users` WHERE users.FB_ID = ?", [options.secretFbId])).result[0].NAME
         await runQuery(
-          "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?", [generateJdenticon(name), options.secretFbId]).catch(error => {
-            errorHandler.database('resetProfilePicture', options, err, 'Could not reset profile picture', res)
+          "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?", [generateJdenticon(name), options.secretFbId]).catch(async err => {
+            res = await errorHandler.database('resetProfilePicture', options, err, '', res)
           });
         res.end()
       }
@@ -1151,8 +1165,8 @@ module.exports = {
     '/updatePrefs': async (req, res, options) => {
       if (!isOptionMissing(options, ['prefs'], res) && await isUserVerified(options.secretFbId)) {
         await runQuery(
-          "UPDATE users SET PREF_TALK = ?, PREF_TALK_MORNING = ?, PREF_SMOKING = ?, PREF_MUSIC = ? WHERE FB_ID = ?;", [options.prefs.talk, options.prefs.talkMorning, options.prefs.smoking, options.prefs.music, options.secretFbId]).catch(error => {
-            throw error;
+          "UPDATE users SET PREF_TALK = ?, PREF_TALK_MORNING = ?, PREF_SMOKING = ?, PREF_MUSIC = ? WHERE FB_ID = ?;", [options.prefs.talk, options.prefs.talkMorning, options.prefs.smoking, options.prefs.music, options.secretFbId]).catch(async err => {
+            res = await errorHandler.database('updatePrefs', options, err, '', res)
           });
         res.end();
       }
@@ -1162,8 +1176,8 @@ module.exports = {
         var uid = options.secretFbId,
           liftId = options.liftId
         await runQuery('INSERT INTO lift_map (USER_ID, LIFT_ID) VALUES ((SELECT ID FROM users WHERE FB_ID = ?), (SELECT ID FROM lift WHERE UUID = ?))', [uid, liftId])
-          .catch(err => {
-            if (!errorHandler.isDuplicateEntry(err)) errorHandler.database('addLiftRequest', options, err, '', res)
+          .catch(async err => {
+            if (!errorHandler.isDuplicateEntry(err)) res = await errorHandler.database('updatePrefs', options, err, '', res)
             // when duplicate entry, don't inform the client, but continue on, client will then remove offer from marketplace and is fine
           })
         res.end()
@@ -1232,7 +1246,7 @@ module.exports = {
       if (!isOptionMissing(options, ['id'], res) && await isUserVerified(options.secretFbId)) {
         await runQuery(
           "DELETE FROM `addresses` WHERE `addresses`.`ID` = ?", [options.id]).catch(async err => {
-            await errorHandler.database('removeAddress', options, err, '', res)
+            res = await errorHandler.database('removeAddress', options, err, '', res)
           });
 
         res.end();
@@ -1242,7 +1256,7 @@ module.exports = {
       if (!isOptionMissing(options, ['id'], res) && await isUserVerified(options.secretFbId)) {
         await runQuery(
           "UPDATE `users` SET DEFAULT_ADDRESS = ? WHERE users.FB_ID = ?", [options.id, options.secretFbId]).catch(async err => {
-            await errorHandler.database('removeAddress', options, err, '', res)
+            res = await errorHandler.database('removeAddress', options, err, '', res)
           });
 
         res.end();
@@ -1267,8 +1281,8 @@ module.exports = {
     '/removeCar': async (req, res, options) => {
       if (!isOptionMissing(options, ['id'], res) && await isUserVerified(options.secretFbId)) {
         await runQuery(
-          "DELETE FROM car WHERE ID = ?", [options.id]).catch(err => {
-            errorHandler.database('removeCar', options, err, 'Could not remove car', res)
+          "DELETE FROM car WHERE ID = ?", [options.id]).catch(async err => {
+            res = errorHandler.database('removeCar', options, err, 'Could not remove car', res)
           })
         res.end()
       }
@@ -1282,15 +1296,15 @@ module.exports = {
 
         await runQuery(
           "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `START`, `DESTINATION`, `UUID`, `REPEATS_ON_WEEKDAY`, `FIRST_DATE`, `DEPART_AT`, `ARRIVE_BY`) VALUES (current_timestamp(), ?, ?, ?, ?, SUBSTRING(UUID_SHORT(), -14, 14), ?, ? ,?, ?)",
-          [lift.seats, lift.carId, lift.startAddressId, lift.destinationAddressId, lift.repeats ? lift.weekday : 0, lift.datestamp, isdepartAt ? lift.timestamp : 0, isdepartAt ? 0 : lift.timestamp]).catch(error => {
-            throw error;
+          [lift.seats, lift.carId, lift.startAddressId, lift.destinationAddressId, lift.repeats ? lift.weekday : 0, lift.datestamp, isdepartAt ? lift.timestamp : 0, isdepartAt ? 0 : lift.timestamp]).catch(async err => {
+            res = await errorHandler.database('addLift', options, err, '', res)
           })
         await runQuery(
-          "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`, `PENDING`) SELECT MAX(ID) AS ID, (SELECT ID FROM users WHERE FB_ID = ?) AS USER_ID, 1 AS IS_DRIVER, 0 AS PENDING FROM lift", [uid]).catch(error => {
-            errorHandler.database('addLift', options, err, '', res)
+          "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`, `PENDING`) SELECT MAX(ID) AS ID, (SELECT ID FROM users WHERE FB_ID = ?) AS USER_ID, 1 AS IS_DRIVER, 0 AS PENDING FROM lift", [uid]).catch(async err => {
+            res = await errorHandler.database('addLift', options, err, '', res)
           })
-        await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, 0, (SELECT MAX(ID) AS ID FROM lift), current_timestamp())", [content]).catch(error => {
-          throw err
+        await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, 0, (SELECT MAX(ID) AS ID FROM lift), current_timestamp())", [content]).catch(async error => {
+          res = await errorHandler.database('addLift', options, err, '', res)
         })
 
         endWithJSON(res, await getChatLifts(options.secretFbId))

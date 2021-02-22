@@ -1,12 +1,6 @@
 <template>
   <div class="q-pa-md">
     <q-btn label="Feuer" @click="go" />
-    <q-avatar>
-      <div class="relative-position">
-        <q-icon class="absolute absolute-center" size="sm" name="favorite" color="grey-5" />
-        <q-icon class="absolute absolute-center" size="sm" name="favorite" color="positive" />
-      </div>
-    </q-avatar>
 
     <p v-for="n in 20" :key="n">Lorem</p>
   </div>
@@ -36,7 +30,9 @@ export default {
       sendApiRequest(
         PING,
         {},
-        data => {},
+        data => {
+          console.warn("pong");
+        },
         err => {}
       );
     }
