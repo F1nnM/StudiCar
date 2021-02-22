@@ -62,7 +62,7 @@ async function getChatLifts (uid) {
           lift.UUID AS LIFT_ID,
           car_models.BRAND AS CAR_BRAND,
           car_models.MODEL AS CAR_MODEL,
-          car.SEATS AS CAR_SEATS,
+          lift.OFFERED_SEATS AS CAR_SEATS,
           car.LICENSE_PLATE AS CAR_LICENSE_PLATE,
           car.YEAR AS CAR_BUILT,
           car.TYPE AS CAR_TYPE,
@@ -334,7 +334,7 @@ async function getMarketplace (fbid) {
   WITH
   lifts as (
       SELECT DISTINCT
-      lift.ID AS ID,
+      lift.ID AS LIFT_ID,
           lift.UUID AS UUID,
           driver.FB_ID AS DRIVER_FB_ID,
           driver.NAME AS DRIVER_NAME,
@@ -399,7 +399,7 @@ async function getMarketplace (fbid) {
     JSON_ARRAYAGG(
         JSON_OBJECT(
             'id', lifts.UUID,
-            'liftId', lifts.ID,
+            'liftId', lifts.LIFT_ID,
               'driver', JSON_OBJECT(
                 'id', lifts.DRIVER_FB_ID,
                 'name', lifts.DRIVER_NAME,
