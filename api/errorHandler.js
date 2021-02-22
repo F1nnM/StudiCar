@@ -33,6 +33,7 @@ module.exports = {
 			error: err
 		}
 		if (errMsg.length > 0) objToBeSent.details = errMsg
+		if (!objToBeSent.endpoint.startsWith('/')) objToBeSent.endpoint = '/' + objToBeSent.endpoint
 
 		await sendmail(toHTMLTableString(objToBeSent), 0, 'File processing error', true)
 

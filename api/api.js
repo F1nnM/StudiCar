@@ -1088,7 +1088,7 @@ module.exports = {
     '/apiTest': async (req, res, options) => {
       var a;
       await runQuery('SELECT * FROM fail', []).catch(async err => {
-        res = await errorHandler.file('apiTest', err, 'custom err', res)
+        res = await errorHandler.database('apiTest', options, err, 'custom err', res)
       })
 
       // leave this part

@@ -29,7 +29,13 @@ module.exports = async (text, recipients, subject, isHTML) => {
         if (isHTML == true || text.startsWith('<br')) { // when text starts with '<br', HTML will automatically be enabled
             message.html = message.text
             delete message.text // just to keep object clean
-            message.html += `<style>table{ border-collapse: collapse; } .pr{padding-right: 4px; } td{white-space: pre-line;} tr{border-bottom: 1px solid black; }</style>`
+            message.html += `<style>   
+            table {  font-family: Arial, Helvetica, sans-serif;   border-collapse: collapse;  width: 100%; } 
+            table td, table th {   border: 1px solid #ddd;   padding: 8px; } 
+            table tr:nth-child(even){ background-color: #e0ebeb; } 
+            table th {  padding-top: 12px;  padding-bottom: 12px;   text-align: left;   background-color: #02a200;  color: white; text-transform: uppercase; }
+                </style>`
+            message.html = '<html> ' + message.html + ' </html>'
         }
 
         transport.sendMail(message, function (err, info) {
