@@ -333,69 +333,96 @@ async function getMarketplace (fbid) {
   let JSON = (await runQuery(`
   WITH
   lifts as (
-      SELECT DISTINCT
-      lift.ID AS LIFT_ID,
-          lift.UUID AS UUID,
-          driver.FB_ID AS DRIVER_FB_ID,
-          driver.NAME AS DRIVER_NAME,
-          driver.SURNAME AS DRIVER_SURNAME,
-          driver.PREF_TALK AS DRIVER_PREF_TALK,
-          driver.PREF_TALK_MORNING AS DRIVER_PREF_TALKMORNING,
-          driver.PREF_SMOKING AS DRIVER_PREF_SMOKING,
-          driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
-          lift.DEPART_AT AS LIFT_DEPART,
-          lift.ARRIVE_BY AS LIFT_ARRIVE,
-          (IF(destination.ID <= 3, destination.NICKNAME, destination.CITY)) AS DESTINATION_CITY,
-      	  (IF(destination.ID <= 3, destination.ID, -1)) AS DESTINATION_ID,
-          (IF(start_point.ID <= 3, start_point.NICKNAME, start_point.CITY)) AS START_CITY,
-      	  (IF(start_point.ID <= 3, start_point.ID, -1)) AS START_ID,
-          lift.OFFERED_SEATS,
-          IFNULL(counts.OCCUPIED_SEATS, 0) AS OCCUPIED_SEATS,
-      	  lift.REPEATS_ON_WEEKDAY AS REPEAT_DAY,
-      	  lift.FIRST_DATE AS FIRST_DATE
-      FROM
-          lift 
-          JOIN
-              lift_map 
-              ON lift_map.LIFT_ID = lift.ID 
-          JOIN
-              users driver 
-              ON lift_map.USER_ID = driver.ID 
-              AND lift_map.IS_DRIVER = 1 
-          JOIN
-              addresses destination 
-              ON lift.DESTINATION = destination.ID 
-          JOIN
-              addresses start_point 
-              ON lift.START = start_point.ID 
-          JOIN 
-      		  lift_map map_user_filter
-            ON lift.ID = map_user_filter.LIFT_ID
-            AND map_user_filter.IS_DRIVER = 1
-          JOIN
-              users user_filter
-              ON user_filter.ID = map_user_filter.USER_ID
-          LEFT OUTER JOIN
-              (
-                  SELECT
-                      lift_map.LIFT_ID,
-                      COUNT(*) AS OCCUPIED_SEATS 
-                  FROM
-                      lift_map 
-                  WHERE
-                      lift_map.PENDING != 0 
-                  GROUP BY
-                      lift_map.LIFT_ID
-              )
-              counts 
-              ON lift.ID = counts.LIFT_ID 
-      WHERE
-          (lift.FIRST_DATE >= CURRENT_DATE() 
-          OR lift.REPEATS_ON_WEEKDAY != 0)
-          AND user_filter.FB_ID != ?
+      SELECT
+        lift.ID AS LIFT_ID,
+        lift.UUID,
+        driver.FB_ID AS DRIVER_FB_ID,
+        driver.NAME AS DRIVER_NAME,
+        driver.SURNAME AS DRIVER_SURNAME,
+        driver.PREF_TALK AS DRIVER_PREF_TALK,
+        driver.PREF_TALK_MORNING AS DRIVER_PREF_TALKMORNING,
+        driver.PREF_SMOKING AS DRIVER_PREF_SMOKING,
+        driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
+        lift.DEPART_AT AS LIFT_DEPART,
+        lift.ARRIVE_BY AS LIFT_ARRIVE,
+        lift.FIRST_DATE AS FIRST_DATE,
+        lift.REPEATS_ON_WEEKDAY AS REPEAT_DAY,
+        (
+            IF(
+                start_point.ID <= 3,
+                start_point.ID,
+                -1
+            )
+        ) AS START_ID,
+        (
+            IF(
+                start_point.ID <= 3,
+                start_point.NICKNAME,
+                start_point.CITY
+            )
+        ) AS START_CITY,
+        (
+            IF(
+                dest_point.ID <= 3,
+                dest_point.ID,
+                -1
+            )
+        ) AS DESTINATION_ID,
+        (
+            IF(
+                dest_point.ID <= 3,
+                dest_point.NICKNAME,
+                dest_point.CITY
+            )
+        ) AS DESTINATION_CITY,
+        lift.OFFERED_SEATS AS OFFERED_SEATS,
+        lifts_without_me.SEATS AS OCCUPIED_SEATS
+    FROM
+        (
+            WITH a AS(
+            SELECT
+                LIFT_ID,
+                COUNT(*) AS WITH_ME
+            FROM
+                lift_map
+            GROUP BY
+                lift_map.LIFT_ID
+        ),
+        b AS(
+        SELECT
+            LIFT_ID,
+            COUNT(*) AS WITHOUT_ME
+        FROM
+            lift_map
+            JOIN users
+            ON users.ID = lift_map.USER_ID
+        WHERE
+            users.ID != 1
+        GROUP BY
+            lift_map.LIFT_ID
+    )
+SELECT
+    a.LIFT_ID AS ID,
+    a.WITH_ME AS SEATS
+FROM
+    a
+JOIN b ON a.LIFT_ID = b.LIFT_ID AND a.WITH_ME = b.WITHOUT_ME
+        ) AS lifts_without_me
+    JOIN lift USING(ID)
+    JOIN addresses start_point ON
+        start_point.ID = lift.START
+    JOIN addresses dest_point ON
+        dest_point.ID = lift.DESTINATION
+    JOIN lift_map driver_map ON
+        driver_map.LIFT_ID = lifts_without_me.ID
+    JOIN users driver ON
+        driver.ID = driver_map.USER_ID AND driver_map.IS_DRIVER = 1
+    WHERE
+        lift.FIRST_DATE >= CURRENT_DATE() OR lift.REPEATS_ON_WEEKDAY != 0
   )
   
   SELECT
+  IFNULL(
     JSON_ARRAYAGG(
         JSON_OBJECT(
             'id', lifts.UUID,
@@ -426,7 +453,7 @@ async function getMarketplace (fbid) {
               'repeatsOn', lifts.REPEAT_DAY,
               'date', lifts.FIRST_DATE
           )
-      ) AS JSON
+      ), '[]') AS JSON
   FROM
     lifts
         `, [fbid])).result[0].JSON
@@ -1177,7 +1204,7 @@ module.exports = {
           liftId = options.liftId
         await runQuery('INSERT INTO lift_map (USER_ID, LIFT_ID) VALUES ((SELECT ID FROM users WHERE FB_ID = ?), (SELECT ID FROM lift WHERE UUID = ?))', [uid, liftId])
           .catch(async err => {
-            if (!errorHandler.isDuplicateEntry(err)) res = await errorHandler.database('updatePrefs', options, err, '', res)
+            if (!errorHandler.isDuplicateEntry(err)) res = await errorHandler.database('addLiftRequest', options, err, '', res)
             // when duplicate entry, don't inform the client, but continue on, client will then remove offer from marketplace and is fine
           })
         res.end()

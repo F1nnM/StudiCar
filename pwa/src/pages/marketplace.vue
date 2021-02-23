@@ -53,7 +53,7 @@
                 <small
                   class="q-ml-sm"
                   v-if="sortFilterDialog.tab == 'filter'"
-                >- {{ getFilteredOffers.length }} Angebot{{ getFilteredOffers.length != 1 ? 'e' : '' }} verbleib{{ getFilteredOffers.length != 1 ? 'en' : 't' }} -</small>
+                >- {{ filteredOffersLength + '/' + allOffers.length}} Angebot{{ allOffers.length != 1 ? 'en' : '' }} übrig -</small>
               </q-item-label>
               <q-tabs
                 v-model="sortFilterDialog.tab"
@@ -561,6 +561,10 @@ export default {
         return true; // stay in results otherwise
       });
       return allOffers;
+    },
+
+    filteredOffersLength() {
+      return this.getFilteredOffers.length;
     },
 
     genderName() {
