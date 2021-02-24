@@ -35,7 +35,11 @@
           <q-item-label header>
             <div class="row justify-between">
               <span>Verlauf</span>
-              <q-item-label caption>{{ formattedDate }}</q-item-label>
+              <q-item-label caption>
+                <q-icon name="loop" size="xs" class="q-mr-xs" v-if="isRepeating" />
+                <q-icon name="query_builder" size="xs" class="q-mr-xs" v-else />
+                {{ formattedDate }}
+              </q-item-label>
             </div>
           </q-item-label>
 
@@ -158,6 +162,15 @@ val: 'music', icon: 'music_note'
             <q-card>
               <q-card-section>
                 <q-btn
+                  :disable="!isDriver"
+                  color="dark"
+                  outline
+                  @click="openEditTime = true"
+                  class="q-my-sm"
+                  icon="update"
+                  label="Fahrtzeit bearbeiten"
+                />
+                <q-btn
                   :disable="isDriver && !!lift.passengers.length"
                   color="dark"
                   outline
@@ -190,6 +203,188 @@ val: 'music', icon: 'music_note'
           </q-card-section>
         </q-card>
       </q-dialog>
+
+      <q-dialog
+        v-model="openEditTime"
+        persistent
+        @show="loadCurrentTime"
+        position="bottom"
+        style="width: 90vw"
+      >
+        <q-toolbar class="bg-white">
+          <q-btn
+            round
+            flat
+            dense
+            outline
+            :disable="uploading"
+            size="lg"
+            @click="newTime.help = !newTime.help"
+          >
+            <span class="text-h6 text-weight-light">?</span>
+          </q-btn>
+          <span v-if="!newTime.help" class="text-weight-light left-border-primary">Fahrtzeit</span>
+          <q-space />
+          <q-btn
+            flat
+            round
+            dense
+            icon="close"
+            size="md"
+            color="grey-9"
+            v-close-popup
+            @click="openEditTime"
+            class="q-mr-lg q-pr-sm"
+          />
+          <q-btn
+            flat
+            round
+            dense
+            icon="done"
+            :disable="!areTimeChanges"
+            size="md"
+            color="positive"
+            @click="saveNewTime"
+          />
+        </q-toolbar>
+        <q-linear-progress :indeterminate="uploading" :value="100" track-color="white" />
+        <q-slide-transition>
+          <div class="bg-white row justify-start" v-if="newTime.help && !uploading">
+            <div class="bg-primary q-px-lg" />
+            <div class="q-pa-xs q-pl-sm q-py-md">
+              <div class="text-weight-light text-h6">Fahrtzeit bearbeiten</div>
+              <div class="text-caption text-grey-9">
+                Deine Fahrtzeit besteht aus zwei unabhängigen Teilen:
+                <ul>
+                  <li>Tag: Der Tag kann entweder ein festes Datum oder ein wiederkehrender Wochentag sein.</li>
+                  <li>
+                    Zeit: Die Zeit kann willkürlich gewählt werden, zusätzlich musst du noch angeben,
+                    ob du zu dieser Zeit an der DH ankommst oder von ihr wegfährst.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </q-slide-transition>
+
+        <div class="q-pa-md bg-white">
+          <q-list>
+            <q-item>
+              <q-item-section avatar>
+                <q-item-label header>Tag</q-item-label>
+              </q-item-section>
+
+              <q-item-section>
+                <q-btn-toggle
+                  v-model="newTime.dateTab"
+                  @click="setDateTab"
+                  no-caps
+                  rounded
+                  unelevated
+                  outline
+                  toggle-color="primary"
+                  class="q-mb-xs"
+                  color="white"
+                  text-color="grey-5"
+                  :options="[
+          {label: 'Fester Tag', value: 'fix'},
+          {label: 'Wöchentlich', value: 'weekly'}
+        ]"
+                />
+                <q-input
+                  clickable
+                  @click="_=> { if(this.newTime.dateTab == 'fix') $refs.datepicker.toggle() 
+                    else $refs.datepicker.showPopup() }"
+                  outlined
+                  readonly
+                  :value="newTime.dateTab == 'fix' ? (newTime.date || '- Datum -') : getWeekDayFromIndex"
+                >
+                  <template v-slot:append>
+                    <q-btn
+                      icon="edit"
+                      color="grey-9"
+                      flat
+                      @click="_=> { if(newTime.dateTab == 'weekly') $refs.datepicker.showPopup() }"
+                    >
+                      <q-menu
+                        v-if="newTime.dateTab == 'fix'"
+                        ref="datepicker"
+                        transition-show="jump-down"
+                        transition-hide="jump-up"
+                      >
+                        <q-date
+                          title="Tag auswählen"
+                          :subtitle="`Maximal 30 Tage im Voraus`"
+                          event-color="primary"
+                          mask="YYYY-MM-DD"
+                          v-model="newTime.date"
+                          :events="[todayString]"
+                          :options="dateOptions"
+                        />
+                      </q-menu>
+                      <q-select
+                        v-else
+                        ref="datepicker"
+                        class="hidden"
+                        emit-value
+                        label="Wochentag auswählen"
+                        transition-show="jump-down"
+                        transition-hide="jump-up"
+                        v-model="newTime.date"
+                        :options="getRepeatingDayOptions"
+                      />
+                    </q-btn>
+                  </template>
+                </q-input>
+              </q-item-section>
+            </q-item>
+
+            <q-item>
+              <q-item-section avatar>
+                <q-item-label header>Zeit</q-item-label>
+              </q-item-section>
+
+              <q-item-section>
+                <q-btn-toggle
+                  v-model="newTime.timeTab"
+                  no-caps
+                  rounded
+                  unelevated
+                  class="q-mb-sm"
+                  outline
+                  toggle-color="primary"
+                  color="white"
+                  text-color="grey-5"
+                  :options="[
+          {label: 'Ankunft um', value: 'arrive'},
+          {label: 'Abfahrt ab', value: 'depart'}
+        ]"
+                />
+                <q-input
+                  class="col-6"
+                  clickable
+                  @click="_=> $refs.timepicker.toggle()"
+                  outlined
+                  readonly
+                  :value="newTime.time || '- Zeit -'"
+                >
+                  <template v-slot:append>
+                    <q-btn icon="edit" color="grey-9" flat>
+                      <q-menu
+                        ref="timepicker"
+                        transition-show="jump-down"
+                        transition-hide="jump-up"
+                      >
+                        <q-time format24h v-model="newTime.time" mask="HH:mm" color="primary" />
+                      </q-menu>
+                    </q-btn>
+                  </template>
+                </q-input>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+      </q-dialog>
     </div>
   </q-dialog>
 </template>
@@ -198,7 +393,12 @@ val: 'music', icon: 'music_note'
 <script>
 import { openURL, date } from "quasar";
 import Vue from "vue";
-import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
+import {
+  buildGetRequestUrl,
+  GET_USER_PROFILE_PIC,
+  sendApiRequest,
+  SQL_UPDATE_LIFT_TIME
+} from "../ApiAccess";
 import VueFriendlyIframe from "vue-friendly-iframe";
 Vue.use(VueFriendlyIframe);
 
@@ -222,11 +422,26 @@ export default {
       user: this.$store.getters["auth/user"].id,
       ntc: null,
       showModelFrame: false,
-      imageUrlTable: {}
+      imageUrlTable: {},
+      openEditTime: false,
+      editTimeTab: "date",
+      newTime: {
+        dateTab: "fix",
+        timeTab: "arrive",
+        date: null,
+        time: null,
+        help: false
+      },
+      oldTime: {},
+      uploading: false
     };
   },
   watch: {},
   computed: {
+    todayString() {
+      return date.formatDate(new Date(), "YYYY/MM/DD");
+    },
+
     modelUrl() {
       var car = this.lift.car;
       var humanColor = "";
@@ -244,26 +459,39 @@ export default {
       return !!this.$store.getters["auth/user"].liftRequests.length;
     },
 
+    isRepeating() {
+      return this.lift.repeatsOn != 0;
+    },
+
+    getRepeatingDayOptions() {
+      return [
+        "Montag",
+        "Dienstag",
+        "Mittwoch",
+        "Donnerstag",
+        "Freitag",
+        "Samstag"
+      ].map((val, index) => ({
+        label: val,
+        value: index + 1
+      }));
+    },
+
     getRepeatingWeekday() {
-      switch (this.lift.repeatsOn) {
-        case 1:
-          return "Montag";
-        case 2:
-          return "Dienstag";
-        case 3:
-          return "Mittwoch";
-        case 4:
-          return "Donnerstag";
-        case 5:
-          return "Freitag";
-        case 6:
-          return "Samstag";
-        case 7:
-          return "Sonntag";
-        case 0:
-        default:
-          return "Fehler";
-      }
+      // getter for display in overview
+      if (!this.isRepeating) return null;
+      var day = this.getRepeatingDayOptions.find(
+        d => d.value == this.lift.repeatsOn
+      );
+      return day ? day.label : null;
+    },
+
+    getWeekDayFromIndex() {
+      // getter for display while editing
+      var day = this.getRepeatingDayOptions.find(
+        d => d.value == this.newTime.date
+      );
+      return day ? day.label : null;
     },
 
     isDriver() {
@@ -275,12 +503,38 @@ export default {
     },
 
     formattedDate() {
+      if (this.isRepeating) return "jeden " + this.getRepeatingWeekday;
       var liftDate = new Date(this.lift.date + " " + this.lift.arriveBy),
         daysLeft = date.getDateDiff(liftDate, new Date(), "days"),
-        text = date.formatDate(liftDate, "DD.MM."),
-        daysLeftText =
-          daysLeft > 7 ? "In über einer Woche" : "In " + daysLeft + " Tagen";
-      return daysLeftText + " am " + text;
+        text = _ => {
+          switch (daysLeft) {
+            case 0:
+              return "Fahrt ist heute";
+              break;
+            case 1:
+              return "Fahrt ist morgen";
+              break;
+            case 2:
+              return "Fahrt ist übermorgen";
+              break;
+            case -1:
+              return "Fahrt war gestern";
+              break;
+            case -2:
+              return "Fahrt war vorgestern";
+              break;
+            default:
+              if (daysLeft < 0) return "Fahrt war";
+              else if (daysLeft <= 7)
+                return "Fahrt ist in " + daysLeft + " Tagen";
+              else return "Fahrt ist erst";
+          }
+        };
+      return text() + " am " + date.formatDate(liftDate, "DD.MM.");
+    },
+
+    areTimeChanges() {
+      return JSON.stringify(this.oldTime) != JSON.stringify(this.newTime);
     }
   },
   methods: {
@@ -292,6 +546,61 @@ export default {
     },
     swipedToRight() {
       this.emit(false);
+    },
+
+    dateOptions(d) {
+      const limit = 30;
+
+      var a = date.getDateDiff(d, new Date(), "days");
+      a = a < limit && a >= 0;
+      return a;
+    },
+
+    loadCurrentTime() {
+      if (this.isRepeating) {
+        this.newTime.dateTab = "weekly";
+        this.newTime.date = this.lift.repeatsOn;
+      } else {
+        this.newTime.dateTab = "fix";
+        this.newTime.date = date.formatDate(
+          new Date(this.lift.date),
+          "YYYY-MM-DD"
+        );
+      }
+
+      if (this.lift.arriveBy != "00:00:00") {
+        this.newTime.timeTab = "arrive";
+        this.newTime.time = this.lift.arriveBy.substr(0, 5);
+      } else {
+        this.newTime.timeTab = "depart";
+        this.newTime.time = this.lift.departAt.substr(0, 5);
+      }
+
+      this.oldTime = JSON.parse(JSON.stringify(this.newTime)); // so that user can see whether he has made changes
+    },
+
+    setDateTab() {
+      var tab = this.newTime.dateTab;
+      if (tab == "weekly") this.newTime.date = 1;
+      // default on monday
+      else this.newTime.date = date.formatDate(new Date(), "YYYY-MM-DD");
+    },
+
+    async saveNewTime() {
+      var liftId = this.lift.id,
+        t = this.newTime,
+        objToBeSent = {
+          liftId: liftId,
+          time: t.time,
+          isArriveBy: t.timeTab == "arrive",
+          date: t.date,
+          isFixDate: t.dateTab == "fix"
+        };
+
+      this.uploading = true;
+      await this.$store.dispatch("auth/updateLiftTime", objToBeSent);
+      this.uploading = false;
+      this.openEditTime = false;
     },
 
     getImageOfUser(id) {
@@ -307,7 +616,7 @@ export default {
     },
 
     viewCar() {
-      openURL(this.modelUrl); // easiest way, otherwise we would have to store a image of each model (!)
+      openURL(this.modelUrl); // easiest way, otherwise we would have to store a image of each(!) model
     },
 
     formatAsTime(timeObj) {
@@ -355,3 +664,10 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" scoped>
+.left-border-primary {
+  border-left: 1px solid $primary;
+  padding-left: 15px;
+}
+</style>

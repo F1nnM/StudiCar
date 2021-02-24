@@ -35,7 +35,10 @@
     <q-list>
       <q-item dense>
         <q-item-section>
-          <q-item-label caption>{{ dateText }}</q-item-label>
+          <q-item-label caption>
+            <q-icon name="loop" size="xs" class="q-mr-xs" v-if="isRepeating" />
+            {{ dateText }}
+          </q-item-label>
           <q-item-label caption>{{ timeText }}</q-item-label>
         </q-item-section>
         <q-item-section side>
@@ -158,7 +161,28 @@ export default {
       return text + " um " + time;
     },
 
+    isRepeating() {
+      return this.lift.repeatsOn != 0;
+    },
+
+    objWithAllWeekDays() {
+      var obj = {};
+      [
+        "Montag",
+        "Dienstag",
+        "Mittwoch",
+        "Donnerstag",
+        "Freitag",
+        "Samstag"
+      ].forEach((d, index) => {
+        obj[index + 1] = d;
+      });
+      return obj;
+    },
+
     dateText() {
+      if (this.isRepeating)
+        return "jeden " + this.objWithAllWeekDays[this.lift.repeatsOn];
       var dateObj = new Date(this.lift.date),
         dateFormatted = date.formatDate(dateObj, "dddd, DD.MM.", {
           days: [
@@ -172,7 +196,7 @@ export default {
           ]
         }),
         daysLeft = date.getDateDiff(dateObj, new Date(), "days"),
-        nextWeekText = "Am";
+        nextWeekText = "";
       switch (daysLeft) {
         case 0:
           nextWeekText = "Heute -";
@@ -180,10 +204,12 @@ export default {
         case 1:
           nextWeekText = "Morgen -";
           break;
+        case 2:
           nextWeekText = "Übermorgen -";
           break;
         default:
-          if (daysLeft < 7) nextWeekText += " kommenden";
+          if (daysLeft < 7) nextWeekText = "Am kommenden";
+          else nextWeekText = "Am ";
       }
 
       return nextWeekText + " " + dateFormatted;

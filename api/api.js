@@ -5,7 +5,8 @@ const
   apiResponseSimulation = require('./simulation/apiResponse'),
   tickerJS = require('./news/postillon/ticker.js'),
   errorHandler = require('./errorHandler'),
-  sendmail = require('./sendmail')
+  sendmail = require('./sendmail');
+const { database } = require('./errorHandler');
 
 function isOptionMissing (data, needed, res) {
   return needed.some(key => {
@@ -1360,6 +1361,31 @@ module.exports = {
         )`, [uid, liftId]) // when lift found where uuid, driver and fbId are matching, then delete that lift. DB is set to cascade, so messages, lift_map, that stuff will be deleted.
         await runQuery('DELETE FROM lift_map WHERE LIFT_ID = (SELECT ID FROM lift WHERE UUID = ?) AND USER_ID = (SELECT ID FROM users WHERE FB_ID = ?)', [liftId, uid]) // when lift has been deleted in previous line, this query will affect nothing
 
+        res.end()
+      }
+    },
+    '/updateLiftTime': async (req, res, options) => {
+      if (!isOptionMissing(options, ['liftId', 'time', 'isArriveBy', 'date', 'isFixDate'], res) && await isUserVerified(options.secretFbId)) {
+        var liftId = options.liftId,
+          arriveBy = (options.isArriveBy == true ? options.time : '00:00') + ':00',
+          departAt = (options.isArriveBy == false ? options.time : '00:00') + ':00',
+          firstDate = options.isFixDate == true ? options.date : null,
+          repeats = options.isFixDate == false ? options.date : 0
+
+        await runQuery(`UPDATE lift SET REPEATS_ON_WEEKDAY = ?, FIRST_DATE = ?, DEPART_AT = ?, ARRIVE_BY = ? WHERE lift.UUID = ?`,
+          [repeats, firstDate, departAt, arriveBy, liftId]).catch(async err => {
+            res = await errorHandler.database('updateLiftTime', options, err, 'Could not update lift time', res)
+          })
+        await runQuery(`INSERT INTO messages( UUID, CONTENT, FROM_USER_ID, LIFT_ID, TIMESTAMP )
+          VALUES(
+            MD5(NOW(6)), 
+            CONCAT(
+              ( SELECT NAME FROM users WHERE users.FB_ID = ? ),
+              ' hat die Fahrtzeiten geändert'),
+              0,
+              ( SELECT ID FROM lift WHERE lift.UUID = ? ),
+              CURRENT_TIMESTAMP())`,
+          [options.secretFbId, liftId])
         res.end()
       }
     },

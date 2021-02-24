@@ -108,6 +108,7 @@
                         :val="option"
                       ></q-radio>
                       <q-btn
+                        :disable="option.disabled"
                         :outline="sort.val == option.val"
                         :flat="sort.val != option.val"
                         :color="sort.val == option.val ? 'primary' : 'dark'"
@@ -140,7 +141,7 @@
                         dense
                         toggle-color="primary"
                         color="white"
-                        text-color="dark"
+                        text-color="grey-5"
                         :options="[
           {icon: 'sentiment_satisfied_alt', value: 0},
           {value: 1, slot: 'groups'},
@@ -190,7 +191,7 @@
                         dense
                         toggle-color="primary"
                         color="white"
-                        text-color="dark"
+                        text-color="grey-5"
                         :options="[
           {icon: 'home', value: 'home'},
           {icon: 'sync_alt', value: 0},
@@ -287,7 +288,7 @@
       <div
         class="text-caption"
         v-if="!(getSortedOffers.length || filter.length)"
-      >Im Moment gibt es für dich gerade keine Angebote. Schau einfach später nochmal vorbei.</div>
+      >Im Moment gibt es für dich keine neuen Angebote. Schau einfach später nochmal vorbei.</div>
       <!-- above case for neither offers nor filter applied -->
       <div
         class="text-caption"
@@ -392,7 +393,8 @@ export default {
           label: "Zeit",
           caption: "Sortiert nach Zeit der Fahrt",
           val: "timeDiff",
-          icon: "departure_board"
+          icon: "departure_board",
+          disabled: true
         },
         {
           label: "Geringste Zeit zum Unterricht",
@@ -446,7 +448,7 @@ export default {
 
       // here comes the sorting code
 
-      if (this.sort) {
+      if (this.sort != {}) {
         switch (this.sort.val) {
           case "distance":
             offers.sort((a, b) => {

@@ -4,7 +4,6 @@
       v-if="(courseStations.length > 2)"
       class="q-ml-md"
     >noch {{ courseStations.length - 2 }} Zwischenstopp{{ courseStations.length > 3 ? 's' : '' }}</q-badge>
-    <q-chip :label="'jeden ' + getRepeatingWeekday" icon="refresh" v-if="lift.repeatsOn" />
 
     <q-list>
       <q-item class="q-mb-sm">

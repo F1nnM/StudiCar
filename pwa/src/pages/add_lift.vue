@@ -661,7 +661,6 @@ export default {
 
       var a = date.getDateDiff(d, new Date(), "days");
       a = a < limit && a >= 0;
-      console.log(d + ": " + a);
       return a;
     },
 

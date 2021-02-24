@@ -16,6 +16,7 @@ import {
   GET_MESSAGES,
   SQL_SEND_MESSAGE,
   SQL_ADD_LIFT,
+  SQL_UPDATE_LIFT_TIME,
   SQL_LEAVE_LIFT,
   SQL_GET_LIFT_REQUESTS,
   SQL_RESPOND_REQUEST,
@@ -108,6 +109,19 @@ export default {
         else return true
       })
       return wasDriver
+    },
+
+    UPDATE_LIFT_TIME (state, payload) {
+      state.user.chatLifts = state.user.chatLifts.map(l => {
+        if (l.id == payload.liftId) {
+          l.arriveBy = (payload.isArriveBy == true ? payload.time : '00:00') + ':00'
+          l.departAt = (payload.isArriveBy == false ? payload.time : '00:00') + ':00'
+          l.date = payload.isFixDate == true ? payload.date : null
+          l.repeatsOn = payload.isFixDate == false ? payload.date : 0
+        }
+
+        return l
+      })
     },
 
     SEND_MESSAGE (state, payload) {
@@ -331,6 +345,19 @@ export default {
         error => errorNotify(error)
       )
     },
+
+    async updateLiftTime ({ commit }, payload) {
+      sendApiRequest(
+        SQL_UPDATE_LIFT_TIME,
+        payload,
+        _ => {
+          commit('UPDATE_LIFT_TIME', payload)
+          successNotify('Fahrtzeit wurde aktualisiert') // has been commented out because extra popup shows state and success messages
+        },
+        error => errorNotify(error)
+      )
+    },
+
     async removeAddress ({ commit }, payload) {
       sendApiRequest(
         SQL_REMOVE_ADDRESS,
@@ -345,6 +372,7 @@ export default {
         }
       )
     },
+
     async updateDefaultAddress ({ commit }, payload) {
       sendApiRequest(
         SQL_UPDATE_DEFAULT_ADDRESS,

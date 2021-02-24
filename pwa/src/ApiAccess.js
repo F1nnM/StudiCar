@@ -200,6 +200,11 @@ export const SQL_ADD_LIFT = {
   method: "POST"
 }
 
+export const SQL_UPDATE_LIFT_TIME = {
+  path: "/updateLiftTime",
+  method: "POST"
+}
+
 export const SQL_LEAVE_LIFT = {
   path: "/leaveLift",
   method: "POST"
