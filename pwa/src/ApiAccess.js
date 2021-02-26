@@ -29,19 +29,14 @@ export function sendApiRequest (action, options, successCallback, errorCallback)
     });
 }
 
-export function buildGetRequestUrl (action, options, callback) {
-  Firebase.auth().currentUser.getIdToken(/* forceRefresh */ true)
-    .then(idToken_ => {
-      let url = ApiBasePath + action.path
-      url += "?idtoken=" + encodeURIComponent(idToken_)
-      Object.keys(options).forEach(key => {
-        url += "&" + encodeURIComponent(key) + "=" + encodeURIComponent(options[key])
-      })
-      callback(url);
-    })
-    .catch(error => {
-      throw error
-    });
+export async function buildGetRequestUrl (action, options) {
+  const idToken_ = await Firebase.auth().currentUser.getIdToken(/* forceRefresh */ true).catch(err => { throw err })
+  let url = ApiBasePath + action.path
+  url += "?idtoken=" + encodeURIComponent(idToken_)
+  Object.keys(options).forEach(key => {
+    url += "&" + encodeURIComponent(key) + "=" + encodeURIComponent(options[key])
+  })
+  return Promise.resolve(url)
 }
 
 

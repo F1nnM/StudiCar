@@ -267,14 +267,10 @@ export default {
         .onCancel();
     },
 
-    refreshImage() {
-      buildGetRequestUrl(
-        GET_USER_PROFILE_PIC,
-        { fbid: this.lift.driver.id },
-        url => {
-          this.imageUrl = url;
-        }
-      );
+    async refreshImage() {
+      this.imageUrl = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
+        fbid: this.lift.driver.id
+      });
     }
   },
 

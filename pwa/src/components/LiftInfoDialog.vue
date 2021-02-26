@@ -45,7 +45,7 @@
 
           <ExpansionLiftTimeline :lift="lift"></ExpansionLiftTimeline>
           <q-separator />
-          <q-item-label header>Auto</q-item-label>
+          <q-item-label header>Fahrzeug</q-item-label>
           <CompactCarInfo :car="lift.car" expandable />
           <q-item-label header>
             <div v-if="lift.passengers">
@@ -69,7 +69,7 @@
           <q-item v-ripple clickable @click="viewUserFromFbId(lift.driver.id)">
             <q-item-section top avatar>
               <q-avatar>
-                <img :src="imageUrlTable[lift.driver.id]" />
+                <img :key="keyToRefreshImages" :src="imageUrlTable[lift.driver.id]" />
               </q-avatar>
             </q-item-section>
             <q-item-section>
@@ -123,7 +123,7 @@ val: 'music', icon: 'music_note'
               >
                 <q-item-section top avatar>
                   <q-avatar>
-                    <img :src="imageUrlTable[item.id]" />
+                    <img :key="keyToRefreshImages" :src="imageUrlTable[item.id]" />
                   </q-avatar>
                 </q-item-section>
 
@@ -204,185 +204,80 @@ val: 'music', icon: 'music_note'
         </q-card>
       </q-dialog>
 
-      <q-dialog
-        v-model="openEditTime"
-        persistent
-        @show="loadCurrentTime"
-        position="bottom"
-        style="width: 90vw"
-      >
-        <q-toolbar class="bg-white">
-          <q-btn
-            round
-            flat
-            dense
-            outline
-            :disable="uploading"
-            size="lg"
-            @click="newTime.help = !newTime.help"
-          >
-            <span class="text-h6 text-weight-light">?</span>
-          </q-btn>
-          <span v-if="!newTime.help" class="text-weight-light left-border-primary">Fahrtzeit</span>
-          <q-space />
-          <q-btn
-            flat
-            round
-            dense
-            icon="close"
-            size="md"
-            color="grey-9"
-            v-close-popup
-            @click="openEditTime"
-            class="q-mr-lg q-pr-sm"
+      <q-dialog v-model="openEditTime" position="bottom" persistent @show="loadCurrentTime">
+        <div class="bg-white q-mx-sm">
+          <q-toolbar class="bg-white shadow-primary">
+            <q-btn
+              round
+              flat
+              dense
+              outline
+              :disable="uploading"
+              size="lg"
+              @click="newTimeHelp = !newTimeHelp"
+            >
+              <span class="text-h6 text-weight-light">?</span>
+            </q-btn>
+            <span v-if="!newTimeHelp" class="text-weight-light left-border-primary">Fahrtzeit</span>
+            <q-space />
+            <q-btn
+              flat
+              round
+              dense
+              icon="close"
+              size="md"
+              color="grey-9"
+              v-close-popup
+              @click="openEditTime = !openEditTime"
+              class="q-mr-lg q-pr-sm"
+            >
+              <Tooltip>Abbrechen und aktuelle Werte beibehalten</Tooltip>
+            </q-btn>
+            <q-btn
+              flat
+              round
+              dense
+              icon="done"
+              :disable="!areTimeChanges"
+              size="md"
+              :color="areTimeChanges ? 'positive' : 'grey-3'"
+              @click="saveNewTime"
+            >
+              <Tooltip>
+                <span v-if="areTimeChanges">Neu eingestellte Werte übernehmen</span>
+                <span v-else>Noch deaktiviert, weil noch keine Werte verändert wurden</span>
+              </Tooltip>
+            </q-btn>
+          </q-toolbar>
+          <q-linear-progress
+            v-if="false"
+            :indeterminate="uploading"
+            :value="100"
+            track-color="white"
           />
-          <q-btn
-            flat
-            round
-            dense
-            icon="done"
-            :disable="!areTimeChanges"
-            size="md"
-            color="positive"
-            @click="saveNewTime"
-          />
-        </q-toolbar>
-        <q-linear-progress :indeterminate="uploading" :value="100" track-color="white" />
-        <q-slide-transition>
-          <div class="bg-white row justify-start" v-if="newTime.help && !uploading">
-            <div class="bg-primary q-px-lg" />
-            <div class="q-pa-xs q-pl-sm q-py-md">
-              <div class="text-weight-light text-h6">Fahrtzeit bearbeiten</div>
-              <div class="text-caption text-grey-9">
-                Deine Fahrtzeit besteht aus zwei unabhängigen Teilen:
-                <ul>
-                  <li>Tag: Der Tag kann entweder ein festes Datum oder ein wiederkehrender Wochentag sein.</li>
-                  <li>
-                    Zeit: Die Zeit kann willkürlich gewählt werden, zusätzlich musst du noch angeben,
-                    ob du zu dieser Zeit an der DH ankommst oder von ihr wegfährst.
-                  </li>
-                </ul>
+          <q-slide-transition>
+            <div class="bg-white row justify-start" v-if="newTimeHelp && !uploading">
+              <div class="bg-primary q-px-lg" />
+              <div class="q-pa-xs q-pl-sm q-py-md">
+                <div class="text-weight-light text-h6">Fahrtzeit bearbeiten</div>
+                <div class="text-caption text-grey-9">
+                  Der Termin der Fahrt setzt sich aus zwei Komponenten zusammen:
+                  <ul>
+                    <li>Tag: Der Tag kann entweder ein festes Datum oder ein wiederkehrender Wochentag sein.</li>
+                    <li>
+                      Zeit: Die Zeit an sich kann willkürlich gewählt werden, es wird allerdings immer nur die Zeit an der DH gespeichert:
+                      Abfahrtzeit bei Start, Ankunftszeit bei Fahrtende. Somit ist die Wahl der beiden Optionen mit der Reihenfolge der
+                      Stationen verbunden, die im Moment noch nicht geändert werden kann.
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
+          </q-slide-transition>
+
+          <div class="q-pa-xs bg-white">
+            <LiftEditDateTime v-model="newTime" />
           </div>
-        </q-slide-transition>
-
-        <div class="q-pa-md bg-white">
-          <q-list>
-            <q-item>
-              <q-item-section avatar>
-                <q-item-label header>Tag</q-item-label>
-              </q-item-section>
-
-              <q-item-section>
-                <q-btn-toggle
-                  v-model="newTime.dateTab"
-                  @click="setDateTab"
-                  no-caps
-                  rounded
-                  unelevated
-                  outline
-                  toggle-color="primary"
-                  class="q-mb-xs"
-                  color="white"
-                  text-color="grey-5"
-                  :options="[
-          {label: 'Fester Tag', value: 'fix'},
-          {label: 'Wöchentlich', value: 'weekly'}
-        ]"
-                />
-                <q-input
-                  clickable
-                  @click="_=> { if(this.newTime.dateTab == 'fix') $refs.datepicker.toggle() 
-                    else $refs.datepicker.showPopup() }"
-                  outlined
-                  readonly
-                  :value="newTime.dateTab == 'fix' ? (newTime.date || '- Datum -') : getWeekDayFromIndex"
-                >
-                  <template v-slot:append>
-                    <q-btn
-                      icon="edit"
-                      color="grey-9"
-                      flat
-                      @click="_=> { if(newTime.dateTab == 'weekly') $refs.datepicker.showPopup() }"
-                    >
-                      <q-menu
-                        v-if="newTime.dateTab == 'fix'"
-                        ref="datepicker"
-                        transition-show="jump-down"
-                        transition-hide="jump-up"
-                      >
-                        <q-date
-                          title="Tag auswählen"
-                          :subtitle="`Maximal 30 Tage im Voraus`"
-                          event-color="primary"
-                          mask="YYYY-MM-DD"
-                          v-model="newTime.date"
-                          :events="[todayString]"
-                          :options="dateOptions"
-                        />
-                      </q-menu>
-                      <q-select
-                        v-else
-                        ref="datepicker"
-                        class="hidden"
-                        emit-value
-                        label="Wochentag auswählen"
-                        transition-show="jump-down"
-                        transition-hide="jump-up"
-                        v-model="newTime.date"
-                        :options="getRepeatingDayOptions"
-                      />
-                    </q-btn>
-                  </template>
-                </q-input>
-              </q-item-section>
-            </q-item>
-
-            <q-item>
-              <q-item-section avatar>
-                <q-item-label header>Zeit</q-item-label>
-              </q-item-section>
-
-              <q-item-section>
-                <q-btn-toggle
-                  v-model="newTime.timeTab"
-                  no-caps
-                  rounded
-                  unelevated
-                  class="q-mb-sm"
-                  outline
-                  toggle-color="primary"
-                  color="white"
-                  text-color="grey-5"
-                  :options="[
-          {label: 'Ankunft um', value: 'arrive'},
-          {label: 'Abfahrt ab', value: 'depart'}
-        ]"
-                />
-                <q-input
-                  class="col-6"
-                  clickable
-                  @click="_=> $refs.timepicker.toggle()"
-                  outlined
-                  readonly
-                  :value="newTime.time || '- Zeit -'"
-                >
-                  <template v-slot:append>
-                    <q-btn icon="edit" color="grey-9" flat>
-                      <q-menu
-                        ref="timepicker"
-                        transition-show="jump-down"
-                        transition-hide="jump-up"
-                      >
-                        <q-time format24h v-model="newTime.time" mask="HH:mm" color="primary" />
-                      </q-menu>
-                    </q-btn>
-                  </template>
-                </q-input>
-              </q-item-section>
-            </q-item>
-          </q-list>
         </div>
       </q-dialog>
     </div>
@@ -393,12 +288,9 @@ val: 'music', icon: 'music_note'
 <script>
 import { openURL, date } from "quasar";
 import Vue from "vue";
-import {
-  buildGetRequestUrl,
-  GET_USER_PROFILE_PIC,
-  sendApiRequest,
-  SQL_UPDATE_LIFT_TIME
-} from "../ApiAccess";
+import LiftEditDateTime from "components/LiftEditDateTime";
+import Tooltip from "components/Tooltip";
+import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
 import VueFriendlyIframe from "vue-friendly-iframe";
 Vue.use(VueFriendlyIframe);
 
@@ -410,7 +302,9 @@ export default {
   name: "LiftInfoDialog",
   components: {
     ExpansionLiftTimeline,
-    CompactCarInfo
+    CompactCarInfo,
+    LiftEditDateTime,
+    Tooltip
   },
   props: {
     value: Boolean,
@@ -429,11 +323,12 @@ export default {
         dateTab: "fix",
         timeTab: "arrive",
         date: null,
-        time: null,
-        help: false
+        time: null
       },
       oldTime: {},
-      uploading: false
+      newTimeHelp: false,
+      uploading: false,
+      keyToRefreshImages: 0
     };
   },
   watch: {},
@@ -603,16 +498,10 @@ export default {
       this.openEditTime = false;
     },
 
-    getImageOfUser(id) {
-      buildGetRequestUrl(
-        GET_USER_PROFILE_PIC,
-        {
-          fbid: id
-        },
-        url => {
-          this.imageUrlTable[id] = url;
-        }
-      );
+    async getImageOfUser(id) {
+      this.imageUrlTable[id] = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
+        fbid: id
+      });
     },
 
     viewCar() {
@@ -652,15 +541,24 @@ export default {
           persistent: true
         })
         .onOk(data => {
-          this.$emit("closeAndLeave", this.lift.id);
+          this.$emit("closeAndLeave", {
+            liftId: this.lift.id,
+            wasDriver: this.isDriver
+          });
         })
         .onCancel();
     }
   },
 
   mounted() {
-    this.getImageOfUser(this.lift.driver.id);
-    this.lift.passengers.forEach(p => this.getImageOfUser(p.id));
+    (async _ => {
+      await this.getImageOfUser(this.lift.driver.id);
+      for (const p of this.lift.passengers) {
+        await this.getImageOfUser(p.id);
+      }
+      const lift = this.imageUrlTable;
+      this.keyToRefreshImages++;
+    })();
   }
 };
 </script>
@@ -669,5 +567,9 @@ export default {
 .left-border-primary {
   border-left: 1px solid $primary;
   padding-left: 15px;
+}
+
+.shadow-primary {
+  box-shadow: 0 0px 0px 0px $primary, 0 1px 0px $primary, 0 1px 6px $primary;
 }
 </style>

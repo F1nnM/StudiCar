@@ -62,12 +62,7 @@
               </q-tab-panels>
             </div>
             <div class="col-xs-2 col-md-1">
-              <q-btn
-                flat
-                dense
-                @click="toggleScannerOpen"
-                v-touch-hold:300.mouse="forceOpenScanner"
-              >
+              <q-btn flat dense @click="toggleScannerOpen">
                 <!-- <q-icon v-if="scannerOpen" name="cancel_presentation" /> -->
                 <div>
                   <q-avatar square size="1.4em">
@@ -514,15 +509,10 @@ export default {
       }
     },
 
-    forceOpenScanner() {
-      this.toggleScannerOpen(true);
-    },
-
-    async toggleScannerOpen(force) {
+    async toggleScannerOpen() {
       // first check whether clipboard contains data to be processed
       var clipboardContent;
-      if (!this.scannerOpen && force !== true)
-        // force makes it possible to bypass clipboard
+      if (!this.scannerOpen)
         clipboardContent = await this.askAndReadClipboard();
       if (clipboardContent) {
         if (clipboardContent.includes("/#/"))
@@ -531,7 +521,7 @@ export default {
           window.location.href = "#/"; // when detecting a lift, first go to marketplace
         }
         await new Promise(res => {
-          setTimeout(res, 100); // has to wait until site has loaded
+          setTimeout(res, 200); // has to wait until site has been changed, 200ms should be enough
         });
         this.$router.replace(clipboardContent).catch(_ => {});
       } else {
@@ -574,9 +564,12 @@ export default {
     if (!user) location.reload();
     // bug: when other user first signs in, no data are displayed. Reloading is then the second sign-in and everything is working properly
     else
-      buildGetRequestUrl(GET_USER_PROFILE_PIC, { fbid: user.uid }, url => {
-        this.profilePictureUrl = url;
-      });
+      (async _ => {
+        this.profilePictureUrl = await buildGetRequestUrl(
+          GET_USER_PROFILE_PIC,
+          { fbid: user.uid }
+        );
+      })();
   }
 };
 </script>

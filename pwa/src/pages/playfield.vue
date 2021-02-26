@@ -1,15 +1,16 @@
 <template>
   <div class="q-pa-md">
     <q-btn label="Feuer" @click="go" />
+    <span v-for="n in 20" :key="-n">HIer steht dann eine ganze Menge Test</span>
 
-    <p v-for="n in 20" :key="n">Lorem</p>
+    <span v-for="n in 20" :key="n">HIer steht dann eine ganze Menge Test</span>
+
+    <p v-for="n in 20" :key="'1000' + n">Lorem</p>
   </div>
 </template>
 
 <script>
 import { scroll } from "quasar";
-import ConfirmDialog from "components/dialogs/Confirm";
-import LiftOffer from "components/LiftOffer";
 
 import { sendApiRequest, PING, SQL_GET_MARKETPLACE_OFFER } from "../ApiAccess";
 

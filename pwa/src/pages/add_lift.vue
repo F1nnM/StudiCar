@@ -14,8 +14,8 @@
           <q-item-label
             caption
             v-if="!(hasOwnCars && hasOwnAddresses)"
-          >Weder Autos noch Adressen gespeichert</q-item-label>
-          <q-item-label caption v-else-if="!hasOwnCars">Noch keine Autos gespeichert</q-item-label>
+          >Weder Fahrzeuge noch Adressen gespeichert</q-item-label>
+          <q-item-label caption v-else-if="!hasOwnCars">Noch keine Fahrzeuge gespeichert</q-item-label>
           <q-item-label caption v-else-if="!hasOwnAddresses">Noch keine Adressen gespeichert</q-item-label>
         </q-item-section>
       </q-item>
@@ -204,11 +204,11 @@
 
                 <q-step
                   :name="4"
-                  title="Auto auswählen"
+                  title="Fahrzeug auswählen"
                   icon="emoji_transportation"
                   :done="step > 4"
                 >
-                  <p class="text-caption">Mit welchem Auto fährst du?</p>
+                  <p class="text-caption">Mit welchem Fahrzeug fährst du?</p>
                   <q-list>
                     <q-item tag="label" v-for="car in userCars" :key="car.carId" class="q-pr-none">
                       <q-radio v-model="lift.carId" :val="car.carId" />
@@ -241,7 +241,7 @@
                 <q-step :name="5" title="Sitze bearbeiten" icon="person_add" :done="step > 5">
                   <p class="text-caption">
                     Willst du die Anzahl an Mitfahrern für diese Fahrt ändern?
-                    (Hinweis: Wenn du hier 0 beibehältst, dann speichert StudiCar für diese Fahrt {{ getCarData.seats }} Mitfahrer, also die übliche Kapazität dieses Autos)
+                    (Hinweis: Wenn du hier 0 beibehältst, dann speichert StudiCar für diese Fahrt {{ getCarData.seats }} Mitfahrer, also die übliche Kapazität dieses Fahrzeugs)
                   </p>
                   <q-item>
                     <q-item-section avatar>
@@ -255,7 +255,6 @@
                     <q-item-section>
                       <q-slider
                         markers
-                        :thumb-path="''/* M7.59 5.41c-.78-.78-.78-2.05 0-2.83.78-.78 2.05-.78 2.83 0 .78.78.78 2.05 0 2.83-.79.79-2.05.79-2.83 0zM6 16V7H4v9c0 2.76 2.24 5 5 5h6v-2H9c-1.66 0-3-1.34-3-3zm14 4.07L14.93 15H11.5v-3.68c1.4 1.15 3.6 2.16 5.5 2.16v-2.16c-1.66.02-3.61-.87-4.67-2.04l-1.4-1.55c-.19-.21-.43-.38-.69-.5-.29-.14-.62-.23-.96-.23h-.03C8.01 7 7 8.01 7 9.25V15c0 1.66 1.34 3 3 3h5.07l3.5 3.5L20 20.07z*/"
                         v-model="lift.seats"
                         :min="0"
                         :max="9"
@@ -278,83 +277,17 @@
                     <q-btn @click="step ++" color="primary" label="Weiter" />
                   </q-stepper-navigation>
                 </q-step>
-                <q-step :name="6" title="Tag festlegen" icon="event" :done="step > 6">
+                <q-step :name="6" title="Tag und Zeit festlegen" icon="event" :done="step > 6">
                   <p class="text-caption">Wähle aus, wann du planst zu fahren.</p>
-                  <q-input
-                    clickable
-                    @click="_=> $refs.datepicker.toggle()"
-                    outlined
-                    readonly
-                    :value="lift.datestamp || '- fehlt -'"
-                  >
-                    <template v-slot:append>
-                      <q-btn icon="edit" color="grey-9" flat>
-                        <q-menu
-                          ref="datepicker"
-                          transition-show="jump-down"
-                          transition-hide="jump-up"
-                        >
-                          <q-date
-                            title="Tag auswählen"
-                            :subtitle="`Maximal ${maxDaysAhead} Tage im Voraus`"
-                            event-color="primary"
-                            mask="YYYY-MM-DD"
-                            v-model="lift.datestamp"
-                            :events="[todayString]"
-                            :options="dateOptions"
-                          />
-                        </q-menu>
-                      </q-btn>
-                    </template>
-                  </q-input>
 
-                  <q-stepper-navigation>
-                    <q-btn
-                      flat
-                      @click="step--"
-                      color="primary"
-                      label="Eins Zurück"
-                      class="q-ml-sm"
-                    />
-                    <q-btn
-                      @click="step ++"
-                      color="primary"
-                      :disable="!lift.datestamp"
-                      label="Weiter"
-                    />
-                  </q-stepper-navigation>
-                </q-step>
-                <q-step :name="7" title="Zeit festlegen" icon="schedule" :done="step > 7">
-                  <p
-                    class="text-caption"
-                  >Wann planst du {{ departing ? 'von der DH wegzufahren' : 'an der DH anzukommen' }}?</p>
-
-                  <q-input
-                    clickable
-                    @click="_=> $refs.timepicker.toggle()"
-                    outlined
-                    readonly
-                    :value="lift.timestamp || '- fehlt -'"
-                  >
-                    <template v-slot:append>
-                      <q-btn icon="edit" color="grey-9" flat>
-                        <q-menu
-                          ref="timepicker"
-                          transition-show="jump-down"
-                          transition-hide="jump-up"
-                        >
-                          <q-time format24h v-model="lift.timestamp" mask="HH:mm" color="primary" />
-                        </q-menu>
-                      </q-btn>
-                    </template>
-                  </q-input>
+                  <LiftEditDateTime v-model="lift" />
 
                   <q-stepper-navigation>
                     <q-btn color="primary" @click="step --" label="Zurück" flat />
                     <q-btn
                       @click="step ++"
                       color="primary"
-                      :disable="!lift.timestamp"
+                      :disable="lift.time == null || lift.date == 0"
                       label="Abschließen"
                       class="q-ml-sm"
                     />
@@ -362,11 +295,11 @@
                 </q-step>
 
                 <q-step
-                  :name="8"
+                  :name="7"
                   class="q-pr-none"
                   title="Überprüfen"
                   icon="visibility"
-                  :done="step > 8"
+                  :done="step > 7"
                 >
                   <p
                     class="text-caption"
@@ -405,7 +338,7 @@
                           <q-item-label caption>
                             {{ lift.destination == 'home' ? 'Abfahrt' : 'Ankunft' }}
                             <br />
-                            um {{ lift.timestamp }}
+                            um {{ lift.time }}
                           </q-item-label>
                         </q-item-section>
                         <q-item-section>
@@ -418,6 +351,20 @@
                           />
                         </q-item-section>
                       </q-item>
+                      <!-- <q-item dense>
+                        <q-item-section avatar>
+                          <q-icon
+                            name="loop"
+                            size="xs"
+                            class="q-mr-xs"
+                            v-if="lift.dateTab == 'weekly'"
+                          />
+                          <q-icon name="query_builder" size="xs" class="q-mr-xs" v-else />
+                        </q-item-section>
+                        <q-item-section>
+                          <q-item-label></q-item-label>
+                        </q-item-section>
+                      </q-item>-->
                     </q-tab-panel>
                     <q-tab-panel name="car" class="q-pa-none">
                       <CompactCarInfo :car="getCarData" compactView />
@@ -484,14 +431,14 @@
 </template>
 
 <script>
-import { sendApiRequest, SQL_ADD_LIFT } from "../ApiAccess";
 import ExtHr from "components/ExtendedHr";
 import CompactCarInfo from "components/CompactCarInfo";
+import LiftEditDateTime from "components/LiftEditDateTime";
 
 import { date } from "quasar";
 
 export default {
-  components: { ExtHr, CompactCarInfo },
+  components: { ExtHr, CompactCarInfo, LiftEditDateTime },
 
   data() {
     return {
@@ -501,8 +448,10 @@ export default {
         destinationAddressId: 0,
         startAddressId: 0,
         carId: null,
-        timestamp: "",
-        datestamp: "",
+        time: null,
+        timeTab: "arrive",
+        date: 1,
+        dateTab: "weekly",
         seats: 0, // just to avoid error when rendering slider
         stops: [
           {
@@ -649,7 +598,7 @@ export default {
           }
         ]
       };
-      this.step = 8;
+      this.step = 7;
     },
 
     goHome() {
@@ -671,20 +620,20 @@ export default {
       }
       this.uploading = 1;
       this.lift.departAt = this.departing;
-      this.$store.dispatch("auth/addLift", this.lift).then(_ => {
-        this.lift = {
-          destination: "school", // default set to school, user selects first home/school, then exact address
-          destinationAddressId: 0,
-          startingPoint: 0,
-          car: null,
-          seats: 0 // just to avoid error when rendering slider
-        };
-        this.uploading = 2;
-        this.step = 1;
-        new Promise(res => setTimeout(res, 1500)).then(_ => {
-          this.goHome();
-        });
-      });
+      this.lift.timeTab = this.departing ? "depart" : "arrive";
+      await this.$store.dispatch("auth/addLift", this.lift);
+      this.lift = {
+        destination: "school", // default set to school, user selects first home/school, then exact address
+        destinationAddressId: 0,
+        startingPoint: 0,
+        car: null,
+        seats: 0 // just to avoid error when rendering slider
+      };
+      this.uploading = 2;
+      this.step = 1;
+
+      await new Promise(res => setTimeout(res, 1500)); // wait so that user can see success message
+      this.goHome();
     },
 
     resetFields() {

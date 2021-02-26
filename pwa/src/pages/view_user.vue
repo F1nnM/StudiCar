@@ -95,13 +95,14 @@
                 transition-prev="slide-right"
                 transition-next="slide-left"
               >
-                <q-tab-panel name="data" class="q-pa-none">
+                <q-tab-panel :name="viewingThisUser ? viewTab : 'data'" class="q-pa-none">
+                  <!-- when viewing this user, tab will always be visible, indepent of viewTab -->
                   <q-item-label header class="q-pt-xs q-pb-xs">
                     <span class="text-uppercase text-caption">Dabei seit</span>
                   </q-item-label>
                   <q-item>{{ since }}</q-item>
                 </q-tab-panel>
-                <q-tab-panel name="social" class="q-pa-none">
+                <q-tab-panel name="social" v-if="!viewingThisUser" class="q-pa-none">
                   <div class="row q-pl-md">
                     <q-icon
                       name="arrow_back_ios"
@@ -474,6 +475,10 @@ export default {
       if (f.in && !f.me) return "only-left-half";
       else if (!f.in && f.me) return "only-right-half";
       else return "";
+    },
+
+    viewingThisUser() {
+      return this.viewedUser.uid == this.$store.getters["auth/user"].uid;
     }
   },
 
@@ -522,10 +527,13 @@ export default {
     let loc = document.location.href;
     let otherFbId = loc.split("?userFbId=")[1];
 
-    buildGetRequestUrl(GET_USER_PROFILE_PIC, { fbid: otherFbId }, url => {
-      this.imageUrl = url;
-      this.splitterPos.current = this.splitterPos.normal;
-    });
+    (async _ => {
+      this.imageUrl = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
+        fbid: otherFbId
+      });
+    })();
+
+    this.splitterPos.current = this.splitterPos.normal;
 
     sendApiRequest(
       SQL_GET_USER_DATA,

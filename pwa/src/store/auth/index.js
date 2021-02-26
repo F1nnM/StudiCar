@@ -284,10 +284,10 @@ export default {
 
     async leaveLift ({ commit }, payload) {
       sendApiRequest(SQL_LEAVE_LIFT, {
-        liftId: payload
+        liftId: payload.liftId
       }, _ => {
-        var wasDriver = commit('LEAVE_LIFT', payload)
-        if (wasDriver) successNotify('Fahrt wurde aufgelöst')
+        commit('LEAVE_LIFT', payload.liftId)
+        if (payload.wasDriver) successNotify('Fahrt wurde aufgelöst')
         else successNotify('Fahrt wurde verlassen')
       }, err => errorNotify(err))
     },

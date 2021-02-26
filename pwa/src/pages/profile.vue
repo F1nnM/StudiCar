@@ -698,20 +698,12 @@ import ImageColorPicker from "components/ImageColorPicker";
 import ProfileTopSection from "components/ProfileTopSection";
 import ColoredMeter from "components/ColoredMeter";
 import ExtHr from "../components/ExtendedHr";
-import QrGen from "../components/QrGenerator";
 import CarInfo from "../components/CarInfo";
 import TitleButtonAnchor from "../components/TitleButtonAnchor";
 import CompactCarInfo from "../components/CompactCarInfo";
 import { mdiAccountGroupOutline } from "@quasar/extras/mdi-v5";
 
-import {
-  buildGetRequestUrl,
-  GET_USER_PROFILE_PIC,
-  sendApiRequest,
-  SQL_UPDATE_PROFILE_PICTURE,
-  GET_CAR_MODELS,
-  SQL_RESET_PROFILE_PICTURE
-} from "../ApiAccess";
+import { sendApiRequest, GET_CAR_MODELS } from "../ApiAccess";
 
 export default {
   components: {

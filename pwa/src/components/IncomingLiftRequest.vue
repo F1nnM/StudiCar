@@ -173,15 +173,14 @@ export default {
     }
   },
   mounted() {
-    buildGetRequestUrl(
-      GET_USER_PROFILE_PIC,
-      {
-        fbid: this.requestingUser.id
-      },
-      url => {
-        this.requestingUser.imageUrl = url;
-      }
-    );
+    (async _ => {
+      this.requestingUser.imageUrl = await buildGetRequestUrl(
+        GET_USER_PROFILE_PIC,
+        {
+          fbid: this.requestingUser.id
+        }
+      );
+    })();
   }
 };
 </script>

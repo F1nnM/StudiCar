@@ -113,7 +113,7 @@
                 <div
                   v-if="!(seatsLeft(lift.liftId) > 0)"
                   class="text-negative"
-                >Das Auto ist im Moment voll, du kannst keine Angebote annehmen.</div>
+                >Das Fahrzeug ist im Moment voll, du kannst keine Angebote annehmen.</div>
                 <div class="full-width">
                   <span
                     class="text-negative"
@@ -523,9 +523,9 @@ export default {
       this.chatPopup.isOpen = false;
     },
 
-    leave(liftId) {
+    leave(event) {
       this.closeLift();
-      this.$store.dispatch("auth/leaveLift", liftId);
+      this.$store.dispatch("auth/leaveLift", event);
     }
   },
 

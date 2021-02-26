@@ -465,13 +465,11 @@ export default {
     }
   },
   mounted() {
-    buildGetRequestUrl(
-      GET_USER_PROFILE_PIC,
-      { fbid: this.$store.getters["auth/user"].uid },
-      url => {
-        this.ppPath = url;
-      }
-    );
+    (async _ => {
+      this.ppPath = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
+        fbid: this.$store.getters["auth/user"].uid
+      });
+    })();
   }
 };
 </script>

@@ -1318,13 +1318,17 @@ module.exports = {
     '/addLift': async (req, res, options) => {
       if (!isOptionMissing(options, ['lift'], res) && await isUserVerified(options.secretFbId)) {
         var lift = options.lift,
-          isdepartAt = lift.departAt,
+          isdepartAt = lift.destination == 'school',
+          weekday = lift.dateTab == 'weekly' ? lift.date : 0,
+          fixLiftDate = lift.dateTab == 'fix' ? lift.date : null,
+          departAt = lift.timeTab == 'depart' ? lift.time : '00:00:00',
+          arriveBy = lift.timeTab == 'arrive' ? lift.time : '00:00:00',
           uid = options.secretFbId
         content = 'Willkommen im Chat!'
 
         await runQuery(
           "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `START`, `DESTINATION`, `UUID`, `REPEATS_ON_WEEKDAY`, `FIRST_DATE`, `DEPART_AT`, `ARRIVE_BY`) VALUES (current_timestamp(), ?, ?, ?, ?, SUBSTRING(UUID_SHORT(), -14, 14), ?, ? ,?, ?)",
-          [lift.seats, lift.carId, lift.startAddressId, lift.destinationAddressId, lift.repeats ? lift.weekday : 0, lift.datestamp, isdepartAt ? lift.timestamp : 0, isdepartAt ? 0 : lift.timestamp]).catch(async err => {
+          [lift.seats, lift.carId, lift.startAddressId, lift.destinationAddressId, weekday, fixLiftDate, departAt, arriveBy]).catch(async err => {
             res = await errorHandler.database('addLift', options, err, '', res)
           })
         await runQuery(
