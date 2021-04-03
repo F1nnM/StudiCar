@@ -204,82 +204,27 @@ val: 'music', icon: 'music_note'
         </q-card>
       </q-dialog>
 
-      <q-dialog v-model="openEditTime" position="bottom" persistent @show="loadCurrentTime">
-        <div class="bg-white q-mx-sm">
-          <q-toolbar class="bg-white shadow-primary">
-            <q-btn
-              round
-              flat
-              dense
-              outline
-              :disable="uploading"
-              size="lg"
-              @click="newTimeHelp = !newTimeHelp"
-            >
-              <span class="text-h6 text-weight-light">?</span>
-            </q-btn>
-            <span v-if="!newTimeHelp" class="text-weight-light left-border-primary">Fahrtzeit</span>
-            <q-space />
-            <q-btn
-              flat
-              round
-              dense
-              icon="close"
-              size="md"
-              color="grey-9"
-              v-close-popup
-              @click="openEditTime = !openEditTime"
-              class="q-mr-lg q-pr-sm"
-            >
-              <Tooltip>Abbrechen und aktuelle Werte beibehalten</Tooltip>
-            </q-btn>
-            <q-btn
-              flat
-              round
-              dense
-              icon="done"
-              :disable="!areTimeChanges"
-              size="md"
-              :color="areTimeChanges ? 'positive' : 'grey-3'"
-              @click="saveNewTime"
-            >
-              <Tooltip>
-                <span v-if="areTimeChanges">Neu eingestellte Werte übernehmen</span>
-                <span v-else>Noch deaktiviert, weil noch keine Werte verändert wurden</span>
-              </Tooltip>
-            </q-btn>
-          </q-toolbar>
-          <q-linear-progress
-            v-if="false"
-            :indeterminate="uploading"
-            :value="100"
-            track-color="white"
-          />
-          <q-slide-transition>
-            <div class="bg-white row justify-start" v-if="newTimeHelp && !uploading">
-              <div class="bg-primary q-px-lg" />
-              <div class="q-pa-xs q-pl-sm q-py-md">
-                <div class="text-weight-light text-h6">Fahrtzeit bearbeiten</div>
-                <div class="text-caption text-grey-9">
-                  Der Termin der Fahrt setzt sich aus zwei Komponenten zusammen:
-                  <ul>
-                    <li>Tag: Der Tag kann entweder ein festes Datum oder ein wiederkehrender Wochentag sein.</li>
-                    <li>
-                      Zeit: Die Zeit an sich kann willkürlich gewählt werden, es wird allerdings immer nur die Zeit an der DH gespeichert:
-                      Abfahrtzeit bei Start, Ankunftszeit bei Fahrtende. Somit ist die Wahl der beiden Optionen mit der Reihenfolge der
-                      Stationen verbunden, die im Moment noch nicht geändert werden kann.
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </q-slide-transition>
+      <SettingScope
+        v-model="openEditTime"
+        @show="loadCurrentTime"
+        :uploading="uploading"
+        property="Fahrzeit"
+        :disableSave="!areTimeChanges"
+      >
+        <template v-slot:description>
+          Der Termin der Fahrt setzt sich aus zwei Komponenten zusammen:
+          <ul>
+            <li>Tag: Der Tag kann entweder ein festes Datum oder ein wiederkehrender Wochentag sein.</li>
+            <li>
+              Zeit: Die Zeit an sich kann willkürlich gewählt werden, es wird allerdings immer nur die Zeit an der DH gespeichert:
+              Abfahrtzeit bei Start, Ankunftszeit bei Fahrtende. Somit ist die Wahl der beiden Optionen mit der Reihenfolge der
+              Stationen verbunden, die im Moment noch nicht geändert werden kann.
+            </li>
+          </ul>
+        </template>
 
-          <div class="q-pa-xs bg-white">
-            <LiftEditDateTime v-model="newTime" />
-          </div>
-        </div>
-      </q-dialog>
+        <LiftEditDateTime v-model="newTime" />
+      </SettingScope>
     </div>
   </q-dialog>
 </template>
@@ -289,7 +234,7 @@ val: 'music', icon: 'music_note'
 import { openURL, date } from "quasar";
 import Vue from "vue";
 import LiftEditDateTime from "components/LiftEditDateTime";
-import Tooltip from "components/Tooltip";
+import SettingScope from "components/SettingScope";
 import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
 import VueFriendlyIframe from "vue-friendly-iframe";
 Vue.use(VueFriendlyIframe);
@@ -304,7 +249,7 @@ export default {
     ExpansionLiftTimeline,
     CompactCarInfo,
     LiftEditDateTime,
-    Tooltip
+    SettingScope
   },
   props: {
     value: Boolean,
@@ -564,12 +509,4 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.left-border-primary {
-  border-left: 1px solid $primary;
-  padding-left: 15px;
-}
-
-.shadow-primary {
-  box-shadow: 0 0px 0px 0px $primary, 0 1px 0px $primary, 0 1px 6px $primary;
-}
 </style>
