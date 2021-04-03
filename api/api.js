@@ -1,61 +1,82 @@
-const
-  runQuery = require('./db'),
-  fs = require('fs'),
+const runQuery = require("./db"),
+  fs = require("fs"),
+  fetch = require("node-fetch"),
   /* longQueries           = require('./longQueries'), */
-  apiResponseSimulation = require('./simulation/apiResponse'),
-  tickerJS = require('./news/postillon/ticker.js'),
-  errorHandler = require('./errorHandler'),
-  sendmail = require('./sendmail');
-const { database } = require('./errorHandler');
+  apiResponseSimulation = require("./simulation/apiResponse"),
+  tickerJS = require("./news/postillon/ticker.js"),
+  errorHandler = require("./errorHandler");
+const { database } = require("./errorHandler");
 
-function isOptionMissing (data, needed, res) {
-  return needed.some(key => {
+function isOptionMissing(data, needed, res) {
+  return needed.some((key) => {
     if (typeof data[key] == "undefined") {
       res.writeHead(400);
       res.end("No field '" + key + "' supplied!");
-      console.log('Error occurred: missing property "' + key + '" at ' + data)
+      console.log('Error occurred: missing property "' + key + '" at ' + data);
       return true;
     }
     return false;
   });
 }
 
+const b64toBlob = (b64Data, contentType = "", sliceSize = 512) => {
+  const byteCharacters = atob(b64Data);
+  const byteArrays = [];
+
+  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+    const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+    const byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+    byteArrays.push(byteArray);
+  }
+
+  const blob = new Blob(byteArrays, { type: contentType });
+  return blob;
+};
+
 // queries for quick, not-optimized database access
 
-async function getUserId (fbId) {
-  let result = (await runQuery("SELECT ID FROM users WHERE FB_ID = ?", [fbId])).result[0]
+async function getUserId(fbId) {
+  let result = (await runQuery("SELECT ID FROM users WHERE FB_ID = ?", [fbId]))
+    .result[0];
   return result ? result.ID : null;
 }
 
-async function getLiftId (liftUuid) {
-  return (await runQuery("SELECT ID FROM lift WHERE UUID = ?", [liftUuid])).result[0].ID;
+async function getLiftId(liftUuid) {
+  return (await runQuery("SELECT ID FROM lift WHERE UUID = ?", [liftUuid]))
+    .result[0].ID;
 }
 
 // end of those queries
 
-function generateJdenticon (seed) {
-  var jdenticon = require("jdenticon")
+function generateJdenticon(seed) {
+  var jdenticon = require("jdenticon");
   jdenticon.config = {
     lightness: {
       color: [0.31, 0.81],
-      grayscale: [0.26, 0.90]
+      grayscale: [0.26, 0.9],
     },
     saturation: {
-      color: 0.60,
-      grayscale: 0.00
+      color: 0.6,
+      grayscale: 0.0,
     },
-    backColor: "#ffffffff"
+    backColor: "#ffffffff",
   };
 
-  let size = 300
+  let size = 300;
   return jdenticon.toPng(seed, size);
 }
 
-
-
-async function getChatLifts (uid) {
+async function getChatLifts(uid) {
   // TODO make query return Nickname if the querying user is offering the lift. Maybe https://stackoverflow.com/questions/1747750/select-column-if-blank-select-from-another
-  var lift_data = (await runQuery(`
+  var lift_data = (
+    await runQuery(
+      `
   WITH
 	lifts as (
         SELECT
@@ -216,12 +237,19 @@ SELECT
     )
     AS JSON
 FROM lifts
-  `, [uid]).catch(err => { throw err })).result[0].JSON
-  return lift_data
+  `,
+      [uid]
+    ).catch((err) => {
+      throw err;
+    })
+  ).result[0].JSON;
+  return lift_data;
 }
 
-async function getLiftRequests (uid) {
-  var db_requests = (await runQuery(`
+async function getLiftRequests(uid) {
+  var db_requests = (
+    await runQuery(
+      `
   (
     SELECT
           JSON_ARRAYAGG(
@@ -310,28 +338,33 @@ async function getLiftRequests (uid) {
       GROUP BY
       my_lifts.LIFT_ID
   )
-  `, [uid])).result
-  var arr = []
-  db_requests.forEach(r => {
-    var a = JSON.parse(r['JSON'])
-    if (a.length > 1) { // more requests, have to merge them
-      var b = {}
+  `,
+      [uid]
+    )
+  ).result;
+  var arr = [];
+  db_requests.forEach((r) => {
+    var a = JSON.parse(r["JSON"]);
+    if (a.length > 1) {
+      // more requests, have to merge them
+      var b = {};
       a.forEach((s, index) => {
-        if (index == 0) b = s
-        else b.requestingUsers.push(s.requestingUsers[0]) // always only one user request in there
-      })
-      arr.push(b)
+        if (index == 0) b = s;
+        else b.requestingUsers.push(s.requestingUsers[0]); // always only one user request in there
+      });
+      arr.push(b);
+    } else {
+      arr.push(a[0]);
     }
-    else {
-      arr.push(a[0])
-    }
-  })
+  });
 
   return JSON.stringify(arr);
 }
 
-async function getMarketplace (fbid) {
-  let JSON = (await runQuery(`
+async function getMarketplace(fbid) {
+  let JSON = (
+    await runQuery(
+      `
   WITH
   lifts as (
       SELECT
@@ -457,13 +490,16 @@ JOIN b ON a.LIFT_ID = b.LIFT_ID AND a.WITH_ME = b.WITHOUT_ME
       ), '[]') AS JSON
   FROM
     lifts
-        `, [fbid])).result[0].JSON
-  return JSON
+        `,
+      [fbid]
+    )
+  ).result[0].JSON;
+  return JSON;
 }
 
-
-async function getMarketplaceOfferByUuid (uuidOnly, invitingUserId) {
-  let JSON = (await runQuery(`
+async function getMarketplaceOfferByUuid(uuidOnly, invitingUserId) {
+  let JSON = await runQuery(
+    `
   WITH
     lifts AS(
     SELECT DISTINCT
@@ -601,62 +637,92 @@ SELECT
     ) AS JSON
 FROM
     lifts
-        `, [invitingUserId, uuidOnly]))
-  if (JSON == null) return null
-  else return JSON.result[0].JSON
+        `,
+    [invitingUserId, uuidOnly]
+  );
+  if (JSON == null) return null;
+  else return JSON.result[0].JSON;
 }
 
-function endWithJSON (res, JSON) {
-  if (res.sent == true) return
-  res.setHeader('Content-Type', 'application/json')
-  res.end(JSON)
+function endWithJSON(res, JSON) {
+  if (res.sent == true) return;
+  res.setHeader("Content-Type", "application/json");
+  res.end(JSON);
 }
 
-async function isUserVerified (fbid) {
-  let result = (await runQuery(`
+async function isUserVerified(fbid) {
+  let result = (
+    await runQuery(
+      `
   SELECT VERIFIED FROM users WHERE FB_ID = ?
-  `, [fbid])).result[0]
-  return result ? result.VERIFIED === 1 : false
+  `,
+      [fbid]
+    )
+  ).result[0];
+  return result ? result.VERIFIED === 1 : false;
 }
 
 module.exports = {
-  'GET': {
-    '/ping': async (req, res, options) => {
-      res.end('pong');
+  GET: {
+    "/ping": async (req, res, options) => {
+      res.end("pong");
     },
-    '/sqlTest': async (req, res, options) => {
+    "/sqlTest": async (req, res, options) => {
       let result = await runQuery("SELECT * FROM `test`");
       res.end(JSON.stringify(result));
     },
-    '/profilePicture': async (req, res, options) => {
-      if (!isOptionMissing(options, ['fbid'], res) && await isUserVerified(options.secretFbId)) {
-        let result = await runQuery("SELECT PICTURE FROM `users` WHERE users.FB_ID = ?", [options.fbid]);
-        res.setHeader('Content-Type', 'image/png');
-        res.end(result.result[0].PICTURE, 'binary');
+    "/profilePicture": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["fbid"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
+        let result = await runQuery(
+          "SELECT PICTURE FROM `users` WHERE users.FB_ID = ?",
+          [options.fbid]
+        );
+        res.setHeader("Content-Type", "image/png");
+        res.end(result.result[0].PICTURE, "binary");
       }
     },
-    '/getNewsticker': async (req, res, options) => {
-      let line = tickerJS[Math.floor(Math.random() * tickerJS.length)]
+    "/getNewsticker": async (req, res, options) => {
+      let line = tickerJS[Math.floor(Math.random() * tickerJS.length)];
 
-      endWithJSON(res, JSON.stringify({
-        ticker: line
-      }))
+      endWithJSON(
+        res,
+        JSON.stringify({
+          ticker: line,
+        })
+      );
     },
-    '/loadMessageMedia': async (req, res, options) => {
-      if (!isOptionMissing(options, ['uuid'], res) && await isUserVerified(options.secretFbId)) {
-        var content = (await runQuery("SELECT IFNULL(messages.AUDIO, messages.PICTURE) AS CONTENT FROM messages WHERE messages.UUID = ?", [options.uuid])).result[0].CONTENT
+    "/loadMessageMedia": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["uuid"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
+        var content = (
+          await runQuery(
+            "SELECT IFNULL(messages.AUDIO, messages.PICTURE) AS CONTENT FROM messages WHERE messages.UUID = ?",
+            [options.uuid]
+          )
+        ).result[0].CONTENT;
 
         /* res.setHeader('Content-Type', 'image/png');
         res.end(result.result[0].PICTURE, 'binary'); */
 
-        res.end(content)
+        res.end(content);
       }
     },
-    '/getUserData': async (req, res, options) => {
-      if (!isOptionMissing(options, ['fbid'], res) && await isUserVerified(options.secretFbId)) {
+    "/getUserData": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["fbid"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
         var data;
-        if (options.secretFbId == options.fbid) { // ACCESSING PRIVATE PROFILE
-          data = (await runQuery(`
+        if (options.secretFbId == options.fbid) {
+          // ACCESSING PRIVATE PROFILE
+          data = (
+            await runQuery(
+              `
           SELECT
               users.ID INTO @userid 
           FROM
@@ -814,19 +880,30 @@ module.exports = {
                   rides USING(USER_ID) 
               LEFT OUTER JOIN
                   drives USING(USER_ID)
-            `, [options.fbid]).catch(err => {
-            errorHandler.database('getUserData', options, err, 'Could not get user data', res)
-          })).result[1][0].JSON
+            `,
+              [options.fbid]
+            ).catch((err) => {
+              errorHandler.database(
+                "getUserData",
+                options,
+                err,
+                "Could not get user data",
+                res
+              );
+            })
+          ).result[1][0].JSON;
 
-          data = JSON.parse(data)
-          data.chatLifts = JSON.parse(await getChatLifts(options.fbid))
+          data = JSON.parse(data);
+          data.chatLifts = JSON.parse(await getChatLifts(options.fbid));
 
-          data.liftRequests = JSON.parse(await getLiftRequests(options.fbid))
+          data.liftRequests = JSON.parse(await getLiftRequests(options.fbid));
 
-          data['topFriends'] = apiResponseSimulation['topFriends']
-
-        } else { // accessing public information
-          data = (await runQuery(`
+          data["topFriends"] = apiResponseSimulation["topFriends"];
+        } else {
+          // accessing public information
+          data = (
+            await runQuery(
+              `
           SELECT
               users.ID INTO @userid 
           FROM
@@ -901,71 +978,101 @@ module.exports = {
                   rides USING(USER_ID) 
               LEFT OUTER JOIN
                   drives USING(USER_ID)
-            `, [options.fbid]).catch(async err => {
-            res = await errorHandler.database('getUserData', options, err, 'Could not get public user data', res)
-          })).result[1][0].JSON
+            `,
+              [options.fbid]
+            ).catch(async (err) => {
+              res = await errorHandler.database(
+                "getUserData",
+                options,
+                err,
+                "Could not get public user data",
+                res
+              );
+            })
+          ).result[1][0].JSON;
 
-          data = JSON.parse(data)
+          data = JSON.parse(data);
         }
-        data.stats.liftsOffered = Math.floor(Math.random() * 100)
-        data.stats.liftsAll = data.stats.liftsOffered + Math.floor(Math.random() * 200)
-        data.marketplaceOffers = JSON.parse(await getMarketplace(options.secretFbId))
+        data.stats.liftsOffered = Math.floor(Math.random() * 100);
+        data.stats.liftsAll =
+          data.stats.liftsOffered + Math.floor(Math.random() * 200);
+        data.marketplaceOffers = JSON.parse(
+          await getMarketplace(options.secretFbId)
+        );
 
-        endWithJSON(res, JSON.stringify(data))
-
+        endWithJSON(res, JSON.stringify(data));
       }
     },
-    '/getCarModels': async (req, res, options) => {
+    "/getCarModels": async (req, res, options) => {
       if (await isUserVerified(options.secretFbId)) {
         let result = await runQuery("SELECT BRAND, MODEL FROM car_models", []);
-        let cars = result.result
-        let carsObj = {}
+        let cars = result.result;
+        let carsObj = {};
 
-        cars.forEach(item => {
-          if (!carsObj[item.BRAND]) { // when brand not initialized, then do it	
-            carsObj[item.BRAND] = []
+        cars.forEach((item) => {
+          if (!carsObj[item.BRAND]) {
+            // when brand not initialized, then do it
+            carsObj[item.BRAND] = [];
           }
-          if (carsObj[item.BRAND].indexOf(item.MODEL) == -1) { // models should not exist twice in array	
-            carsObj[item.BRAND].push(item.MODEL)
-          } // basically grouped all cars in object array	
-        })
+          if (carsObj[item.BRAND].indexOf(item.MODEL) == -1) {
+            // models should not exist twice in array
+            carsObj[item.BRAND].push(item.MODEL);
+          } // basically grouped all cars in object array
+        });
 
-        endWithJSON(res, JSON.stringify(carsObj))
+        endWithJSON(res, JSON.stringify(carsObj));
       }
     },
-    '/getMessages': async (req, res, options) => {
+    "/getMessages": async (req, res, options) => {
       if (await isUserVerified(options.secretFbId)) {
-        var a = await getChatLifts(options.secretFbId)
+        var a = await getChatLifts(options.secretFbId);
 
-        endWithJSON(res, a)
+        endWithJSON(res, a);
       }
     },
-    '/getLegal': async (req, res, options) => {
-      var filename = null
+    "/getLegal": async (req, res, options) => {
+      var filename = null;
 
       switch (options.view) {
-        case 'agb': filename = 'terms_of_use'
-          break
-        case 'dataSec': filename = 'data_security'
-          break
+        case "agb":
+          filename = "terms_of_use";
+          break;
+        case "dataSec":
+          filename = "data_security";
+          break;
       }
       if (!filename) {
-        res.writeHead(404)
-      }
-      else fs.readFile(`legal/${filename}.html`, 'utf8', (err, data) => {
-        if (err) errorHandler.file('getLegal', err, 'Could not read file "' + filename + '.html', res)
-        else endWithJSON(res, JSON.stringify({
-          text: data
-        }))
-      })
+        res.writeHead(404);
+      } else
+        fs.readFile(`legal/${filename}.html`, "utf8", (err, data) => {
+          if (err)
+            errorHandler.file(
+              "getLegal",
+              err,
+              'Could not read file "' + filename + ".html",
+              res
+            );
+          else
+            endWithJSON(
+              res,
+              JSON.stringify({
+                text: data,
+              })
+            );
+        });
     },
-    '/getSupportData': async (req, res, options) => {
-      var result = (await runQuery(`SELECT faq.ID, faq.QUESTION, faq.CATEGORY, faq.ANSWER, users.NAME AS ORGAS_NAME, team.FUNCTION, team.ID AS ORGA_ID 
+    "/getSupportData": async (req, res, options) => {
+      var result = (
+          await runQuery(
+            `SELECT faq.ID, faq.QUESTION, faq.CATEGORY, faq.ANSWER, users.NAME AS ORGAS_NAME, team.FUNCTION, team.ID AS ORGA_ID 
       FROM faq JOIN team ON team.ID = faq.ANSWERED_BY LEFT JOIN users ON users.ID = faq.ANSWERED_BY	
-    WHERE IS_PUBLIC = 1`, [])).result,
+    WHERE IS_PUBLIC = 1`,
+            []
+          )
+        ).result,
         faqArr = [],
-        tutArr = []
-      result.forEach(item => {
+        tutArr = [];
+      result.forEach((item) => {
         faqArr.push({
           id: item.ID,
           question: item.QUESTION,
@@ -973,63 +1080,82 @@ module.exports = {
           category: item.CATEGORY,
           answeredBy: {
             id: item.ORGA_ID,
-            name: item.ORGAS_NAME.split(' ')[0],
-            function: item.FUNCTION
-          }
-        })
-      })
-      result = (await runQuery('SELECT ID, TITLE, CAPTION, URL FROM tutorials WHERE PUBLIC = 1')).result
-      if (result[0]) result.forEach(video => {
-        tutArr.push({
-          id: video.ID,
-          title: video.TITLE,
-          caption: video.CAPTION || '',
-          url: video.URL
-        })
-      })
+            name: item.ORGAS_NAME.split(" ")[0],
+            function: item.FUNCTION,
+          },
+        });
+      });
+      result = (
+        await runQuery(
+          "SELECT ID, TITLE, CAPTION, URL FROM tutorials WHERE PUBLIC = 1"
+        )
+      ).result;
+      if (result[0])
+        result.forEach((video) => {
+          tutArr.push({
+            id: video.ID,
+            title: video.TITLE,
+            caption: video.CAPTION || "",
+            url: video.URL,
+          });
+        });
 
-      endWithJSON(res, JSON.stringify({
-        faq: faqArr,
-        tutorials: tutArr
-      }))
+      endWithJSON(
+        res,
+        JSON.stringify({
+          faq: faqArr,
+          tutorials: tutArr,
+        })
+      );
     },
-    '/getAllFAQ': async (req, res, options) => {
-      var result = (await runQuery(`SELECT faq.*, users.NAME AS ORGAS_NAME, orgas.FUNCTION 	
+    "/getAllFAQ": async (req, res, options) => {
+      var result = (
+          await runQuery(
+            `SELECT faq.*, users.NAME AS ORGAS_NAME, orgas.FUNCTION 	
     FROM faq JOIN orgas ON orgas.ID = faq.ANSWERED_BY 	
-    JOIN users ON users.ID = faq.ANSWERED_BY`, [])).result,
+    JOIN users ON users.ID = faq.ANSWERED_BY`,
+            []
+          )
+        ).result,
         obj = {
-          'bedienung': [],
-          'sonstiges': []
-        }
-      result.forEach(item => {
+          bedienung: [],
+          sonstiges: [],
+        };
+      result.forEach((item) => {
         obj[item.CATEGORY.toLowerCase()].push({
           id: item.ID,
           question: item.QUESTION,
           askedBy: item.FIRST_NAME,
           answer: item.ANSWER,
-          answeredBy: item.ORGAS_NAME.split(' ')[0],
+          answeredBy: item.ORGAS_NAME.split(" ")[0],
           isPublic: item.IS_PUBLIC,
-          lastChange: item.LAST_CHANGE
-        })
-      })
+          lastChange: item.LAST_CHANGE,
+        });
+      });
 
-      endWithJSON(res, JSON.stringify(obj))
+      endWithJSON(res, JSON.stringify(obj));
     },
-    '/getTeamInfo': async (req, res, options) => {
+    "/getTeamInfo": async (req, res, options) => {
       if (isUserVerified(options.secretFbId)) {
-        var team = (await runQuery('SELECT * from team WHERE ID != 0')).result,
-          about = '',
-          teamArr = []
+        var team = (await runQuery("SELECT * from team WHERE ID != 0")).result,
+          about = "",
+          teamArr = [];
 
-        about = await new Promise((resolve, reject) => fs.readFile('legal/about.html', 'utf8', (err, data) => {
-          if (err) {
-            about = err
-            errorHandler.file('getTeamInfo', err, 'Could not read the about file', res)
-          }
-          else resolve(data)
-        }))
+        about = await new Promise((resolve, reject) =>
+          fs.readFile("legal/about.html", "utf8", (err, data) => {
+            if (err) {
+              about = err;
+              errorHandler.file(
+                "getTeamInfo",
+                err,
+                "Could not read the about file",
+                res
+              );
+            } else resolve(data);
+          })
+        );
 
-        team.forEach(async m => {
+        team.forEach(async (m) => {
           let teamElem = {
             id: m.ID,
             name: m.NAME,
@@ -1037,207 +1163,321 @@ module.exports = {
             function: m.FUNCTION,
             funcShort: m.FUNC_SHORT || null,
             bio: m.BIO,
-            picture: Buffer.from(m.PICTURE).toString('base64')
-          }
-          teamArr.push(teamElem)
-        })
+            picture: Buffer.from(m.PICTURE).toString("base64"),
+          };
+          teamArr.push(teamElem);
+        });
 
         var obj = {
           team: teamArr,
-          infoText: about
-        }
+          infoText: about,
+        };
 
-        endWithJSON(res, JSON.stringify(obj))
+        endWithJSON(res, JSON.stringify(obj));
       }
     },
-    '/chatPicture': async (req, res, options) => {
-      if (!isOptionMissing(options, ['msgId'], res) && await isUserVerified(options.secretFbId)) {
-        let pic = (await runQuery(`
+    "/chatPicture": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["msgId"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
+        let pic = (
+          await runQuery(
+            `
         SELECT messages.PICTURE from messages
         join lift_map on messages.LIFT_ID = lift_map.LIFT_ID
         join users.ID = lift_map.USER_ID
         where users.FB_ID = ?
         AND lift_map.PENDING = 0
-        AND messages.UUID = ?`, [options.secretFbId, options.msgId])).result[0].PICTURE
-        res.setHeader('Content-Type', 'image/jpg');
-        res.end(pic, 'binary');
+        AND messages.UUID = ?`,
+            [options.secretFbId, options.msgId]
+          )
+        ).result[0].PICTURE;
+        res.setHeader("Content-Type", "image/jpg");
+        res.end(pic, "binary");
       }
     },
-    '/chatAudio': async (req, res, options) => {
-      if (!isOptionMissing(options, ['msgId'], res) && await isUserVerified(options.secretFbId)) {
-        let audio = (await runQuery(`
+    "/chatAudio": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["msgId"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
+        let audio = (
+          await runQuery(
+            `
         SELECT messages.AUDIO from messages
         join lift_map on messages.LIFT_ID = lift_map.LIFT_ID
         join users.ID = lift_map.USER_ID
         where users.FB_ID = ?
         AND lift_map.PENDING = 0
-        AND messages.UUID = ?`, [options.secretFbId, options.msgId])).result[0].AUDIO
-        res.setHeader('Content-Type', 'application/octet-stream');
-        res.end(audio, 'binary');
+        AND messages.UUID = ?`,
+            [options.secretFbId, options.msgId]
+          )
+        ).result[0].AUDIO;
+        res.setHeader("Content-Type", "application/octet-stream");
+        res.end(audio, "binary");
       }
     },
-    '/marketplace': async (req, res, options) => {
+    "/marketplace": async (req, res, options) => {
       if (await isUserVerified(options.secretFbId)) {
-        endWithJSON(res, await getMarketplace(options.secretFbId)) // normal, simple marketplace offers are wanted
-      }
-      else {
-        console.log('not verified')
-        res.end()
+        endWithJSON(res, await getMarketplace(options.secretFbId)); // normal, simple marketplace offers are wanted
+      } else {
+        console.log("not verified");
+        res.end();
       }
     },
-    '/specificMarketplaceOffer': async (req, res, options) => {
+    "/specificMarketplaceOffer": async (req, res, options) => {
       if (await isUserVerified(options.secretFbId)) {
-        var offers = JSON.parse(await getMarketplaceOfferByUuid(options.uuid, options.invitingUserId))
+        var offers = JSON.parse(
+          await getMarketplaceOfferByUuid(options.uuid, options.invitingUserId)
+        );
         if (offers != null) {
-          wantedOffer = offers[0], // when specific uuid is wanted, then only one result will be there, which should be returned as single object and not as array with just one element
-            invitingUserName = wantedOffer.invitingUserName
-          delete wantedOffer.invitingUserName
-          endWithJSON(res, JSON.stringify({
-            lift: wantedOffer,
-            invitingUserName: invitingUserName
-          }))
-        }
-        else {
-          errorLogDatabase('specificMarketplaceOffer', options)
-          res.writeHead(404)
-          res.end('Database returned no data')
+          (wantedOffer = offers[0]), // when specific uuid is wanted, then only one result will be there, which should be returned as single object and not as array with just one element
+            (invitingUserName = wantedOffer.invitingUserName);
+          delete wantedOffer.invitingUserName;
+          endWithJSON(
+            res,
+            JSON.stringify({
+              lift: wantedOffer,
+              invitingUserName: invitingUserName,
+            })
+          );
+        } else {
+          errorLogDatabase("specificMarketplaceOffer", options);
+          res.writeHead(404);
+          res.end("Database returned no data");
         }
       }
     },
-    '/liftRequests': async (req, res, options) => {
+    "/liftRequests": async (req, res, options) => {
       if (await isUserVerified(options.secretFbId)) {
-        endWithJSON(res, JSON.stringify({
-          requests: JSON.parse(await getLiftRequests(options.secretFbId))
-        }));
+        endWithJSON(
+          res,
+          JSON.stringify({
+            requests: JSON.parse(await getLiftRequests(options.secretFbId)),
+          })
+        );
       }
-    }
+    },
   },
-  'POST': {
-    '/apiTest': async (req, res, options) => {
+  POST: {
+    "/apiTest": async (req, res, options) => {
       var a;
-      await runQuery('SELECT * FROM fail', []).catch(async err => {
-        res = await errorHandler.database('apiTest', options, err, 'custom err', res)
-      })
+      await runQuery("SELECT * FROM fail", []).catch(async (err) => {
+        res = await errorHandler.database(
+          "apiTest",
+          options,
+          err,
+          "custom err",
+          res
+        );
+      });
 
       // leave this part
-      if (typeof a == 'object') a = JSON.stringify(a)
-      endWithJSON(res, a)
+      if (typeof a == "object") a = JSON.stringify(a);
+      endWithJSON(res, a);
     },
-    '/createUserIfNotExisting': async (req, res, options) => {
-      if (!isOptionMissing(options, ['name', 'surname', 'mail'], res)) {
-        let user = await getUserId(options.secretFbId)
+    "/createUserIfNotExisting": async (req, res, options) => {
+      if (!isOptionMissing(options, ["name", "surname", "mail"], res)) {
+        let user = await getUserId(options.secretFbId);
         if (!user) {
           let png = generateJdenticon(options.name);
           await runQuery(
             "INSERT INTO `users` (`ID`, `FB_ID`, `NAME`, `SURNAME`, `GENDER`, `COURSE`, `PICTURE`, `DESCRIPTION`, `CREATED_DATE`, `MAIL`, `PREF_SMOKING`, `PREF_MUSIC`, `PREF_TALK`, `PREF_TALK_MORNING`, `VERIFIED`)" +
-            "VALUES (NULL, ?, ?, ?, 'X', '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED', 1)", [options.secretFbId, options.name, options.surname, png, options.mail]).catch(error => {
-              throw error;
-            });
-          res.end("added")
+              "VALUES (NULL, ?, ?, ?, 'X', '', ?, '', NULL, ?, 'RED', 'RED', 'RED', 'RED', 1)",
+            [
+              options.secretFbId,
+              options.name,
+              options.surname,
+              png,
+              options.mail,
+            ]
+          ).catch((error) => {
+            throw error;
+          });
+          res.end("added");
         }
-        res.end("existed")
+        res.end("existed");
       }
     },
-    '/updateDescription': async (req, res, options) => {
-      if (!isOptionMissing(options, ['description'], res) && await isUserVerified(options.secretFbId)) {
+    "/updateDescription": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["description"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
         await runQuery(
-          "UPDATE `users` SET `DESCRIPTION` = ? WHERE `users`.`FB_ID` = ?", [options.description, options.secretFbId]).catch(error => {
-            throw error;
-          });
+          "UPDATE `users` SET `DESCRIPTION` = ? WHERE `users`.`FB_ID` = ?",
+          [options.description, options.secretFbId]
+        ).catch((error) => {
+          throw error;
+        });
         res.end();
       }
     },
-    '/updateGender': async (req, res, options) => {
-      if (!isOptionMissing(options, ['gender'], res) && await isUserVerified(options.secretFbId)) {
+    "/updateGender": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["gender"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
         await runQuery(
-          "UPDATE `users` SET `GENDER` = ? WHERE `users`.`FB_ID` = ?", [options.gender, options.secretFbId]).catch(error => {
-            throw error;
-          });
+          "UPDATE `users` SET `GENDER` = ? WHERE `users`.`FB_ID` = ?",
+          [options.gender, options.secretFbId]
+        ).catch((error) => {
+          throw error;
+        });
         res.end();
       }
     },
-    '/updateLiftMaxDistance': async (req, res, options) => {
-      if (!isOptionMissing(options, ['liftMaxDistance'], res) && await isUserVerified(options.secretFbId)) {
+    "/updateLiftMaxDistance": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["liftMaxDistance"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
         await runQuery(
-          "UPDATE `users` SET `LIFT_MAX_DISTANCE` = ? WHERE `users`.`FB_ID` = ?", [options.liftMaxDistance, options.secretFbId]).catch(error => {
-            throw error;
-          });
+          "UPDATE `users` SET `LIFT_MAX_DISTANCE` = ? WHERE `users`.`FB_ID` = ?",
+          [options.liftMaxDistance, options.secretFbId]
+        ).catch((error) => {
+          throw error;
+        });
         res.end();
       }
     },
-    '/updateProfilePicture': async (req, res, options) => {
-      if (!isOptionMissing(options, ['imageData'], res) && await isUserVerified(options.secretFbId)) {
-        var img = Buffer.from(options.imageData.substr(22), 'base64');
-        var dimensions = require('image-size')(img);
+    "/updateProfilePicture": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["imageData"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
+        var img = Buffer.from(options.imageData.substr(22), "base64");
+        var dimensions = require("image-size")(img);
         if (!(dimensions.width == 300 && dimensions.height == 300)) {
           res.writeHead(400);
           res.end("Image must be 300x300");
         }
         await runQuery(
-          "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?", [img, options.secretFbId]).catch(async err => {
-            res = await errorHandler.database('updateProfilePicture', options, err, 'Could not update profile picture', res)
-          });
-        res.end()
-      }
-    },
-    '/resetProfilePicture': async (req, res, options) => {
-      if (await isUserVerified(options.secretFbId)) {
-        var name = (await runQuery("SELECT NAME FROM `users` WHERE users.FB_ID = ?", [options.secretFbId])).result[0].NAME
-        await runQuery(
-          "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?", [generateJdenticon(name), options.secretFbId]).catch(async err => {
-            res = await errorHandler.database('resetProfilePicture', options, err, '', res)
-          });
-        res.end()
-      }
-    },
-    '/updatePrefs': async (req, res, options) => {
-      if (!isOptionMissing(options, ['prefs'], res) && await isUserVerified(options.secretFbId)) {
-        await runQuery(
-          "UPDATE users SET PREF_TALK = ?, PREF_TALK_MORNING = ?, PREF_SMOKING = ?, PREF_MUSIC = ? WHERE FB_ID = ?;", [options.prefs.talk, options.prefs.talkMorning, options.prefs.smoking, options.prefs.music, options.secretFbId]).catch(async err => {
-            res = await errorHandler.database('updatePrefs', options, err, '', res)
-          });
+          "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?",
+          [img, options.secretFbId]
+        ).catch(async (err) => {
+          res = await errorHandler.database(
+            "updateProfilePicture",
+            options,
+            err,
+            "Could not update profile picture",
+            res
+          );
+        });
         res.end();
       }
     },
-    '/addLiftRequest': async (req, res, options) => {
-      if (!isOptionMissing(options, ['liftId'], res) && await isUserVerified(options.secretFbId)) {
-        var uid = options.secretFbId,
-          liftId = options.liftId
-        await runQuery('INSERT INTO lift_map (USER_ID, LIFT_ID) VALUES ((SELECT ID FROM users WHERE FB_ID = ?), (SELECT ID FROM lift WHERE UUID = ?))', [uid, liftId])
-          .catch(async err => {
-            if (!errorHandler.isDuplicateEntry(err)) res = await errorHandler.database('addLiftRequest', options, err, '', res)
-            // when duplicate entry, don't inform the client, but continue on, client will then remove offer from marketplace and is fine
-          })
-        res.end()
+    "/resetProfilePicture": async (req, res, options) => {
+      if (await isUserVerified(options.secretFbId)) {
+        var name = (
+          await runQuery("SELECT NAME FROM `users` WHERE users.FB_ID = ?", [
+            options.secretFbId,
+          ])
+        ).result[0].NAME;
+        await runQuery(
+          "UPDATE `users` SET `PICTURE` = ? WHERE `users`.`FB_ID` = ?",
+          [generateJdenticon(name), options.secretFbId]
+        ).catch(async (err) => {
+          res = await errorHandler.database(
+            "resetProfilePicture",
+            options,
+            err,
+            "",
+            res
+          );
+        });
+        res.end();
       }
     },
-    '/respondRequest': async (req, res, options) => {
-      if (!isOptionMissing(options, ['accepted', 'liftId', 'userId'], res) && await isUserVerified(options.secretFbId)) {
+    "/updatePrefs": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["prefs"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
+        await runQuery(
+          "UPDATE users SET PREF_TALK = ?, PREF_TALK_MORNING = ?, PREF_SMOKING = ?, PREF_MUSIC = ? WHERE FB_ID = ?;",
+          [
+            options.prefs.talk,
+            options.prefs.talkMorning,
+            options.prefs.smoking,
+            options.prefs.music,
+            options.secretFbId,
+          ]
+        ).catch(async (err) => {
+          res = await errorHandler.database(
+            "updatePrefs",
+            options,
+            err,
+            "",
+            res
+          );
+        });
+        res.end();
+      }
+    },
+    "/addLiftRequest": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["liftId"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
+        var uid = options.secretFbId,
+          liftId = options.liftId;
+        await runQuery(
+          "INSERT INTO lift_map (USER_ID, LIFT_ID) VALUES ((SELECT ID FROM users WHERE FB_ID = ?), (SELECT ID FROM lift WHERE UUID = ?))",
+          [uid, liftId]
+        ).catch(async (err) => {
+          if (!errorHandler.isDuplicateEntry(err))
+            res = await errorHandler.database(
+              "addLiftRequest",
+              options,
+              err,
+              "",
+              res
+            );
+          // when duplicate entry, don't inform the client, but continue on, client will then remove offer from marketplace and is fine
+        });
+        res.end();
+      }
+    },
+    "/respondRequest": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["accepted", "liftId", "userId"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
         var uid = options.secretFbId,
           liftId = options.liftId,
           accepted = options.accepted,
-          requestingUserId = options.userId
-        if (requestingUserId == -1) { // all requests of specific lift should be responded
+          requestingUserId = options.userId;
+        if (requestingUserId == -1) {
+          // all requests of specific lift should be responded
           if (accepted) {
-            await runQuery(`INSERT INTO messages( UUID, CONTENT, FROM_USER_ID, LIFT_ID, TIMESTAMP )
+            await runQuery(
+              `INSERT INTO messages( UUID, CONTENT, FROM_USER_ID, LIFT_ID, TIMESTAMP )
             VALUES(
               MD5(NOW(6)),
                 'Alle anfragenden Nutzer wurden der Fahrt hinzugefügt',
                 0,
                 ( SELECT ID FROM lift WHERE lift.UUID = ? ),
                 CURRENT_TIMESTAMP())`,
-              [liftId])
-            await runQuery('UPDATE lift_map SET PENDING = 0 WHERE lift_map.LIFT_ID = (SELECT ID FROM lift WHERE UUID = ?)', [liftId]) // simply set all relations of that lift to 1
+              [liftId]
+            );
+            await runQuery(
+              "UPDATE lift_map SET PENDING = 0 WHERE lift_map.LIFT_ID = (SELECT ID FROM lift WHERE UUID = ?)",
+              [liftId]
+            ); // simply set all relations of that lift to 1
+          } else {
+            res.writeHead(500);
+            res.end("Not implemented yet");
           }
-          else {
-            res.writeHead(500)
-            res.end('Not implemented yet')
-          }
-        }
-        else {
+        } else {
           if (accepted) {
-            await runQuery('UPDATE lift_map SET PENDING = 0 WHERE LIFT_ID = ( SELECT ID FROM lift WHERE lift.UUID = ? ) AND USER_ID = ( SELECT ID FROM users WHERE users.FB_ID = ? ) AND ', [liftId, requestingUserId])
-            await runQuery(`INSERT INTO messages( UUID, CONTENT, FROM_USER_ID, LIFT_ID, TIMESTAMP )
+            await runQuery(
+              "UPDATE lift_map SET PENDING = 0 WHERE LIFT_ID = ( SELECT ID FROM lift WHERE lift.UUID = ? ) AND USER_ID = ( SELECT ID FROM users WHERE users.FB_ID = ? ) AND ",
+              [liftId, requestingUserId]
+            );
+            await runQuery(
+              `INSERT INTO messages( UUID, CONTENT, FROM_USER_ID, LIFT_ID, TIMESTAMP )
             VALUES(
               MD5(NOW(6)), 
               CONCAT(
@@ -1246,107 +1486,197 @@ module.exports = {
                 0,
                 ( SELECT ID FROM lift WHERE lift.UUID = ? ),
                 CURRENT_TIMESTAMP())`,
-              [requestingUserId, liftId])
-          }
-          else await runQuery('DELETE FROM lift_map WHERE LIFT_ID = ( SELECT ID FROM lift WHERE lift.UUID = ? ) AND USER_ID = ( SELECT ID FROM users WHERE users.FB_ID = ? )', [liftId, requestingUserId])
+              [requestingUserId, liftId]
+            );
+          } else
+            await runQuery(
+              "DELETE FROM lift_map WHERE LIFT_ID = ( SELECT ID FROM lift WHERE lift.UUID = ? ) AND USER_ID = ( SELECT ID FROM users WHERE users.FB_ID = ? )",
+              [liftId, requestingUserId]
+            );
         }
         res.end();
       }
     },
-    '/addAddress': async (req, res, options) => {
-      if (!isOptionMissing(options, ['address'], res) && await isUserVerified(options.secretFbId)) {
+    "/addAddress": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["address"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
         var uid = options.secretFbId,
-          a = options.address
+          a = options.address;
         await runQuery(
-          "INSERT INTO `addresses` (`ID`, `NICKNAME`, `POSTCODE`, `CITY`, `NUMBER`, `STREET`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, (SELECT ID FROM users WHERE FB_ID = ?));", [a.nickname || '', a.postcode, a.city, a.number, a.street, uid]).catch(err => {
-            errorHandler(err, res, 'addAddress')
-          });
-        var a = (await runQuery('SELECT MAX(b.ID) AS MAX FROM ( SELECT ID FROM addresses a WHERE a.CITY = ? AND a.NUMBER = ? AND a.STREET = ? ORDER BY a.ID DESC ) as b', [
-          a.city, a.number, a.street
-        ])).result[0].MAX
+          "INSERT INTO `addresses` (`ID`, `NICKNAME`, `POSTCODE`, `CITY`, `NUMBER`, `STREET`, `USER_ID`) VALUES (NULL, ?, ?, ?, ?, ?, (SELECT ID FROM users WHERE FB_ID = ?));",
+          [a.nickname || "", a.postcode, a.city, a.number, a.street, uid]
+        ).catch((err) => {
+          errorHandler(err, res, "addAddress");
+        });
+        var a = (
+          await runQuery(
+            "SELECT MAX(b.ID) AS MAX FROM ( SELECT ID FROM addresses a WHERE a.CITY = ? AND a.NUMBER = ? AND a.STREET = ? ORDER BY a.ID DESC ) as b",
+            [a.city, a.number, a.street]
+          )
+        ).result[0].MAX;
 
-        endWithJSON(res, JSON.stringify({
-          id: a
-        }))
+        endWithJSON(
+          res,
+          JSON.stringify({
+            id: a,
+          })
+        );
       }
     },
-    '/removeAddress': async (req, res, options) => {
-      if (!isOptionMissing(options, ['id'], res) && await isUserVerified(options.secretFbId)) {
-        await runQuery(
-          "DELETE FROM `addresses` WHERE `addresses`.`ID` = ?", [options.id]).catch(async err => {
-            res = await errorHandler.database('removeAddress', options, err, '', res)
-          });
+    "/removeAddress": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["id"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
+        await runQuery("DELETE FROM `addresses` WHERE `addresses`.`ID` = ?", [
+          options.id,
+        ]).catch(async (err) => {
+          res = await errorHandler.database(
+            "removeAddress",
+            options,
+            err,
+            "",
+            res
+          );
+        });
 
         res.end();
       }
     },
-    '/updateDefaultAddress': async (req, res, options) => {
-      if (!isOptionMissing(options, ['id'], res) && await isUserVerified(options.secretFbId)) {
+    "/updateDefaultAddress": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["id"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
         await runQuery(
-          "UPDATE `users` SET DEFAULT_ADDRESS = ? WHERE users.FB_ID = ?", [options.id, options.secretFbId]).catch(async err => {
-            res = await errorHandler.database('removeAddress', options, err, '', res)
-          });
+          "UPDATE `users` SET DEFAULT_ADDRESS = ? WHERE users.FB_ID = ?",
+          [options.id, options.secretFbId]
+        ).catch(async (err) => {
+          res = await errorHandler.database(
+            "removeAddress",
+            options,
+            err,
+            "",
+            res
+          );
+        });
 
         res.end();
       }
     },
-    '/addCar': async (req, res, options) => {
-      if (!isOptionMissing(options, ['car'], res) && await isUserVerified(options.secretFbId)) {
+    "/addCar": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["car"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
         var car = options.car,
-          uid = options.secretFbId
+          uid = options.secretFbId;
 
-        await runQuery("INSERT INTO car (`ID`, `LICENSE_PLATE`, `SEATS`, `MODEL_ID`, `TYPE`, `COLOR`, `YEAR`, `USER_ID`) VALUES (NULL, ?, ?, (SELECT ID FROM car_models WHERE BRAND = ? AND MODEL = ?), ?, ?, ?, (SELECT ID FROM users WHERE FB_ID = ?))",
-          [car.licensePlate, car.seats, car.brand, car.model, car.type, car.color.replace('#', ''), car.year, uid]).catch(error => {
-            errorHandler(error, res, '/addCar')
-          })
-        var createdId = (await runQuery('SELECT ID FROM car WHERE LICENSE_PLATE = ? AND COLOR = ?', [car.licensePlate, car.color.replace('#', '')])).result[0].ID
-
-        endWithJSON(res, JSON.stringify({
-          id: createdId
-        }))
-      }
-    },
-    '/removeCar': async (req, res, options) => {
-      if (!isOptionMissing(options, ['id'], res) && await isUserVerified(options.secretFbId)) {
         await runQuery(
-          "DELETE FROM car WHERE ID = ?", [options.id]).catch(async err => {
-            res = errorHandler.database('removeCar', options, err, 'Could not remove car', res)
+          "INSERT INTO car (`ID`, `LICENSE_PLATE`, `SEATS`, `MODEL_ID`, `TYPE`, `COLOR`, `YEAR`, `USER_ID`) VALUES (NULL, ?, ?, (SELECT ID FROM car_models WHERE BRAND = ? AND MODEL = ?), ?, ?, ?, (SELECT ID FROM users WHERE FB_ID = ?))",
+          [
+            car.licensePlate,
+            car.seats,
+            car.brand,
+            car.model,
+            car.type,
+            car.color.replace("#", ""),
+            car.year,
+            uid,
+          ]
+        ).catch((error) => {
+          errorHandler(error, res, "/addCar");
+        });
+        var createdId = (
+          await runQuery(
+            "SELECT ID FROM car WHERE LICENSE_PLATE = ? AND COLOR = ?",
+            [car.licensePlate, car.color.replace("#", "")]
+          )
+        ).result[0].ID;
+
+        endWithJSON(
+          res,
+          JSON.stringify({
+            id: createdId,
           })
-        res.end()
+        );
       }
     },
-    '/addLift': async (req, res, options) => {
-      if (!isOptionMissing(options, ['lift'], res) && await isUserVerified(options.secretFbId)) {
+    "/removeCar": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["id"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
+        await runQuery("DELETE FROM car WHERE ID = ?", [options.id]).catch(
+          async (err) => {
+            res = errorHandler.database(
+              "removeCar",
+              options,
+              err,
+              "Could not remove car",
+              res
+            );
+          }
+        );
+        res.end();
+      }
+    },
+    "/addLift": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["lift"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
         var lift = options.lift,
-          isdepartAt = lift.destination == 'school',
-          weekday = lift.dateTab == 'weekly' ? lift.date : 0,
-          fixLiftDate = lift.dateTab == 'fix' ? lift.date : null,
-          departAt = lift.timeTab == 'depart' ? lift.time : '00:00:00',
-          arriveBy = lift.timeTab == 'arrive' ? lift.time : '00:00:00',
-          uid = options.secretFbId
-        content = 'Willkommen im Chat!'
+          isdepartAt = lift.destination == "school",
+          weekday = lift.dateTab == "weekly" ? lift.date : 0,
+          fixLiftDate = lift.dateTab == "fix" ? lift.date : null,
+          departAt = lift.timeTab == "depart" ? lift.time : "00:00:00",
+          arriveBy = lift.timeTab == "arrive" ? lift.time : "00:00:00",
+          uid = options.secretFbId;
+        content = "Willkommen im Chat!";
 
         await runQuery(
           "INSERT INTO `lift` (`CREATED_AT`, `OFFERED_SEATS`, `CAR_ID`, `START`, `DESTINATION`, `UUID`, `REPEATS_ON_WEEKDAY`, `FIRST_DATE`, `DEPART_AT`, `ARRIVE_BY`) VALUES (current_timestamp(), ?, ?, ?, ?, SUBSTRING(UUID_SHORT(), -14, 14), ?, ? ,?, ?)",
-          [lift.seats, lift.carId, lift.startAddressId, lift.destinationAddressId, weekday, fixLiftDate, departAt, arriveBy]).catch(async err => {
-            res = await errorHandler.database('addLift', options, err, '', res)
-          })
+          [
+            lift.seats,
+            lift.carId,
+            lift.startAddressId,
+            lift.destinationAddressId,
+            weekday,
+            fixLiftDate,
+            departAt,
+            arriveBy,
+          ]
+        ).catch(async (err) => {
+          res = await errorHandler.database("addLift", options, err, "", res);
+        });
         await runQuery(
-          "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`, `PENDING`) SELECT MAX(ID) AS ID, (SELECT ID FROM users WHERE FB_ID = ?) AS USER_ID, 1 AS IS_DRIVER, 0 AS PENDING FROM lift", [uid]).catch(async err => {
-            res = await errorHandler.database('addLift', options, err, '', res)
-          })
-        await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, 0, (SELECT MAX(ID) AS ID FROM lift), current_timestamp())", [content]).catch(async error => {
-          res = await errorHandler.database('addLift', options, err, '', res)
-        })
+          "INSERT INTO `lift_map` (`LIFT_ID`, `USER_ID`, `IS_DRIVER`, `PENDING`) SELECT MAX(ID) AS ID, (SELECT ID FROM users WHERE FB_ID = ?) AS USER_ID, 1 AS IS_DRIVER, 0 AS PENDING FROM lift",
+          [uid]
+        ).catch(async (err) => {
+          res = await errorHandler.database("addLift", options, err, "", res);
+        });
+        await runQuery(
+          "INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, 0, (SELECT MAX(ID) AS ID FROM lift), current_timestamp())",
+          [content]
+        ).catch(async (error) => {
+          res = await errorHandler.database("addLift", options, err, "", res);
+        });
 
-        endWithJSON(res, await getChatLifts(options.secretFbId))
+        endWithJSON(res, await getChatLifts(options.secretFbId));
       }
     },
-    '/leaveLift': async (req, res, options) => {
-      if (!isOptionMissing(options, ['liftId'], res) && await isUserVerified(options.secretFbId)) {
+    "/leaveLift": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["liftId"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
         var uid = options.secretFbId,
-          liftId = options.liftId
-        await runQuery(`INSERT INTO messages( UUID, CONTENT, FROM_USER_ID, LIFT_ID, TIMESTAMP )
+          liftId = options.liftId;
+        await runQuery(
+          `INSERT INTO messages( UUID, CONTENT, FROM_USER_ID, LIFT_ID, TIMESTAMP )
           VALUES(
             MD5(NOW(6)), 
             CONCAT(
@@ -1355,32 +1685,57 @@ module.exports = {
               0,
               ( SELECT ID FROM lift WHERE lift.UUID = ? ),
               CURRENT_TIMESTAMP())`,
-          [uid, liftId])
-        await runQuery(`DELETE
+          [uid, liftId]
+        );
+        await runQuery(
+          `DELETE
         FROM lift
         WHERE ID = (
         SELECT LIFT_ID
         FROM lift_map
         WHERE USER_ID = (SELECT ID FROM users WHERE FB_ID = ?) AND PENDING = 0 AND IS_DRIVER = 1 AND LIFT_ID =(SELECT ID FROM lift WHERE UUID = ?)
-        )`, [uid, liftId]) // when lift found where uuid, driver and fbId are matching, then delete that lift. DB is set to cascade, so messages, lift_map, that stuff will be deleted.
-        await runQuery('DELETE FROM lift_map WHERE LIFT_ID = (SELECT ID FROM lift WHERE UUID = ?) AND USER_ID = (SELECT ID FROM users WHERE FB_ID = ?)', [liftId, uid]) // when lift has been deleted in previous line, this query will affect nothing
+        )`,
+          [uid, liftId]
+        ); // when lift found where uuid, driver and fbId are matching, then delete that lift. DB is set to cascade, so messages, lift_map, that stuff will be deleted.
+        await runQuery(
+          "DELETE FROM lift_map WHERE LIFT_ID = (SELECT ID FROM lift WHERE UUID = ?) AND USER_ID = (SELECT ID FROM users WHERE FB_ID = ?)",
+          [liftId, uid]
+        ); // when lift has been deleted in previous line, this query will affect nothing
 
-        res.end()
+        res.end();
       }
     },
-    '/updateLiftTime': async (req, res, options) => {
-      if (!isOptionMissing(options, ['liftId', 'time', 'isArriveBy', 'date', 'isFixDate'], res) && await isUserVerified(options.secretFbId)) {
+    "/updateLiftTime": async (req, res, options) => {
+      if (
+        !isOptionMissing(
+          options,
+          ["liftId", "time", "isArriveBy", "date", "isFixDate"],
+          res
+        ) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
         var liftId = options.liftId,
-          arriveBy = (options.isArriveBy == true ? options.time : '00:00') + ':00',
-          departAt = (options.isArriveBy == false ? options.time : '00:00') + ':00',
+          arriveBy =
+            (options.isArriveBy == true ? options.time : "00:00") + ":00",
+          departAt =
+            (options.isArriveBy == false ? options.time : "00:00") + ":00",
           firstDate = options.isFixDate == true ? options.date : null,
-          repeats = options.isFixDate == false ? options.date : 0
+          repeats = options.isFixDate == false ? options.date : 0;
 
-        await runQuery(`UPDATE lift SET REPEATS_ON_WEEKDAY = ?, FIRST_DATE = ?, DEPART_AT = ?, ARRIVE_BY = ? WHERE lift.UUID = ?`,
-          [repeats, firstDate, departAt, arriveBy, liftId]).catch(async err => {
-            res = await errorHandler.database('updateLiftTime', options, err, 'Could not update lift time', res)
-          })
-        await runQuery(`INSERT INTO messages( UUID, CONTENT, FROM_USER_ID, LIFT_ID, TIMESTAMP )
+        await runQuery(
+          `UPDATE lift SET REPEATS_ON_WEEKDAY = ?, FIRST_DATE = ?, DEPART_AT = ?, ARRIVE_BY = ? WHERE lift.UUID = ?`,
+          [repeats, firstDate, departAt, arriveBy, liftId]
+        ).catch(async (err) => {
+          res = await errorHandler.database(
+            "updateLiftTime",
+            options,
+            err,
+            "Could not update lift time",
+            res
+          );
+        });
+        await runQuery(
+          `INSERT INTO messages( UUID, CONTENT, FROM_USER_ID, LIFT_ID, TIMESTAMP )
           VALUES(
             MD5(NOW(6)), 
             CONCAT(
@@ -1389,87 +1744,138 @@ module.exports = {
               0,
               ( SELECT ID FROM lift WHERE lift.UUID = ? ),
               CURRENT_TIMESTAMP())`,
-          [options.secretFbId, liftId])
-        res.end()
+          [options.secretFbId, liftId]
+        );
+        res.end();
       }
     },
-    '/sendMessage': async (req, res, options) => {
-      if (!isOptionMissing(options, ['message'], res) && await isUserVerified(options.secretFbId)) {
-        var message = options.message
+    "/sendMessage": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["message"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
+        var message = options.message;
         if (message.content) {
-
           switch (message.type) {
             case 1: // text
-              await runQuery("INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, (SELECT ID FROM users WHERE FB_ID = ?), (SELECT ID FROM lift WHERE UUID = ?), current_timestamp())", [message.content, options.secretFbId, message.liftId]).catch(error => {
-                throw error
-              })
-              break
+              await runQuery(
+                "INSERT INTO `messages` (`UUID`, `CONTENT`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, (SELECT ID FROM users WHERE FB_ID = ?), (SELECT ID FROM lift WHERE UUID = ?), current_timestamp())",
+                [message.content, options.secretFbId, message.liftId]
+              ).catch((error) => {
+                throw error;
+              });
+              break;
             case 2: // audio blob
-              var blob = await (await fetch(dataURI)).blob()
-              await runQuery("INSERT INTO `messages` (`UUID`, `AUDIO`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, (SELECT ID FROM users WHERE FB_ID = ?), (SELECT ID FROM lift WHERE UUID = ?), current_timestamp())", [blob, options.secretFbId, message.liftId]).catch(error => {
-                throw error
-              })
-              break
+              /* var c =
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==";
+              console.log(c);
+              var blob = await fetch(c);
+              console.log(blob); */
+              /* await runQuery(
+                "INSERT INTO `messages` (`UUID`, `AUDIO`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, (SELECT ID FROM users WHERE FB_ID = ?), (SELECT ID FROM lift WHERE UUID = ?), current_timestamp())",
+                [blob, options.secretFbId, message.liftId]
+              ).catch((error) => {
+                throw error;
+              }); */
+              break;
             case 3: // image blob
-              var blob = await (await fetch(dataURI)).blob();
-              await runQuery("INSERT INTO `messages` (`UUID`, `PICTURE`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, (SELECT ID FROM users WHERE FB_ID = ?), (SELECT ID FROM lift WHERE UUID = ?), current_timestamp())", [message.content, userId, liftId]).catch(error => {
-                throw error
-              })
-              break
+              console.log(blob);
+              await runQuery(
+                "INSERT INTO `messages` (`UUID`, `PICTURE`, `FROM_USER_ID`, `LIFT_ID`, `TIMESTAMP`) VALUES (MD5(NOW(6)), ?, (SELECT ID FROM users WHERE FB_ID = ?), (SELECT ID FROM lift WHERE UUID = ?), current_timestamp())",
+                [message.content, userId, liftId]
+              ).catch((error) => {
+                throw error;
+              });
+              break;
           }
 
-          let result = await runQuery("SELECT MAX(ID), CURRENT_TIMESTAMP() AS TIME FROM `messages`", []).catch(error => {
-            throw error
-          })
-          var id = result.result[0]['MAX(ID)']
+          let result = await runQuery(
+            "SELECT MAX(ID), CURRENT_TIMESTAMP() AS TIME FROM `messages`",
+            []
+          ).catch((error) => {
+            throw error;
+          });
+          var id = result.result[0]["MAX(ID)"];
 
-          endWithJSON(res, JSON.stringify({
-            id: id,
-            timestamp: result.result[0].TIME
-          }))
-        }
-        else res.end()
+          endWithJSON(
+            res,
+            JSON.stringify({
+              id: id,
+              timestamp: result.result[0].TIME,
+            })
+          );
+        } else res.end();
       }
     },
-    '/changeFriendRelation': async (req, res, options) => {
-      if (!isOptionMissing(options, ['otherFbId', 'isRisingEdge'], res) && await isUserVerified(options.secretFbId)) {
+    "/changeFriendRelation": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["otherFbId", "isRisingEdge"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
         var ownId = options.secretFbId,
           otherFbId = options.otherFbId,
-          isRisingEdge = options.isRisingEdge // contains all needed information about the state transition
+          isRisingEdge = options.isRisingEdge; // contains all needed information about the state transition
 
-        if (isRisingEdge) { // rising edge -> insert relation, when already exists catch and do nothing
-          runQuery(`INSERT INTO friends (FROM, TO) VALUES
+        if (isRisingEdge) {
+          // rising edge -> insert relation, when already exists catch and do nothing
+          runQuery(
+            `INSERT INTO friends (FROM, TO) VALUES
           (
             (SELECT ID FROM users WHERE FB_ID = ?),
             (SELECT ID FROM users WHERE FB_ID = ?)
             )
-          `, [ownId, otherFbId]).catch(_ => { /* relation already there */ })
+          `,
+            [ownId, otherFbId]
+          ).catch((_) => {
+            /* relation already there */
+          });
+        } else {
+          runQuery(
+            `DELETE FROM friends WHERE FROM = (SELECT ID FROM users WHERE FB_ID = ?) AND TO = (SELECT ID FROM users WHERE FB_ID = ?)`,
+            [ownId, otherFbId]
+          ).catch((_) => {
+            /* relation not there any more */
+          });
         }
-        else {
-          runQuery(`DELETE FROM friends WHERE FROM = (SELECT ID FROM users WHERE FB_ID = ?) AND TO = (SELECT ID FROM users WHERE FB_ID = ?)`, [ownId, otherFbId]).catch(_ => { /* relation not there any more */ })
-        }
-        res.end()
+        res.end();
       }
     },
-    '/addQuestion': async (req, res, options) => {
-      if (!isOptionMissing(options, ['question', 'category', 'uid'], res) && await isUserVerified(options.secretFbId)) {
-        var cat = options.category
+    "/addQuestion": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["question", "category", "uid"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
+        var cat = options.category;
 
-        await runQuery("INSERT INTO `faq` (`QUESTION`, `CATEGORY`, `ASKED_BY`) VALUES (?, ?, ?)", [options.question, cat, uid])
-        res.end()
+        await runQuery(
+          "INSERT INTO `faq` (`QUESTION`, `CATEGORY`, `ASKED_BY`) VALUES (?, ?, ?)",
+          [options.question, cat, uid]
+        );
+        res.end();
       }
     },
-    '/updateQuestion': async (req, res, options) => {
-      if (!isOptionMissing(options, ['data', 'mode'], res) && await isUserVerified(options.secretFbId)) {
-        var d = options.data
-        if (options.mode == 1) { // normal mode
-          await runQuery("UPDATE faq SET ANSWER = ?, ANSWERED_BY = ?, IS_PUBLIC = ? WHERE ID = ?", [d.answer, d.orgaId, d.instantPublish, d.id])
-        } else { // mode is 2, special mode just to set publicity
-          await runQuery("UPDATE faq SET IS_PUBLIC = ? WHERE ID = ?", [d.newValue, d.id])
+    "/updateQuestion": async (req, res, options) => {
+      if (
+        !isOptionMissing(options, ["data", "mode"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
+        var d = options.data;
+        if (options.mode == 1) {
+          // normal mode
+          await runQuery(
+            "UPDATE faq SET ANSWER = ?, ANSWERED_BY = ?, IS_PUBLIC = ? WHERE ID = ?",
+            [d.answer, d.orgaId, d.instantPublish, d.id]
+          );
+        } else {
+          // mode is 2, special mode just to set publicity
+          await runQuery("UPDATE faq SET IS_PUBLIC = ? WHERE ID = ?", [
+            d.newValue,
+            d.id,
+          ]);
         }
 
-        res.end()
+        res.end();
       }
     },
-  }
-}
+  },
+};

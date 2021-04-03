@@ -26,13 +26,13 @@ admin.initializeApp({
 
 var api = require('./api');
 server.on('request', async (req, res) => {
-  //CORS -Stuff
+  // CORS -Stuff
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Request-Method', '*');
   res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST');
   res.setHeader('Access-Control-Allow-Headers', '*');
 
-  //Header
+  // Header
   res.setHeader('Content-Type', 'text/json');
 
   var urlParts = require("url").parse(req.url);
