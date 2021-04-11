@@ -1,5 +1,8 @@
 <template>
-  <div :class="`${noShadow ? '' : 'shadow-5 '} q-pa-sm primary-border`" style="border-radius: 7px">
+  <div
+    :class="`${noShadow ? '' : 'shadow-5 '} q-pa-sm primary-border`"
+    style="border-radius: 7px"
+  >
     <q-toolbar>
       <q-toolbar-title>
         <!-- <q-icon :name="lift.start.id > 3 ? 'home' : 'school'" size="sm" /> -->
@@ -13,23 +16,56 @@
           </q-badge>-->
         </span>
       </q-toolbar-title>
-      <q-icon v-if="lift.requested" name="mark_chat_read" size="xs" color="dark">
+      <q-icon
+        v-if="lift.requested"
+        name="mark_chat_read"
+        size="xs"
+        color="dark"
+      >
         <q-tooltip
           anchor="top middle"
           :content-class="`bg-white text-dark`"
           content-style="border: 1px solid darkgrey"
           self="bottom middle"
           :offset="[10, 10]"
-        >Du hast hier schon angefragt</q-tooltip>
+          >Du hast hier schon angefragt</q-tooltip
+        >
       </q-icon>
-      <q-btn flat @click="requestLift" v-else dense icon="touch_app" size="md" color="primary">
+      <q-btn
+        flat
+        @click="requestLift"
+        v-else-if="!isAlreadyRequested"
+        dense
+        icon="touch_app"
+        size="md"
+        color="primary"
+      >
         <q-tooltip
           anchor="top middle"
           :content-class="`bg-white text-dark`"
           content-style="border: 1px solid darkgrey"
           self="bottom middle"
           :offset="[10, 10]"
-        >Eine Anfrage senden</q-tooltip>
+          >Eine Anfrage senden</q-tooltip
+        >
+      </q-btn>
+      <q-btn
+        @click="cancelRequest"
+        flat
+        v-else
+        dense
+        icon="event_busy"
+        size="md"
+        color="primary"
+      >
+        <q-tooltip
+          anchor="top middle"
+          :content-class="`bg-white text-dark`"
+          content-style="border: 1px solid darkgrey"
+          self="bottom middle"
+          :offset="[10, 10]"
+          >Anfrage zurückziehen</q-tooltip
+        >
       </q-btn>
     </q-toolbar>
     <q-list>
@@ -50,10 +86,15 @@
             track-color="white"
             color="primary"
             text-color="dark"
-            :value="lift.seatsOccupied / lift.seatsOffered * 100"
+            :value="(lift.seatsOccupied / lift.seatsOffered) * 100"
           >
             <span>{{ lift.seatsOccupied }}/{{ lift.seatsOffered }}</span>
-            <q-icon style="display: inline" id="seats" size="12px" name="person" />
+            <q-icon
+              style="display: inline"
+              id="seats"
+              size="12px"
+              name="person"
+            />
           </q-knob>
         </q-item-section>
       </q-item>
@@ -73,7 +114,9 @@
             </q-item-section>
             <q-item-section>
               <q-item-label>
-                <div class="text-subtitle1">angeboten von {{ lift.driver.name }}</div>
+                <div class="text-subtitle1">
+                  angeboten von {{ lift.driver.name }}
+                </div>
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -84,18 +127,24 @@
               <q-toolbar-title class="row justify-evenly">
                 <div
                   class="text-center"
-                  v-for="pref in [{
-val: 'talk', icon: 'record_voice_over'
+                  v-for="pref in [
+                    {
+                      val: 'talk',
+                      icon: 'record_voice_over'
                     },
                     {
-val: 'talkMorning', icon: 'alarm'
+                      val: 'talkMorning',
+                      icon: 'alarm'
                     },
                     {
-val: 'smoking', icon: 'smoking_rooms'
+                      val: 'smoking',
+                      icon: 'smoking_rooms'
                     },
                     {
-val: 'music', icon: 'music_note'
-                    }]"
+                      val: 'music',
+                      icon: 'music_note'
+                    }
+                  ]"
                   :key="pref.val"
                 >
                   <q-icon
@@ -108,15 +157,22 @@ val: 'music', icon: 'music_note'
                     <q-tooltip
                       anchor="top middle"
                       :content-class="`bg-white text-dark`"
-                      :content-style="'border-bottom: 1px solid ' + betterPrefColor(pref.val)"
+                      :content-style="
+                        'border-bottom: 1px solid ' + betterPrefColor(pref.val)
+                      "
                       self="bottom middle"
                       :offset="[10, 10]"
-                    >{{ prefsDocu[pref.val][lift.driver.prefs[pref.val].toLowerCase()] }}</q-tooltip>
+                      >{{
+                        prefsDocu[pref.val][
+                          lift.driver.prefs[pref.val].toLowerCase()
+                        ]
+                      }}</q-tooltip
+                    >
                   </q-icon>
                 </div>
               </q-toolbar-title>
               <q-btn
-                :to="'benutzerinfo?userFbId='+lift.driver.id"
+                :to="'benutzerinfo?userFbId=' + lift.driver.id"
                 outline
                 class="rounded-borders"
                 color="dark"
@@ -133,19 +189,15 @@ val: 'music', icon: 'music_note'
 
 <script>
 import { date } from "quasar";
-import ExtendedHr from "components/ExtendedHr";
-import {
-  buildGetRequestUrl,
-  sendApiRequest,
-  GET_USER_PROFILE_PIC
-} from "../ApiAccess";
+import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
 
 export default {
   name: "LiftOffer",
   components: {},
   props: {
     lift: Object,
-    noShadow: Boolean
+    noShadow: Boolean,
+    isAlreadyRequested: Boolean
   },
   data() {
     return {
@@ -263,6 +315,26 @@ export default {
         })
         .onOk(data => {
           this.$emit("request", this.lift.id);
+        })
+        .onCancel();
+    },
+
+    cancelRequest() {
+      this.$q
+        .dialog({
+          title: "Zurückziehen",
+          message: `Deine Anfrage zur Fahrt zurückziehen?`,
+          ok: {
+            color: "positive"
+          },
+          cancel: {
+            color: "white"
+          },
+          cancel: true,
+          persistent: true
+        })
+        .onOk(_ => {
+          this.$emit("cancelRequest", this.lift.id);
         })
         .onCancel();
     },

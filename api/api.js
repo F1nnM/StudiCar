@@ -411,16 +411,16 @@ async function getMarketplace(fbid) {
         ) AS DESTINATION_CITY,
         lift.OFFERED_SEATS AS OFFERED_SEATS,
         lifts_without_me.SEATS AS OCCUPIED_SEATS
-    FROM
-        (
-            WITH a AS(
-            SELECT
-                LIFT_ID,
-                COUNT(*) AS WITH_ME
-            FROM
-                lift_map
-            GROUP BY
-                lift_map.LIFT_ID
+      FROM
+      (
+        WITH a AS(
+          SELECT
+              LIFT_ID,
+              COUNT(*) AS WITH_ME
+          FROM
+              lift_map
+          GROUP BY
+              lift_map.LIFT_ID
         ),
         b AS(
         SELECT
@@ -431,29 +431,158 @@ async function getMarketplace(fbid) {
             JOIN users
             ON users.ID = lift_map.USER_ID
         WHERE
-            users.ID != 1
+            users.FB_ID != ?
         GROUP BY
             lift_map.LIFT_ID
+        )
+        SELECT
+            a.LIFT_ID AS ID,
+            a.WITH_ME AS SEATS
+        FROM
+            a
+        JOIN b ON a.LIFT_ID = b.LIFT_ID AND a.WITH_ME = b.WITHOUT_ME
+      ) AS lifts_without_me
+      JOIN lift USING(ID)
+      JOIN addresses start_point ON
+          start_point.ID = lift.START
+      JOIN addresses dest_point ON
+          dest_point.ID = lift.DESTINATION
+      JOIN lift_map driver_map ON
+          driver_map.LIFT_ID = lifts_without_me.ID
+      JOIN users driver ON
+          driver.ID = driver_map.USER_ID AND driver_map.IS_DRIVER = 1
+      WHERE
+          lift.FIRST_DATE >= CURRENT_DATE() OR lift.REPEATS_ON_WEEKDAY != 0
     )
-SELECT
-    a.LIFT_ID AS ID,
-    a.WITH_ME AS SEATS
-FROM
-    a
-JOIN b ON a.LIFT_ID = b.LIFT_ID AND a.WITH_ME = b.WITHOUT_ME
-        ) AS lifts_without_me
-    JOIN lift USING(ID)
-    JOIN addresses start_point ON
-        start_point.ID = lift.START
-    JOIN addresses dest_point ON
-        dest_point.ID = lift.DESTINATION
-    JOIN lift_map driver_map ON
-        driver_map.LIFT_ID = lifts_without_me.ID
-    JOIN users driver ON
-        driver.ID = driver_map.USER_ID AND driver_map.IS_DRIVER = 1
-    WHERE
-        lift.FIRST_DATE >= CURRENT_DATE() OR lift.REPEATS_ON_WEEKDAY != 0
-  )
+  
+  SELECT
+  IFNULL(
+    JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'id', lifts.UUID,
+            'liftId', lifts.LIFT_ID,
+              'driver', JSON_OBJECT(
+                'id', lifts.DRIVER_FB_ID,
+                'name', lifts.DRIVER_NAME,
+                'surname', lifts.DRIVER_SURNAME,
+                'prefs', JSON_OBJECT(
+                      'talk', DRIVER_PREF_TALK,
+                      'talkMorning', DRIVER_PREF_TALKMORNING,
+                      'smoking', DRIVER_PREF_SMOKING,
+                      'music', DRIVER_PREF_MUSIC
+                  )
+              ),
+              'departAt', lifts.LIFT_DEPART,
+              'arriveBy', lifts.LIFT_ARRIVE,
+              'destination', JSON_OBJECT(
+              	  'name', lifts.DESTINATION_CITY,
+                  'id', lifts.DESTINATION_ID
+              ),
+              'start', JSON_OBJECT(
+              	  'name', lifts.START_CITY,
+                  'id', lifts.START_ID
+              ),
+              'seatsOffered', lifts.OFFERED_SEATS,
+              'seatsOccupied', lifts.OCCUPIED_SEATS,
+              'repeatsOn', lifts.REPEAT_DAY,
+              'date', lifts.FIRST_DATE
+          )
+      ), '[]') AS JSON
+  FROM
+    lifts
+        `,
+      [fbid]
+    )
+  ).result[0].JSON;
+  return JSON;
+}
+
+async function getOutgoingRequests(fbid) {
+  let JSON = (
+    await runQuery(
+      `
+  WITH
+  lifts as (
+      SELECT
+        lift.ID AS LIFT_ID,
+        lift.UUID,
+        driver.FB_ID AS DRIVER_FB_ID,
+        driver.NAME AS DRIVER_NAME,
+        driver.SURNAME AS DRIVER_SURNAME,
+        driver.PREF_TALK AS DRIVER_PREF_TALK,
+        driver.PREF_TALK_MORNING AS DRIVER_PREF_TALKMORNING,
+        driver.PREF_SMOKING AS DRIVER_PREF_SMOKING,
+        driver.PREF_MUSIC AS DRIVER_PREF_MUSIC,
+        lift.DEPART_AT AS LIFT_DEPART,
+        lift.ARRIVE_BY AS LIFT_ARRIVE,
+        lift.FIRST_DATE AS FIRST_DATE,
+        lift.REPEATS_ON_WEEKDAY AS REPEAT_DAY,
+        (
+            IF(
+                start_point.ID <= 3,
+                start_point.ID,
+                -1 -- -1 when it's a user address
+            )
+        ) AS START_ID,
+        (
+            IF(
+                start_point.ID <= 3,
+                start_point.NICKNAME, -- when a campus, show nickname instead of city
+                start_point.CITY
+            )
+        ) AS START_CITY,
+        (
+            IF(
+                dest_point.ID <= 3,
+                dest_point.ID,
+                -1
+            )
+        ) AS DESTINATION_ID,
+        (
+            IF(
+                dest_point.ID <= 3,
+                dest_point.NICKNAME,
+                dest_point.CITY
+            )
+        ) AS DESTINATION_CITY,
+        lift.OFFERED_SEATS AS OFFERED_SEATS,
+        pending_with_seats.SEATS AS OCCUPIED_SEATS
+      FROM
+      (
+        WITH a AS(
+          SELECT
+              LIFT_ID,
+              COUNT(*) AS SEATS
+          FROM
+              lift_map
+          WHERE lift_map.PENDING = 0
+          GROUP BY
+              lift_map.LIFT_ID
+        ), -- table returns the number of occupied seats per lift
+        b AS(
+         SELECT LIFT_ID
+         FROM lift_map
+         WHERE lift_map.PENDING = 1 AND lift_map.USER_ID = (SELECT ID FROM users WHERE FB_ID = ?)
+        ) -- table returns the ids of the lifts where the user has a pending request
+        SELECT
+            a.LIFT_ID AS ID,
+            a.SEATS AS SEATS
+        FROM
+            a
+        JOIN b USING(LIFT_ID) -- returns seats where user has pending request
+      ) AS pending_with_seats
+      JOIN lift USING(ID)
+      JOIN addresses start_point ON
+          start_point.ID = lift.START
+      JOIN addresses dest_point ON
+          dest_point.ID = lift.DESTINATION
+      JOIN lift_map driver_map ON
+          driver_map.LIFT_ID = pending_with_seats.ID
+      JOIN users driver ON
+          driver.ID = driver_map.USER_ID AND driver_map.IS_DRIVER = 1
+      WHERE
+          lift.FIRST_DATE >= CURRENT_DATE() OR lift.REPEATS_ON_WEEKDAY != 0
+    )
   
   SELECT
   IFNULL(
@@ -898,6 +1027,10 @@ module.exports = {
 
           data.liftRequests = JSON.parse(await getLiftRequests(options.fbid));
 
+          data.outgoingRequests = JSON.parse(
+            await getOutgoingRequests(options.fbid)
+          );
+
           data["topFriends"] = apiResponseSimulation["topFriends"];
         } else {
           // accessing public information
@@ -1255,6 +1388,16 @@ module.exports = {
           res,
           JSON.stringify({
             requests: JSON.parse(await getLiftRequests(options.secretFbId)),
+          })
+        );
+      }
+    },
+    "/outgoingRequests": async (req, res, options) => {
+      if (await isUserVerified(options.secretFbId)) {
+        endWithJSON(
+          res,
+          JSON.stringify({
+            requests: JSON.parse(await getOutgoingRequests(options.secretFbId)),
           })
         );
       }

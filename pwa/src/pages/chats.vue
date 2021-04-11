@@ -20,7 +20,14 @@
                 v-if="item.value == 'pending'"
                 class="q-mx-xs"
                 :color="totalRequests ? 'primary' : 'dark'"
-              >{{ totalRequests }}</q-badge>
+                >{{ totalRequests }}</q-badge
+              >
+              <q-badge
+                v-if="item.value == 'pending_out'"
+                class="q-mx-xs"
+                :color="totalRequests ? 'primary' : 'dark'"
+                >{{ totalRequests }}</q-badge
+              >
             </q-slide-transition>
             {{ item.label }}
           </q-tab-panel>
@@ -44,7 +51,12 @@
       </div>
     </TitleButtonAnchor>
 
-    <q-tab-panels animated v-model="liftTab" transition-prev="fade" transition-next="fade">
+    <q-tab-panels
+      animated
+      v-model="liftTab"
+      transition-prev="fade"
+      transition-next="fade"
+    >
       <q-tab-panel name="pending" class="q-pa-none">
         <div v-if="totalRequests" class="row">
           <!-- <p class="text-caption">Du hast Anfragen für die folgenden Mitfahrgelegenheiten:</p> -->
@@ -86,9 +98,11 @@
                     @input="val => { pendingRequestTab = val - 1 }"
                   ></q-pagination>-->
                   <div class="self-center">
-                    <div
-                      class="text-center text-overline"
-                    >Seite {{ pendingRequestTab + 1 }}/{{ liftRequests.length }}</div>
+                    <div class="text-center text-overline">
+                      Seite {{ pendingRequestTab + 1 }}/{{
+                        liftRequests.length
+                      }}
+                    </div>
                     <div class="row justify-between">
                       <q-btn
                         @click="switchTab(false)"
@@ -110,15 +124,18 @@
                   </div>
                 </LiftOfferForRequest>
                 <ExtHr color="grey-3" size="xs" />
-                <div
-                  v-if="!(seatsLeft(lift.liftId) > 0)"
-                  class="text-negative"
-                >Das Fahrzeug ist im Moment voll, du kannst keine Angebote annehmen.</div>
+                <div v-if="!(seatsLeft(lift.liftId) > 0)" class="text-negative">
+                  Das Fahrzeug ist im Moment voll, du kannst keine Angebote
+                  annehmen.
+                </div>
                 <div class="full-width">
                   <span
                     class="text-negative"
-                    v-if="!canAcceptAllRequests(lift) && (seatsLeft(lift.liftId) > 0)"
-                  >Du hast mehr Anfragen als noch Plätze frei sind!</span>
+                    v-if="
+                      !canAcceptAllRequests(lift) && seatsLeft(lift.liftId) > 0
+                    "
+                    >Du hast mehr Anfragen als noch Plätze frei sind!</span
+                  >
                   <q-slide-item
                     left-color="white"
                     right-color="white"
@@ -134,7 +151,9 @@
                       </q-avatar>
                       <span class="text-dark text-h6 text-uppercase">Ok</span>
 
-                      <p class="text-grey-9">Anfrage von {{ r.name }} annehmen</p>
+                      <p class="text-grey-9">
+                        Anfrage von {{ r.name }} annehmen
+                      </p>
                     </template>
                     <template v-slot:right>
                       <q-avatar>
@@ -142,7 +161,9 @@
                       </q-avatar>
                       <span class="text-dark text-h6 text-uppercase">Ne</span>
 
-                      <p class="text-grey-9">Anfrage von {{ r.name }} ablehnen</p>
+                      <p class="text-grey-9">
+                        Anfrage von {{ r.name }} ablehnen
+                      </p>
                     </template>
                     <div :key="keyToBeIncremented">
                       <IncomingLiftRequest
@@ -159,6 +180,22 @@
           </div>
         </div>
         <div v-else class="text-caption">Im Moment hast du keine Anfragen.</div>
+      </q-tab-panel>
+
+      <q-tab-panel name="pending_out" class="q-pa-none">
+        <div v-if="outgoingRequests.length">
+          <LiftOffer
+            v-for="r in outgoingRequests"
+            :key="r.liftId"
+            :lift="r"
+            isAlreadyRequested
+            @cancelRequest="cancelRequest"
+          />
+        </div>
+        <div v-else class="text-caption">
+          Im Moment sind von dir keine offenen Anfragen bei anderen Fahrten
+          vorhanden.
+        </div>
       </q-tab-panel>
 
       <q-tab-panel name="current" class="q-pa-none">
@@ -191,15 +228,15 @@
             :input="qrInput"
             text="Über diesen Code kannst du eine Fahrgemeinschaft direkt teilen."
           >
-            {{ liftCodePopup.data ? liftCodePopup.data.start.name : '' }}
+            {{ liftCodePopup.data ? liftCodePopup.data.start.name : "" }}
             <span class="q-mx-xs">›</span>
-            {{ liftCodePopup.data ? liftCodePopup.data.destination.name : '' }}
+            {{ liftCodePopup.data ? liftCodePopup.data.destination.name : "" }}
           </QrGen>
         </div>
-        <div
-          v-else
-          class="text-caption"
-        >Du nimmst noch an keinen Fahrten teil. Frage auf dem Marktplatz bei einer Fahrt an oder biete selber eine an.</div>
+        <div v-else class="text-caption">
+          Du nimmst noch an keinen Fahrten teil. Frage auf dem Marktplatz bei
+          einer Fahrt an oder biete selber eine an.
+        </div>
       </q-tab-panel>
     </q-tab-panels>
   </div>
@@ -209,6 +246,7 @@
 import ChatItem from "components/ChatItem";
 import LiftPopup from "components/LiftPopup";
 import QrGen from "components/QrGenerator";
+import LiftOffer from "components/LiftOffer";
 import ExtHr from "components/ExtendedHr";
 import TitleButtonAnchor from "components/TitleButtonAnchor";
 import IncomingLiftRequest from "components/IncomingLiftRequest";
@@ -224,6 +262,7 @@ export default {
     TitleButtonAnchor,
     IncomingLiftRequest,
     LiftOfferForRequest,
+    LiftOffer,
     ExtHr
   },
 
@@ -258,6 +297,9 @@ export default {
     },
     liftRequests() {
       return this.$store.getters["auth/user"].liftRequests;
+    },
+    outgoingRequests() {
+      return this.$store.getters["auth/user"].outgoingRequests;
     },
     lastMessages() {
       var returnedArray = [];
@@ -319,6 +361,11 @@ export default {
           value: "pending",
           icon: "call_received",
           label: "eingehende Anfrage" + (this.totalRequests != 1 ? "n" : "")
+        },
+        {
+          value: "pending_out",
+          icon: "call_missed_outgoing",
+          label: "ausstehende Anfrage" + (this.totalRequests != 1 ? "n" : "")
         }
       ];
     },
@@ -368,12 +415,16 @@ export default {
 
   methods: {
     async refreshContent(res, rej) {
-      var method =
-        this.liftTab == "current" ? "reloadChatLifts" : "getLiftRequests";
-      this.$store.dispatch("auth/" + method, {
+      var callbacks = {
         res: res,
         rej: rej
-      });
+      };
+      ["reloadChatLifts", "getLiftRequests", "getOutgoingRequests"].forEach(
+        method => {
+          this.$store.dispatch("auth/" + method, callbacks);
+          // reload all three of them, causes more traffic but then you have always full fresh data
+        }
+      );
     },
 
     switchTab(right) {
@@ -516,6 +567,10 @@ export default {
         }
       });
       this.keyToBeIncremented++;
+    },
+
+    cancelRequest(liftId) {
+      // here will come the cancelling code
     },
 
     closeLift() {
