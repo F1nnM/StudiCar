@@ -1,4 +1,5 @@
 <template>
+  <!-- was made to control styling and sizing of the team images properly -->
   <q-img :contain="!headFocused" :class="comClass" :src="imageData" />
 </template>
 

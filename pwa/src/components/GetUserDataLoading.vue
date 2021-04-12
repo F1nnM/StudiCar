@@ -1,4 +1,5 @@
 <template v-show="open">
+  <!-- this component is the splashscreen in StudiCar -->
   <div>
     <div class="q-pa-md">
       <q-dialog
@@ -10,10 +11,10 @@
       >
         <div class="flex flex-center bg-white">
           <div class="text-center full-width">
-            <p class="text-h4">
-              <span class="text-primary">Studi</span>Car
+            <p class="text-h4"><span class="text-primary">Studi</span>Car</p>
+            <p class="text-subtitle1 primary-underline">
+              Green. Cheap. Social.
             </p>
-            <p class="text-subtitle1 primary-underline">Green. Cheap. Social.</p>
           </div>
           <div>
             <q-linear-progress
@@ -29,10 +30,13 @@
           </div>
 
           <div class="fixed-bottom overflow-hidden-y text-center">
-            <q-tab-panels :value="open || showBranding" animated transition-show="jump-up">
+            <q-tab-panels
+              :value="open || showBranding"
+              animated
+              transition-show="jump-up"
+            >
               <q-tab-panel :name="true" class="text-grey-7">
-                Mit freundlicher Unterstützung des
-                ADAC e.V.
+                Mit freundlicher Unterstützung des ADAC e.V.
               </q-tab-panel>
             </q-tab-panels>
           </div>

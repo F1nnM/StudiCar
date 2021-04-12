@@ -1,4 +1,6 @@
 <template>
+  <!-- this component is just a placeholder for iOS devices with their bar at the bottom,
+otherwise that would overlay important nav elements -->
   <div>
     <div
       v-touch-hold:1500.mouse="hideBottomSpace"

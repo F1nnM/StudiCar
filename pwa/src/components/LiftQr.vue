@@ -1,4 +1,5 @@
 <template>
+  <!-- this component slides up from the bottom and lets you scan the public link of the given lift -->
   <q-dialog
     transition-show="scale"
     transition-hide="slide-down"
@@ -13,13 +14,16 @@
             <VueQrcode
               :width="200"
               :color="{
-                          dark: '#000000',
-                          light: '#FFFFFF'
-                          }"
+                dark: '#000000',
+                light: '#FFFFFF'
+              }"
               errorCorrectionLevel="H"
               :value="input"
             />
-            <q-img src="~assets/app-icon_from_web_filled.png" class="absolute-center qrcode-image" />
+            <q-img
+              src="~assets/app-icon_from_web_filled.png"
+              class="absolute-center qrcode-image"
+            />
           </div>
           <div class="q-pl-sm column justify-start">
             <div class="q-my-md">
@@ -31,9 +35,9 @@
           </div>
         </div>
         <ExtHr color="primary" size="xs" />
-        <p
-          class="text-grey-7 q-pt-sm q-mb-none text-center"
-        >Teile deine Mitfahrgelegenheit über den StudiCar Code</p>
+        <p class="text-grey-7 q-pt-sm q-mb-none text-center">
+          Teile deine Mitfahrgelegenheit über den StudiCar Code
+        </p>
         <p></p>
       </q-card-section>
     </q-card>
@@ -49,20 +53,20 @@ export default {
   components: { VueQrcode, ExtHr },
   props: {
     value: Boolean,
-    input: String,
+    input: String
   },
   data() {
     return {};
   },
   watch: {
-    open: function (val) {},
+    open: function(val) {}
   },
   computed: {},
   methods: {
     emit(val) {
       this.$emit("input", val);
-    },
-  },
+    }
+  }
 };
 </script>
 

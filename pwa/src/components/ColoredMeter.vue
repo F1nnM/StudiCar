@@ -1,10 +1,19 @@
 <template>
-  <div class="tester overflow-hidden" :style="`width: ${width}; height: calc(${width} / 2)`">
-    <div class="colored-scale overflow-hidden full-width" :style="coloredScaleGradient">
+  <!-- this is a kinda instable component at it's a quick-and-dirty solution for a metered display -->
+  <div
+    class="tester overflow-hidden"
+    :style="`width: ${width}; height: calc(${width} / 2)`"
+  >
+    <div
+      class="colored-scale overflow-hidden full-width"
+      :style="coloredScaleGradient"
+    >
       <div v-if="showLine" class="display-line" :style="lineTransform"></div>
       <div class="circle-shaper full-width full-height text-center q-pb-md">
         <div class="text-anchor flex flex-center q-ma-md vertical-bottom">
-          <p class="q-pa-none q-pt-sm text-red-3" v-if="!angle">Noch keine Daten</p>
+          <p class="q-pa-none q-pt-sm text-red-3" v-if="!angle">
+            Noch keine Daten
+          </p>
           <slot></slot>
         </div>
       </div>
@@ -18,31 +27,31 @@ export default {
   components: {},
   model: {
     prop: "angle",
-    event: "input",
+    event: "input"
   },
   props: {
     angle: {
       type: Number,
-      required: true,
+      required: true
     },
     width: {
       type: String,
-      required: true,
+      required: true
     },
     minInput: {
       type: Number,
-      default: -50,
+      default: -50
     },
     maxInput: {
       type: Number,
-      default: 50,
-    },
+      default: 50
+    }
   },
   data() {
     return {
       gradient: this.$store.state.liftDriverRatioGradient,
       angleMin: 1, // smalled rotation value, should be bit outer the left red area
-      angleMax: 178, // should be bit outer the righ red area
+      angleMax: 178 // should be bit outer the righ red area
     };
   },
   computed: {
@@ -65,14 +74,14 @@ export default {
       return (
         this.angle >= this.minInput && this.angle <= this.maxInput && this.angle
       );
-    },
+    }
   },
   watch: {},
   methods: {
     emit() {
       this.$emit("input", this.angle);
-    },
-  },
+    }
+  }
 };
 </script>
 

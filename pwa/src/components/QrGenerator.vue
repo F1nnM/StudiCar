@@ -1,4 +1,5 @@
 <template>
+  <!-- one of the most important components in StudiCar, shows the StudiCar Code and the public link of the content -->
   <div>
     <q-dialog
       :value="value"
@@ -14,7 +15,12 @@
       <q-card class="q-pa-none">
         <q-card-section class="text-center overflow-hidden-y q-pa-none">
           <div class="bg-white text-center">
-            <q-chip outline size="md" color="primary" class="q-ma-sm q-mt-lg col-6">
+            <q-chip
+              outline
+              size="md"
+              color="primary"
+              class="q-ma-sm q-mt-lg col-6"
+            >
               <span class="text-subtitle1 text-dark">
                 <slot v-if="!label">Scan den Code</slot>
                 <span v-else>{{ label }}</span>
@@ -24,7 +30,11 @@
 
             <q-tab-panels v-model="dataTab" animated swipeable infinite>
               <q-tab-panel name="qr">
-                <div :class="'relative-position studicar-code' + (value  ? ' show' : '')">
+                <div
+                  :class="
+                    'relative-position studicar-code' + (value ? ' show' : '')
+                  "
+                >
                   <div class="pan-anchor"></div>
                   <VueQrcode
                     v-touch-swipe.mouse.left="setDataTabToRaw"
@@ -69,11 +79,22 @@
                     <div
                       class="text-overline"
                       style="max-width: 90%; word-break: break-all; line-height: 1.1rem"
-                    >{{ publicUrl || '- es steht aktuell keine Url zur Verfügung -' }}</div>
+                    >
+                      {{
+                        publicUrl ||
+                          "- es steht aktuell keine Url zur Verfügung -"
+                      }}
+                    </div>
                   </q-card-section>
 
                   <q-card-actions align="around" class="q-mt-md q-mb-lg">
-                    <q-btn rounded class="q-pa-xs" color="primary" outline @click="copy">
+                    <q-btn
+                      rounded
+                      class="q-pa-xs"
+                      color="primary"
+                      outline
+                      @click="copy"
+                    >
                       <q-icon name="content_copy" color="dark" />
                     </q-btn>
                     <q-btn
@@ -157,8 +178,10 @@
 
               <p v-if="text">{{ text }}</p>
               <p v-else>
-                Über diesen Code kannst du Daten an andere Nutzer der App übertragen. Dafür muss ein anderer StudiCar-Nutzer den Code
-                mit seinem Scanner scannen und er wird direkt auf den passenden Inhalt weitergeleitet.
+                Über diesen Code kannst du Daten an andere Nutzer der App
+                übertragen. Dafür muss ein anderer StudiCar-Nutzer den Code mit
+                seinem Scanner scannen und er wird direkt auf den passenden
+                Inhalt weitergeleitet.
               </p>
             </div>
 

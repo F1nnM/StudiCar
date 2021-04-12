@@ -1,4 +1,5 @@
 <template>
+  <!-- the first component you will recognize when you open StudiCar, shows a single lift offer at marketplace -->
   <div
     :class="`${noShadow ? '' : 'shadow-5 '} q-pa-sm primary-border`"
     style="border-radius: 7px"

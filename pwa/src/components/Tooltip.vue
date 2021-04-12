@@ -1,4 +1,5 @@
 <template>
+  <!-- very important component for UX, as user should be able to see what important buttons do before clicking on them -->
   <q-tooltip
     anchor="top middle"
     content-class="rounded-borders transparent no-margin no-padding"
@@ -6,8 +7,12 @@
     :offset="[10, 10]"
   >
     <div
-      :class="`q-pa-sm tooltip-styling ${transparent || rgba ? 'tooltip-transparent' : ''} 
-      rounded-borders text-dark ${dark ? 'dark-mode' : '' }`"
+      :class="
+        `q-pa-sm tooltip-styling ${
+          transparent || rgba ? 'tooltip-transparent' : ''
+        } 
+      rounded-borders text-dark ${dark ? 'dark-mode' : ''}`
+      "
     >
       <slot></slot>
     </div>

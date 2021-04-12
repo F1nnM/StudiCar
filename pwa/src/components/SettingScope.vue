@@ -1,4 +1,5 @@
 <template>
+  <!-- just a pretty display scope for some of the settings -->
   <q-dialog
     :value="value"
     @input="emit"
@@ -9,10 +10,20 @@
   >
     <div class="bg-white q-mx-sm">
       <q-toolbar class="bg-white shadow-primary">
-        <q-btn round flat dense outline :disable="uploading" size="lg" @click="help = !help">
+        <q-btn
+          round
+          flat
+          dense
+          outline
+          :disable="uploading"
+          size="lg"
+          @click="help = !help"
+        >
           <span class="text-h6 text-weight-light">?</span>
         </q-btn>
-        <span v-if="!help" class="text-weight-light left-border-primary">{{ property }}</span>
+        <span v-if="!help" class="text-weight-light left-border-primary">{{
+          property
+        }}</span>
         <q-space />
         <q-btn
           flat
@@ -38,7 +49,9 @@
         >
           <Tooltip>
             <span v-if="!disableSave">Neu eingestellte Werte übernehmen</span>
-            <span v-else>Noch deaktiviert, weil noch keine Werte verändert wurden</span>
+            <span v-else
+              >Noch deaktiviert, weil noch keine Werte verändert wurden</span
+            >
           </Tooltip>
         </q-btn>
       </q-toolbar>

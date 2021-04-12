@@ -2,7 +2,10 @@
   <q-card>
     <q-card-section>
       <div class="row">
-        <div class="col-4 rounded-borders" :style="'box-shadow: -1px 0px 4px 2px' + car.color">
+        <div
+          class="col-4 rounded-borders"
+          :style="'box-shadow: -1px 0px 4px 2px' + car.color"
+        >
           <q-img
             src="~assets/app-logo.svg"
             spinner-color="primary"
@@ -22,26 +25,28 @@
       <div
         class="row q-"
         v-for="data in [
-                  {
-                    prop: 'type',
-                    label: 'Fahrzeugtyp',
-                  },
-                  {
-                    prop: 'seats',
-                    label: 'Freie Sitze',
-                  },
-                  {
-                    prop: 'licensePlate',
-                    label: 'Kennzeichen',
-                  },
-                  {
-                    prop: 'year',
-                    label: 'Baujahr',
-                  },
-                ]"
+          {
+            prop: 'type',
+            label: 'Fahrzeugtyp'
+          },
+          {
+            prop: 'seats',
+            label: 'Freie Sitze'
+          },
+          {
+            prop: 'licensePlate',
+            label: 'Kennzeichen'
+          },
+          {
+            prop: 'year',
+            label: 'Baujahr'
+          }
+        ]"
         :key="data.prop"
       >
-        <div class="text-uppercase text-caption q-mb-sm col-7">{{ data.label }}</div>
+        <div class="text-uppercase text-caption q-mb-sm col-7">
+          {{ data.label }}
+        </div>
         <div class="col-5">{{ car[data.prop] }}</div>
       </div>
     </q-card-section>
@@ -49,7 +54,6 @@
 </template>
 
 <script>
-import { date } from "quasar";
 import ExtHr from "components/ExtendedHr";
 
 export default {
@@ -69,5 +73,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

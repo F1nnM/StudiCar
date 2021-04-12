@@ -1,4 +1,5 @@
 <template>
+  <!-- this component was made to split the profile file in smaller pieces to improve maintining, just the advantages of modularizing -->
   <div>
     <q-splitter :value="50" disable>
       <template v-slot:before>
@@ -19,7 +20,11 @@
                     </div>
                   </template>
                 </q-img>
-                <q-badge floating class="q-pa-none" style="background-color: transparent">
+                <q-badge
+                  floating
+                  class="q-pa-none"
+                  style="background-color: transparent"
+                >
                   <!-- <q-btn
                     round
                     color="black"
@@ -28,7 +33,13 @@
                     @click="resetPP()"
                     class="q-mr-sm"
                   />-->
-                  <q-btn round color="black" size="sm" icon="edit" @click="openUpload = true" />
+                  <q-btn
+                    round
+                    color="black"
+                    size="sm"
+                    icon="edit"
+                    @click="openUpload = true"
+                  />
                 </q-badge>
               </div>
             </q-card-section>
@@ -36,7 +47,9 @@
             <q-card-section class="row q-pb-none">
               <div
                 class="col-8 text-h5 text-weight-light text-left q-mt-none q-mb-xs custom-overline c-o-1 c-o-l c-o-sm"
-              >{{ username }}</div>
+              >
+                {{ username }}
+              </div>
               <p class="col-4">
                 <q-btn @click="shareProfileQR = true" flat>
                   <QrIcon size="sm" :type="4" showLogo />
@@ -108,9 +121,15 @@
           </q-tab-panel>
         <q-tab-panel name="friends" class="q-pa-xs">-->
         <q-list>
-          <q-item-label header class="q-pt-xs q-pb-xs text-caption text-uppercase">Dabei seit</q-item-label>
+          <q-item-label
+            header
+            class="q-pt-xs q-pb-xs text-caption text-uppercase"
+            >Dabei seit</q-item-label
+          >
           <q-item>{{ since }}</q-item>
-          <q-item-label header class="text-caption text-uppercase">Meiste Fahrten</q-item-label>
+          <q-item-label header class="text-caption text-uppercase"
+            >Meiste Fahrten</q-item-label
+          >
           <div v-if="friends.length">
             <q-item
               v-for="friend in friends"
@@ -129,10 +148,14 @@
               <q-item-section>
                 <q-item-label>{{ friend.name }}</q-item-label>
               </q-item-section>
-              <q-item-section side class="text-bold q-mr-sm">{{ friend.lifts }}</q-item-section>
+              <q-item-section side class="text-bold q-mr-sm">{{
+                friend.lifts
+              }}</q-item-section>
             </q-item>
           </div>
-          <div v-else class="text-caption">Du hast noch an keinen Fahrten teilgenommen</div>
+          <div v-else class="text-caption">
+            Du hast noch an keinen Fahrten teilgenommen
+          </div>
         </q-list>
         <!--  </q-tab-panel>
         </q-tab-panels>-->
@@ -140,7 +163,7 @@
     </q-splitter>
     <q-dialog
       :value="!!friendInfoData"
-      @input="e => friendInfoData = !!e"
+      @input="e => (friendInfoData = !!e)"
       position="right"
       class="bg-white"
       style="min-width: 45vw; min-height: 40vh"
@@ -157,7 +180,9 @@
               </q-item-section>
               <q-item-section>
                 <q-item-label>{{ friendInfoData.name }}</q-item-label>
-                <q-item-label caption>{{ friendInfoData.surname }}</q-item-label>
+                <q-item-label caption>{{
+                  friendInfoData.surname
+                }}</q-item-label>
               </q-item-section>
             </q-item>
             <q-expansion-item dense class="full-width">
@@ -172,7 +197,14 @@
               </template>
               <q-card>
                 <q-card-section>
-                  <q-btn outline no-caps dense class="q-px-sm" color="red" label="Entfernen" />
+                  <q-btn
+                    outline
+                    no-caps
+                    dense
+                    class="q-px-sm"
+                    color="red"
+                    label="Entfernen"
+                  />
                 </q-card-section>
               </q-card>
             </q-expansion-item>
@@ -201,10 +233,10 @@
                   @input="loadFile"
                   accept="image/*"
                   :hint="
-                      file
-                        ? '...und noch auf das Icon tippen'
-                        : 'noch kein Bild ausgewählt'
-                    "
+                    file
+                      ? '...und noch auf das Icon tippen'
+                      : 'noch kein Bild ausgewählt'
+                  "
                   class="full-width"
                 />
               </div>
@@ -227,7 +259,9 @@
                     color="primary"
                     dense
                     no-caps
-                    :disable="!this.newPPictureBase64 || uploadingProfilePicture"
+                    :disable="
+                      !this.newPPictureBase64 || uploadingProfilePicture
+                    "
                     @click="uploadProfilePicture"
                   />
                   <br />
@@ -474,5 +508,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

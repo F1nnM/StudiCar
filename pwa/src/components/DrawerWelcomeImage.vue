@@ -1,15 +1,26 @@
 <template>
+  <!-- this is a fun component to make the left drawer prettier -->
   <div>
-    <q-img v-if="true" :src="randomImage" style="height: 35vh;" class="text-white">
+    <q-img
+      v-if="true"
+      :src="randomImage"
+      style="height: 35vh;"
+      class="text-white"
+    >
       <div class="row full-width q-pa-md">
         <div class="text-h6 col-10 text-weight-light">{{ greeting.full }}</div>
         <q-icon size="sm" class="col-2" :name="greetingIcon" />
       </div>
-      <div v-if="caption && showTicker" class="full-width absolute-bottom-left text-caption">
+      <div
+        v-if="caption && showTicker"
+        class="full-width absolute-bottom-left text-caption"
+      >
         {{ caption }}
         <small>
           <br />bezogen von
-          <a class="text-white" href="https://der-postillon.com">der Postillon</a>
+          <a class="text-white" href="https://der-postillon.com"
+            >der Postillon</a
+          >
         </small>
       </div>
     </q-img>

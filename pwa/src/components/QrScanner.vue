@@ -1,17 +1,28 @@
 <template>
+  <!-- explaining by itself, had to play around a lot to get it work pretty with MainLayout and Navbar
+Is not really a module/component by nature as it is that hard connected to MainLayout -->
   <div>
     <div :class="'bg-primary scanner-container' + (open ? ' open' : '')">
       <q-slide-transition>
         <div class="scanning-overlay">
           <qrcode-stream
-            :style="'height: 100vh; transition: .5s; opacity:' + (scannerReady ? 1 : 0)"
+            :style="
+              'height: 100vh; transition: .5s; opacity:' +
+                (scannerReady ? 1 : 0)
+            "
             v-if="open"
             @init="onInit"
             @decode="decoded"
             v-touch-swipe.mouse="swiped"
           >
-            <q-dialog v-model="otherQR" transition-show="jump-up" transition-hide="jump-up">
-              <div class="text-no-wrap text-h5 q-pa-xl bg-black text-primary">kein StudiCar Code</div>
+            <q-dialog
+              v-model="otherQR"
+              transition-show="jump-up"
+              transition-hide="jump-up"
+            >
+              <div class="text-no-wrap text-h5 q-pa-xl bg-black text-primary">
+                kein StudiCar Code
+              </div>
             </q-dialog>
             <div class="overlay-inner">
               <p>
@@ -36,10 +47,13 @@
           </q-card-section>
 
           <q-card-section class="q-pa-md">
-            Der StudiCar Code kann benutzt werden, um Fahrtangebote zu teilen oder
-            andere Benutzerprofile anzusehen. Um einen Code zu erzeugen, geh einfach in deinem Profil auf eine deiner Fahrten und tipp auf
-            das kleine Code-Symbol. Diesen Code kann dann ein anderer StudiCar Benutzer scannen und sieht direkt den geteilten Inhalt.
-            <br />Du musst den Code übrigens nicht besonders genau platzieren. Es reicht, wenn er vollständig im Bild und gut zu sehen ist.
+            Der StudiCar Code kann benutzt werden, um Fahrtangebote zu teilen
+            oder andere Benutzerprofile anzusehen. Um einen Code zu erzeugen,
+            geh einfach in deinem Profil auf eine deiner Fahrten und tipp auf
+            das kleine Code-Symbol. Diesen Code kann dann ein anderer StudiCar
+            Benutzer scannen und sieht direkt den geteilten Inhalt.
+            <br />Du musst den Code übrigens nicht besonders genau platzieren.
+            Es reicht, wenn er vollständig im Bild und gut zu sehen ist.
           </q-card-section>
         </q-card>
       </q-dialog>
@@ -47,7 +61,6 @@
   </div>
 </template>
 
-        
 <script>
 import { QrcodeStream, QrcodeDropZone, QrcodeCapture } from "vue-qrcode-reader";
 

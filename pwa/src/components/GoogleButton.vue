@@ -1,8 +1,17 @@
 <template>
+  <!-- a beautiful Google Button Component, took thousands of hours to even get that damn borders in perfect gradients
+I hope you appreciate my work xD -->
   <div class="zgoogle-btn">
-    <div clickable v-ripple @click="doSignIn" class="box q-pa-xs row justify-around">
+    <div
+      clickable
+      v-ripple
+      @click="doSignIn"
+      class="box q-pa-xs row justify-around"
+    >
       <q-avatar size="sm" class="self-center q-ml-xs">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" />
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+        />
       </q-avatar>
       <span class="text-grey-7 text-subtitle2">
         über
@@ -31,7 +40,7 @@ export default {
       this.$firebase
         .auth()
         .signInWithPopup(provider)
-        .then(_=>_)
+        .then(_ => _)
         .catch(function(error) {
           // Handle Errors here.
           var errorCode = error.code;

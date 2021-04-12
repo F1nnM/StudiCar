@@ -548,21 +548,15 @@
 </template>
 
 <script>
-import VueRecord from "@codekraft-studio/vue-record";
+/* import VueRecord from "@codekraft-studio/vue-record";
 import Vue from "vue";
-Vue.use(VueRecord);
+Vue.use(VueRecord); */
 
 import { openURL, date, copyToClipboard, Notify } from "quasar";
-import ExtHr from "components/ExtendedHr";
 import LiftInfoDialog from "components/LiftInfoDialog";
-import AudioPlayer from "components/AudioPlayer";
 import BottomSpaceForiOS from "components/BottomSpaceForiOS";
 
-import {
-  sendApiRequest,
-  SQL_SEND_MESSAGE,
-  SQL_LOAD_MESSAGE_MEDIA
-} from "../ApiAccess";
+import { sendApiRequest, SQL_LOAD_MESSAGE_MEDIA } from "../ApiAccess";
 
 export default {
   name: "LiftPopup",
@@ -588,17 +582,6 @@ export default {
       quickMessagesTab: "text",
       footerBgColor: "white",
       user: this.$store.getters["auth/user"].uid,
-      // lift: {
-      //   car: {
-      //     brand: "",
-      //     model: "",
-      //     color: "",
-      //     type: "",
-      //     licensePlate: "",
-      //   },
-      //   passengers: [],
-      //   seats: 0, // all "empty" data just to avoid errors when calling variables
-      // },
       loading: 0, // as always: 0 means not loading, 1 means in progress, 2 means success and -1 error.
       bottomReached: false,
       medias: {}
@@ -616,29 +599,29 @@ export default {
   watch: {
     open: function(newValue) {
       if (newValue) {
-        this.showMembersInTitle = false; // so that each time tap-for-info is displayed again
+        this.showMembersInTitle = false; // so that each time you open tap-for-info is displayed again
         setTimeout(_ => {
           this.showMembersInTitle = true;
-        }, 2000); // after that time, hide tap-for-info-hint and show members
+        }, 2000); // after that time, hide tap-for-info-hint and show members instead
         setTimeout(_ => {
           this.scrollToEnd();
-        }, 50);
+        }, 50); // has to have short delay to get wanted effect
       } else {
         this.infoDrawerOpen = false;
         this.detailsOpen = false;
       }
     },
 
-    messageText: function(newText) {
-      if (newText.slice(-1) == "@") {
+    messageText: function(val) {
+      if (val.slice(-1) == "@") {
         this.showPassengersToBeMentioned = true;
       } else {
         this.showPassengersToBeMentioned = false;
       }
     },
 
-    detailsOpen: function(newv) {
-      if (newv) this.infoDrawerOpen = true;
+    detailsOpen: function(val) {
+      if (val) this.infoDrawerOpen = true;
     }
   },
   computed: {
@@ -660,13 +643,6 @@ export default {
 
     emojis() {
       var stringArray = this.$store.state.emojis;
-      //   betterArray = [];
-      // stringArray.forEach((string) => {
-      //   var categoryArray = [];
-      //   for (var i = 0; i < string.length; i++)
-      //     categoryArray.push(string.slice(i, i + 1));
-      //   betterArray.push(categoryArray);
-      // });
       return stringArray;
     },
 
@@ -702,7 +678,7 @@ export default {
           "blue-grey-4"
         ],
         dark: [
-          /* just some standard colors from the quasar palette */
+          /* just some standard colors from the quasar palette, a lift hasn't more people */
           "deep-purple-10",
           "indigo-10",
           "teal-10",
@@ -711,11 +687,12 @@ export default {
           "grey-10",
           "red-14",
           "blue-grey-10"
-        ] // dark/colorful selection
+        ] // dark/colored selection
       };
     },
 
     passengersAndDriverNames() {
+      // returns an object like that: {'weu43ef34f': 'John Doe', 'je374ffu494': 'Sarah Smith'}
       var people = {},
         firstNamesAlreadyFound = [],
         firstNamesNotUnique = [];
@@ -739,7 +716,7 @@ export default {
       allPeopleToBeHandled.unshift(
         JSON.parse(JSON.stringify(this.lift.driver))
       );
-      var isDriver = this.isDriver;
+
       allPeopleToBeHandled.forEach(p => {
         var nameToBeShown = p.name;
         if (firstNamesNotUnique.includes(p.name))
@@ -758,12 +735,12 @@ export default {
         });
       try {
         var endOfPage =
-          this.$refs.endOfPage.$el || document.getElementById("endOfPage");
+          this.$refs.endOfPage.$el || document.getElementById("endOfPage"); // just to be sure, sometimes Vue Element isn't be found
 
         endOfPage.scrollIntoView(
           delay
             ? {
-                behavior: "smooth",
+                behavior: "smooth", // delay is used when user is expected to see scrolling, a hard jump when not (e.g. on opening)
                 block: "start"
               }
             : null
@@ -774,15 +751,17 @@ export default {
     informUserAboutAudios() {
       this.$q.dialog({
         title: "Audios in StudiCar",
-        message: `Audios sind zwar mega komfortabel aufzunehmen und zu senden, es ist aber es weit weniger angenehm, die wesentlichen Inhalte dann wieder
-        anzuhören. StudiCar verweist daher auf die in den meisten Tastaturen eingebaute Speech-To-Text Funktion, die Gesprochenes
+        message: `Sprachnachrichten gestalten sich zwar für den Sender als äußerst komfortabel, allerdings ist der Empfänger
+        oftmals gezwungen, eine Minute lang zuzuhören für den Inhalt von zwei Zeilen Text. StudiCar verweist daher 
+        auf die in den meisten Tastaturen eingebaute Speech-To-Text Funktion, die Gesprochenes
         direkt in Text umwandelt. Schau in deinen Einstellungen nach, nutze die Funktion und ermögliche so auch den anderen Mitfahrern 
-        deine Nachrichten datenschonend und vor allem schnell zu lesen.`
+        deine Nachrichten datenschonend, von den Umgebungsgeräuschen unabhängig und vor allem schnell zu lesen.`
       });
     },
 
     getNameFromId(userId) {
       if (userId == "Go6vlU74gFgz5GgM5eRnWPPt2Cf1") return "StudiCar";
+      // StudiCar is registered as user, id has to be checked this way
       else {
         var name = this.passengersAndDriverNames[userId];
         if (!name) return "[Ehemalig]";
@@ -836,11 +815,11 @@ export default {
     },
 
     checkDayBreak(messageItem) {
+      // when a parameter is given, return true or false. When no parameter is given, returns the text of the label
+      // currently function is always called with a parameter given
       var messages = this.lift.messages;
       if (!messages[0]) return false;
       else {
-        // when a parameter is given, return true or false. When no parameter is given, returns the text of the label
-        // currently function is always called with a parameter given
         var pos = this.lift.messages.indexOf(messageItem),
           label = false;
 
@@ -962,7 +941,7 @@ export default {
       }
 
       this.$store.dispatch("auth/sendMessage", msgObj);
-      this.scrollToEnd(100);
+      this.scrollToEnd(100); // smooth scrolling to end, so that user can see newly generated message as well
 
       this.messageText = "";
     },
@@ -976,7 +955,9 @@ export default {
         media => {
           this.medias[uuid] = media;
         },
-        err => {}
+        err => {
+          alert("Error at fetching media: " + err);
+        }
       );
     },
 
@@ -1015,16 +996,7 @@ export default {
     }
   },
 
-  mounted() {
-    //  document.getElementById("recordButton").onmousedown = (event) => {
-    //    event.preventDefault()
-    //    this.recordAudio()
-    //  }
-    //  document.getElementById("recordButton").onmouseup = (event) => {
-    //    event.preventDefault()
-    //    this.sendAudio()
-    //  }
-  }
+  mounted() {}
 };
 </script>
 

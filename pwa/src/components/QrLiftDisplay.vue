@@ -1,4 +1,5 @@
 <template>
+  <!-- this component is used to display a lift transferred via StudiCar Code -->
   <q-dialog
     :value="!!liftData && !denied"
     persistent
@@ -11,20 +12,23 @@
     <q-card>
       <q-card-section>
         <div v-if="lift && !alreadyMemberOfLift">
-          <p
-            class="text-subtitle2"
-          >{{ invitingUserName }} hat dich zu einer Fahrgemeinschaft eingeladen:</p>
-          <p
-            v-if="lift.requested"
-            class="text-caption text-red"
-          >Du hast hier schon angefragt, Antwort steht noch aus</p>
+          <p class="text-subtitle2">
+            {{ invitingUserName }} hat dich zu einer Fahrgemeinschaft
+            eingeladen:
+          </p>
+          <p v-if="lift.requested" class="text-caption text-red">
+            Du hast hier schon angefragt, Antwort steht noch aus
+          </p>
           <LiftOffer :lift="lift" @request="emitRequest" noShadow />
           <q-item v-if="!prefsMatching">
             <q-item-section avatar>
               <q-icon name="warning" color="negative" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>Deine Präferenzen scheinen nicht zu denen von {{ lift.driver.name }} zu passen.</q-item-label>
+              <q-item-label
+                >Deine Präferenzen scheinen nicht zu denen von
+                {{ lift.driver.name }} zu passen.</q-item-label
+              >
             </q-item-section>
           </q-item>
         </div>
@@ -36,7 +40,9 @@
           </q-item-section>
           <q-item-section>
             <q-item-label>Info zur Einladung</q-item-label>
-            <q-item-label caption>Ihr seid bereits beide in der Fahrgemeinschaft.</q-item-label>
+            <q-item-label caption
+              >Ihr seid bereits beide in der Fahrgemeinschaft.</q-item-label
+            >
           </q-item-section>
         </q-item>
         <q-item v-else-if="err">
@@ -47,23 +53,38 @@
           </q-item-section>
           <q-item-section>
             <q-item-label>Anfrage fehlgeschlagen</q-item-label>
-            <q-item-label caption>Fehler {{ err.status }}: {{ err.data }}</q-item-label>
+            <q-item-label caption
+              >Fehler {{ err.status }}: {{ err.data }}</q-item-label
+            >
           </q-item-section>
         </q-item>
         <div v-else>
           <q-item>
             <q-item-section avatar>
-              <q-circular-progress indeterminate size="md" color="primary" class="q-ma-md" />
+              <q-circular-progress
+                indeterminate
+                size="md"
+                color="primary"
+                class="q-ma-md"
+              />
             </q-item-section>
             <q-item-section>
-              <q-item-label class="text-subtitle1">StudiCar überprüft deine Einladung</q-item-label>
+              <q-item-label class="text-subtitle1"
+                >StudiCar überprüft deine Einladung</q-item-label
+              >
               <q-item-label caption>Bitte hab einen Moment Geduld</q-item-label>
             </q-item-section>
           </q-item>
         </div>
       </q-card-section>
       <q-card-section actions class="text-right" bordered>
-        <q-btn @click="denied = true" label="Abbrechen" class="q-my-none" flat color="negative" />
+        <q-btn
+          @click="denied = true"
+          label="Abbrechen"
+          class="q-my-none"
+          flat
+          color="negative"
+        />
       </q-card-section>
     </q-card>
   </q-dialog>
@@ -186,5 +207,4 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

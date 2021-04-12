@@ -1,4 +1,5 @@
 <template>
+  <!-- actually a very cool component as well, lets you pretty good choose the color of your car with preview -->
   <div>
     <div class="row">
       <div class="q-pr-xs col-xs-8">
@@ -9,7 +10,12 @@
           transition-next="fade"
         >
           <q-tab-panel name="field">
-            <q-color v-model="colorPicker.color" no-header no-footer @input="emit()" />
+            <q-color
+              v-model="colorPicker.color"
+              no-header
+              no-footer
+              @input="emit()"
+            />
           </q-tab-panel>
 
           <q-tab-panel name="palette">
@@ -36,7 +42,7 @@
       </div>
       <div
         class="color-preview rounded-bottom-borders col-xs-4"
-        :style="`background-color: ${ colorPicker.color }`"
+        :style="`background-color: ${colorPicker.color}`"
       >
         <q-img v-if="imageSrc" :src="imageSrcFromJS" />
         <div style="background: transparent" class="dotted-border"></div>
@@ -52,26 +58,26 @@ import { date } from "quasar";
 export default {
   name: "ImageColorPicker",
   props: {
-    imageSrc: String,
+    imageSrc: String
   },
   methods: {
     emit() {
       this.$emit("input", this.colorPicker.color);
-    },
+    }
   },
   computed: {
     imageSrcFromJS() {
       return require("../assets/" + this.imageSrc);
-    },
+    }
   },
   data() {
     return {
       colorPicker: {
         tab: "field",
-        color: "#FFFFF",
-      },
+        color: "#FFFFF"
+      }
     };
-  },
+  }
 };
 </script>
 
