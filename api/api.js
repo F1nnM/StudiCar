@@ -1640,6 +1640,17 @@ module.exports = {
         res.end();
       }
     },
+    "/cancelLiftRequest": async (req, res, options) => {
+      if (await isUserVerified(options.secretFbId)) {
+        await runQuery(
+          `DELETE FROM lift_map 
+        WHERE LIFT_ID = (SELECT ID FROM lift WHERE UUID = ?) AND USER_ID = (SELECT ID FROM users WHERE FB_ID = ?) AND PENDING = 1`,
+          [options.liftId, options.secretFbId]
+        );
+        // removes selected entry, PENDING is there for security so that this cannot be used to remove existing passengers
+        endWithJSON(res, "");
+      }
+    },
     "/addAddress": async (req, res, options) => {
       if (
         !isOptionMissing(options, ["address"], res) &&

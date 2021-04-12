@@ -234,6 +234,11 @@ export const SQL_ADD_LIFT_REQUEST = {
   method: "POST"
 };
 
+export const SQL_CANCEL_LIFT_REQUEST = {
+  path: "/cancelLiftRequest",
+  method: "POST"
+};
+
 export const SQL_RESPOND_REQUEST = {
   path: "/respondRequest",
   method: "POST"

@@ -571,6 +571,7 @@ export default {
 
     cancelRequest(liftId) {
       // here will come the cancelling code
+      this.$store.dispatch("auth/cancelRequest", liftId);
     },
 
     closeLift() {

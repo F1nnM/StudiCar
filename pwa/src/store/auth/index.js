@@ -22,7 +22,8 @@ import {
   SQL_GET_OUTGOING_REQUESTS,
   SQL_RESPOND_REQUEST,
   SQL_ADD_LIFT_REQUEST,
-  SQL_UPDATE_DEFAULT_ADDRESS
+  SQL_UPDATE_DEFAULT_ADDRESS,
+  SQL_CANCEL_LIFT_REQUEST
 } from "../../ApiAccess";
 
 import { Notify } from "quasar";
@@ -216,6 +217,13 @@ export default {
         offer => offer.id != liftId
       );
       successNotify("StudiCar hat deine Anfrage ins System aufgenommen");
+    },
+
+    REMOVE_REQUEST(state, liftId) {
+      state.user.outgoingRequests = state.user.outgoingRequests.filter(
+        offer => offer.id != liftId
+      );
+      successNotify("Deine Anfrage wurde zurückgenommen");
     }
   },
 
@@ -349,6 +357,19 @@ export default {
         data => {
           commit("UPDATE_OUTGOING_REQUESTS", data.requests);
           callbacks.res();
+        },
+        err => errorNotify(err)
+      );
+    },
+
+    async cancelRequest({ commit }, payload) {
+      sendApiRequest(
+        SQL_CANCEL_LIFT_REQUEST,
+        {
+          liftId: payload
+        },
+        _ => {
+          commit("REMOVE_REQUEST", payload);
         },
         err => errorNotify(err)
       );
