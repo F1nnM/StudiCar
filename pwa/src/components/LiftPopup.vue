@@ -17,19 +17,35 @@
                 <div class="col-10 bg-primary">
                   <q-toolbar class="q-pr-xs">
                     <q-toolbar-title>
-                      <q-item dense class="q-px-none" clickable @click="infoDrawerOpen = true">
+                      <q-item
+                        dense
+                        class="q-px-none"
+                        clickable
+                        @click="infoDrawerOpen = true"
+                      >
                         <q-item-section class="text-white">
                           <q-item-label class="row no-wrap">
-                            <div class="col-auto text-h6 text-weight-light ellipsis">
-                              {{ getCampusLabel(lift.start.id, lift.start.name) }}
-                              <span
-                                class="q-mx-sm"
-                              >&rsaquo;</span>
-                              {{ getCampusLabel(lift.destination.id, lift.destination.name) }}
+                            <div
+                              class="col-auto text-h6 text-weight-light ellipsis"
+                            >
+                              {{
+                                getCampusLabel(lift.start.id, lift.start.name)
+                              }}
+                              <span class="q-mx-sm">&rsaquo;</span>
+                              {{
+                                getCampusLabel(
+                                  lift.destination.id,
+                                  lift.destination.name
+                                )
+                              }}
                             </div>
                           </q-item-label>
                           <q-slide-transition>
-                            <q-item-label v-if="!infoDrawerOpen" caption class="q-mt-none">
+                            <q-item-label
+                              v-if="!infoDrawerOpen"
+                              caption
+                              class="q-mt-none"
+                            >
                               <q-tab-panels
                                 class="q-pa-none bg-primary q-mb-xs text-grey-3 text-weight-thin"
                                 v-model="showMembersInTitle"
@@ -37,18 +53,29 @@
                                 transition-next="fade"
                                 transition-prev="fade"
                               >
-                                <q-tab-panel :name="true" class="q-pa-none row justify-between">
+                                <q-tab-panel
+                                  :name="true"
+                                  class="q-pa-none row justify-between"
+                                >
                                   <div>
                                     <span>
                                       Du
                                       <span v-if="isDriver">
                                         (
-                                        <q-icon size="1.3em" name="directions_car" />)
+                                        <q-icon
+                                          size="1.3em"
+                                          name="directions_car"
+                                        />)
                                       </span>
                                     </span>
                                     <span v-if="allMembersOfLift.length">
-                                      <span v-for="(p) in allMembersOfLift" :key="p.fbId">
-                                        <span v-if="p.id != myFbId">{{ ', ' }}{{ p.name }}</span>
+                                      <span
+                                        v-for="p in allMembersOfLift"
+                                        :key="p.fbId"
+                                      >
+                                        <span v-if="p.id != myFbId"
+                                          >{{ ", " }}{{ p.name }}</span
+                                        >
                                       </span>
                                     </span>
                                     <span v-else>keine Mitfahrer</span>
@@ -66,7 +93,9 @@
                                   />-->
                                   <!-- <q-btn flat round dense icon="search" /> -->
                                 </q-tab-panel>
-                                <q-tab-panel :name="false" class="q-pa-none">Tippe für Info</q-tab-panel>
+                                <q-tab-panel :name="false" class="q-pa-none"
+                                  >Tippe für Info</q-tab-panel
+                                >
                               </q-tab-panels>
                             </q-item-label>
                           </q-slide-transition>
@@ -128,7 +157,11 @@
                   <div
                     v-for="(m, messageIndex) in lift.messages"
                     :key="m.timestamp"
-                    :ref="messageIndex == lift.messages.length - 1 ? 'last_message': ''"
+                    :ref="
+                      messageIndex == lift.messages.length - 1
+                        ? 'last_message'
+                        : ''
+                    "
                   >
                     <!-- <p
                       class="custom-chat-label text-caption text-center q-mt-xl text-grey-7"
@@ -138,13 +171,18 @@
                         class="rounded-borders bg-grey-3 text-dark q-pa-xs text-weight-light"
                         style="font-size:0.8em"
                         v-if="checkDayBreak(m) != ''"
-                      >{{ checkDayBreak(m) }}</span>
+                        >{{ checkDayBreak(m) }}</span
+                      >
                     </p>
-                    <p class="text-center" v-if="getNameFromId(m.sentBy) == 'StudiCar'">
+                    <p
+                      class="text-center"
+                      v-if="getNameFromId(m.sentBy) == 'StudiCar'"
+                    >
                       <span
                         class="rounded-borders bg-grey-4 text-dark q-pa-xs text-weight-light"
                         style="font-size:1.0em"
-                      >{{ m.content }}</span>
+                        >{{ m.content }}</span
+                      >
                     </p>
                     <div>
                       <q-menu
@@ -171,11 +209,14 @@
                           <q-item
                             dense
                             clickable
-                            @click="_=> { showMoreMessageOptions = {
-                        message: m,
-                        open: true
-                       }
-                       }"
+                            @click="
+                              _ => {
+                                showMoreMessageOptions = {
+                                  message: m,
+                                  open: true
+                                };
+                              }
+                            "
                           >
                             <q-item-section avatar>
                               <q-icon name="more_horiz" size="sm" />
@@ -195,7 +236,9 @@
                         :bg-color="getColor(m.sentBy)"
                       >
                         <div v-if="m.type == 2">
-                          <div v-if="m.content.length < 40 && !medias[m.content]">
+                          <div
+                            v-if="m.content.length < 40 && !medias[m.content]"
+                          >
                             <q-item dense>
                               <q-item-section avatar>
                                 <q-btn
@@ -208,13 +251,18 @@
                               </q-item-section>
                               <q-item-section>
                                 <!-- <q-icon name="play_arrow" disable size="sm" flat color="grey-7" /> -->
-                                <span class="text-caption">Memo herunterladen</span>
+                                <span class="text-caption"
+                                  >Memo herunterladen</span
+                                >
                               </q-item-section>
                             </q-item>
                           </div>
                           <div v-else>
                             <audio controls>
-                              <source type="audio/wav" :src="medias[m.content]" />
+                              <source
+                                type="audio/wav"
+                                :src="medias[m.content]"
+                              />
                               <!-- <AudioPlayer :src="m.content" /> -->
                             </audio>
                           </div>
@@ -228,29 +276,50 @@
             </q-tab-panels>
             <q-dialog position="top" v-model="showMoreMessageOptions.open">
               <q-toolbar class="bg-primary text-white">
-                <q-toolbar-title class="text-subtitle1">Nachrichteninfos</q-toolbar-title>
+                <q-toolbar-title class="text-subtitle1"
+                  >Nachrichteninfos</q-toolbar-title
+                >
                 <q-btn icon="close" flat round dense v-close-popup />
               </q-toolbar>
-              <div v-if="showMoreMessageOptions.message" class="q-pa-md bg-white">
+              <div
+                v-if="showMoreMessageOptions.message"
+                class="q-pa-md bg-white"
+              >
                 <q-list>
                   <q-item dense>
                     <q-item-section>Datum</q-item-section>
-                    <q-item-section>{{ formatAsDate(showMoreMessageOptions.message.timestamp) }}</q-item-section>
+                    <q-item-section>{{
+                      formatAsDate(showMoreMessageOptions.message.timestamp)
+                    }}</q-item-section>
                   </q-item>
                   <q-item dense>
                     <q-item-section>Genaue Uhrzeit</q-item-section>
-                    <q-item-section>{{ formatAsLongTime(showMoreMessageOptions.message.timestamp) }} Uhr</q-item-section>
+                    <q-item-section
+                      >{{
+                        formatAsLongTime(
+                          showMoreMessageOptions.message.timestamp
+                        )
+                      }}
+                      Uhr</q-item-section
+                    >
                   </q-item>
                   <q-item dense>
                     <q-item-section>Länge</q-item-section>
-                    <q-item-section>{{ showMoreMessageOptions.message.content.length }} Zeichen</q-item-section>
+                    <q-item-section
+                      >{{
+                        showMoreMessageOptions.message.content.length
+                      }}
+                      Zeichen</q-item-section
+                    >
                   </q-item>
                   <q-separator class="q-mt-sm" />
                   <div class="q-mt-sm row">
                     <q-item
                       class="col-6"
                       clickable
-                      @click="customCopyToClipboard(showMoreMessageOptions.message)"
+                      @click="
+                        customCopyToClipboard(showMoreMessageOptions.message)
+                      "
                       v-ripple
                       dense
                     >
@@ -262,7 +331,9 @@
                     <q-item
                       class="col-6"
                       clickable
-                      @click="viewUserFromFbId(showMoreMessageOptions.message.sentBy)"
+                      @click="
+                        viewUserFromFbId(showMoreMessageOptions.message.sentBy)
+                      "
                       v-ripple
                       dense
                       v-if="showMoreMessageOptions.message.sentBy != user"
@@ -270,7 +341,12 @@
                       <q-item-section avatar>
                         <q-icon name="person_outline" size="sm" />
                       </q-item-section>
-                      <q-item-section>Profil von {{ getNameFromId(showMoreMessageOptions.message.sentBy) }}</q-item-section>
+                      <q-item-section
+                        >Profil von
+                        {{
+                          getNameFromId(showMoreMessageOptions.message.sentBy)
+                        }}</q-item-section
+                      >
                     </q-item>
                   </div>
                 </q-list>
@@ -280,7 +356,10 @@
 
           <q-footer reveal :class="`q-pa-none bg-${footerBgColor} text-white`">
             <q-slide-transition>
-              <div class="bg-white text-dark border-radius-50" v-if="showQuickMessages">
+              <div
+                class="bg-white text-dark border-radius-50"
+                v-if="showQuickMessages"
+              >
                 <div class="q-pl-sm q-pt-md">
                   <q-splitter :value="10">
                     <template v-slot:before>
@@ -309,7 +388,10 @@
                         <q-tab-panel name="emoji">
                           <q-list>
                             <q-item-label header>Emojis</q-item-label>
-                            <div v-for="cat in emojis" :key="cat + Math.random()">
+                            <div
+                              v-for="cat in emojis"
+                              :key="cat + Math.random()"
+                            >
                               <q-btn
                                 v-for="icon in cat"
                                 :key="icon"
@@ -317,7 +399,8 @@
                                 dense
                                 @click="messageText += icon"
                                 class="text-h5"
-                              >{{ icon }}</q-btn>
+                                >{{ icon }}</q-btn
+                              >
                               <br />
                               <q-separator />
                             </div>
@@ -325,7 +408,9 @@
                         </q-tab-panel>
                         <q-tab-panel name="text" class="q-pt-none">
                           <q-list>
-                            <q-item-label header>Gängige Nachrichten</q-item-label>
+                            <q-item-label header
+                              >Gängige Nachrichten</q-item-label
+                            >
                             <q-item
                               clickable
                               v-ripple
@@ -336,7 +421,9 @@
                               <q-item-section avatar>
                                 <q-icon :name="m.icon" />
                               </q-item-section>
-                              <q-item-section class="text-subtitle1">{{ m.text }}</q-item-section>
+                              <q-item-section class="text-subtitle1">{{
+                                m.text
+                              }}</q-item-section>
                             </q-item>
                           </q-list>
                         </q-tab-panel>
@@ -401,7 +488,9 @@
                       <q-tab-panel :name="true" class="q-pa-none q-my-md flex">
                         <p
                           class="text-subtitle1 text-dark q-mb-none recording-pulsing"
-                        >Audio wird aufgenommen...</p>
+                        >
+                          Audio wird aufgenommen...
+                        </p>
                         <q-space />
                       </q-tab-panel>
                     </q-tab-panels>
@@ -429,19 +518,28 @@
 
                     <q-tab-panel :name="true" class="q-pa-none full-width">
                       <q-space />
-                      <vue-record-audio
+                      <q-btn
+                        @click="informUserAboutAudios"
+                        icon="settings_voice"
+                        outline
+                        size="lg"
+                        rounded
+                        dense
+                        color="primary"
+                      />
+                      <!-- <vue-record-audio
                         mode="hold"
                         @result="sendAudio"
                         @onContextMenu="false"
                         @stream="recording = true"
                         class="record-audio"
-                      />
+                      /> -->
                     </q-tab-panel>
                   </q-tab-panels>
                 </q-toolbar>
               </div>
             </q-form>
-             <BottomSpaceForiOS />
+            <BottomSpaceForiOS />
           </q-footer>
         </q-layout>
       </q-dialog>
@@ -671,6 +769,16 @@ export default {
             : null
         );
       } catch (e) {}
+    },
+
+    informUserAboutAudios() {
+      this.$q.dialog({
+        title: "Audios in StudiCar",
+        message: `Audios sind zwar mega komfortabel aufzunehmen und zu senden, es ist aber es weit weniger angenehm, die wesentlichen Inhalte dann wieder
+        anzuhören. StudiCar verweist daher auf die in den meisten Tastaturen eingebaute Speech-To-Text Funktion, die Gesprochenes
+        direkt in Text umwandelt. Schau in deinen Einstellungen nach, nutze die Funktion und ermögliche so auch den anderen Mitfahrern 
+        deine Nachrichten datenschonend und vor allem schnell zu lesen.`
+      });
     },
 
     getNameFromId(userId) {
