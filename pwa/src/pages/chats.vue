@@ -202,7 +202,21 @@
         <div v-if="lastMessages.length">
           <q-list class="q-pb-sm">
             <ChatItem
-              v-for="(m, index) in lastMessages"
+              v-for="(m, index) in recentChats"
+              :key="m.timestamp + Math.random() + ''"
+              :message="m"
+              :sentByName="getNameFromId(m.liftId, m.sentBy)"
+              :firstItem="index == 0"
+              @open="openTheLift"
+              @shortLiftInfo="openShortLiftInfo"
+              @right="openShortLiftInfo"
+              @left="openLiftWithDetails"
+            />
+            <q-item-label class="q-mt-lg" header v-if="olderChats.length > 0"
+              >Ältere Chats</q-item-label
+            >
+            <ChatItem
+              v-for="(m, index) in olderChats"
               :key="m.timestamp + Math.random() + ''"
               :message="m"
               :sentByName="getNameFromId(m.liftId, m.sentBy)"
@@ -330,6 +344,32 @@ export default {
       ); // sort descending, so swap compared values
 
       return returnedArray;
+    },
+
+    recentChats() {
+      const now = new Date();
+      const dayLimit = 14;
+      return this.lastMessages.filter(m => {
+        return false == isOverLimit(m.timestamp, now, dayLimit);
+      });
+
+      function isOverLimit(stamp, now, dayLimit) {
+        var diff = date.getDateDiff(now, new Date(stamp), "days");
+        return diff > dayLimit;
+      }
+    },
+
+    olderChats() {
+      const now = new Date();
+      const dayLimit = 14;
+      return this.lastMessages.filter(m => {
+        return true == isOverLimit(m.timestamp, now, dayLimit);
+      });
+
+      function isOverLimit(stamp, now, dayLimit) {
+        var diff = date.getDateDiff(now, new Date(stamp), "days");
+        return diff > dayLimit;
+      }
     },
 
     withoutMessages() {
