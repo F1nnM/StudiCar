@@ -16,12 +16,12 @@
         class="full-width absolute-bottom-left text-caption"
       >
         {{ caption }}
-        <small>
+        <!-- <small>
           <br />bezogen von
           <a class="text-white" href="https://der-postillon.com"
             >der Postillon</a
           >
-        </small>
+        </small> -->
       </div>
     </q-img>
   </div>

@@ -814,7 +814,9 @@ module.exports = {
       }
     },
     "/getNewsticker": async (req, res, options) => {
-      let line = tickerJS[Math.floor(Math.random() * tickerJS.length)];
+      var claims = require("./news/dhbw/claims"),
+        rnd = Math.floor(Math.random() * claims.length),
+        line = claims[rnd];
 
       endWithJSON(
         res,
