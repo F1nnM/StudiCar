@@ -32,3 +32,11 @@ In this case, take a look at MainLayout.vue first.
     }
   }
 }
+
+.my-shadow-left {
+  border-style: solid; // just to init that property, most parts will be overwritten
+  border-width: 1px 1px 1px 0;
+  div {
+    color: black; // color prop of this el will be overwritten on runtime, so we have to override that again for the child elements
+  }
+}

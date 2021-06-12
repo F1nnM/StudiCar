@@ -28,9 +28,15 @@
             :color="notFound ? 'negative' : 'primary'"
             class="q-ma-md full-width"
           >
-            <q-icon :name="notFound ? 'error' : 'person_outline'" color="dark" size="md" />
+            <q-icon
+              :name="notFound ? 'error' : 'person_outline'"
+              color="dark"
+              size="md"
+            />
           </q-circular-progress>
-          <span v-if="!notFound" class="text-subtitle1">Profil wird geladen</span>
+          <span v-if="!notFound" class="text-subtitle1"
+            >Profil wird geladen</span
+          >
           <span v-else class="text-subtitle1">Nutzer nicht gefunden</span>
         </p>
       </div>
@@ -59,9 +65,9 @@
                   <div class="absolute-center">Bild wird geladen...</div>
                 </template>
                 <template v-slot:error>
-                  <div
-                    class="absolute-full flex flex-center text-caption"
-                  >Bild konnte nicht geladen werden</div>
+                  <div class="absolute-full flex flex-center text-caption">
+                    Bild konnte nicht geladen werden
+                  </div>
                 </template>
               </q-img>
             </q-card>
@@ -74,7 +80,8 @@
                 <q-item-section>
                   <span
                     class="text-h5 overflow q-pt-xs custom-underline c-u-3 c-u-md c-u-l"
-                  >{{ viewedUser.name.split(' ')[0] }}</span>
+                    >{{ viewedUser.name.split(" ")[0] }}</span
+                  >
                 </q-item-section>
                 <q-item-section avatar class="q-mr-md">
                   <q-btn icon="close" dense flat @click="$router.go(-1)">
@@ -84,7 +91,8 @@
                       content-style="border: 1px solid darkgrey"
                       self="bottom middle"
                       :offset="[10, 10]"
-                    >zur vorherigen Seite</q-tooltip>
+                      >zur vorherigen Seite</q-tooltip
+                    >
                   </q-btn>
                 </q-item-section>
               </q-item>
@@ -95,14 +103,21 @@
                 transition-prev="slide-right"
                 transition-next="slide-left"
               >
-                <q-tab-panel :name="viewingThisUser ? viewTab : 'data'" class="q-pa-none">
+                <q-tab-panel
+                  :name="viewingThisUser ? viewTab : 'data'"
+                  class="q-pa-none"
+                >
                   <!-- when viewing this user, tab will always be visible, indepent of viewTab -->
                   <q-item-label header class="q-pt-xs q-pb-xs">
                     <span class="text-uppercase text-caption">Dabei seit</span>
                   </q-item-label>
                   <q-item>{{ since }}</q-item>
                 </q-tab-panel>
-                <q-tab-panel name="social" v-if="!viewingThisUser" class="q-pa-none">
+                <q-tab-panel
+                  name="social"
+                  v-if="!viewingThisUser"
+                  class="q-pa-none"
+                >
                   <div class="row q-pl-md">
                     <q-icon
                       name="arrow_back_ios"
@@ -110,7 +125,7 @@
                       color="grey-5"
                       style="transform: rotate(-45deg); transform-origin: right center"
                     />
-                    <q-btn @click="toggleFriend" flat dense :ripple="false">
+                    <!-- <q-btn @click="toggleFriend" flat dense :ripple="false">
                       <q-avatar>
                         <div class="relative-position">
                           <q-icon
@@ -131,9 +146,18 @@
                           />
                         </div>
                       </q-avatar>
-                    </q-btn>
+                    </q-btn> -->
+                    <FriendHeart
+                      :left="friended.in"
+                      :right="friended.me"
+                      @click="toggleFriend"
+                    />
                     <q-icon name="minimize" size="md" color="grey-5" />
-                    <div class="vertical-middle q-pt-sm q-mt-xs q-ml-xs text-subtitle1">Du</div>
+                    <div
+                      class="vertical-middle q-pt-sm q-mt-xs q-ml-xs text-subtitle1"
+                    >
+                      Du
+                    </div>
                   </div>
                 </q-tab-panel>
               </q-tab-panels>
@@ -184,7 +208,11 @@
             <div class="row">
               <div class="col-6">
                 <div class="q-mb-xs">
-                  <q-item-label header caption class="q-pt-xs q-pb-xs text-uppercase">
+                  <q-item-label
+                    header
+                    caption
+                    class="q-pt-xs q-pb-xs text-uppercase"
+                  >
                     Präferenzen
                     <!-- <q-btn
                   dense
@@ -195,21 +223,29 @@
                   icon="info"
                     />-->
                   </q-item-label>
-                  <q-item-label caption class="q-pl-md q-pt-xs q-pb-md">Tippe lang für Info</q-item-label>
+                  <q-item-label caption class="q-pl-md q-pt-xs q-pb-md"
+                    >Tippe lang für Info</q-item-label
+                  >
                   <div class="text-center q-mt-sm q-px-md row justify-around">
                     <q-btn
-                      v-for="(pref) in [{
-val: 'talk', icon: 'record_voice_over'
-                    },
-                    {
-val: 'talkMorning', icon: 'alarm'
-                    },
-                    {
-val: 'smoking', icon: 'smoking_rooms'
-                    },
-                    {
-val: 'music', icon: 'music_note'
-                    }]"
+                      v-for="pref in [
+                        {
+                          val: 'talk',
+                          icon: 'record_voice_over'
+                        },
+                        {
+                          val: 'talkMorning',
+                          icon: 'alarm'
+                        },
+                        {
+                          val: 'smoking',
+                          icon: 'smoking_rooms'
+                        },
+                        {
+                          val: 'music',
+                          icon: 'music_note'
+                        }
+                      ]"
                       :key="pref.val"
                       outline
                       dense
@@ -224,10 +260,18 @@ val: 'music', icon: 'music_note'
                       <q-tooltip
                         anchor="top middle"
                         :content-class="`bg-white text-dark`"
-                        :content-style="'border-bottom: 1px solid ' + betterPrefColor(pref.val)"
+                        :content-style="
+                          'border-bottom: 1px solid ' +
+                            betterPrefColor(pref.val)
+                        "
                         self="bottom middle"
                         :offset="[10, 10]"
-                      >{{ prefsDocu[pref.val][viewedUser.prefs[pref.val].toLowerCase()]}}</q-tooltip>
+                        >{{
+                          prefsDocu[pref.val][
+                            viewedUser.prefs[pref.val].toLowerCase()
+                          ]
+                        }}</q-tooltip
+                      >
                     </q-btn>
                   </div>
                 </div>
@@ -237,7 +281,8 @@ val: 'music', icon: 'music_note'
                   <q-item-label
                     header
                     class="q-pt-sm q-pb-md text-uppercase text-caption"
-                  >Fahrtenstatistik</q-item-label>
+                    >Fahrtenstatistik</q-item-label
+                  >
                   <q-item-label>Früher</q-item-label>
                   <q-expansion-item class="q-pa-none">
                     <template v-slot:header>
@@ -247,14 +292,21 @@ val: 'music', icon: 'music_note'
                             color="white"
                             class="text-weight-light"
                             text-color="dark"
-                          >{{ viewedUser.stats.liftsAll }}</q-avatar>
+                            >{{ viewedUser.stats.liftsAll }}</q-avatar
+                          >
                         </q-item-section>
                         <q-item-section avatar>
                           <q-circular-progress
                             show-value
                             font-size="16px"
                             class="text-primary q-ma-sm"
-                            :value="Math.round(viewedUser.stats.liftsOffered / viewedUser.stats.liftsAll * 100)"
+                            :value="
+                              Math.round(
+                                (viewedUser.stats.liftsOffered /
+                                  viewedUser.stats.liftsAll) *
+                                  100
+                              )
+                            "
                             size="xl"
                             :thickness="0.05"
                             color="primary"
@@ -275,9 +327,10 @@ val: 'music', icon: 'music_note'
                           :minInput="0"
                           :maxInput="1"
                         >
-                          <p
-                            class="text-h6 text-weight-light q-pt-md"
-                          >{{ viewedUser.stats.liftsOffered }} / {{ viewedUser.stats.liftsAll }}</p>
+                          <p class="text-h6 text-weight-light q-pt-md">
+                            {{ viewedUser.stats.liftsOffered }} /
+                            {{ viewedUser.stats.liftsAll }}
+                          </p>
                         </ColoredMeter>
                         <br />
                         <q-separator />
@@ -294,14 +347,21 @@ val: 'music', icon: 'music_note'
                             color="white"
                             class="text-weight-light"
                             text-color="dark"
-                          >{{ viewedUser.stats.liftCount }}</q-avatar>
+                            >{{ viewedUser.stats.liftCount }}</q-avatar
+                          >
                         </q-item-section>
                         <q-item-section avatar>
                           <q-circular-progress
                             show-value
                             font-size="16px"
                             class="text-primary q-ma-sm"
-                            :value="Math.round(viewedUser.stats.driverCount / viewedUser.stats.liftCount * 100)"
+                            :value="
+                              Math.round(
+                                (viewedUser.stats.driverCount /
+                                  viewedUser.stats.liftCount) *
+                                  100
+                              )
+                            "
                             size="xl"
                             :thickness="0.05"
                             color="primary"
@@ -322,9 +382,10 @@ val: 'music', icon: 'music_note'
                           :minInput="0"
                           :maxInput="1"
                         >
-                          <p
-                            class="text-h6 text-weight-light q-pt-md"
-                          >{{ viewedUser.stats.driverCount }} / {{ viewedUser.stats.liftCount }}</p>
+                          <p class="text-h6 text-weight-light q-pt-md">
+                            {{ viewedUser.stats.driverCount }} /
+                            {{ viewedUser.stats.liftCount }}
+                          </p>
                         </ColoredMeter>
                         <br />
                         <q-separator />
@@ -339,7 +400,9 @@ val: 'music', icon: 'music_note'
             <p class="text-uppercase text-caption">Kurzbeschreibung</p>
             <div class="padding">
               <div v-if="viewedUser.bio">{{ viewedUser.bio }}</div>
-              <div v-else class="text-weight-light text-grey-7">Noch keine Beschreibung hinterlegt</div>
+              <div v-else class="text-weight-light text-grey-7">
+                Noch keine Beschreibung hinterlegt
+              </div>
             </div>
           </div>
         </q-tab-panel>
@@ -358,11 +421,13 @@ val: 'music', icon: 'music_note'
           Zustände des Freundschaftssystems in StudiCar:
           <q-list>
             <div
-              v-for="s in [{
-              icon: 'half',
-              title: 'Angefragt',
-              text: `Einer von euch beiden will eine Freundschaft eingehen. Die ausgefüllte Hälfte des Herzes zeigt an, wer. Das abgebildete Herz zeigt z.B. an, dass der andere Nutzer die von dir gestellte Anfrage noch nicht bestätigt hat.`
-            }]"
+              v-for="s in [
+                {
+                  icon: 'half',
+                  title: 'Angefragt',
+                  text: `Einer von euch beiden will eine Freundschaft eingehen. Die ausgefüllte Hälfte des Herzes zeigt an, wer. Das abgebildete Herz zeigt z.B. an, dass der andere Nutzer die von dir gestellte Anfrage noch nicht bestätigt hat.`
+                }
+              ]"
               :key="s.icon"
             >
               <q-item-label header>{{ s.title }}</q-item-label>
@@ -386,6 +451,7 @@ val: 'music', icon: 'music_note'
 <script>
 import { date, colors } from "quasar";
 import ColoredMeter from "components/ColoredMeter";
+import FriendHeart from "components/FriendHeart";
 import { ionMdHeartHalf, ionMdHeart } from "@quasar/extras/ionicons-v4";
 import {
   sendApiRequest,
@@ -396,7 +462,8 @@ import {
 const { lighten } = colors;
 export default {
   components: {
-    ColoredMeter
+    ColoredMeter,
+    FriendHeart
   },
   data() {
     return {
@@ -501,15 +568,14 @@ export default {
     },
 
     toggleFriend() {
-      if (this.friended.me) {
+      if (this.friended.me && this.friended.in) {
+        // only ask if there is an connection established
         this.$q
           .dialog({
             title: "Freundschaft beenden",
-            message: `Willst du die ${
-              this.friended.in ? "Freundschaft" : "Verbindung"
-            } mit ${this.viewedUser.name.split(" ")[0]} wirklich ${
-              this.friended.in ? "beenden" : "löschen"
-            }?`,
+            message: `Willst du die Freundschaft mit ${
+              this.viewedUser.name.split(" ")[0]
+            } wirklich beenden?`,
             cancel: true,
             persistent: true
           })
@@ -518,7 +584,7 @@ export default {
           });
       } else {
         // request code
-        this.friended.me = true;
+        this.friended.me = !this.friended.me;
       }
     }
   },

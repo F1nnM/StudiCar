@@ -22,7 +22,10 @@
                 transition-prev="jump-down"
                 transition-next="jump-up"
               >
-                <q-tab-panel class="q-pa-none bg-primary text-white" :name="false">
+                <q-tab-panel
+                  class="q-pa-none bg-primary text-white"
+                  :name="false"
+                >
                   <q-tab-panels
                     v-model="scannerOpen"
                     class="bg-primary"
@@ -46,19 +49,22 @@
                         color="deep-orange"
                         text-color="white"
                         icon="new_releases"
-                      >ältere Version</q-chip>
+                        >ältere Version</q-chip
+                      >
                       <!-- {{ pageTrans }} -->
                     </q-tab-panel>
                     <q-tab-panel
                       class="bg-primary q-pa-none text-white"
                       :name="true"
-                    >Scanvorgang läuft</q-tab-panel>
+                      >Scanvorgang läuft</q-tab-panel
+                    >
                   </q-tab-panels>
                 </q-tab-panel>
                 <q-tab-panel
                   class="q-pa-none bg-primary text-white"
                   :name="true"
-                >{{ navTitle || pageName }}</q-tab-panel>
+                  >{{ navTitle || pageName }}</q-tab-panel
+                >
               </q-tab-panels>
             </div>
             <div class="col-xs-2 col-md-1">
@@ -78,7 +84,9 @@
                       enable-background="new 0 0 1000 1000"
                       xml:space="preserve"
                     >
-                      <metadata>Svg Vector Icons : http://www.onlinewebfonts.com/icon</metadata>
+                      <metadata>
+                        Svg Vector Icons : http://www.onlinewebfonts.com/icon
+                      </metadata>
                       <g fill="white">
                         <path
                           v-if="!scannerOpen"
@@ -114,11 +122,20 @@
       content-class="bg-grey-1"
       class="drawer-no-border"
     >
-      <DrawerWelcomeImage :timeText="greeting" :caption="newsticker || 'Ticker wird geladen...'" />
+      <DrawerWelcomeImage
+        :timeText="greeting"
+        :caption="newsticker || 'Ticker wird geladen...'"
+      />
       <q-list class="q-pb-sm">
         <div v-for="group in navigationLinks" :key="group.title">
-          <q-item-label header class="text-grey-8">{{ group.title }}</q-item-label>
-          <EssentialLink v-for="link in group.links" :key="link.title" v-bind="link" />
+          <q-item-label header class="text-grey-8">{{
+            group.title
+          }}</q-item-label>
+          <EssentialLink
+            v-for="link in group.links"
+            :key="link.title"
+            v-bind="link"
+          />
         </div>
       </q-list>
       <ExtHr color="grey-7" size="xs" />
@@ -136,11 +153,21 @@
           <div v-if="pageName">
             <q-scroll-observer @scroll="scrollHandler" />
 
-            <div class="text-h5 q-py-md" v-if="!titleOnlyInNav">
+            <div class="q-py-md" v-if="!titleOnlyInNav">
+              <!-- <q-btn
+                flat
+                color="dark"
+                dense
+                size="md"
+                class="q-ml-sm q-mb-sm"
+                @click="goBack"
+              >
+                <span class="text-h4 font-weight-light">‹</span>
+              </q-btn> -->
               <span
-                class="custom-underline q-ml-md c-u-l c-u-2 c-u-md"
-                transition="slide-left"
-              >{{ pageName }}</span>
+                class="text-h5 custom-underline q-ml-md c-u-l c-u-2 c-u-md"
+                >{{ pageName }}</span
+              >
             </div>
           </div>
           <transition :name="pageTrans" mode="out-in">
@@ -166,7 +193,10 @@
           <!-- <q-btn icon="close" flat round dense v-close-popup /> -->
         </q-toolbar>
 
-        <q-card-section>Bitte starte die App neu, damit die neue Version fertig geladen werden kann.</q-card-section>
+        <q-card-section
+          >Bitte starte die App neu, damit die neue Version fertig geladen
+          werden kann.</q-card-section
+        >
         <q-card-actions align="around" class="q-mt-sm">
           <!-- <q-btn flat color="white" label="Später" @click="hideUpdateField = true" /> -->
           <q-btn color="primary" label="Ok, neu laden" @click="reloadPage" />
@@ -174,7 +204,7 @@
       </q-card>
     </q-dialog>
 
-    <q-footer elevated v-show="!(scannerOpen)">
+    <q-footer elevated v-show="!scannerOpen">
       <q-slide-transition>
         <div v-if="!!refreshErr">
           <q-banner inline-actions class="text-white bg-negative">
@@ -414,7 +444,7 @@ export default {
     },
 
     goBack() {
-      window.location.goBack();
+      this.$router.go(-1);
     },
 
     askAndReadClipboard(e) {

@@ -23,7 +23,6 @@
     "qrcode": "^1.4.4",
     "quasar": "^1.0.0",
     "quasar-app-extension-firebase-messaging": "^0.1.1",
-    "rss-parser": "^3.8.0",
     "vue-friendly-iframe": "^0.18.0",
     "vue-image-compressor": "^1.0.3",
     "vue-qrcode": "^0.3.3",

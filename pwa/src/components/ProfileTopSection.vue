@@ -1,17 +1,32 @@
 <template>
   <!-- this component was made to split the profile file in smaller pieces to improve maintining, just the advantages of modularizing -->
   <div>
-    <q-splitter :value="50" disable>
+    <div class="q-mr-md">
+      <TitleButtonAnchor>
+        <q-btn label="Freunde" to="/friends" outline color="primary" />
+      </TitleButtonAnchor>
+    </div>
+
+    <q-splitter
+      :value="50"
+      disable
+      :separator-style="'background-color: transparent '"
+    >
       <template v-slot:before>
         <div class="q-px-md q-py-sm">
-          <q-card>
+          <q-card
+            class="my-shadow-left"
+            :style="'border-color: ' + profileColor"
+          >
             <q-card-section class="q-pa-none">
               <div class>
                 <q-img
                   spinner-color="primary"
                   class="rounded-borders"
                   spinner-size="82px"
+                  id="profile_image"
                   :src="ppPath"
+                  @load="getProminentColor"
                 >
                   <template v-slot:error>
                     <div class="absolute-full flex flex-center text-white">
@@ -35,6 +50,7 @@
                   />-->
                   <q-btn
                     round
+                    outline
                     color="black"
                     size="sm"
                     icon="edit"
@@ -315,13 +331,15 @@
     </q-dialog>
   </div>
 </template>
-
+<script src="js/Vibrant.min.js"></script>
 <script>
 import { date } from "quasar";
+
 import ExtHr from "components/ExtendedHr";
 import ColoredMeter from "components/ColoredMeter";
 import QrGen from "components/QrGenerator";
 import QrIcon from "components/QrIcon";
+import TitleButtonAnchor from "components/TitleButtonAnchor";
 
 import {
   buildGetRequestUrl,
@@ -336,7 +354,8 @@ export default {
   components: {
     ExtHr,
     QrGen,
-    QrIcon
+    QrIcon,
+    TitleButtonAnchor
   },
   props: {
     username: String,
@@ -373,6 +392,10 @@ export default {
         } else arr[Math.floor(index / pageSize)].push(f);
       });
       return arr;
+    },
+
+    profileColor() {
+      return "white";
     },
 
     since() {
@@ -496,6 +519,10 @@ export default {
           );
         })
         .onCancel(() => {});
+    },
+
+    getProminentColor() {
+      var img = document.getElementById("profile_image");
     }
   },
   mounted() {
