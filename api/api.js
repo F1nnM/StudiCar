@@ -1974,17 +1974,18 @@ module.exports = {
     },
     "/changeFriendRelation": async (req, res, options) => {
       if (
-        !isOptionMissing(options, ["otherFbId", "isRisingEdge"], res) &&
+        !isOptionMissing(options, ["otherFbId", "mySideOfHeart"], res) &&
         (await isUserVerified(options.secretFbId))
       ) {
         var ownId = options.secretFbId,
           otherFbId = options.otherFbId,
-          isRisingEdge = options.isRisingEdge; // contains all needed information about the state transition
+          mySideOfHeart = options.mySideOfHeart; // contains all needed information about the state transition
 
-        if (isRisingEdge) {
+        if (mySideOfHeart) {
           // rising edge -> insert relation, when already exists catch and do nothing
           runQuery(
-            `INSERT INTO friends (FROM, TO) VALUES
+            /* escape column names to avoid conflicts with keywoards */
+            `INSERT INTO friends (\`FROM\`, \`TO\`) VALUES
           (
             (SELECT ID FROM users WHERE FB_ID = ?),
             (SELECT ID FROM users WHERE FB_ID = ?)
@@ -1996,7 +1997,9 @@ module.exports = {
           });
         } else {
           runQuery(
-            `DELETE FROM friends WHERE FROM = (SELECT ID FROM users WHERE FB_ID = ?) AND TO = (SELECT ID FROM users WHERE FB_ID = ?)`,
+            `DELETE FROM friends WHERE 
+            \`FROM\` = (SELECT ID FROM users WHERE FB_ID = 'wG3cG4M7NFMJzJYcreFjLrJC9Q23') 
+            AND \`TO\` = (SELECT ID FROM users WHERE FB_ID = 'QTs2vuk6O0RHjr8uDyLBwb9DZ5G3');`,
             [ownId, otherFbId]
           ).catch((_) => {
             /* relation not there any more */
