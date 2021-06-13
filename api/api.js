@@ -1422,6 +1422,15 @@ module.exports = {
       if (typeof a == "object") a = JSON.stringify(a);
       endWithJSON(res, a);
     },
+    "/apiTest": async (req, res, options) => {
+      // leave this part
+      endWithJSON(
+        res,
+        JSON.stringify({
+          msg: "Hello, " + options.name,
+        })
+      );
+    },
     "/createUserIfNotExisting": async (req, res, options) => {
       if (!isOptionMissing(options, ["name", "surname", "mail"], res)) {
         let user = await getUserId(options.secretFbId);

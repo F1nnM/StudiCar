@@ -195,8 +195,8 @@ export default {
         this.$q
           .dialog({
             title: "Freundschaft beenden",
-            message: `Willst du die Freundschaft mit ${otherUser.name} wirklich beenden? Bis auf weiteres wird sie dann zu den 
-            Ausstehenden geordnet`,
+            message: `Willst du die Freundschaft mit ${otherUser.name} wirklich beenden? Die Anfrage wird dann wieder als ausstehend 
+            gespeichert.`,
             cancel: true,
             persistent: true
           })

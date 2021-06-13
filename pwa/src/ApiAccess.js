@@ -34,6 +34,14 @@ export function sendApiRequest(
   Firebase.auth()
     .currentUser.getIdToken(/* forceRefresh */ true)
     .then(idToken_ => {
+      if (process.env.DEV)
+        console.warn(
+          " +++ BEGIN AUTH TOKEN FOR " +
+            action.method +
+            " ++++\n" +
+            idToken_ +
+            "\n+++ END AUTH TOKEN +++"
+        );
       options.idtoken = idToken_;
       if (action.method === "GET") {
         axios
