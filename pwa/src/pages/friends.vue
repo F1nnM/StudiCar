@@ -28,11 +28,11 @@
         <q-tab-panels
           v-model="mainTab"
           class="q-mx-none"
-          transition-next="fade"
-          transition-prev="fade"
+          transition-next="jump-left"
+          transition-prev="jump-right"
           animated
         >
-          <q-tab-panel :name="mainTab">
+          <q-tab-panel name="friends">
             <q-list>
               <q-item v-for="(f, idx) in currentList" :key="f.name + idx">
                 <q-item-section avatar>
@@ -41,11 +41,9 @@
                   </q-avatar>
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label
-                    >{{ f.name }}
-                    <span class="text-caption text-grey">
-                      {{ f.surname }}
-                    </span>
+                  <q-item-label>{{ f.name }} </q-item-label>
+                  <q-item-label caption class="text-grey">
+                    {{ f.surname }}
                   </q-item-label>
                   <q-item-label caption>
                     <q-rating
@@ -55,23 +53,16 @@
                       :max="5"
                       icon="emoji_people"
                       color="primary"
-                    >
-                      <template v-slot:tip-1>
-                        <q-tooltip>Kaum Fahrgemeinschaften</q-tooltip>
-                      </template>
-                      <template v-slot:tip-2>
-                        <q-tooltip>Wenig Fahrgemeinschaften</q-tooltip>
-                      </template>
-                      <template v-slot:tip-3>
-                        <q-tooltip>Mehrere Fahrgemeinschaften</q-tooltip>
-                      </template>
-                      <template v-slot:tip-4>
-                        <q-tooltip>Viele Fahrgemeinschaften</q-tooltip>
-                      </template>
-                      <template v-slot:tip-5>
-                        <q-tooltip>Ständige Mitfahrer</q-tooltip>
-                      </template>
-                    </q-rating>
+                    /><Tooltip>
+                      <!-- putting tooltip in rating didn't work: rating has no default slot -->
+                      {{
+                        ["Kaum", "Wenig", "Mehrere", "Viele", "Ständige"][
+                          f.rating - 1
+                        ]
+                      }}
+
+                      {{ f.rating == 5 ? "Mitfahrer" : "Fahrgemeinschaften" }}
+                    </Tooltip>
                   </q-item-label>
                 </q-item-section>
 
@@ -88,7 +79,31 @@
             </q-list>
           </q-tab-panel>
           <q-tab-panel name="pending">
-            Pending
+            <q-list>
+              <q-item v-for="(f, idx) in currentList" :key="f.name + idx">
+                <q-item-section avatar>
+                  <q-avatar>
+                    <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
+                  </q-avatar>
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{ f.name }} </q-item-label>
+                  <q-item-label caption class="text-grey">
+                    {{ f.surname }}
+                  </q-item-label>
+                </q-item-section>
+
+                <q-item-section side>
+                  <FriendHeart
+                    backColor="grey-3"
+                    size="sm"
+                    :left="f.friended.in"
+                    :right="f.friended.me"
+                    @click="toggleHeart(f.id)"
+                  />
+                </q-item-section>
+              </q-item>
+            </q-list>
           </q-tab-panel>
         </q-tab-panels>
       </div>
@@ -111,10 +126,11 @@
 </template>
 
 <script>
+import Tooltip from "components/Tooltip";
 import FriendHeart from "../components/FriendHeart.vue";
 import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
 export default {
-  components: { FriendHeart },
+  components: { FriendHeart, Tooltip },
   data() {
     return {
       mainTab: "friends",
