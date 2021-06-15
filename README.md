@@ -16,8 +16,17 @@ git clone https://[Github-Username]:[Github_password]@github.com/F1nnM/StudiCar.
 Open settings (CTRL+,) and tick the option _npm.enableScriptExplorer_. 
 
 #### PWA
+if starting for the first time, make sure to run the following scripts:
 ```bash
 cd PWA
+```
+
+```bash
+npm run build
+icongenie generate -m pwa -i app-icon.png
+```
+
+```bash
 npm run dev
 ```
 or in VS CODE, in the bottom left corner: NPM SCRIPTS > `PWA/package.json` > `dev - PWA` > hover > little triangle to run
