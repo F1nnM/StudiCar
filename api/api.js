@@ -773,6 +773,88 @@ FROM
   else return JSON.result[0].JSON;
 }
 
+async function getFriends(fbId) {
+  var friendsFormatted = (
+    await runQuery(
+      `
+    WITH user_data AS (
+      SELECT ID
+      FROM users
+      WHERE ID = 1
+  ),
+  real_friends AS (
+  SELECT TO_U AS ID, 1 AS IS_IN, 1 AS IS_ME
+  FROM friends
+      LEFT JOIN user_data
+      ON 1
+  WHERE FROM_U = user_data.ID
+  INTERSECT
+  SELECT FROM_U AS ID, 1 AS IS_IN, 1 AS IS_ME
+  FROM friends
+      LEFT JOIN user_data
+      ON 1
+  WHERE TO_U = user_data.ID
+  ),
+  pending AS (
+  SELECT FROM_U, TO_U-- , (SELECT ID FROM users WHERE ID = 1) AS THIS_USER
+  FROM friends
+  LEFT JOIN real_friends
+  ON 1
+      LEFT JOIN user_data
+      ON 1
+  WHERE NOT((friends.FROM_U = user_data.ID AND friends.TO_U = real_friends.ID) 
+      OR (friends.TO_U = user_data.ID AND friends.FROM_U = real_friends.ID)) 
+          AND (FROM_U = user_data.ID OR TO_U = user_data.ID) -- logical result of big friends table minus real friends
+      ),
+  pending_formatted AS (
+      SELECT IF((pending.FROM_U = user_data.ID), pending.TO_U, pending.FROM_U) AS ID,
+      pending.FROM_U = user_data.ID AS IS_IN, -- I thought that it would be the other way round, but hey, it works
+      pending.TO_U = user_data.ID AS IS_ME
+      FROM pending
+      LEFT JOIN user_data
+      ON 1
+      ),
+  all_formatted AS (
+      SELECT ID, IS_IN, IS_ME FROM real_friends
+      UNION
+      SELECT ID, IS_IN, IS_ME FROM pending_formatted
+  ),
+  final_table AS (
+    SELECT users.FB_ID, users.NAME, users.SURNAME, all_formatted.IS_IN, all_formatted.IS_ME
+    FROM all_formatted
+    JOIN users
+      USING (ID)
+  )
+  SELECT
+      JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'fbId',
+            final_table.FB_ID,
+              'name',
+              final_table.NAME,
+              'surname',
+              final_table.SURNAME,
+              'friended',
+              JSON_OBJECT(
+                  'in',
+                  IF(final_table.IS_IN, true, false),
+                  'me',
+                  IF(final_table.IS_ME, true, false)
+              )
+          )
+      ) AS JSON
+  FROM
+      final_table
+  `,
+      [fbId]
+    )
+  ).result[0].JSON;
+
+  friendsFormatted = JSON.parse(friendsFormatted);
+
+  return friendsFormatted;
+}
+
 function endWithJSON(res, JSON) {
   if (res.sent == true) return;
   res.setHeader("Content-Type", "application/json");
@@ -1400,6 +1482,16 @@ module.exports = {
           res,
           JSON.stringify({
             requests: JSON.parse(await getOutgoingRequests(options.secretFbId)),
+          })
+        );
+      }
+    },
+    "/getFriends": async (req, res, options) => {
+      if (await isUserVerified(options.secretFbId)) {
+        endWithJSON(
+          res,
+          JSON.stringify({
+            friends: await getFriends(options.secretFbId),
           })
         );
       }
