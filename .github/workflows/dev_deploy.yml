@@ -2,50 +2,51 @@ name: Build and publish to mfinn.de
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   pwa:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
-    - uses: actions/cache@v2
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
-    - run: npm install -g @quasar/cli
-    - run: npm install -g @quasar/icongenie
-    - run: cd ./pwa && npm ci
-    - run: cd ./pwa && npm run build
-    - uses: SamKirkland/FTP-Deploy-Action@4.0.0
-      with:
-        server: mfinn.de
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./pwa/dist/pwa/
-        server-dir: /dev/pwa/
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - run: npm install -g @quasar/cli
+      - run: npm install -g @quasar/icongenie
+      - run: cd ./pwa && npm ci
+      - run: cd ./pwa && npm run build
+      - run: cd ./pwa && icongenie g -m pwa -i app-icon.png
+      - uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        with:
+          server: mfinn.de
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./pwa/dist/pwa/
+          server-dir: /dev/pwa/
   api:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
-    - uses: actions/cache@v2
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
-    - run: cd ./api && npm ci && mkdir tmp && date > ./tmp/restart.txt && npm run build
-    - uses: SamKirkland/FTP-Deploy-Action@4.0.0
-      with:
-        server: mfinn.de
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./api/
-        server-dir: /dev/api/
-        exclude: .git* .git*/**
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - run: cd ./api && npm ci && mkdir tmp && date > ./tmp/restart.txt && npm run build
+      - uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        with:
+          server: mfinn.de
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./api/
+          server-dir: /dev/api/
+          exclude: .git* .git*/**
