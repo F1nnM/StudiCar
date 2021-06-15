@@ -10,7 +10,7 @@
   "scripts": {
     "lint": "eslint --ext .js,.vue src",
     "test": "echo \"No test specified\" && echo \"test\" && exit 0",
-    "build": "icongenie g -m pwa -i app-icon.png && quasar build -m pwa",
+    "build": "quasar build -m pwa",
     "dev": "quasar dev -m pwa"
   },
   "dependencies": {
