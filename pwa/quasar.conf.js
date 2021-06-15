@@ -144,6 +144,12 @@ module.exports = function(ctx) {
             src: "statics/icons/icon-512x512.png",
             sizes: "512x512",
             type: "image/png"
+          },
+          {
+            src: "statics/icons/icon-512x512.png",
+            sizes: "128x128 196x196 256x256 384x384 512x512",
+            type: "image/png",
+            purpose: "any maskable"
           }
         ]
       },
