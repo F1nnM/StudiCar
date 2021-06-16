@@ -146,7 +146,7 @@ module.exports = function(ctx) {
             type: "image/png"
           },
           {
-            src: "statics/icons/icon-512x512.png", // this is just to pass lighthouse audit, tutorial at https://web.dev/maskable-icon-audit/?utm_source=lighthouse&utm_medium=devtools
+            src: "app-icon-maskable.png", // this is just to pass lighthouse audit, tutorial at https://web.dev/maskable-icon-audit/?utm_source=lighthouse&utm_medium=devtools
             sizes: "128x128 196x196 256x256 384x384 512x512", // just for the common sizes
             type: "image/png",
             purpose: "any maskable"
