@@ -21,6 +21,7 @@ jobs:
       - run: npm install -g @quasar/icongenie
       - run: cd ./pwa && npm ci
       - run: cd ./pwa && npm run build
+      - run: cp ./pwa/src/statics ./pwa/dist/pwa/statics
       - run: cd ./pwa && tree .
       - uses: SamKirkland/FTP-Deploy-Action@4.0.0
         with:

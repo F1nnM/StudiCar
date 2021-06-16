@@ -62,11 +62,6 @@ module.exports = function(ctx) {
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
       vueRouterMode: "hash", // available values: 'hash', 'history'
-      
-      files: [
-       { from: 'statics', to: 'statics' }, // suggestion related to https://github.com/quasarframework/quasar/issues/1960#issuecomment-384460636
-        // Other files/folders here...
-      ],
 
       // rtl: false, // https://quasar.dev/options/rtl-support
       // showProgress: false,
