@@ -23,7 +23,9 @@ import {
   SQL_RESPOND_REQUEST,
   SQL_ADD_LIFT_REQUEST,
   SQL_UPDATE_DEFAULT_ADDRESS,
-  SQL_CANCEL_LIFT_REQUEST
+  SQL_CANCEL_LIFT_REQUEST,
+  SQL_CHANGE_FRIEND_RELATION,
+  SQL_GET_FRIENDS
 } from "../../ApiAccess";
 
 import { Notify } from "quasar";
@@ -74,6 +76,10 @@ export default {
 
     UPDATE_MARKETPLACE_OFFERS(state, payload) {
       state.user.marketplaceOffers = payload;
+    },
+
+    RELOAD_FRIENDS(state, payload) {
+      state.user.friends = payload;
     },
 
     UPDATE_CHAT_LIFTS(state, payload) {
@@ -224,6 +230,26 @@ export default {
         offer => offer.id != liftId
       );
       successNotify("Deine Anfrage wurde zurückgenommen");
+    },
+
+    CHANGE_FRIEND_RELATION(state, fbId) {
+      state.user.friends = state.user.friends
+        .map(u => {
+          if (u.fbId == fbId) u.friended.me = !u.friended.me; // simple invert the current value
+          return u;
+        })
+        .filter(u => {
+          if (u.fbId == fbId)
+            // first check whether this object could actually have been changed
+            return (
+              u.friended !=
+              {
+                in: false,
+                me: false
+              } // if fbId matching remove if item has no relationships (any more), in other words tidy up
+            );
+          else return true;
+        });
     }
   },
 
@@ -593,6 +619,35 @@ export default {
             "Konnte Anfrage nicht einstellen, möglicherweise hast du schon angefragt."
           );
         }
+      );
+    },
+
+    async changeFriendRelation({ commit }, payload) {
+      sendApiRequest(
+        SQL_CHANGE_FRIEND_RELATION,
+        {
+          otherFbId: payload.fbId,
+          mySideOfHeart: payload.mySideOfHeart
+        },
+        _ => {
+          commit("CHANGE_FRIEND_RELATION", payload.fbId);
+        },
+        err => {
+          console.warn("Could not change friend relation: " + err);
+          errorNotify("Konnte die Beziehung nicht aktualisieren");
+        }
+      );
+    },
+
+    async reloadFriends({ commit }, callbacks) {
+      sendApiRequest(
+        SQL_GET_FRIENDS,
+        {},
+        data => {
+          commit("RELOAD_FRIENDS", data.friends);
+          callbacks.res();
+        },
+        error => callbacks.rej(error)
       );
     }
   }

@@ -34,7 +34,7 @@
         >
           <q-tab-panel name="friends">
             <q-list>
-              <q-item v-for="(f, idx) in currentList" :key="f.name + idx">
+              <q-item v-for="(f, idx) in friends" :key="f.name + idx">
                 <q-item-section avatar>
                   <q-avatar>
                     <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
@@ -48,6 +48,7 @@
                   <q-item-label caption>
                     <q-rating
                       readonly
+                      v-if="f.rating"
                       size="1em"
                       :value="f.rating"
                       :max="5"
@@ -72,7 +73,7 @@
                     size="sm"
                     :left="f.friended.in"
                     :right="f.friended.me"
-                    @click="toggleHeart(f.id)"
+                    @click="toggleHeart(f.fbId)"
                   />
                 </q-item-section>
               </q-item>
@@ -80,7 +81,7 @@
           </q-tab-panel>
           <q-tab-panel name="pending">
             <q-list>
-              <q-item v-for="(f, idx) in currentList" :key="f.name + idx">
+              <q-item v-for="(f, idx) in pending" :key="f.name + idx">
                 <q-item-section avatar>
                   <q-avatar>
                     <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
@@ -99,7 +100,7 @@
                     size="sm"
                     :left="f.friended.in"
                     :right="f.friended.me"
-                    @click="toggleHeart(f.id)"
+                    @click="toggleHeart(f.fbId)"
                   />
                 </q-item-section>
               </q-item>
@@ -128,7 +129,13 @@
 <script>
 import Tooltip from "components/Tooltip";
 import FriendHeart from "../components/FriendHeart.vue";
-import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
+import {
+  buildGetRequestUrl,
+  GET_USER_PROFILE_PIC,
+  sendApiRequest,
+  SQL_GET_FRIENDS,
+  SQL_CHANGE_FRIEND_RELATION
+} from "../ApiAccess";
 export default {
   components: { FriendHeart, Tooltip },
   data() {
@@ -181,12 +188,16 @@ export default {
   },
 
   computed: {
+    friendsFromStore() {
+      return this.$store.getters["auth/user"].friends;
+    },
+
     friends() {
-      return this.entireNetwork.filter(u => u.friended.in && u.friended.me);
+      return this.friendsFromStore.filter(u => u.friended.in && u.friended.me);
     },
 
     pending() {
-      return this.entireNetwork
+      return this.friendsFromStore
         .filter(u => !(u.friended.in && u.friended.me))
         .sort((a, b) => +a.friended.me > +b.friended.me);
       /* sorting using the unary operator:
@@ -203,38 +214,74 @@ export default {
   watch: {},
 
   methods: {
-    toggleHeart(id) {
-      var otherUser = this.entireNetwork.find(u => u.id == id),
-        friended = otherUser.friended;
-      if (friended.in && friended.me) {
+    async refreshContent(res, rej) {
+      this.$store.dispatch("auth/reloadFriends", {
+        res: res,
+        rej: rej
+      });
+    },
+
+    async userConfirm(fbId) {
+      var otherUser = this.friendsFromStore.find(u => u.fbId == fbId);
+      var friended = otherUser.friended;
+      // propably not the best way to extra find the wanted item, alternative would be to pass all as params
+      // this definitely is the cleaner way
+
+      if (friended.in && friended.me)
         // only ask if there is an connection established
         this.$q
           .dialog({
             title: "Freundschaft beenden",
-            message: `Willst du die Freundschaft mit ${otherUser.name} wirklich beenden? Die Anfrage wird dann wieder als ausstehend 
+            message: `Willst du die Freundschaft mit ${otherUser.name} wirklich beenden? Die Anfrage wird dann wieder als ausstehend
             gespeichert.`,
             cancel: true,
             persistent: true
           })
-          .onOk(() => {
-            friended.me = false;
-          });
-      } else {
-        if (friended.me)
-          this.$q
-            .dialog({
-              title: "Anfrage zurückziehen",
-              message: `Willst du die Freundschaftsanfrage an ${otherUser.name} wirklich zurückziehen? Denk dran, dass 
-du ${otherUser.name} dann nur über eine Fahrgemeinschaft oder einen StudiCar Code wiederfinden kannst!`,
-              cancel: true,
-              persistent: true
-            })
-            .onOk(() => {
-              friended.me = false;
+          .onOk(_ => {
+            this.sendRelationChange({
+              fbId: fbId,
+              mySideOfHeart: friended.me
             });
-        else friended.me = !friended.me;
-        // request code
-      }
+          })
+          .onCancel(_ => rej("Friendship isn't supposed to be quit"));
+      else if (friended.me)
+        this.$q
+          .dialog({
+            title: "Anfrage zurückziehen",
+            message: `Willst du die Freundschaftsanfrage an ${otherUser.name} wirklich zurückziehen? Denk dran, dass
+du ${otherUser.name} dann nur über eine Fahrgemeinschaft oder einen StudiCar Code wiederfinden kannst!`,
+            cancel: true,
+            persistent: true
+          })
+          .onOk(_ => {
+            this.sendRelationChange({
+              fbId: fbId,
+              mySideOfHeart: friended.me
+            });
+          })
+          .onCancel(_ => rej("Request isn't supposed to be deleted"));
+      else
+        this.sendRelationChange({
+          fbId: fbId,
+          mySideOfHeart: friended.me
+        });
+    },
+
+    async toggleHeart(fbId) {
+      this.userConfirm(fbId)
+        .then(_ => {
+          this.sendRelationChange({
+            fbId: fbId,
+            mySideOfHeart: friended.me
+          });
+        })
+        .catch(err => {
+          console.warn("Changing aborted: " + err);
+        });
+    },
+
+    sendRelationChange(payloadObj) {
+      this.$store.dispatch("auth/changeFriendRelation", payloadObj);
     }
   },
 

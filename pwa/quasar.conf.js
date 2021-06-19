@@ -112,7 +112,7 @@ module.exports = function(ctx) {
         skipWaiting: true // found in https://forum.quasar-framework.org/topic/2560/solved-pwa-force-refresh-when-new-version-released/28
       }, // only for GenerateSW
       manifest: {
-        name: "StudiCar",
+        name: "StudiCar" + ctx.dev ? " LOCAL" : "",
         short_name: "StudiCar",
         description: "Green.Cheap.Social",
         display: "standalone",
@@ -146,7 +146,7 @@ module.exports = function(ctx) {
             type: "image/png"
           },
           {
-            src: "app-icon-maskable.png", // this is just to pass lighthouse audit, tutorial at https://web.dev/maskable-icon-audit/?utm_source=lighthouse&utm_medium=devtools
+            src: "statics/app-icon-maskable.png", // this is just to pass lighthouse audit, tutorial at https://web.dev/maskable-icon-audit/?utm_source=lighthouse&utm_medium=devtools
             sizes: "128x128 196x196 256x256 384x384 512x512", // just for the common sizes
             type: "image/png",
             purpose: "any maskable"

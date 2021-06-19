@@ -165,6 +165,11 @@ export const SQL_LOAD_MESSAGE_MEDIA = {
   method: "GET"
 };
 
+export const SQL_GET_FRIENDS = {
+  path: "/getFriends",
+  method: "GET"
+};
+
 export const TEST_API = {
   path: "/apiTest",
   method: "POST"
@@ -267,6 +272,11 @@ export const SQL_ACCEPT_ALL_REQUESTS = {
 
 export const SQL_SEND_MESSAGE = {
   path: "/sendMessage",
+  method: "POST"
+};
+
+export const SQL_CHANGE_FRIEND_RELATION = {
+  path: "/changeFriendRelation",
   method: "POST"
 };
 

@@ -780,7 +780,7 @@ async function getFriends(fbId) {
     WITH user_data AS (
       SELECT ID
       FROM users
-      WHERE ID = 1
+      WHERE FB_ID = ?
   ),
   real_friends AS (
   SELECT TO_U AS ID, 1 AS IS_IN, 1 AS IS_ME
@@ -796,7 +796,7 @@ async function getFriends(fbId) {
   WHERE TO_U = user_data.ID
   ),
   pending AS (
-  SELECT FROM_U, TO_U-- , (SELECT ID FROM users WHERE ID = 1) AS THIS_USER
+  SELECT FROM_U, TO_U
   FROM friends
   LEFT JOIN real_friends
   ON 1
@@ -845,6 +845,9 @@ async function getFriends(fbId) {
       ) AS JSON
   FROM
       final_table
+  /* actually wanted to sort here so that order is friends, incoming friend requests, outgoing requests: ORDER BY IS_IN DESC, IS_ME DESC, NAME
+  Did somehow not work, neither in WITH nor in the last FROM as subquery
+  */
   `,
       [fbId]
     )
@@ -1116,6 +1119,7 @@ module.exports = {
           );
 
           data["topFriends"] = apiResponseSimulation["topFriends"];
+          data["friends"] = await getFriends(options.fbid);
         } else {
           // accessing public information
           data = (
@@ -2073,31 +2077,37 @@ module.exports = {
           otherFbId = options.otherFbId,
           mySideOfHeart = options.mySideOfHeart; // contains all needed information about the state transition
 
-        if (mySideOfHeart) {
+        if (mySideOfHeart === false) {
+          // check absolute equality, is important here
           // rising edge -> insert relation, when already exists catch and do nothing
           runQuery(
             /* escape column names to avoid conflicts with keywoards */
-            `INSERT INTO friends (\`FROM\`, \`TO\`) VALUES
-          (
-            (SELECT ID FROM users WHERE FB_ID = ?),
-            (SELECT ID FROM users WHERE FB_ID = ?)
-            )
-          `,
+            `INSERT INTO friends (FROM_U, TO_U) VALUES
+            (
+              (SELECT ID FROM users WHERE FB_ID = ?),
+              (SELECT ID FROM users WHERE FB_ID = ?)
+              )
+              `,
             [ownId, otherFbId]
-          ).catch((_) => {
+          ).catch((err) => {
             /* relation already there */
           });
         } else {
           runQuery(
             `DELETE FROM friends WHERE 
-            \`FROM\` = (SELECT ID FROM users WHERE FB_ID = 'wG3cG4M7NFMJzJYcreFjLrJC9Q23') 
-            AND \`TO\` = (SELECT ID FROM users WHERE FB_ID = 'QTs2vuk6O0RHjr8uDyLBwb9DZ5G3');`,
+            FROM_U = (SELECT ID FROM users WHERE FB_ID = ?) 
+            AND TO_U = (SELECT ID FROM users WHERE FB_ID = ?);`,
             [ownId, otherFbId]
           ).catch((_) => {
             /* relation not there any more */
           });
         }
-        res.end();
+        endWithJSON(
+          res,
+          JSON.stringify({
+            pass: true,
+          })
+        );
       }
     },
     "/addQuestion": async (req, res, options) => {

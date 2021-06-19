@@ -31,11 +31,11 @@ export default {
   name: "FriendHeart",
   props: {
     left: {
-      type: Number,
+      type: Boolean,
       required: true
     },
     right: {
-      type: Number,
+      type: Boolean,
       required: true
     },
     size: String,
