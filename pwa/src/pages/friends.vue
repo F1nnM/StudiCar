@@ -33,11 +33,12 @@
           animated
         >
           <q-tab-panel name="friends">
-            <q-list>
+            <q-list v-if="friends.length">
               <q-item v-for="(f, idx) in friends" :key="f.name + idx">
                 <q-item-section avatar>
                   <q-avatar>
-                    <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
+                    <img v-if="imagePaths[f.fbId]" :src="imagePaths[f.fbId]" />
+                    <q-icon name="account" v-else />
                   </q-avatar>
                 </q-item-section>
                 <q-item-section>
@@ -78,13 +79,31 @@
                 </q-item-section>
               </q-item>
             </q-list>
+            <div v-else>
+              <q-item>
+                <q-item-section>
+                  <q-item-label
+                    >Du hast noch keine Freunde in StudiCar</q-item-label
+                  >
+                  <q-item-label caption
+                    >Besuche die Profile von Mitfahrern und frage für eine
+                    Freundschaft an</q-item-label
+                  >
+                </q-item-section>
+              </q-item>
+            </div>
           </q-tab-panel>
           <q-tab-panel name="pending">
-            <q-list>
+            <q-list v-if="pending.length">
               <q-item v-for="(f, idx) in pending" :key="f.name + idx">
                 <q-item-section avatar>
                   <q-avatar>
-                    <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
+                    <img
+                      :src="
+                        imagePaths[f.fbId] ||
+                          'https://cdn.quasar.dev/img/boy-avatar.png'
+                      "
+                    />
                   </q-avatar>
                 </q-item-section>
                 <q-item-section>
@@ -105,12 +124,23 @@
                 </q-item-section>
               </q-item>
             </q-list>
+            <div v-else>
+              <q-item>
+                <q-item-section>
+                  <q-item-label>Keine ausstehenden Anfragen</q-item-label>
+                  <q-item-label caption
+                    >Besuche die Profile von Mitfahrern und frage für eine
+                    Freundschaft an</q-item-label
+                  >
+                </q-item-section>
+              </q-item>
+            </div>
           </q-tab-panel>
         </q-tab-panels>
       </div>
       <div class="col-2">
         <q-avatar size="md">
-          <img :src="ppPath" />
+          <img v-if="friendsFromStore.length" :src="ppPath" />
         </q-avatar>
         <!-- <div class="row">
           <div class="col-1"> -->
@@ -183,7 +213,8 @@ export default {
           }
         }
       ],
-      ppPath: ""
+      ppPath: "",
+      imagePaths: {}
     };
   },
 
@@ -196,9 +227,17 @@ export default {
       return this.friendsFromStore.filter(u => u.friended.in && u.friended.me);
     },
 
+    friendsFbId() {
+      return this.friends.map(e => e.fbId);
+    },
+
     pending() {
       return this.friendsFromStore
-        .filter(u => !(u.friended.in && u.friended.me))
+        .filter(
+          u =>
+            !(u.friended.in && u.friended.me) &&
+            !this.friendsFbId.includes(u.fbId) // this line is just a workaround to fix an existing bug in the sql query
+        )
         .sort((a, b) => +a.friended.me > +b.friended.me);
       /* sorting using the unary operator:
       +true = 1
@@ -295,6 +334,11 @@ du ${otherUser.name} dann nur über eine Fahrgemeinschaft oder einen StudiCar Co
         fbid: this.$store.getters["auth/user"].uid
       });
     })();
+    this.friendsFromStore.forEach(async e => {
+      this.imagePaths[e.fbId] = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
+        fbid: e.fbId
+      });
+    });
   }
 };
 </script>

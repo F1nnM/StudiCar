@@ -777,77 +777,78 @@ async function getFriends(fbId) {
   var friendsFormatted = (
     await runQuery(
       `
-    WITH user_data AS (
-      SELECT ID
-      FROM users
-      WHERE FB_ID = ?
-  ),
-  real_friends AS (
-  SELECT TO_U AS ID, 1 AS IS_IN, 1 AS IS_ME
-  FROM friends
-      LEFT JOIN user_data
-      ON 1
-  WHERE FROM_U = user_data.ID
-  INTERSECT
-  SELECT FROM_U AS ID, 1 AS IS_IN, 1 AS IS_ME
-  FROM friends
-      LEFT JOIN user_data
-      ON 1
-  WHERE TO_U = user_data.ID
-  ),
-  pending AS (
-  SELECT FROM_U, TO_U
-  FROM friends
-  LEFT JOIN real_friends
-  ON 1
-      LEFT JOIN user_data
-      ON 1
-  WHERE NOT((friends.FROM_U = user_data.ID AND friends.TO_U = real_friends.ID) 
-      OR (friends.TO_U = user_data.ID AND friends.FROM_U = real_friends.ID)) 
-          AND (FROM_U = user_data.ID OR TO_U = user_data.ID) -- logical result of big friends table minus real friends
-      ),
-  pending_formatted AS (
-      SELECT IF((pending.FROM_U = user_data.ID), pending.TO_U, pending.FROM_U) AS ID,
-      pending.FROM_U = user_data.ID AS IS_IN, -- I thought that it would be the other way round, but hey, it works
-      pending.TO_U = user_data.ID AS IS_ME
-      FROM pending
-      LEFT JOIN user_data
-      ON 1
-      ),
-  all_formatted AS (
-      SELECT ID, IS_IN, IS_ME FROM real_friends
-      UNION
-      SELECT ID, IS_IN, IS_ME FROM pending_formatted
-  ),
-  final_table AS (
-    SELECT users.FB_ID, users.NAME, users.SURNAME, all_formatted.IS_IN, all_formatted.IS_ME
-    FROM all_formatted
-    JOIN users
-      USING (ID)
-  )
+    WITH user_data AS( /* just to have ID of current user always accessible */
+    SELECT ID, FB_ID
+    FROM users
+    WHERE FB_ID = ?
+),
+lefts AS( /* all records where current user is standing left */
+	SELECT f.ID, f.TO_U AS USER_ID, 0 AS IS_IN, 1 AS IS_ME
+    FROM friends f
+	JOIN user_data 
+    ON user_data.ID = f.FROM_U
+),
+rights AS( /* all records where current user is standing right */
+	SELECT f.ID, f.FROM_U AS USER_ID, 1 AS IS_IN, 0 AS IS_ME
+    FROM friends f
+	JOIN user_data
+    ON user_data.ID = f.TO_U
+),
+all_ids_from_real_friends AS(
+    SELECT l.ID
+    FROM lefts l
+	JOIN rights
+    ON l.USER_ID = rights.USER_ID
+    UNION
+    SELECT r.ID
+    FROM lefts
+	JOIN rights r
+    ON r.USER_ID = lefts.USER_ID
+),
+real_friends AS( /* all records where the other user of lefts and rights are matching */
+	SELECT DISTINCT l.ID, l.USER_ID, 1 AS IS_IN, 1 AS IS_ME
+    FROM lefts l
+	JOIN rights
+    ON l.USER_ID = rights.USER_ID
+),
+altogether AS(
+    SELECT ID, USER_ID, IS_IN, IS_ME
+    FROM
+    real_friends
+    UNION
+    SELECT ID, USER_ID, IS_IN, IS_ME
+    FROM
+    rights
+    UNION
+    SELECT ID, USER_ID, IS_IN, IS_ME
+    FROM
+    lefts
+),
+with_user_data AS(
+    SELECT NAME, SURNAME, FB_ID, IS_IN, IS_ME
+    FROM altogether a
+    JOIN users ON users.ID = a.USER_ID
+)
   SELECT
-      JSON_ARRAYAGG(
+      IFNULL(JSON_ARRAYAGG(
           JSON_OBJECT(
             'fbId',
-            final_table.FB_ID,
+            FB_ID,
               'name',
-              final_table.NAME,
+              NAME,
               'surname',
-              final_table.SURNAME,
+              SURNAME,
               'friended',
               JSON_OBJECT(
                   'in',
-                  IF(final_table.IS_IN, true, false),
+                  IF(IS_IN, true, false),
                   'me',
-                  IF(final_table.IS_ME, true, false)
+                  IF(IS_ME, true, false)
               )
           )
-      ) AS JSON
+      ), '[]') AS JSON
   FROM
-      final_table
-  /* actually wanted to sort here so that order is friends, incoming friend requests, outgoing requests: ORDER BY IS_IN DESC, IS_ME DESC, NAME
-  Did somehow not work, neither in WITH nor in the last FROM as subquery
-  */
+      with_user_data
   `,
       [fbId]
     )

@@ -11,3 +11,5 @@ news/postillon/*.json
 
 # ignoring all the modules
 node_modules/
+
+test.json
