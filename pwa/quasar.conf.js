@@ -112,7 +112,7 @@ module.exports = function(ctx) {
         skipWaiting: true // found in https://forum.quasar-framework.org/topic/2560/solved-pwa-force-refresh-when-new-version-released/28
       }, // only for GenerateSW
       manifest: {
-        name: "StudiCar" + ctx.dev ? " LOCAL" : "",
+        name: "StudiCar" + (ctx.dev ? " LOCAL" : ""),
         short_name: "StudiCar",
         description: "Green.Cheap.Social",
         display: "standalone",

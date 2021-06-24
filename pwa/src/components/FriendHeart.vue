@@ -8,7 +8,7 @@
             class="absolute absolute-center"
             :size="size || 'md'"
             name="favorite"
-            :color="backColor || 'grey-5'"
+            :color="backColor || 'grey-4'"
           />
           <q-icon
             dense

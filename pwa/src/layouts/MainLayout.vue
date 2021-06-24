@@ -426,13 +426,12 @@ export default {
         .catch(response => {
           this.refreshErr = response;
         })
-        .finally(done);
+        .finally(done); // stop showing the refresh icon
     },
 
     refreshAgain() {
       this.refreshErr = null;
       this.$refs.refresher.trigger();
-      // this.refresh();
     },
 
     scannerSwiped(e) {
@@ -503,7 +502,7 @@ export default {
           type: "negative",
           message:
             err +
-            "StudiCar kann nicht auf deine Zwischenablage zugreifen. Bitte sieh im Support nach, oft haben wir schon eine andere Lösung veröffentlicht."
+            "StudiCar kann nicht auf deine Zwischenablage zugreifen. Bitte sieh im Support nach, wenn du partout Daten daraus laden willst."
         });
       }
     },

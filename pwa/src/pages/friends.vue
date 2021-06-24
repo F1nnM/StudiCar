@@ -36,10 +36,16 @@
             <q-list v-if="friends.length">
               <q-item v-for="(f, idx) in friends" :key="f.name + idx">
                 <q-item-section avatar>
-                  <q-avatar>
-                    <img v-if="imagePaths[f.fbId]" :src="imagePaths[f.fbId]" />
-                    <q-icon name="account" v-else />
-                  </q-avatar>
+                  <a :href="'/#/benutzerinfo?userFbId=' + f.fbId">
+                    <!-- was the easiest way, vue router did make troubles -->
+                    <q-avatar>
+                      <img
+                        v-if="imagePaths[f.fbId]"
+                        :src="imagePaths[f.fbId]"
+                      />
+                      <q-icon name="account" v-else />
+                    </q-avatar>
+                  </a>
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>{{ f.name }} </q-item-label>
@@ -68,7 +74,7 @@
                   </q-item-label>
                 </q-item-section>
 
-                <q-item-section side>
+                <q-item-section side class="no-pointer">
                   <FriendHeart
                     backColor="grey-3"
                     size="sm"
@@ -97,14 +103,16 @@
             <q-list v-if="pending.length">
               <q-item v-for="(f, idx) in pending" :key="f.name + idx">
                 <q-item-section avatar>
-                  <q-avatar>
-                    <img
-                      :src="
-                        imagePaths[f.fbId] ||
-                          'https://cdn.quasar.dev/img/boy-avatar.png'
-                      "
-                    />
-                  </q-avatar>
+                  <a :href="'/#/benutzerinfo?userFbId=' + f.fbId">
+                    <q-avatar>
+                      <img
+                        :src="
+                          imagePaths[f.fbId] ||
+                            'https://cdn.quasar.dev/img/boy-avatar.png'
+                        "
+                      />
+                    </q-avatar>
+                  </a>
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>{{ f.name }} </q-item-label>
@@ -282,7 +290,7 @@ export default {
               mySideOfHeart: friended.me
             });
           })
-          .onCancel(_ => rej("Friendship isn't supposed to be quit"));
+          .onCancel(console.warn("Friendship isn't supposed to be quit"));
       else if (friended.me)
         this.$q
           .dialog({
@@ -298,7 +306,7 @@ du ${otherUser.name} dann nur über eine Fahrgemeinschaft oder einen StudiCar Co
               mySideOfHeart: friended.me
             });
           })
-          .onCancel(_ => rej("Request isn't supposed to be deleted"));
+          .onCancel(console.warn("Request isn't supposed to be deleted"));
       else
         this.sendRelationChange({
           fbId: fbId,

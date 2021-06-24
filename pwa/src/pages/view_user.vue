@@ -151,6 +151,11 @@
                       :left="friended.in"
                       :right="friended.me"
                       @click="toggleFriend"
+                      v-touch-hold.mouse="
+                        _ => {
+                          showFriendGuide = true;
+                        }
+                      "
                     />
                     <q-icon name="minimize" size="md" color="grey-5" />
                     <div
@@ -161,24 +166,6 @@
                   </div>
                 </q-tab-panel>
               </q-tab-panels>
-
-              <!-- <q-item dense clickable @click="toggleFriend">
-                <q-item-section avatar>
-                  <q-icon
-                    :name="friendIcon"
-                    size="sm"
-                    :class="friended.in && !friended.me ? 'mirror-horiz' : ''"
-                    :color="!(friended.in || friended.me) ? 'grey-7' : 'dark'"
-                  />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>Platzhalter</q-item-label>
-                  <q-item-label caption>Hilfetext</q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                  <q-btn icon="info_outline" @click="showFriendGuide = true" flat dense />
-                </q-item-section>
-              </q-item>-->
             </q-list>
           </q-slide-transition>
         </template>
@@ -457,6 +444,7 @@ import {
   sendApiRequest,
   SQL_GET_USER_DATA,
   GET_USER_PROFILE_PIC,
+  SQL_CHANGE_FRIEND_RELATION,
   buildGetRequestUrl
 } from "../ApiAccess";
 const { lighten } = colors;
@@ -477,10 +465,6 @@ export default {
       viewTab: "data",
       viewedUser: null,
       imageUrl: "",
-      friended: {
-        in: true,
-        me: false
-      },
       showFriendGuide: false,
       hearts: {
         half: ionMdHeartHalf,
@@ -495,6 +479,18 @@ export default {
     meterModelBefore() {
       var a = this.viewedUser.stats;
       return a.liftsOffered / a.liftsAll;
+    },
+
+    friended() {
+      var friends = this.$store.getters["auth/user"].friends,
+        wanted = friends.find(u => u.fbId == this.viewedUser.uid);
+      if (wanted) return wanted.friended;
+      else
+        return {
+          // when not found, there's no relation between current and viewed user
+          in: false,
+          me: false
+        };
     },
 
     meterModelCurrent() {
@@ -552,6 +548,14 @@ export default {
   watch: {},
 
   methods: {
+    async refreshContent(res, rej) {
+      this.initLoad()
+        .catch(err => {
+          rej(err); // will be sent to MainLayout
+        })
+        .finally(res);
+    },
+
     betterPrefColor(prefName) {
       var color = this.viewedUser.prefs[prefName].toLowerCase();
       if (color == "yellow") return "orange";
@@ -580,44 +584,62 @@ export default {
             persistent: true
           })
           .onOk(() => {
-            this.friended.me = false;
+            this.sendRelationChange({
+              fbId: this.viewedUser.uid,
+              mySideOfHeart: this.friended.me // is true when interpreting this line
+            });
           });
       } else {
-        // request code
-        this.friended.me = !this.friended.me;
+        // when the last relation is supposed to be deleted, don't warn, because user obviously could revert directly
+        this.sendRelationChange({
+          fbId: this.viewedUser.uid,
+          mySideOfHeart: this.friended.me // is true when interpreting this line
+        });
       }
+    },
+
+    sendRelationChange(payloadObj) {
+      this.$store.dispatch("auth/changeFriendRelation", payloadObj);
+    },
+
+    async initLoad() {
+      // loads all the data of the viewed user
+      let loc = document.location.href;
+      let otherFbId = loc.split("?userFbId=")[1];
+
+      (async _ => {
+        this.imageUrl = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
+          fbid: otherFbId
+        });
+      })();
+
+      this.splitterPos.current = this.splitterPos.normal;
+
+      return new Promise((res, rej) => {
+        sendApiRequest(
+          SQL_GET_USER_DATA,
+          {
+            fbid: otherFbId,
+            secretFbId: "/°" // I hope nobody will ever have this secretFbId, cause then our server is gonna crash
+          },
+          userData => {
+            if (userData.status == 204) this.notFound = true;
+            // profile not found
+            else this.viewedUser = userData; // actually wanted to store both imageUrl and userData in one object,
+            // but had troubles with v-if
+            res();
+          },
+          error => {
+            rej(error);
+            throw error;
+          }
+        );
+      });
     }
   },
 
   mounted() {
-    let loc = document.location.href;
-    let otherFbId = loc.split("?userFbId=")[1];
-
-    (async _ => {
-      this.imageUrl = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
-        fbid: otherFbId
-      });
-    })();
-
-    this.splitterPos.current = this.splitterPos.normal;
-
-    sendApiRequest(
-      SQL_GET_USER_DATA,
-      {
-        fbid: otherFbId,
-        secretFbId: "/°" // I hope nobody will ever have this secretFbId, cause then our server is gonna crash
-      },
-      userData => {
-        if (userData.status == 204) this.notFound = true;
-        // profile not found
-        else this.viewedUser = userData; // actually wanted to store both imageUrl and userData in one object,
-        // but had troubles with v-if
-      },
-      error => {
-        throw error;
-      }
-    );
-
+    this.initLoad();
     this.$store.commit("setPage", "");
   }
 };

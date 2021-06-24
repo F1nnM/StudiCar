@@ -1,15 +1,15 @@
-const mariadb = require('mariadb'),
-  config = require('./dbConfig'),
+const mariadb = require("mariadb"),
+  config = require("./dbConfig"),
   pool = mariadb.createPool({
     host: config.host,
     user: config.username,
     password: config.password,
     database: config.database,
     connectionLimit: 5,
-    multipleStatements: true
-  })
+    multipleStatements: true,
+  });
 
-module.exports = async function runQuery (sql, data) {
+module.exports = async function runQuery(sql, data) {
   return new Promise(async (res, rej) => {
     let conn;
     let result;
@@ -17,10 +17,10 @@ module.exports = async function runQuery (sql, data) {
       conn = await pool.getConnection();
       result = await conn.query(sql, data);
     } catch (error) {
-      rej(error)
+      rej(error);
     } finally {
-      if (conn) conn.release(); //release to pool
+      if (conn) conn.release(); // release to pool
     }
     res({ result });
-  })
-}
+  });
+};
