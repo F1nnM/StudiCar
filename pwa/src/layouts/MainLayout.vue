@@ -449,8 +449,9 @@ export default {
     askAndReadClipboard(e) {
       var duration = e ? e.duration : null, // makes duration handling possible
         clipboard = navigator.clipboard;
-      if (!!clipboard) {
-        return new Promise((res, rej) => {
+      return new Promise((res, rej) => {
+        if (!clipboard) rej("No clipboard");
+        else
           clipboard
             .readText()
             .then(content => {
@@ -488,23 +489,9 @@ export default {
               }
             })
             .catch(err => {
-              this.error(err);
-              rej();
+              rej(err);
             });
-        });
-      } else return Promise.resolve("");
-
-      function error(err) {
-        if (err) err = "[ERR: " + err + "] ";
-        else err = "";
-        alert("Clipboard error");
-        this.$q.notify({
-          type: "negative",
-          message:
-            err +
-            "StudiCar kann nicht auf deine Zwischenablage zugreifen. Bitte sieh im Support nach, wenn du partout Daten daraus laden willst."
-        });
-      }
+      });
     },
 
     isClipboardValid(text) {
@@ -542,7 +529,17 @@ export default {
       // first check whether clipboard contains data to be processed
       var clipboardContent;
       if (!this.scannerOpen)
-        clipboardContent = await this.askAndReadClipboard();
+        clipboardContent = await this.askAndReadClipboard().catch(err => {
+          console.log(err);
+          this.$q.notify({
+            type: "negative",
+            message: "Zwischenablage blockiert",
+            caption: err.toString().includes("DOMException")
+              ? "Bitte sieh in den FAQ nach, wir haben dafür eine Lösung veröffentlicht."
+              : "StudiCar kann aus irgendeinem Grund keine Daten aus der Zwischenablage laden: " +
+                err
+          });
+        });
       if (clipboardContent) {
         if (clipboardContent.includes("/#/"))
           clipboardContent = clipboardContent.split("/#/")[1];

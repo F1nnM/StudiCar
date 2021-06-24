@@ -103,34 +103,67 @@ export default {
     },
 
     async onInit(promise) {
-      try {
-        await promise;
-        this.scannerReady = true;
-      } catch (error) {
-        this.scannerReady = false;
-        var errText = "";
-        if (error.name === "NotAllowedError") {
-          errText = "Der Kamerazugriff ist blockiert";
-        } else if (error.name === "NotFoundError") {
-          errText = "StudiCar konnte keine Kamera finden";
-        } else if (error.name === "NotSupportedError") {
-          errText = "Zertifikatsfehler: Bitte melde dich beim Support";
-        } else if (error.name === "NotReadableError") {
-          errText = "Kamera wird schon von einem anderen Prozess verwendet";
-        } else if (error.name === "OverconstrainedError") {
-          errText = "Die gefundene Kamera ist nicht mit StudiCar kompatibel";
-        } else if (error.name === "StreamApiNotSupportedError") {
-          errText = "Dein Browser unterstützt die Stream API nicht";
-        }
-        this.errorMessage(errText);
-        this.emit();
-      }
+      promise
+        .then(_ => {
+          this.scannerReady = true;
+        })
+        .catch(error => {
+          this.scannerReady = false;
+          var errObj = (_ => {
+            switch (error.name) {
+              case "NotAllowedError":
+                return {
+                  m: "Zugriff blockiert",
+                  c:
+                    "Du hast StudiCar verboten, auf die Kamera zuzugreifen. Für dieses Problem haben wir im Support Lösungen bereitgestellt."
+                };
+              case "NotFoundError":
+                return {
+                  m: "Keine Kamera",
+                  c: "StudiCar konnte keine Kamera finden"
+                };
+              case "NotSupportedError":
+                return {
+                  m: "Zertifikatsfehler",
+                  c:
+                    "Bitte melde dich beim Support, wenn das Problem weiterhin besteht"
+                };
+              case "NotReadableError":
+                return {
+                  m: "Zugriff verweigert",
+                  c:
+                    "Deine Kamera wird im Moment von einem anderen Prozess verwendet"
+                };
+              case "OverconstrainedError":
+                return {
+                  m: "Nicht kompatibel",
+                  c:
+                    "Deine Kamera scheint nicht kompatibel zu sein. Bitte schreibe dem Support dein Gerätemodell"
+                };
+              case "StreamApiNotSupportedError":
+                return {
+                  m: "Stream API Fehler",
+                  c:
+                    "Dein Browser unterstützt die Stream API nicht. Probier es bitte mit einem anderen Browser"
+                };
+              default:
+                return {
+                  m: "Fehler aufgetreten",
+                  c: error.toString()
+                };
+            }
+          })();
+
+          this.errorMessage(errObj);
+          this.emit();
+        });
     },
 
-    errorMessage(text) {
+    errorMessage(errObj) {
       this.$q.notify({
         type: "negative",
-        message: text
+        message: errObj.m,
+        caption: errObj.c || "" // when no caption set, empty string
       });
     },
 
