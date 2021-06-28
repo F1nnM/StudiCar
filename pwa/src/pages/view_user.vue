@@ -394,7 +394,49 @@
           </div>
         </q-tab-panel>
         <q-tab-panel name="social">
-          <p>Hier kommen dann die Freunde</p>
+          <q-list v-if="commonFriends.length">
+            <q-item v-for="(f, idx) in commonFriends" :key="f.name + idx">
+              <q-item-section avatar>
+                <a :href="'/#/benutzerinfo?userFbId=' + f.fbId">
+                  <q-avatar>
+                    <img
+                      :src="
+                        imagePaths[f.fbId] ||
+                          'https://cdn.quasar.dev/img/boy-avatar.png'
+                      "
+                    />
+                  </q-avatar>
+                </a>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ f.name }} </q-item-label>
+                <q-item-label caption class="text-grey">
+                  {{ f.surname }}
+                </q-item-label>
+              </q-item-section>
+
+              <q-item-section side>
+                <FriendHeart
+                  backColor="grey-3"
+                  size="sm"
+                  :left="f.friended.in"
+                  :right="f.friended.me"
+                  @click="toggleHeart(f.fbId)"
+                />
+              </q-item-section>
+            </q-item>
+          </q-list>
+          <div v-else>
+            <q-item>
+              <q-item-section>
+                <q-item-label>Keine gemeinsamen Freunde</q-item-label>
+                <q-item-label caption
+                  >Bilde mit mehr Leuten Freundschaften, dann kommen die
+                  gemeinsamen Freunde ganz automatisch</q-item-label
+                >
+              </q-item-section>
+            </q-item>
+          </div>
         </q-tab-panel>
       </q-tab-panels>
     </div>
@@ -444,7 +486,6 @@ import {
   sendApiRequest,
   SQL_GET_USER_DATA,
   GET_USER_PROFILE_PIC,
-  SQL_CHANGE_FRIEND_RELATION,
   buildGetRequestUrl
 } from "../ApiAccess";
 const { lighten } = colors;
@@ -471,7 +512,8 @@ export default {
         entire: ionMdHeart,
         border: "favorite_border"
       },
-      notFound: false
+      notFound: false,
+      imagePaths: []
     };
   },
 
@@ -542,6 +584,20 @@ export default {
 
     viewingThisUser() {
       return this.viewedUser.uid == this.$store.getters["auth/user"].uid;
+    },
+
+    commonFriends() {
+      var myFriends = this.$store.getters["auth/user"].friends.filter(
+          e => e.friended.in && e.friended.out
+        ),
+        fbIdsOfFriendsOfVisitedUser = this.viewedUser.friends
+          .filter(e => e.friended.in && e.friended.out)
+          .map(e => e.fbId);
+      var common = [];
+      return myFriends.filter(e =>
+        fbIdsOfFriendsOfVisitedUser.includes(e.fbId)
+      );
+      // not the best way as O(n²), but can be accepted as a single user has not hundreds of friends
     }
   },
 
@@ -641,6 +697,12 @@ export default {
   mounted() {
     this.initLoad();
     this.$store.commit("setPage", "");
+
+    this.commonFriends.forEach(async e => {
+      this.imagePaths[e.fbId] = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
+        fbid: e.fbId
+      });
+    });
   }
 };
 </script>

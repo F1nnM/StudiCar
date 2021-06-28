@@ -777,58 +777,52 @@ async function getFriends(fbId) {
   var friendsFormatted = (
     await runQuery(
       `
-    WITH user_data AS( /* just to have ID of current user always accessible */
-    SELECT ID, FB_ID
-    FROM users
-    WHERE FB_ID = ?
-),
-lefts AS( /* all records where current user is standing left */
-	SELECT f.ID, f.TO_U AS USER_ID, 0 AS IS_IN, 1 AS IS_ME
-    FROM friends f
-	JOIN user_data 
-    ON user_data.ID = f.FROM_U
-),
-rights AS( /* all records where current user is standing right */
-	SELECT f.ID, f.FROM_U AS USER_ID, 1 AS IS_IN, 0 AS IS_ME
-    FROM friends f
-	JOIN user_data
-    ON user_data.ID = f.TO_U
-),
-all_ids_from_real_friends AS(
-    SELECT l.ID
-    FROM lefts l
-	JOIN rights
-    ON l.USER_ID = rights.USER_ID
-    UNION
-    SELECT r.ID
-    FROM lefts
-	JOIN rights r
-    ON r.USER_ID = lefts.USER_ID
-),
-real_friends AS( /* all records where the other user of lefts and rights are matching */
-	SELECT DISTINCT l.ID, l.USER_ID, 1 AS IS_IN, 1 AS IS_ME
-    FROM lefts l
-	JOIN rights
-    ON l.USER_ID = rights.USER_ID
-),
-altogether AS(
-    SELECT ID, USER_ID, IS_IN, IS_ME
-    FROM
-    real_friends
-    UNION
-    SELECT ID, USER_ID, IS_IN, IS_ME
-    FROM
-    rights
-    UNION
-    SELECT ID, USER_ID, IS_IN, IS_ME
-    FROM
-    lefts
-),
-with_user_data AS(
-    SELECT NAME, SURNAME, FB_ID, IS_IN, IS_ME
-    FROM altogether a
-    JOIN users ON users.ID = a.USER_ID
-)
+      SELECT ID INTO @user_id FROM users WHERE FB_ID = ?;
+  WITH lefts AS( /* all records where current user is standing left */
+    SELECT f.ID, f.TO_U AS USER_ID, 0 AS IS_IN, 1 AS IS_ME
+      FROM friends f
+      WHERE f.FROM_U = @user_id
+  ),
+  rights AS( /* all records where current user is standing right */
+    SELECT f.ID, f.FROM_U AS USER_ID, 1 AS IS_IN, 0 AS IS_ME
+      FROM friends f
+      WHERE f.TO_U = @user_id
+  ),
+  all_ids_from_real_friends AS(
+      SELECT l.ID
+      FROM lefts l
+    JOIN rights
+      ON l.USER_ID = rights.USER_ID
+      UNION
+      SELECT r.ID
+      FROM lefts
+    JOIN rights r
+      ON r.USER_ID = lefts.USER_ID
+  ),
+  real_friends AS( /* all records where the other user of lefts and rights are matching */
+    SELECT DISTINCT l.ID, l.USER_ID, 1 AS IS_IN, 1 AS IS_ME
+      FROM lefts l
+    JOIN rights
+      ON l.USER_ID = rights.USER_ID
+  ),
+  altogether AS(
+      SELECT ID, USER_ID, IS_IN, IS_ME
+      FROM
+      real_friends
+      UNION
+      SELECT ID, USER_ID, IS_IN, IS_ME
+      FROM
+      rights
+      UNION
+      SELECT ID, USER_ID, IS_IN, IS_ME
+      FROM
+      lefts
+  ),
+  with_user_data AS(
+      SELECT NAME, SURNAME, FB_ID, IS_IN, IS_ME
+      FROM altogether a
+      JOIN users ON users.ID = a.USER_ID
+  )
   SELECT
       IFNULL(JSON_ARRAYAGG(
           JSON_OBJECT(
@@ -852,7 +846,7 @@ with_user_data AS(
   `,
       [fbId]
     )
-  ).result[0].JSON;
+  ).result[1][0].JSON;
 
   friendsFormatted = JSON.parse(friendsFormatted);
 
@@ -937,6 +931,13 @@ module.exports = {
         var data;
         if (options.secretFbId == options.fbid) {
           // ACCESSING PRIVATE PROFILE
+
+          await runQuery(
+            `REPLACE INTO fcm_tokens (USER_ID, TOKEN) VALUES ((SELECT ID FROM users WHERE FB_ID = ?), ?)`,
+            [options.secretFbId, options.idtoken]
+          ); // update fcm token in db
+          /* could also have been solved via inserting at creating user and then updating */
+
           data = (
             await runQuery(
               `
@@ -1119,11 +1120,15 @@ module.exports = {
             await getOutgoingRequests(options.fbid)
           );
 
-          data["topFriends"] = apiResponseSimulation["topFriends"];
-          data["friends"] = await getFriends(options.fbid);
+          data.topFriends = apiResponseSimulation["topFriends"];
+          data.friends = await getFriends(options.fbid);
+
+          data.marketplaceOffers = JSON.parse(
+            await getMarketplace(options.secretFbId)
+          );
         } else {
-          // accessing public information
-          data = (
+          // ACCESSING PUBLIC INFORMATION
+          var dataOfViewedUser = (
             await runQuery(
               `
           SELECT
@@ -1213,14 +1218,12 @@ module.exports = {
             })
           ).result[1][0].JSON;
 
-          data = JSON.parse(data);
+          data = JSON.parse(dataOfViewedUser);
+          data.friends = await getFriends(options.fbid);
         }
         data.stats.liftsOffered = Math.floor(Math.random() * 100);
         data.stats.liftsAll =
           data.stats.liftsOffered + Math.floor(Math.random() * 200);
-        data.marketplaceOffers = JSON.parse(
-          await getMarketplace(options.secretFbId)
-        );
 
         endWithJSON(res, JSON.stringify(data));
       }

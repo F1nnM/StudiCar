@@ -212,7 +212,10 @@
               @right="openShortLiftInfo"
               @left="openLiftWithDetails"
             />
-            <q-item-label class="q-mt-lg" header v-if="olderChats.length > 0"
+            <q-item-label
+              class="q-mt-lg"
+              header
+              v-if="olderChats.length > 0 && recentChats.length > 0"
               >Ältere Chats</q-item-label
             >
             <ChatItem
