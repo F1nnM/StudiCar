@@ -588,12 +588,12 @@ export default {
 
     commonFriends() {
       var myFriends = this.$store.getters["auth/user"].friends.filter(
-          e => e.friended.in && e.friended.out
+          e => e.friended.in && e.friended.me // just to be sure, as error still exists in backend query
         ),
         fbIdsOfFriendsOfVisitedUser = this.viewedUser.friends
-          .filter(e => e.friended.in && e.friended.out)
+          .filter(e => e.friended.in && e.friended.me)
           .map(e => e.fbId);
-      var common = [];
+
       return myFriends.filter(e =>
         fbIdsOfFriendsOfVisitedUser.includes(e.fbId)
       );
