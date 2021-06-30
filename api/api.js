@@ -1579,8 +1579,8 @@ module.exports = {
             throw error;
           });
 
-          runQuery(
-            "INSERT INTO fcm_tokens (USER_ID, TOKEN) VALUES ((SELECT ID FROM users WHERE ID = 1), '0');"
+          await runQuery(
+            "INSERT INTO fcm_tokens (USER_ID, TOKEN) VALUES ((SELECT ID FROM users WHERE ID = ?), '0');"
           ).catch((err) => {
             /* propably duplicate entry, do nothing */
           });
