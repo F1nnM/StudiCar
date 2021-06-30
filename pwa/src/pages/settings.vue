@@ -12,12 +12,17 @@
           </q-item-section>
           <q-item-section>
             <q-item-label>Benachrichtigungen testen</q-item-label>
-            <q-item-label
-              caption
-            >Wenn du von StudiCar keine Benachrichtigungen erhältst, musst du den Zugriff eventuell erst erlauben.</q-item-label>
+            <q-item-label caption
+              >Wenn du von StudiCar keine Benachrichtigungen erhältst, musst du
+              den Zugriff eventuell erst erlauben.</q-item-label
+            >
           </q-item-section>
           <q-item-section side>
-            <q-icon v-if="notificationTestPassed" name="done" color="positive" />
+            <q-icon
+              v-if="notificationTestPassed"
+              name="done"
+              color="positive"
+            />
             <q-btn v-else label="Test" outline @click="testNotification" />
           </q-item-section>
         </q-item>
@@ -27,9 +32,10 @@
           </q-item-section>
           <q-item-section>
             <q-item-label>Zugriff auf die Zwischenablage</q-item-label>
-            <q-item-label
-              caption
-            >Wenn der StudiCar Scanner die Zwischenablage nicht lesen kann, musst du den Zugriff eventuell erst erlauben.</q-item-label>
+            <q-item-label caption
+              >Wenn der StudiCar Scanner die Zwischenablage nicht lesen kann,
+              musst du den Zugriff eventuell erst erlauben.</q-item-label
+            >
           </q-item-section>
           <q-item-section side>
             <q-icon v-if="clipboardTestPassed" name="done" color="positive" />
@@ -61,10 +67,14 @@
           <q-item-section>
             <q-item-label>Eingehende Anfragen bestätigen</q-item-label>
             <q-item-label caption>
-              <span
-                v-if="askAgainWhenAppreciatingNewPassenger"
-              >Im Moment musst du bestätigen, wenn du jemanden in eine Fahrgemeinschaft aufnimmst</span>
-              <span v-else>Im Moment kannst du Anfragen mit einem Tippen direkt annehmen</span>
+              <span v-if="askAgainWhenAppreciatingNewPassenger"
+                >Im Moment musst du bestätigen, wenn du jemanden in eine
+                Fahrgemeinschaft aufnimmst</span
+              >
+              <span v-else
+                >Im Moment kannst du Anfragen mit einem Tippen direkt
+                annehmen</span
+              >
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -73,7 +83,6 @@
   </div>
 </template>
 
-      
 <script>
 import SignOutButton from "components/SignOutButton";
 
@@ -147,28 +156,17 @@ export default {
 
     async testNotification() {
       this.notificationTestRunning = true;
-      navigator.serviceWorker.ready.then(registration => {
-        this.makeNotification(registration).catch(_ => {
-          // perms have to be granted first
-
-          this.requestNotificationPermission()
-            .then(_ => {
-              // finally granted
-
-              this.makeNotification(registration).then(
-                _ => (this.notificationTestPassed = true)
-              );
-            })
-            .catch(_ => {
-              this.$q.dialog({
-                title: "Zugriff weiterhin blockiert",
-                message: `Bitte starte den Test erneut und akzeptiere dann die Anfrage. Wenn keine Anfrage kommt,
-                kann es sein, dass die Website schon blockiert wurde, in diesem Fall musst du das über 
-                die Browser-Einstellungen rückgängig machen.`
-              });
-            });
+      this.$q
+        .dialog({
+          cancel: true,
+          persistent: true,
+          title: "Testablauf",
+          message: `Wenn du den Test startest, senden wir dir über den Server eine Nachricht. Wenn du keine Benachrichtigung
+              kriegen solltest, dann schau in den FAQ nach, woran es liegen könnte.`
+        })
+        .onOk(_ => {
+          this.$store.dispatch("auth/testPushNotification");
         });
-      });
     },
 
     async testClipboardAccess() {
@@ -198,29 +196,6 @@ export default {
           message: `Ein ungewöhnlicher Fehler ist aufgetreten, bitte melde dich beim Support`
         });
       }
-    },
-
-    async requestNotificationPermission() {
-      return new Promise((res, rej) => {
-        Notification.requestPermission(function(result) {
-          if (result === "granted") res();
-          else rej();
-        });
-      });
-    },
-
-    async makeNotification(reg) {
-      return new Promise(function(res, rej) {
-        reg
-          .showNotification("StudiCar Test", {
-            body: "Testbenachrichtigung",
-            icon: "https://cdn.quasar.dev/logo/svg/quasar-logo.svg",
-            // vibrate: [200, 100, 200, 100, 200, 100, 200],
-            tag: "studicar-test-notification"
-          })
-          .catch(rej)
-          .then(res);
-      });
     }
   },
   mounted() {

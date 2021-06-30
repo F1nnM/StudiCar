@@ -4,7 +4,11 @@ const runQuery = require("./db"),
   /* longQueries           = require('./longQueries'), */
   apiResponseSimulation = require("./simulation/apiResponse"),
   tickerJS = require("./news/postillon/ticker.js"),
-  errorHandler = require("./errorHandler");
+  errorHandler = require("./errorHandler"),
+  admin = require("firebase-admin"),
+  FCM = require("fcm-node"),
+  SERVICE_ACCOUNT = require("./firebaseAccountKey.json"),
+  fcm = new FCM(SERVICE_ACCOUNT);
 const { database } = require("./errorHandler");
 
 function isOptionMissing(data, needed, res) {
@@ -70,6 +74,37 @@ function generateJdenticon(seed) {
 
   let size = 300;
   return jdenticon.toPng(seed, size);
+}
+
+function sendViaCloudMessaging(fcmToken, title, body, prio) {
+  var payload = {
+    notification: {
+      title: title || "- no title set -",
+      body: body || "- no body set -",
+    },
+  };
+
+  console.log("starting to send");
+
+  /* admin.messaging().sendToDevice(fcmToken, payload, {
+    priority: prio || "normal",
+  }); */
+  /* had troubles with above */
+
+  fcm.send(
+    {
+      to: fcmToken,
+      notification: {
+        title: "Lorem",
+        body: "Hello there",
+      },
+    },
+    (err, res) => {
+      if (err) console.log(err);
+      else console.log(res);
+    }
+  );
+  console.log("done");
 }
 
 async function getChatLifts(uid) {
@@ -932,12 +967,6 @@ module.exports = {
         if (options.secretFbId == options.fbid) {
           // ACCESSING PRIVATE PROFILE
 
-          await runQuery(
-            `REPLACE INTO fcm_tokens (USER_ID, TOKEN) VALUES ((SELECT ID FROM users WHERE FB_ID = ?), ?)`,
-            [options.secretFbId, options.idtoken]
-          ); // update fcm token in db
-          /* could also have been solved via inserting at creating user and then updating */
-
           data = (
             await runQuery(
               `
@@ -1549,11 +1578,58 @@ module.exports = {
           ).catch((error) => {
             throw error;
           });
+
+          runQuery(
+            "INSERT INTO fcm_tokens (USER_ID, TOKEN) VALUES ((SELECT ID FROM users WHERE ID = 1), '0');"
+          ).catch((err) => {
+            /* propably duplicate entry, do nothing */
+          });
           res.end("added");
         }
         res.end("existed");
       }
     },
+    "/updateFCM": async (req, res, options) => {
+      if (!isOptionMissing(options, ["token"], res)) {
+        await runQuery(
+          "UPDATE fcm_tokens SET TOKEN = ? WHERE USER_ID = (SELECT ID FROM users WHERE FB_ID = ?)",
+          [options.token, options.secretFbId]
+        )
+          .catch((err) => {
+            throw err;
+          })
+          .then((_) => {
+            console.log("updated FCM Token");
+          });
+
+        res.end();
+      }
+    },
+    "/testPush": async (req, res, options) => {
+      if (!isOptionMissing(options, [], res)) {
+        var result = (
+          await runQuery(
+            "SELECT TOKEN FROM fcm_tokens WHERE USER_ID = (SELECT ID FROM users WHERE ID = 1)",
+            [options.secretFbId]
+          ).catch((err) => {
+            throw err;
+          })
+        ).result;
+
+        if (!result[0]) {
+          // when no record, no token is stored for user
+          res.end("No token set");
+        } else {
+          var token = result[0].TOKEN;
+
+          sendViaCloudMessaging(token, "Lorem", "Hello there");
+
+          console.log(token);
+          res.end();
+        }
+      }
+    },
+
     "/updateDescription": async (req, res, options) => {
       if (
         !isOptionMissing(options, ["description"], res) &&

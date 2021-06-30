@@ -12,6 +12,7 @@
   "author": "Finn Melzer <studicar@mfinn.de>",
   "license": "ISC",
   "dependencies": {
+    "fcm-node": "^1.6.1",
     "firebase-admin": "^9.4.2",
     "image-size": "^0.8.3",
     "jdenticon": "^2.2.0",

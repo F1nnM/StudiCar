@@ -25,7 +25,8 @@ import {
   SQL_UPDATE_DEFAULT_ADDRESS,
   SQL_CANCEL_LIFT_REQUEST,
   SQL_CHANGE_FRIEND_RELATION,
-  SQL_GET_FRIENDS
+  SQL_GET_FRIENDS,
+  TEST_PUSH
 } from "../../ApiAccess";
 
 import { Notify } from "quasar";
@@ -250,6 +251,10 @@ export default {
             );
           else return true;
         });
+    },
+
+    SET_FCM_TOKEN(state, token) {
+      state.user.fcmToken = token;
     }
   },
 
@@ -314,6 +319,19 @@ export default {
         .then(() => {
           commit("RESET_USER");
         });
+    },
+
+    async testPushNotification({ commit }) {
+      sendApiRequest(
+        TEST_PUSH,
+        {},
+        response => {
+          if (response == "No token set") alert("No token set");
+        },
+        err => {
+          throw err;
+        }
+      );
     },
 
     async updateDescription({ commit }, payload) {

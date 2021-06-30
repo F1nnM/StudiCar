@@ -5,10 +5,12 @@ import "firebase/firebase-messaging";
 import {
   sendApiRequest,
   SQL_CREATE_USER_IF_NOT_EXISTING,
-  SQL_GET_USER_DATA
+  SQL_GET_USER_DATA,
+  SQL_UPDATE_FCM_TOKEN
 } from "../ApiAccess";
 
-function setUpPush(fbid) {
+function setUpPush(fbid, store) {
+  // propably not the best way to pass store object, but very simple
   try {
     const messaging = Firebase.messaging();
 
@@ -20,6 +22,18 @@ function setUpPush(fbid) {
       .then(currentToken => {
         if (currentToken) {
           console.warn("+++ TOKEN +++ " + currentToken);
+          if (store) store.commit("auth/SET_FCM_TOKEN", currentToken);
+
+          sendApiRequest(
+            SQL_UPDATE_FCM_TOKEN,
+            {
+              token: currentToken
+            },
+            _ => {},
+            err => {
+              throw err;
+            }
+          );
         } else {
           console.log(
             "No registration token available. Request permission to generate one."
@@ -72,8 +86,7 @@ export default ({ router, store }) => {
               /****************
                * PUSH MESSAGES
                *****************/
-
-              setUpPush(user.uid);
+              setUpPush(user.uid, store);
             },
             error => {
               store.dispatch("auth/signOut");

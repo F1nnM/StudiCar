@@ -289,3 +289,13 @@ export const SQL_UPDATE_FAQ_QUESTION = {
   path: "/updateQuestion",
   method: "POST"
 };
+
+export const SQL_UPDATE_FCM_TOKEN = {
+  path: "/updateFCM",
+  method: "POST"
+};
+
+export const TEST_PUSH = {
+  path: "/testPush",
+  method: "POST"
+};
