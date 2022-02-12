@@ -1598,9 +1598,7 @@ module.exports = {
           .catch((err) => {
             throw err;
           })
-          .then((_) => {
-            console.log("updated FCM Token");
-          });
+          .then((_) => {});
 
         res.end();
       }
@@ -1961,7 +1959,7 @@ module.exports = {
             );
           }
         );
-        res.end();
+        if (!res.sent) res.end();
       }
     },
     "/addLift": async (req, res, options) => {

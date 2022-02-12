@@ -2,34 +2,34 @@
   <div class="q-pa-md">
     <q-resize-observer :debounce="0"></q-resize-observer>
     <q-scroll-observer @scroll="scrollHandler" />
-    <q-toolbar class="text-primary">
-      <q-btn flat round dense icon="menu" />
-      <q-toolbar-title>Toolbar</q-toolbar-title>
-      <q-btn flat round dense icon="more_vert" />
-    </q-toolbar>
-    <q-input rounded outlined v-model="text" label="Rounded outlined" />
-    <q-input clearable filled color="blue-grey-9" v-model="text" label="Label" />
-
-    <q-circular-progress indeterminate size="50px" color="lime" class="q-ma-md" />
-
-    <q-rating v-model="ratingModel" size="2em" :max="10" color="primary" />
-
-    <p v-for="n in 30" :key="n">Lorem</p>
-
-    <p v-for="m in 30" :key="m">Lorem</p>
+    <q-btn label="toggle" @click="test = !test" />
+    <SettingScope
+      v-model="test"
+      descriptionLabel="cool"
+      property="Fahrzeug hinzufügen"
+      @save="alert"
+    >
+      here comes the setting
+      <template v-slot:description>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Corrupti animi
+        sit corporis! Inventore quisquam doloribus beatae repudiandae magni
+        natus impedit quae incidunt iure iste ex facilis, alias, tempora
+        voluptas laborum!
+      </template>
+    </SettingScope>
   </div>
 </template>
 
 <script>
+import SettingScope from "components/SettingScope";
 export default {
-  components: {},
-  data() {
-    return {};
+  components: {
+    SettingScope
   },
 
   data() {
     return {
-      ratingModel: 3
+      test: true
     };
   },
 

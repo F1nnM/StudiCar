@@ -338,7 +338,10 @@ export default {
       sendApiRequest(
         SQL_UPDATE_DESCRIPTION,
         { description: payload },
-        _ => commit("UPDATE_DESCRIPTION", payload),
+        _ => {
+          commit("UPDATE_DESCRIPTION", payload);
+          successNotify("Beschreibung wurde aktualisiert");
+        },
         error => alert(error)
       );
     },
@@ -487,7 +490,7 @@ export default {
         error => {
           if (error.status == 424)
             errorNotify(
-              "Kann Adresse noch nicht entfernen: mindestens eine Mitfahrgelegenheit hängt davon ab"
+              "Kann Adresse noch nicht entfernen: sie ist Endpunkt in mindestens einer Mitfahrgelegenheit"
             );
           else errorNotify(error);
         }
@@ -534,7 +537,7 @@ export default {
         error => {
           if (error.status == 424)
             errorNotify(
-              "Kann Fahrzeug noch nicht entfernen: mindestens eine Mitfahrgelegenheit hängt davon ab"
+              "Kann Fahrzeug noch nicht entfernen: es wird auf mindestens einer Fahrt genutzt"
             );
           else errorNotify(error);
         }

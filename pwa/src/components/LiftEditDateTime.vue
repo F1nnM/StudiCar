@@ -19,24 +19,36 @@
             color="white"
             text-color="grey-5"
             :options="[
-          {label: 'fester Tag', value: 'fix'},
-          {label: 'Wöchentlich', value: 'weekly'}
-        ]"
+              { label: 'Einmalig', value: 'fix' },
+              { label: 'Wöchentlich', value: 'weekly' }
+            ]"
           />
           <q-input
             clickable
-            @click="_=> { if(this.value.dateTab == 'fix') $refs.datepicker.toggle() 
-                    else $refs.datepicker.showPopup() }"
+            @click="
+              _ => {
+                if (this.value.dateTab == 'fix') $refs.datepicker.toggle();
+                else $refs.datepicker.showPopup();
+              }
+            "
             borderless
             readonly
-            :value="value.dateTab == 'fix' ? (value.date || '- Datum -') : getWeekDayFromIndex"
+            :value="
+              value.dateTab == 'fix'
+                ? value.date || '- Datum -'
+                : getWeekDayFromIndex
+            "
           >
             <template v-slot:append>
               <q-btn
                 icon="edit"
                 color="grey-9"
                 flat
-                @click="_ => { if(value.dateTab == 'weekly') $refs.datepicker.showPopup() }"
+                @click="
+                  _ => {
+                    if (value.dateTab == 'weekly') $refs.datepicker.showPopup();
+                  }
+                "
               >
                 <q-menu
                   v-if="value.dateTab == 'fix'"
@@ -85,26 +97,27 @@
             no-caps
             rounded
             unelevated
-            disable
+            :disable="false"
             class="q-ma-none q-mb-sm"
             outline
             toggle-color="primary"
             color="white"
             text-color="g rey-3"
             :options="[
-          {label: 'Ankunft um', value: arriveValue},
-          {label: 'Abfahrt um', value: departValue}
-        ]"
+              { label: 'Ankunft um', value: arriveValue },
+              { label: 'Abfahrt um', value: departValue }
+            ]"
           />
           <Tooltip rgba>
-            Dieses Feld ist deaktiviert:
-            die Wegpunkte der Fahrt stehen schon fest und damit auch der Ort, von dem die Zeit bekannt ist.
+            Zu einer Fahrt gehört immer nur eine Zeit, nämlich die an der DHBW.
+            Indem du Start und Ziel auswählst gibst du also auch ein, ob du die
+            Abfahrts- oder Ankunftszeit eingibst.
           </Tooltip>
           <div>
             <q-input
               class="col-6"
               clickable
-              @click="_=> $refs.timepicker.toggle()"
+              @click="_ => $refs.timepicker.toggle()"
               readonly
               borderless
               square
@@ -112,8 +125,17 @@
             >
               <template v-slot:append>
                 <q-btn icon="edit" color="grey-9" flat>
-                  <q-menu ref="timepicker" transition-show="jump-down" transition-hide="jump-up">
-                    <q-time format24h v-model="value.time" mask="HH:mm" color="primary" />
+                  <q-menu
+                    ref="timepicker"
+                    transition-show="jump-down"
+                    transition-hide="jump-up"
+                  >
+                    <q-time
+                      format24h
+                      v-model="value.time"
+                      mask="HH:mm"
+                      color="primary"
+                    />
                   </q-menu>
                 </q-btn>
               </template>

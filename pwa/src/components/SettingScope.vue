@@ -1,84 +1,100 @@
 <template>
-  <!-- just a pretty display scope for some of the settings -->
+  <!-- just a pretty display header and scope for most of the settings -->
   <q-dialog
     :value="value"
     @input="emit"
     position="bottom"
+    full-width
     persistent
     @show="emitShow"
     @hide="emitHide"
   >
-    <div class="bg-white q-mx-sm">
-      <q-toolbar class="bg-white shadow-primary">
-        <q-btn
-          round
-          flat
-          dense
-          outline
-          :disable="uploading"
-          size="lg"
-          @click="help = !help"
-        >
-          <span class="text-h6 text-weight-light">?</span>
-        </q-btn>
-        <span v-if="!help" class="text-weight-light left-border-primary">{{
-          property
-        }}</span>
-        <q-space />
-        <q-btn
-          flat
-          round
-          dense
-          icon="close"
-          size="md"
-          color="grey-9"
-          v-close-popup
-          class="q-mr-lg q-pr-sm"
-        >
-          <Tooltip>Abbrechen und aktuelle Werte beibehalten</Tooltip>
-        </q-btn>
-        <q-btn
-          flat
-          round
-          dense
-          icon="done"
-          :disable="disableSave"
-          size="md"
-          :color="!disableSave ? 'positive' : 'grey-3'"
-          @click="save"
-        >
-          <Tooltip>
-            <span v-if="!disableSave">Neu eingestellte Werte übernehmen</span>
-            <span v-else
-              >Noch deaktiviert, weil noch keine Werte verändert wurden</span
+    <div class="bg-white">
+      <q-card>
+        <q-toolbar class="q-pl-none">
+          <q-toolbar-title class="text-h6 text-weight-light"
+            ><q-btn
+              flat
+              dense
+              size="lg"
+              @click="help = !help"
+              no-caps
+              class="text-weight-light left-border-primary"
+              >{{ property }}</q-btn
             >
-          </Tooltip>
-        </q-btn>
-      </q-toolbar>
-      <q-linear-progress
-        v-if="value && uploading && !hasBeenSaved"
-        :indeterminate="uploading"
-        :value="100"
-        track-color="white"
-      />
-      <q-slide-transition>
-        <div class="bg-white row justify-start" v-if="help && !uploading">
-          <div class="bg-primary q-px-lg" />
-          <div class="q-pa-xs q-pl-sm q-py-md">
-            <div class="text-weight-light text-h6">
-              <span v-if="descriptionLabel">{{ descriptionLabel }}</span>
-              <span v-else>{{ property }} bearbeiten</span>
+          </q-toolbar-title>
+          <!-- <q-btn
+            round
+            flat
+            dense
+            outline
+            :disable="uploading"
+            size="lg"
+            @click="help = !help"
+          >
+            <span class="text-h6 text-weight-light">?</span>
+          </q-btn> -->
+
+          <q-btn
+            flat
+            round
+            dense
+            icon="close"
+            size="md"
+            color="grey-9"
+            @click="emitHide"
+            v-close-popup
+            class="q-mr-lg q-pr-sm"
+          >
+            <Tooltip>Abbrechen und aktuelle Werte beibehalten</Tooltip>
+          </q-btn>
+          <q-btn
+            flat
+            round
+            dense
+            icon="done"
+            :disable="disableSave"
+            size="md"
+            :color="!disableSave ? 'positive' : 'grey-3'"
+            @click="save"
+          >
+            <Tooltip>
+              <span v-if="!disableSave">Neu eingestellte Werte übernehmen</span>
+              <span v-else
+                >Noch deaktiviert, weil noch keine Werte verändert wurden</span
+              >
+            </Tooltip>
+          </q-btn>
+        </q-toolbar>
+        <q-linear-progress
+          v-if="value && uploading && !hasBeenSaved"
+          :indeterminate="uploading"
+          :value="100"
+          track-color="white"
+        />
+        <q-slide-transition>
+          <div class="bg-white row " v-if="help && !uploading">
+            <div class="q-px-lg col-2">
+              <div class="text-primary text-h5 q-mt-md">›</div>
             </div>
-            <div class="text-caption text-grey-9">
-              <slot name="description"></slot>
+            <div class="q-pa-xs q-pl-sm q-py-md col-10">
+              <div class="text-weight-light text-subtitle2">
+                <slot name="description"></slot>
+                <span v-if="!hasDescriptionSlot && descriptionLabel">{{
+                  descriptionLabel
+                }}</span>
+                <span v-else> {{ property }} bearbeiten </span>
+              </div>
             </div>
           </div>
-        </div>
-      </q-slide-transition>
+        </q-slide-transition>
 
-      <div class="q-pa-xs bg-white">
-        <slot></slot>
-      </div>
+        <q-card-section>
+          <slot>
+            <!-- here comes the actual setting form or whatever -->
+          </slot>
+        </q-card-section>
+      </q-card>
     </div>
   </q-dialog>
 </template>
@@ -115,7 +131,11 @@ export default {
       if (val == true) this.hasBeenSaved = false; // reset when re-opening
     }
   },
-  computed: {},
+  computed: {
+    hasDescriptionSlot() {
+      return !!this.$slots.description;
+    }
+  },
   methods: {
     emit(val) {
       this.$emit("input", val);
@@ -139,7 +159,7 @@ export default {
 
 <style lang="scss" scoped>
 .left-border-primary {
-  border-left: 1px solid $primary;
+  border-left: 3px solid $primary;
   padding-left: 15px;
 }
 

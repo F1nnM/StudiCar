@@ -35,7 +35,11 @@
             <path d="M0,0h24v24H0V0z" fill="none" />
           </g>
         </svg>
-        <span style="margin-left: 2px" v-html="filtersActive" v-if="filtersActive" />
+        <span
+          style="margin-left: 2px"
+          v-html="filtersActive"
+          v-if="filtersActive"
+        />
       </q-btn>
     </TitleButton>
     <div class="q-gutter-y-md">
@@ -49,11 +53,14 @@
           <q-card>
             <div class="row justify-between">
               <q-item-label header>
-                {{ sortFilterDialog.tab == 'sort' ? 'Sortieren' : 'Filtern' }}
-                <small
-                  class="q-ml-sm"
-                  v-if="sortFilterDialog.tab == 'filter'"
-                >- {{ filteredOffersLength + '/' + allOffers.length}} Angebot{{ allOffers.length != 1 ? 'en' : '' }} übrig -</small>
+                {{ sortFilterDialog.tab == "sort" ? "Sortieren" : "Filtern" }}
+                <small class="q-ml-sm" v-if="sortFilterDialog.tab == 'filter'"
+                  >-
+                  {{ filteredOffersLength + "/" + allOffers.length }} Angebot{{
+                    allOffers.length != 1 ? "en" : ""
+                  }}
+                  übrig -</small
+                >
               </q-item-label>
               <q-tabs
                 v-model="sortFilterDialog.tab"
@@ -143,10 +150,10 @@
                         color="white"
                         text-color="grey-5"
                         :options="[
-          {icon: 'sentiment_satisfied_alt', value: 0},
-          {value: 1, slot: 'groups'},
-          {icon: 'group', value: 2}
-        ]"
+                          { icon: 'sentiment_satisfied_alt', value: 0 },
+                          { value: 1, slot: 'groups' },
+                          { icon: 'group', value: 2 }
+                        ]"
                       >
                         <template v-slot:groups>
                           <q-icon>
@@ -172,11 +179,16 @@
                     <q-item-section>
                       <q-item-label>Angebote von Nutzern filtern</q-item-label>
                       <q-item-label caption>
-                        <span v-if="filter.friends == 2">nur Angebote von Freunden werden angezeigt</span>
-                        <span
-                          v-else-if="filter.friends == 1"
-                        >nur Angebote von Freunden und deren Freunden werden angezeigt</span>
-                        <span v-else-if="!filter.friends">Angebote von jedem Nutzer werden angezeigt</span>
+                        <span v-if="filter.friends == 2"
+                          >nur Angebote von Freunden werden angezeigt</span
+                        >
+                        <span v-else-if="filter.friends == 1"
+                          >nur Angebote von Freunden und deren Freunden werden
+                          angezeigt</span
+                        >
+                        <span v-else-if="!filter.friends"
+                          >Angebote von jedem Nutzer werden angezeigt</span
+                        >
                       </q-item-label>
                     </q-item-section>
                   </q-item>
@@ -193,21 +205,22 @@
                         color="white"
                         text-color="grey-5"
                         :options="[
-          {icon: 'home', value: 'home'},
-          {icon: 'sync_alt', value: 0},
-          {icon: 'school', value: 'school'}
-        ]"
+                          { icon: 'home', value: 'home' },
+                          { icon: 'sync_alt', value: 0 },
+                          { icon: 'school', value: 'school' }
+                        ]"
                       />
                     </q-item-section>
                     <q-item-section>
                       <q-item-label>Fahrtziel filtern</q-item-label>
                       <q-item-label caption>
-                        <span
-                          v-if="filter.dest == 'home'"
-                        >nur Fahrten in Richtung deiner Adressen werden angezeigt</span>
-                        <span
-                          v-else-if="filter.dest == 'school'"
-                        >nur Fahrten in Richtung DH werden angezeigt</span>
+                        <span v-if="filter.dest == 'home'"
+                          >nur Fahrten in Richtung deiner Adressen werden
+                          angezeigt</span
+                        >
+                        <span v-else-if="filter.dest == 'school'"
+                          >nur Fahrten in Richtung DH werden angezeigt</span
+                        >
                         <span v-else>es werden alle Fahrten angezeigt</span>
                       </q-item-label>
                     </q-item-section>
@@ -217,35 +230,58 @@
                       <q-toggle v-model="filter.prefs" />
                     </q-item-section>
                     <q-item-section>
-                      <q-item-label>Meine Präferenzen berücksichtigen</q-item-label>
+                      <q-item-label
+                        >Meine Präferenzen berücksichtigen</q-item-label
+                      >
                       <q-item-label caption>
-                        <span v-if="filter.prefs">Im Moment werden deine Präferenzen berücksichtigt</span>
-                        <span v-else>Im Moment werden deine Präferenzen nicht beachtet</span>
+                        <span v-if="filter.prefs"
+                          >Im Moment werden deine Präferenzen
+                          berücksichtigt</span
+                        >
+                        <span v-else
+                          >Im Moment werden deine Präferenzen nicht
+                          beachtet</span
+                        >
                       </q-item-label>
                     </q-item-section>
                   </q-item>
-                  <q-item tag="label" :disable="(typeof defaultHomeCity) != 'string'">
+                  <!-- the below lines had some red markers, this is likely because the typeof operator isn't be recognized properly, and eslint removed brackets if set -->
+                  <q-item
+                    tag="label"
+                    :disable="typeof defaultHomeCity != 'string'"
+                  >
                     <q-item-section avatar>
                       <q-toggle
                         v-model="filter.defaultHome"
-                        :disable="(typeof defaultHomeCity) != 'string'"
+                        :disable="typeof defaultHomeCity != 'string'"
                       />
                     </q-item-section>
                     <q-item-section v-if="defaultHomeCity != null">
-                      <q-item-label>Nur Fahrten {{ filterDefaultHomePreposition }} {{ defaultHomeCity }} anzeigen</q-item-label>
+                      <q-item-label
+                        >Nur Fahrten {{ filterDefaultHomePreposition }}
+                        {{ defaultHomeCity }} anzeigen</q-item-label
+                      >
                       <q-item-label caption>
-                        <span
-                          v-if="filter.defaultHome"
-                        >Im Moment werden nur Fahrten {{ filterDefaultHomePreposition }} {{ defaultHomeCity }} angezeigt</span>
-                        <span v-else>Im Moment werden Fahrten zu all deinen Adressen angezeigt</span>
+                        <span v-if="filter.defaultHome"
+                          >Im Moment werden nur Fahrten
+                          {{ filterDefaultHomePreposition }}
+                          {{ defaultHomeCity }} angezeigt</span
+                        >
+                        <span v-else
+                          >Im Moment werden Fahrten zu all deinen Adressen
+                          angezeigt</span
+                        >
                       </q-item-label>
                     </q-item-section>
                     <q-item-section v-else>
-                      <q-item-label>nur Fahrten mit der Stadt meiner Standardadresse anzeigen</q-item-label>
                       <q-item-label
-                        caption
-                        class="text-negative"
-                      >Diese Option ist deaktiviert, weil du im Profil noch keine Standardadresse eingestellt hast</q-item-label>
+                        >nur Fahrten mit der Stadt meiner Standardadresse
+                        anzeigen</q-item-label
+                      >
+                      <q-item-label caption class="text-negative"
+                        >Diese Option ist deaktiviert, weil du im Profil noch
+                        keine Standardadresse eingestellt hast</q-item-label
+                      >
                     </q-item-section>
                   </q-item>
                 </q-list>
@@ -269,9 +305,11 @@
             </q-item-section>
             <q-item-section>
               <q-item-label>Noch keine Adressen verfügbar</q-item-label>
-              <q-item-label
-                caption
-              >In deinem Profil sind noch keine Adressen hinterlegt, StudiCar kann dir also noch keine passenden Angebote anzeigen.</q-item-label>
+              <q-item-label caption
+                >In deinem Profil sind noch keine Adressen hinterlegt, StudiCar
+                kann dir also noch keine passenden Angebote
+                anzeigen.</q-item-label
+              >
             </q-item-section>
           </q-item>
 
@@ -288,12 +326,17 @@
       <div
         class="text-caption"
         v-if="!(getSortedOffers.length || filter.length)"
-      >Im Moment gibt es für dich keine neuen Angebote. Schau einfach später nochmal vorbei.</div>
+      >
+        Im Moment gibt es für dich keine neuen Angebote. Schau einfach später
+        nochmal vorbei.
+      </div>
       <!-- above case for neither offers nor filter applied -->
       <div
         class="text-caption"
         v-else-if="!getSortedOffers.length && filter.length"
-      >Es gibt keine Angebote, die deinen Filterkriterien entsprechen.</div>
+      >
+        Es gibt keine Angebote, die deinen Filterkriterien entsprechen.
+      </div>
       <!-- above case for offers all not matching selected filter settings -->
     </div>
     <QrLiftDisplay @request="triggerLiftRequest" />
@@ -337,7 +380,7 @@ export default {
     title() {
       var greeting = this.$store.state.greeting;
       var name = this.$store.getters["auth/user"].name.split(" ")[0];
-      return greeting + ", " + name;
+      return "Hi, " + name; // first had greeting like in DrawerWelcomeImage, but took up too much space
     },
 
     filterDefaultHomePreposition() {

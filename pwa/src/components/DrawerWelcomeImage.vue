@@ -8,7 +8,7 @@
       class="text-white"
     >
       <div class="row full-width q-pa-md">
-        <div class="text-h6 col-10 text-weight-light">{{ greeting.full }}</div>
+        <div class="text-h6 col-10 text-weight-light">{{ greetingFull }}</div>
         <q-icon size="sm" class="col-2" :name="greetingIcon" />
       </div>
       <div
@@ -91,14 +91,12 @@ export default {
       else return require("../assets/drawer_images/" + imgPath + ".jpg");
     },
 
-    greeting() {
-      return {
-        full:
-          this.timeText +
-          ", " +
-          this.$store.getters["auth/user"].name.split(" ")[0],
-        time: this.timeText
-      };
+    greetingFull() {
+      return (
+        this.timeText +
+        ", " +
+        this.$store.getters["auth/user"].name.split(" ")[0]
+      );
     },
 
     greetingIcon() {

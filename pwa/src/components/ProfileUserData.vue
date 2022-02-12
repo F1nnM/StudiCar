@@ -1,46 +1,31 @@
 <template>
   <!-- this component was made to split the profile file in smaller pieces to improve maintining, just the advantages of modularizing -->
   <div>
-    <div class="q-mr-md">
-      <TitleButtonAnchor>
-        <q-btn label="Freunde" to="/friends" outline color="primary" />
-      </TitleButtonAnchor>
-    </div>
-
-    <q-splitter
-      :value="50"
-      disable
-      :separator-style="'background-color: transparent '"
-    >
+    <q-splitter :value="50" :separator-style="'background-color: transparent '">
       <template v-slot:before>
-        <div class="q-px-md q-py-sm">
-          <q-card
-            class="my-shadow-left"
-            :style="'border-color: ' + profileColor"
-          >
-            <q-card-section class="q-pa-none">
-              <div class>
-                <q-img
-                  spinner-color="primary"
-                  class="rounded-borders"
-                  spinner-size="82px"
-                  id="profile_image"
-                  :src="ppPath"
-                  @load="getProminentColor"
-                >
-                  <template v-slot:error>
-                    <div class="absolute-full flex flex-center text-white">
-                      StudiCar konnte dein Bild nicht laden. Bitte stelle eine
-                      Internetverbindung her, um dein Profilbild zu sehen.
-                    </div>
-                  </template>
-                </q-img>
-                <q-badge
-                  floating
-                  class="q-pa-none"
-                  style="background-color: transparent"
-                >
-                  <!-- <q-btn
+        <q-card class="q-ml-md q-mt-md q-mb-xs q-mr-sm">
+          <q-card-section class="q-py-sm">
+            <div id="img-container">
+              <q-img
+                spinner-color="primary"
+                class="rounded-borders"
+                spinner-size="82px"
+                id="profile_image"
+                :src="ppPath"
+              >
+                <template v-slot:error>
+                  <div class="absolute-full flex flex-center text-white">
+                    StudiCar konnte dein Bild nicht laden. Bitte stelle eine
+                    Internetverbindung her, um dein Profilbild zu sehen.
+                  </div>
+                </template>
+              </q-img>
+              <q-badge
+                floating
+                class="q-pa-none"
+                style="background-color: transparent"
+              >
+                <!-- <q-btn
                     round
                     color="black"
                     size="sm"
@@ -48,95 +33,89 @@
                     @click="resetPP()"
                     class="q-mr-sm"
                   />-->
-                  <q-btn
-                    round
-                    outline
-                    color="black"
-                    size="sm"
-                    icon="edit"
-                    @click="openUpload = true"
-                  />
-                </q-badge>
-              </div>
-            </q-card-section>
+                <q-btn
+                  round
+                  outline
+                  color="black"
+                  size="sm"
+                  icon="edit"
+                  @click="openUpload = true"
+                />
+              </q-badge>
+            </div>
+          </q-card-section>
 
-            <q-card-section class="row q-pb-none">
-              <div
-                class="col-8 text-h5 text-weight-light text-left q-mt-none q-mb-xs custom-overline c-o-1 c-o-l c-o-sm"
-              >
-                {{ username }}
-              </div>
-              <p class="col-4">
-                <q-btn @click="shareProfileQR = true" flat>
-                  <QrIcon size="sm" :type="4" showLogo />
-                </q-btn>
-              </p>
-            </q-card-section>
-          </q-card>
-        </div>
+          <q-card-section class="q-pb-sm"
+            ><div
+              class="col-8 text-h5 text-weight-light text-left q-mt-none q-mb-xs custom-overline c-o-1 c-o-l c-o-sm"
+            >
+              {{ username }}
+              <!-- Anastasia -->
+            </div>
+          </q-card-section>
+        </q-card>
       </template>
 
       <template v-slot:after>
-        <!-- <q-tab-panels
-          v-model="statsFriendsTab"
-          animated
-          transition-prev="jump-left"
-          transition-next="jump-right"
-        >
-          <q-tab-panel name="stats">
-            <q-list>
-              <q-item-label
-                header
-                class="q-pt-xs q-pb-xs text-uppercase text-caption"
-              >Fahrtenstatistik</q-item-label>
-              <q-tabs v-model="statsTimeTab" dense class="bg-white text-grey-7">
-                <q-tab name="previous" icon="query_builder" />
-                <q-tab name="current" icon="check_circle_outline" />
-              </q-tabs>
-              <q-tab-panels v-model="statsTimeTab">
-                <q-tab-panel
-                  v-for="t in [
-                    {
-                      name: 'previous',
-                      label: 'Früher',
-                      lifts: {
-                        all: stats.liftsAll,
-                        driver: stats.liftsOffered,
-                      },
-                    },
-                    {
-                      name: 'current',
-                      label: 'Aktuell',
-                      lifts: {
-                        all: stats.liftCount,
-                        driver: stats.driverCount,
-                      },
-                    },
-                  ]"
-                  :key="t.name"
-                  :name="t.name"
-                >
-                  <p>{{ t.label }}</p>
+        <div class="column justify-between q-pr-md">
+          <div class="col">
+            <div class="row justify-start q-ml-sm q-mt-md">
+              <!-- <div>
+            <q-card class="my-shadow-left no-border">
+              <q-card-section> -->
+              <q-btn class="q-mr-sm" @click="shareProfileQR = true">
+                <QrIcon size="sm" :type="4" showLogo />
+              </q-btn>
 
-                  <p class="text-caption">Angebotsbilanz:</p>
-                  <ColoredMeter
-                    :angle="t.lifts.driver / t.lifts.all"
-                    width="30vw"
-                    :minInput="0"
-                    :maxInput="1"
+              <q-btn icon="group" size="sm" to="friends/" />
+            </div>
+          </div>
+          <div class="col">
+            <q-card class="q-ml-sm q-mt-sm q-mb-xs">
+              <q-card-section class="q-py-sm">
+                <div class="text-uppercase text-caption q-mt-none q-mb-xs">
+                  Präferenzen
+                  <br />im Auto
+                  <q-btn
+                    size="sm"
+                    flat
+                    @click="toggleOpenEditPrefs"
+                    icon="edit"
+                  />
+                </div>
+                <div class="row text-caption">
+                  <div class="col-9">Redseligkeit</div>
+                  <div :class="'col-3 text-' + betterPrefColor(prefs.talk)">
+                    ●
+                  </div>
+                  <div class="col-9">... am Morgen</div>
+                  <div
+                    :class="'col-3 text-' + betterPrefColor(prefs.talkMorning)"
                   >
-                    <p
-                      class="text-h6 text-weight-light q-pt-md"
-                    >{{ t.lifts.driver }} / {{ t.lifts.all }}</p>
-                  </ColoredMeter>
-                  <br />
-                  <q-separator />
-                </q-tab-panel>
-              </q-tab-panels>
-            </q-list>
-          </q-tab-panel>
-        <q-tab-panel name="friends" class="q-pa-xs">-->
-        <q-list>
+                    ●
+                  </div>
+                  <div class="col-9">Rauchen</div>
+                  <div :class="'col-3 text-' + betterPrefColor(prefs.smoking)">
+                    ●
+                  </div>
+                  <div class="col-9">Musik</div>
+                  <div :class="'col-3 text-' + betterPrefColor(prefs.music)">
+                    ●
+                  </div>
+                </div>
+                <!-- <q-expansion-item v-model="prefExpanded">
+            <template v-slot:header>
+              <span>
+                ●●●●
+              </span>
+            </template>
+          </q-expansion-item> -->
+              </q-card-section>
+            </q-card>
+          </div>
+        </div>
+
+        <!-- <q-list>
           <q-item-label
             header
             class="q-pt-xs q-pb-xs text-caption text-uppercase"
@@ -157,7 +136,7 @@
             >
               <q-item-section avatar>
                 <q-avatar size="md">
-                  <!-- friendInfoData = friend -->
+                  
                   <q-img :src="friend.imageUrl" />
                 </q-avatar>
               </q-item-section>
@@ -172,11 +151,31 @@
           <div v-else class="text-caption">
             Du hast noch an keinen Fahrten teilgenommen
           </div>
-        </q-list>
-        <!--  </q-tab-panel>
-        </q-tab-panels>-->
+        </q-list> -->
       </template>
     </q-splitter>
+    <q-card class="q-ma-md q-mt-sm">
+      <q-card-section class="q-pb-sm q-pt-xs ">
+        <div class="row justify-between q-mb-xs">
+          <div class="text-uppercase text-caption q-mt-xs">
+            Über Mich
+          </div>
+          <q-btn
+            size="sm"
+            flat
+            color="black"
+            icon="edit"
+            @click="toggleOpenEditDescription"
+          />
+        </div>
+        <div class="text-weight-light q-mt-sm">
+          <div v-if="description">{{ description }}</div>
+          <div v-else>
+            - noch keine Beschreibung hinterlegt -
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
     <q-dialog
       :value="!!friendInfoData"
       @input="e => (friendInfoData = !!e)"
@@ -329,17 +328,147 @@
         />
       </q-card>
     </q-dialog>
+
+    <q-dialog v-model="openEditDescription" persistent full-width>
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Kurzinfo</div>
+          <p class="text-caption">
+            Beschreibe dich in wenigstens 5 Worten
+            <br />
+          </p>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none row">
+          <q-input
+            class="col-10"
+            dense
+            v-model="newDescription"
+            autofocus
+            @keyup.enter="prompt = false"
+          />
+          <q-btn
+            class="col-2"
+            icon="clear"
+            flat
+            size="sm"
+            @click="newDescription = ''"
+          />
+        </q-card-section>
+
+        <q-card-actions align="right" class="text-primary">
+          <q-btn flat label="Abbrechen" v-close-popup />
+          <q-btn
+            :disabled="!atLeastFiveWords"
+            flat
+            label="Speichern"
+            @click="toggleOpenEditDescription"
+            v-close-popup
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog
+      v-model="openEditPrefs"
+      persistent
+      position="bottom"
+      class="q-pa-md"
+    >
+      <q-card class="q-pa-xs">
+        <q-btn
+          icon="close"
+          flat
+          class="z-top absolute-top-right q-pr-md q-pt-md"
+          round
+          dense
+          v-close-popup
+          @click="toggleOpenEditPrefs(true)"
+        />
+        <q-splitter :value="20">
+          <template v-slot:before class="full-height">
+            <q-tabs v-model="openEditPrefsTab" vertical class="text-primary">
+              <q-tab name="talk" icon="record_voice_over" />
+              <q-tab name="talkMorning" icon="alarm" />
+              <q-tab name="smoking" icon="smoking_rooms" />
+              <q-tab name="music" icon="music_note" />
+            </q-tabs>
+          </template>
+          <template v-slot:after style="height: 300px">
+            <q-tab-panels
+              v-model="openEditPrefsTab"
+              swipeable
+              animated
+              vertical
+              transition-prev="jump-down"
+              transition-next="jump-up"
+              style="height: 400px"
+            >
+              <q-tab-panel
+                v-for="cat in [
+                  {
+                    prop: 'talk',
+                    label: 'Redseligkeit'
+                  },
+                  {
+                    prop: 'talkMorning',
+                    label: '... am Morgen'
+                  },
+                  {
+                    prop: 'smoking',
+                    label: 'Rauchen im Auto'
+                  },
+                  {
+                    prop: 'music',
+                    label: 'Musik im Auto'
+                  }
+                ]"
+                :key="cat.prop"
+                :name="cat.prop"
+              >
+                <div class="text-h6 q-mb-md">{{ cat.label }}</div>
+                <q-list>
+                  <q-item tag="label" v-ripple>
+                    <q-radio
+                      keep-color
+                      v-model="newPrefs[cat.prop]"
+                      val="RED"
+                      :label="prefsDocu[cat.prop].red"
+                      color="red"
+                    />
+                  </q-item>
+                  <q-item tag="label" v-ripple>
+                    <q-radio
+                      keep-color
+                      v-model="newPrefs[cat.prop]"
+                      val="YELLOW"
+                      :label="prefsDocu[cat.prop].yellow"
+                      color="orange"
+                    />
+                  </q-item>
+                  <q-item tag="label" v-ripple>
+                    <q-radio
+                      keep-color
+                      v-model="newPrefs[cat.prop]"
+                      val="GREEN"
+                      :label="prefsDocu[cat.prop].green"
+                      color="green"
+                    />
+                  </q-item>
+                </q-list>
+              </q-tab-panel>
+            </q-tab-panels>
+          </template>
+        </q-splitter>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
-<script src="js/Vibrant.min.js"></script>
 <script>
 import { date } from "quasar";
-
 import ExtHr from "components/ExtendedHr";
-import ColoredMeter from "components/ColoredMeter";
 import QrGen from "components/QrGenerator";
 import QrIcon from "components/QrIcon";
-import TitleButtonAnchor from "components/TitleButtonAnchor";
 
 import {
   buildGetRequestUrl,
@@ -350,16 +479,14 @@ import {
 } from "../ApiAccess";
 
 export default {
-  name: "ProfileTopSection",
+  name: "ProfileUserData",
   components: {
     ExtHr,
     QrGen,
-    QrIcon,
-    TitleButtonAnchor
+    QrIcon
   },
   props: {
-    username: String,
-    stats: Object
+    username: String
   },
   data() {
     return {
@@ -372,7 +499,22 @@ export default {
       file: null,
       newPPictureBase64: "",
       friendsPage: 0,
-      uploadingProfilePicture: false
+      uploadingProfilePicture: false,
+      prefExpanded: false,
+
+      openEditPrefs: false, // prefs settings
+      openEditPrefsTab: "talk",
+      newPrefs: {
+        talk: "",
+        talkMorning: "",
+        smoking: "",
+        music: ""
+      },
+      prefsDocu: this.$store.state.prefsDocu,
+      imageForColors: null,
+
+      openEditDescription: false,
+      newDescription: ""
     };
   },
   computed: {
@@ -396,6 +538,17 @@ export default {
 
     profileColor() {
       return "white";
+    },
+
+    atLeastFiveWords() {
+      if (this.username == "Bernd") {
+        return true;
+      } else {
+        var splitted = this.newDescription.split(" ");
+        var length = splitted.length;
+        var lastItemIsWord = splitted[length - 1] != "";
+        return length > 5 ? true : length >= 5 && lastItemIsWord; // when more than 5 words, just return true
+      }
     },
 
     since() {
@@ -430,6 +583,24 @@ export default {
         type: "user",
         data: uid
       };
+    },
+
+    prefs: {
+      get() {
+        return this.$store.getters["auth/user"].prefs;
+      },
+      set(value) {
+        this.$store.dispatch("auth/updatePrefs", value);
+      }
+    },
+
+    description: {
+      get() {
+        return this.$store.getters["auth/user"].bio;
+      },
+      set(value) {
+        this.$store.dispatch("auth/updateDescription", value);
+      }
     }
   },
   methods: {
@@ -521,8 +692,51 @@ export default {
         .onCancel(() => {});
     },
 
-    getProminentColor() {
-      var img = document.getElementById("profile_image");
+    betterPrefColor(color) {
+      if (color == "GREEN") color = "green-8";
+      // first convert color if neccessary
+      else if (color == "YELLOW") color = "orange";
+      return color.toLowerCase(); // always return lower case
+    },
+
+    toggleOpenEditPrefs(save) {
+      if (this.openEditPrefs) {
+        // open, shall be closed, so prefs have to be converted and stored back to original var (only when save)
+        if (save) {
+          this.prefs = this.newPrefs; // just to minimize traffic, prefs are only stored when clicking on save (respectively closing dialog)
+          this.newPrefs = {
+            talk: "",
+            talkMorning: "",
+            smoking: "",
+            music: ""
+          };
+        } else {
+          this.newPrefs = {
+            // just to make sure
+            talk: "",
+            talkMorning: "",
+            smoking: "",
+            music: ""
+          };
+        }
+      } else {
+        // still closed, shall be opened, so we have to copy (and first convert) prefs to another var
+
+        this.newPrefs = this.prefs;
+      }
+
+      this.openEditPrefs = !this.openEditPrefs;
+    },
+
+    toggleOpenEditDescription() {
+      if (this.openEditDescription) {
+        // already open
+        this.description = this.newDescription;
+      } else {
+        // still closed
+        this.newDescription = this.description;
+      }
+      this.openEditDescription = !this.openEditDescription;
     }
   },
   mounted() {
