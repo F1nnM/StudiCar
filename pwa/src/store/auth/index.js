@@ -437,7 +437,9 @@ export default {
         { prefs: payload },
         _ => {
           commit("UPDATE_PREFS", payload);
-          successNotify("Deine Präferenzen wurden aktualisiert");
+          successNotify(
+            "Deine Präferenzen wurden aktualisiert bzw. gespeichert."
+          );
         },
         error => alert(error)
       );

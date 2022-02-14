@@ -530,15 +530,25 @@ export default {
       var clipboardContent;
       if (!this.scannerOpen)
         clipboardContent = await this.askAndReadClipboard().catch(err => {
-          console.log(err);
+          var isDomException = (err + "").includes("NotAllowedError");
+
           this.$q.notify({
             type: "negative",
             message: "Zwischenablage blockiert",
-            caption: err.toString().includes("DOMException")
+            caption: isDomException
               ? "Bitte sieh in den FAQ nach, wir haben dafür eine Lösung veröffentlicht."
               : "StudiCar kann aus irgendeinem Grund keine Daten aus der Zwischenablage laden: " +
                 err
           });
+          setTimeout(_ => {
+            this.scannerOpen = false;
+            this.$q.notify({
+              type: "info",
+              message: "Kamera geschlossen",
+              caption:
+                "StudiCar hat den Scanner wieder geschlossen, weil wie gesagt der Zugriff auf die Kamera geblockt ist"
+            });
+          }, 500);
         });
       if (clipboardContent) {
         if (clipboardContent.includes("/#/"))
