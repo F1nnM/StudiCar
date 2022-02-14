@@ -186,7 +186,7 @@ export default {
     },
 
     seatsLeft() {
-      return this.lift.car.allSeats - this.lift.passengers.length;
+      return this.lift.car.seatsWithoutDriver - this.lift.passengers.length;
     }
   },
   methods: {

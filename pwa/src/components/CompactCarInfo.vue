@@ -57,7 +57,7 @@
           <div class="row" v-if="compactView">
             <!-- <q-chip color="black" text-color="white" size="sm">{{ car.type }}</q-chip> -->
             <q-chip icon="event_seat" size="sm">{{
-              car.seats || car.allSeats
+              car.seats || car.seatsWithoutDriver
             }}</q-chip>
           </div>
           <span v-else>{{ car.licensePlate }}</span>
@@ -66,7 +66,7 @@
       <q-item-section side top v-if="!compactView">
         <div class="row justify-between">
           <q-chip icon="event_seat" size="sm"
-            >{{ car.seats || car.allSeats }} verfügbar</q-chip
+            >{{ car.seats || car.seatsWithoutDriver }} verfügbar</q-chip
           >
         </div>
       </q-item-section>

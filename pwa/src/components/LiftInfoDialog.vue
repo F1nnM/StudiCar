@@ -6,9 +6,17 @@
     maximized
     @input="emit"
   >
-    <div v-if="lift" v-touch-swipe.mouse.right="swipedToRight" v-touch-swipe.mouse.left="closeLift">
+    <div
+      v-if="lift"
+      v-touch-swipe.mouse.right="swipedToRight"
+      v-touch-swipe.mouse.left="closeLift"
+    >
       <div class="row justify-end">
-        <div class="col-2 text-right column justify-center q-pr-md text-primary bg-white">Info</div>
+        <div
+          class="col-2 text-right column justify-center q-pr-md text-primary bg-white"
+        >
+          Info
+        </div>
         <div class="col-2 bg-white text-primary">
           <q-toolbar>
             <q-toolbar-title class="text-uppercase">
@@ -29,14 +37,21 @@
         <q-list class="q-mt-md bg-white">
           <q-item dense class="q-mb-md">
             <q-item-section>
-              <q-item-label class="text-h5 text-weight-light">Fahrtdetails</q-item-label>
+              <q-item-label class="text-h5 text-weight-light"
+                >Fahrtdetails</q-item-label
+              >
             </q-item-section>
           </q-item>
           <q-item-label header>
             <div class="row justify-between">
               <span>Verlauf</span>
               <q-item-label caption>
-                <q-icon name="loop" size="xs" class="q-mr-xs" v-if="isRepeating" />
+                <q-icon
+                  name="loop"
+                  size="xs"
+                  class="q-mr-xs"
+                  v-if="isRepeating"
+                />
                 <q-icon name="query_builder" size="xs" class="q-mr-xs" v-else />
                 {{ formattedDate }}
               </q-item-label>
@@ -51,30 +66,37 @@
             <div v-if="lift.passengers">
               Teilnehmer
               <br />
-              <small
-                class="text-caption"
-                style="font-size: .7em;"
-              >Tippe, um zum jeweiligen Profil zu kommen</small>
+              <small class="text-caption" style="font-size: .7em;"
+                >Tippe, um zum jeweiligen Profil zu kommen</small
+              >
               <span class="text-caption float-right">
-                {{ lift.passengers.length + 1 }} / {{ lift.car.allSeats + 1 }}
-                <q-icon name="person" size="xs" v-if="lift.passengers.length < lift.car.allSeats" />
+                {{ lift.passengers.length + 1 }} /
+                {{ lift.car.seatsWithoutDriver + 1 }}
+                <q-icon
+                  name="person"
+                  size="xs"
+                  v-if="lift.passengers.length < lift.car.seatsWithoutDriver"
+                />
                 <q-icon name="how_to_reg" color="positive" size="xs" v-else />
               </span>
             </div>
             <span v-else class="text-caption float-right">
-              0 / {{ lift.car.allSeats }}
+              0 / {{ lift.car.seatsWithoutDriver }}
               <q-icon name="person" size="xs" />
             </span>
           </q-item-label>
           <q-item v-ripple clickable @click="viewUserFromFbId(lift.driver.id)">
             <q-item-section top avatar>
               <q-avatar>
-                <img :key="keyToRefreshImages" :src="imageUrlTable[lift.driver.id]" />
+                <img
+                  :key="keyToRefreshImages"
+                  :src="imageUrlTable[lift.driver.id]"
+                />
               </q-avatar>
             </q-item-section>
             <q-item-section>
               <p class="q-mb-none">
-                {{ !isDriver ? lift.driver.name : 'Du' }}
+                {{ !isDriver ? lift.driver.name : "Du" }}
                 <q-badge class="q-ml-sm" transparent color="white">
                   <q-icon name="directions_car" size="xs" color="black" />
                 </q-badge>
@@ -85,18 +107,24 @@
             <q-item-section side>
               <div class="row justify-around">
                 <q-btn
-                  v-for="(pref) in [{
-val: 'talk', icon: 'record_voice_over'
+                  v-for="pref in [
+                    {
+                      val: 'talk',
+                      icon: 'record_voice_over'
                     },
                     {
-val: 'talkMorning', icon: 'alarm'
+                      val: 'talkMorning',
+                      icon: 'alarm'
                     },
                     {
-val: 'smoking', icon: 'smoking_rooms'
+                      val: 'smoking',
+                      icon: 'smoking_rooms'
                     },
                     {
-val: 'music', icon: 'music_note'
-                    }]"
+                      val: 'music',
+                      icon: 'music_note'
+                    }
+                  ]"
                   :key="pref.val"
                   outline
                   rounded
@@ -118,12 +146,15 @@ val: 'music', icon: 'music_note'
                 v-ripple
                 @click="viewUserFromFbId(item.id)"
                 class="col-6"
-                v-for="(item) in lift.passengers"
+                v-for="item in lift.passengers"
                 :key="item.id"
               >
                 <q-item-section top avatar>
                   <q-avatar>
-                    <img :key="keyToRefreshImages" :src="imageUrlTable[item.id]" />
+                    <img
+                      :key="keyToRefreshImages"
+                      :src="imageUrlTable[item.id]"
+                    />
                   </q-avatar>
                 </q-item-section>
 
@@ -145,7 +176,9 @@ val: 'music', icon: 'music_note'
               </q-item>
             </div>
           </div>
-          <p v-else class="text-center q-mt-sm text-grey-7">Du hast noch keine Mitfahrer</p>
+          <p v-else class="text-center q-mt-sm text-grey-7">
+            Du hast noch keine Mitfahrer
+          </p>
           <q-expansion-item>
             <template v-slot:header>
               <q-item>
@@ -177,7 +210,9 @@ val: 'music', icon: 'music_note'
                   @click="leave"
                 >
                   <q-icon name="logout" color="negative" />
-                  <span class="q-ml-sm" v-if="isDriver">Mitfahrgelegenheit auflösen</span>
+                  <span class="q-ml-sm" v-if="isDriver"
+                    >Mitfahrgelegenheit auflösen</span
+                  >
                   <span class="q-ml-sm" v-else>Verlassen</span>
                   <q-tooltip
                     anchor="top middle"
@@ -185,7 +220,9 @@ val: 'music', icon: 'music_note'
                     :content-class="`bg-white text-dark`"
                     self="bottom middle"
                     :offset="[10, 10]"
-                  >Hinweis: Wenn du noch Mitfahrer hast, dann kannst du als Fahrer nicht einfach so absagen.</q-tooltip>
+                    >Hinweis: Wenn du noch Mitfahrer hast, dann kannst du als
+                    Fahrer nicht einfach so absagen.</q-tooltip
+                  >
                 </q-btn>
               </q-card-section>
             </q-card>
@@ -214,11 +251,16 @@ val: 'music', icon: 'music_note'
         <template v-slot:description>
           Der Termin der Fahrt setzt sich aus zwei Komponenten zusammen:
           <ul>
-            <li>Tag: Der Tag kann entweder ein festes Datum oder ein wiederkehrender Wochentag sein.</li>
             <li>
-              Zeit: Die Zeit an sich kann willkürlich gewählt werden, es wird allerdings immer nur die Zeit an der DH gespeichert:
-              Abfahrtzeit bei Start, Ankunftszeit bei Fahrtende. Somit ist die Wahl der beiden Optionen mit der Reihenfolge der
-              Stationen verbunden, die im Moment noch nicht geändert werden kann.
+              Tag: Der Tag kann entweder ein festes Datum oder ein
+              wiederkehrender Wochentag sein.
+            </li>
+            <li>
+              Zeit: Die Zeit an sich kann willkürlich gewählt werden, es wird
+              allerdings immer nur die Zeit an der DH gespeichert: Abfahrtzeit
+              bei Start, Ankunftszeit bei Fahrtende. Somit ist die Wahl der
+              beiden Optionen mit der Reihenfolge der Stationen verbunden, die
+              im Moment noch nicht geändert werden kann.
             </li>
           </ul>
         </template>
@@ -228,7 +270,6 @@ val: 'music', icon: 'music_note'
     </div>
   </q-dialog>
 </template>
-
 
 <script>
 import { openURL, date } from "quasar";
@@ -508,5 +549,4 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

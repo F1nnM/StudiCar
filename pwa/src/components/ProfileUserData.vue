@@ -10,7 +10,8 @@
                 spinner-color="primary"
                 class="rounded-borders"
                 spinner-size="82px"
-                id="profile_image"
+                ref="profile_image"
+                @load="imageHasBeenLoaded"
                 :src="ppPath"
               >
                 <template v-slot:error>
@@ -470,6 +471,8 @@ import ExtHr from "components/ExtendedHr";
 import QrGen from "components/QrGenerator";
 import QrIcon from "components/QrIcon";
 
+import Vibrant from "node-vibrant";
+
 import {
   buildGetRequestUrl,
   sendApiRequest,
@@ -737,6 +740,12 @@ export default {
         this.newDescription = this.description;
       }
       this.openEditDescription = !this.openEditDescription;
+    },
+
+    imageHasBeenLoaded() {
+      const img = this.$refs.profile_image;
+
+      console.log("Image has been loaded");
     }
   },
   mounted() {

@@ -37,7 +37,7 @@
         @click="requestLift"
         v-else-if="!isAlreadyRequested"
         dense
-        icon="touch_app"
+        icon="hail"
         size="md"
         color="primary"
       >
@@ -79,6 +79,21 @@
           <q-item-label caption>{{ timeText }}</q-item-label>
         </q-item-section>
         <q-item-section side>
+          <div class="text-grey-7 text-right">
+            noch {{ lift.seatsOffered - lift.seatsOccupied }} Pl{{
+              lift.seatsOffered - (lift.seatsOccupied % 1) != 0 ? "ätze" : "atz"
+            }}
+            frei
+          </div>
+
+          <q-linear-progress
+            size="xs"
+            :value="lift.seatsOccupied / lift.seatsOffered"
+            color="primary"
+            :rounded="true"
+          >
+          </q-linear-progress>
+          <!-- 
           <q-knob
             size="lg"
             show-value
@@ -89,14 +104,8 @@
             text-color="dark"
             :value="(lift.seatsOccupied / lift.seatsOffered) * 100"
           >
-            <span>{{ lift.seatsOccupied }}/{{ lift.seatsOffered }}</span>
-            <q-icon
-              style="display: inline"
-              id="seats"
-              size="12px"
-              name="person"
-            />
-          </q-knob>
+            <q-icon style="display: inline" size="12px" name="transport_car" />
+          </q-knob> -->
         </q-item-section>
       </q-item>
       <!-- <q-item>

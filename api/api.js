@@ -235,7 +235,7 @@ SELECT
                 'car', JSON_OBJECT(
                     'brand', CAR_BRAND,
                     'model', CAR_MODEL,
-                    'allSeats', CAR_SEATS,
+                    'seatsWithoutDriver', CAR_SEATS,
                     'licensePlate', CAR_LICENSE_PLATE,
                     'built', CAR_BUILT,
                     'type', CAR_TYPE,

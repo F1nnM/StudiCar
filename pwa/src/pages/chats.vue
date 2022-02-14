@@ -528,7 +528,7 @@ export default {
 
     seatsLeft(liftId) {
       const lift = this.getLiftFromId(liftId);
-      var a = lift.car.allSeats - lift.passengers.length;
+      var a = lift.car.seatsWithoutDriver - lift.passengers.length;
       if (a < 0) a = 0; // negative number as left seats makes no sence
       return a;
     },
