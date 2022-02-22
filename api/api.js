@@ -77,13 +77,6 @@ function generateJdenticon(seed) {
 }
 
 function sendViaCloudMessaging(fcmToken, title, body, prio) {
-  var payload = {
-    notification: {
-      title: title || "- no title set -",
-      body: body || "- no body set -",
-    },
-  };
-
   console.log("starting to send");
 
   /* admin.messaging().sendToDevice(fcmToken, payload, {
@@ -95,8 +88,9 @@ function sendViaCloudMessaging(fcmToken, title, body, prio) {
     {
       to: fcmToken,
       notification: {
-        title: "Lorem",
-        body: "Hello there",
+        title: title || "- no title set -",
+        body: body || "- no body set -",
+        icon: "https://localhost:3000/img/app-icon.svg",
       },
     },
     (err, res) => {
@@ -1580,7 +1574,8 @@ module.exports = {
           });
 
           await runQuery(
-            "INSERT INTO fcm_tokens (USER_ID, TOKEN) VALUES ((SELECT ID FROM users WHERE ID = ?), '0');"
+            "INSERT INTO fcm_tokens (USER_ID, TOKEN) VALUES ((SELECT ID FROM users WHERE ID = ?), '0') ON DUPLICATE KEY UPDATE TOKEN='0';",
+            [options.secretFbId]
           ).catch((err) => {
             /* propably duplicate entry, do nothing */
           });
@@ -1592,8 +1587,8 @@ module.exports = {
     "/updateFCM": async (req, res, options) => {
       if (!isOptionMissing(options, ["token"], res)) {
         await runQuery(
-          "UPDATE fcm_tokens SET TOKEN = ? WHERE USER_ID = (SELECT ID FROM users WHERE FB_ID = ?)",
-          [options.token, options.secretFbId]
+          "INSERT INTO fcm_tokens (USER_ID, TOKEN) VALUES ((SELECT ID FROM users WHERE FB_ID = ?), ?) ON DUPLICATE KEY UPDATE TOKEN=?;",
+          [options.secretFbId, options.token, options.token]
         )
           .catch((err) => {
             throw err;
@@ -1604,7 +1599,6 @@ module.exports = {
       }
     },
     "/updateSubscription": async (req, res, options) => {
-      console.log(options);
       if (
         !isOptionMissing(options, ["pushSubscription"], res) &&
         (await isUserVerified(options.secretFbId))
@@ -1624,11 +1618,13 @@ module.exports = {
       }
     },
     "/testPush": async (req, res, options) => {
-      if (!isOptionMissing(options, [], res)) {
+      if (
+        !isOptionMissing(options, ["receiverFbId", "title", "message"], res)
+      ) {
         var result = (
           await runQuery(
-            "SELECT TOKEN FROM fcm_tokens WHERE USER_ID = (SELECT ID FROM users WHERE ID = 1)",
-            [options.secretFbId]
+            "SELECT TOKEN FROM fcm_tokens WHERE USER_ID = (SELECT ID FROM users WHERE FB_ID = ?)",
+            [options.receiverFbId]
           ).catch((err) => {
             throw err;
           })
@@ -1636,11 +1632,11 @@ module.exports = {
 
         if (!result[0]) {
           // when no record, no token is stored for user
-          res.end("No token set");
+          res.end("No token found");
         } else {
           var token = result[0].TOKEN;
 
-          sendViaCloudMessaging(token, "Lorem", "Hello there");
+          sendViaCloudMessaging(token, options.title, options.message);
 
           res.end();
         }

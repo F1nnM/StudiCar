@@ -18,15 +18,6 @@ register("firebase-messaging-sw.js", {
     if (process.env.DEV) {
       console.log("Service worker is ready.");
       console.warn("Showing notification in 5 sec");
-      setTimeout(_ => {
-        registration.showNotification("Lorem ipsum", {
-          icon: "img/app-icon.svg"
-        });
-      }, 5000);
-
-      registration.addEventListener("push", event => {
-        alert("GOT YA: " + event);
-      });
     }
   },
 

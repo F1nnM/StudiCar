@@ -1,6 +1,9 @@
 <template>
   <div class="q-pa-md">
     <q-btn label="Feuer" @click="go" />
+    <q-btn label="Bernd" @click="pushTest('Bernd')" />
+    <q-btn label="der andere Bernd" @click="pushTest('Bernd2')" />
+    <q-btn label="Finn" @click="pushTest('Finn')" />
     <span v-for="n in 20" :key="-n">Hier steht dann eine ganze Menge Test</span>
 
     <span v-for="n in 20" :key="n">Hier steht dann eine ganze Menge Test</span>
@@ -37,7 +40,34 @@ export default {
         TEST_PUSH,
         {},
         data => {},
-        err => {}
+        err => {
+          throw err;
+        }
+      );
+    },
+
+    pushTest(code) {
+      var uid = "";
+      switch (code) {
+        case "Bernd":
+          uid = "wG3cG4M7NFMJzJYcreFjLrJC9Q23";
+          break;
+        case "Bernd2":
+          uid = "9V2F272TmUV6EMIl9bJHHZW5tPE2";
+          break;
+        case "Finn":
+          uid = "QTs2vuk6O0RHjr8uDyLBwb9DZ5G3";
+          break;
+      }
+      sendApiRequest(
+        TEST_PUSH,
+        {
+          receiverFbId: uid,
+          title: "Heyho",
+          message: "Von jemandem an " + code
+        },
+        _ => {},
+        _ => {}
       );
     }
   },

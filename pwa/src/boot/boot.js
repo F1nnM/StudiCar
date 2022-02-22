@@ -28,7 +28,10 @@ function createNotificationSubscription() {
           return sub;
         })
         .catch(err => {
-          console.warn(err);
+          alert(
+            "Bitte erlaube StudiCar den Zugriff auf Benachrichtigungen, sonst kriegst du nichts mit."
+          );
+          console.log(err);
         });
     })
     .catch(err => console.warn(err));
@@ -70,11 +73,15 @@ function setUpPush(fbid, store) {
 
                 setUpPush(fbid);
               } else {
-                console.log("Permission Denied");
+                alert(
+                  "Bitte erlaube StudiCar den Zugriff auf Benachrichtigungen, sonst kriegst du nichts mit."
+                );
               }
             })
             .catch(err => {
-              console.log(err);
+              alert(
+                "Bitte erlaube StudiCar den Zugriff auf Benachrichtigungen, sonst kriegst du nichts mit."
+              );
               window.location.href = window.location.href;
             });
         }
@@ -90,6 +97,10 @@ function setUpPush(fbid, store) {
           console.warn("Got a new token: " + newToken);
         })
         .catch(err => console.warn(err));
+    });
+
+    messaging.onMessage(payload => {
+      console.warn(payload);
     });
 
     createNotificationSubscription().then(subscription => {
