@@ -1,9 +1,9 @@
 <template>
   <div class="q-pa-md">
     <q-btn label="Feuer" @click="go" />
-    <span v-for="n in 20" :key="-n">HIer steht dann eine ganze Menge Test</span>
+    <span v-for="n in 20" :key="-n">Hier steht dann eine ganze Menge Test</span>
 
-    <span v-for="n in 20" :key="n">HIer steht dann eine ganze Menge Test</span>
+    <span v-for="n in 20" :key="n">Hier steht dann eine ganze Menge Test</span>
 
     <p v-for="n in 20" :key="'1000' + n">Lorem</p>
   </div>
@@ -12,7 +12,12 @@
 <script>
 import { scroll } from "quasar";
 
-import { sendApiRequest, PING, SQL_GET_MARKETPLACE_OFFER } from "../ApiAccess";
+import {
+  sendApiRequest,
+  PING,
+  SQL_GET_MARKETPLACE_OFFER,
+  TEST_PUSH
+} from "../ApiAccess";
 
 export default {
   components: {},
@@ -29,11 +34,9 @@ export default {
       var uid = "wG3cG4M7NFMJzJYcreFjLrJC9Q23";
       uid += "a";
       sendApiRequest(
-        PING,
+        TEST_PUSH,
         {},
-        data => {
-          console.warn("pong");
-        },
+        data => {},
         err => {}
       );
     }
@@ -45,5 +48,4 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

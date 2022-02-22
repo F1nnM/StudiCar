@@ -1603,6 +1603,26 @@ module.exports = {
         res.end();
       }
     },
+    "/updateSubscription": async (req, res, options) => {
+      console.log(options);
+      if (
+        !isOptionMissing(options, ["pushSubscription"], res) &&
+        (await isUserVerified(options.secretFbId))
+      ) {
+        await runQuery(
+          "UPDATE fcm_tokens SET SUBSCRIPTION = ? WHERE USER_ID = (SELECT ID FROM users WHERE FB_ID = ?)",
+          [options.pushSubscription, options.secretFbId]
+        )
+          .catch((err) => {
+            throw err;
+          })
+          .then((_) => {
+            // test
+          });
+
+        res.end();
+      }
+    },
     "/testPush": async (req, res, options) => {
       if (!isOptionMissing(options, [], res)) {
         var result = (
@@ -1622,7 +1642,6 @@ module.exports = {
 
           sendViaCloudMessaging(token, "Lorem", "Hello there");
 
-          console.log(token);
           res.end();
         }
       }

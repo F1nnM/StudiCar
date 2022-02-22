@@ -1,4 +1,5 @@
 import { register } from "register-service-worker";
+import firebase from "src/boot/firebase";
 
 import store from "../src/store";
 
@@ -22,6 +23,10 @@ register("firebase-messaging-sw.js", {
           icon: "img/app-icon.svg"
         });
       }, 5000);
+
+      registration.addEventListener("push", event => {
+        alert("GOT YA: " + event);
+      });
     }
   },
 

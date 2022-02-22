@@ -1,21 +1,43 @@
 import Firebase from "firebase/app";
 import "firebase/auth";
-import "firebase/firebase-messaging";
+import { getMessaging, onMessage } from "firebase/firebase-messaging";
 
 import {
   sendApiRequest,
   SQL_CREATE_USER_IF_NOT_EXISTING,
   SQL_GET_USER_DATA,
-  SQL_UPDATE_FCM_TOKEN
+  SQL_UPDATE_FCM_TOKEN,
+  SQL_UPDATE_PUSH_SUBSCRIPTION,
+  TEST_PUSH
 } from "../ApiAccess";
+
+const vapidKey =
+  "BEkNfar1xxwvXxxSAlgjdXmivUZtcudfXZiN5Hd8Xjksv1rzDNF44f8U9heFv8UeQlC0l42qW1dpKzv9cG4k9lw";
+
+function createNotificationSubscription() {
+  return navigator.serviceWorker
+    .getRegistration()
+    .then(reg => {
+      return reg.pushManager
+        .subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: vapidKey
+        })
+        .then(sub => {
+          console.warn("User is subscribed: " + sub);
+          return sub;
+        })
+        .catch(err => {
+          console.warn(err);
+        });
+    })
+    .catch(err => console.warn(err));
+}
 
 function setUpPush(fbid, store) {
   // propably not the best way to pass store object, but very simple
   try {
     const messaging = Firebase.messaging();
-
-    const vapidKey =
-      "BEkNfar1xxwvXxxSAlgjdXmivUZtcudfXZiN5Hd8Xjksv1rzDNF44f8U9heFv8UeQlC0l42qW1dpKzv9cG4k9lw";
 
     messaging
       .getToken({
@@ -61,10 +83,6 @@ function setUpPush(fbid, store) {
         console.log("An error occurred while retrieving token. ", err);
       });
 
-    messaging.onMessage(payload => {
-      console.warn("Received: " + payload);
-    });
-
     messaging.onTokenRefresh(_ => {
       messaging
         .getToken()
@@ -74,24 +92,16 @@ function setUpPush(fbid, store) {
         .catch(err => console.warn(err));
     });
 
-    navigator.serviceWorker
-      .getRegistration()
-      .then(reg => {
-        console.warn("getreg");
-        reg.pushManager
-          .subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: vapidKey
-          })
-          .then(sub => {
-            console.warn("User is subscribed: " + sub);
-            return sub;
-          })
-          .catch(err => {
-            console.warn(err);
-          });
-      })
-      .catch(err => console.warn(err));
+    createNotificationSubscription().then(subscription => {
+      sendApiRequest(
+        SQL_UPDATE_PUSH_SUBSCRIPTION,
+        {
+          pushSubscription: JSON.stringify(subscription)
+        },
+        _ => {},
+        err => {}
+      );
+    });
   } catch (e) {
     console.warn(e);
   }
