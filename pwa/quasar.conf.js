@@ -1,6 +1,8 @@
 // Configuration for your app
 // https://quasar.dev/quasar-cli/quasar-conf-js
 
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+
 const fs = require("fs");
 
 function tryReadFile(file) {
@@ -83,6 +85,12 @@ module.exports = function(ctx) {
             formatter: require("eslint").CLIEngine.getFormatter("stylish")
           }
         });
+
+        cfg.plugins.push(
+          new CopyWebpackPlugin([{ from: "src/rootFolder", to: "" }])
+        );
+        // creation of root entry point,
+        // ref: https://forum.quasar-framework.org/topic/5015/use-firebase-messaging-sw-js-file-in-quasar-1-5-8
       }
     },
 
@@ -107,16 +115,20 @@ module.exports = function(ctx) {
 
     // https://quasar.dev/quasar-cli/developing-pwa/configuring-pwa
     pwa: {
-      workboxPluginMode: "GenerateSW", // 'GenerateSW' or 'InjectManifest'
-      workboxOptions: {
+      workboxPluginMode: "InjectManifest", // 'GenerateSW' or 'InjectManifest'
+      /* workboxOptions: {
+        swSrc: "firebase-messaging-sw.js"
+      }, */
+      /* workboxOptions: {
         skipWaiting: true // found in https://forum.quasar-framework.org/topic/2560/solved-pwa-force-refresh-when-new-version-released/28
-      }, // only for GenerateSW
+      }, // only for GenerateSW */
       manifest: {
         name: "StudiCar" + (ctx.dev ? " LOCAL" : ""),
         short_name: "StudiCar",
         description: "Green.Cheap.Social",
         display: "standalone",
         orientation: "portrait",
+        gcm_sender_id: "640124338592",
         background_color: "#ffffff",
         theme_color: "#02a200", // blue color: 027be3
         icons: [

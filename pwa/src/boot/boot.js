@@ -14,10 +14,12 @@ function setUpPush(fbid, store) {
   try {
     const messaging = Firebase.messaging();
 
+    const vapidKey =
+      "BEkNfar1xxwvXxxSAlgjdXmivUZtcudfXZiN5Hd8Xjksv1rzDNF44f8U9heFv8UeQlC0l42qW1dpKzv9cG4k9lw";
+
     messaging
       .getToken({
-        vapidKey:
-          "BEkNfar1xxwvXxxSAlgjdXmivUZtcudfXZiN5Hd8Xjksv1rzDNF44f8U9heFv8UeQlC0l42qW1dpKzv9cG4k9lw"
+        vapidKey: vapidKey
       })
       .then(currentToken => {
         if (currentToken) {
@@ -58,6 +60,38 @@ function setUpPush(fbid, store) {
       .catch(err => {
         console.log("An error occurred while retrieving token. ", err);
       });
+
+    messaging.onMessage(payload => {
+      console.warn("Received: " + payload);
+    });
+
+    messaging.onTokenRefresh(_ => {
+      messaging
+        .getToken()
+        .then(newToken => {
+          console.warn("Got a new token: " + newToken);
+        })
+        .catch(err => console.warn(err));
+    });
+
+    navigator.serviceWorker
+      .getRegistration()
+      .then(reg => {
+        console.warn("getreg");
+        reg.pushManager
+          .subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: vapidKey
+          })
+          .then(sub => {
+            console.warn("User is subscribed: " + sub);
+            return sub;
+          })
+          .catch(err => {
+            console.warn(err);
+          });
+      })
+      .catch(err => console.warn(err));
   } catch (e) {
     console.warn(e);
   }

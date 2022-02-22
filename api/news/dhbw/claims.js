@@ -1,5 +1,5 @@
 module.exports = [
-  "Leider muss ich ihnen mitteilen, dass ich ihre Absage auf meine Bewerbung nicht aktzeptieren kann. Ich fange nächste Woche an. Viel Erfolg beim nächsten Mal!",
+  "Leider muss ich ihnen mitteilen, dass ich ihre Absage auf meine Bewerbung nicht akzeptieren kann. Ich fange nächste Woche an. Viel Erfolg beim nächsten Mal!",
   '"Ich studiere dual." - "Haben Sie mich gerade Aal genannt?!"',
   "Meine Mathe-Kenntnisse: Addition, Subtraktion, Frustration, Aufgebentraktion",
   "Der Duale Student: Eine perfekte Mischung aus jung und erfahren - findet man sonst nur auf dem Straßenstrich.",
