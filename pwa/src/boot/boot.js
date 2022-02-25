@@ -88,6 +88,7 @@ function setUpPush(fbid, store) {
       })
       .catch(err => {
         console.log("An error occurred while retrieving token. ", err);
+        alert("Could not get token: " + err);
       });
 
     messaging.onTokenRefresh(_ => {

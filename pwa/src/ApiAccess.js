@@ -304,3 +304,8 @@ export const TEST_PUSH = {
   path: "/testPush",
   method: "POST"
 };
+
+export const NOTIFY_USERS_IN_LIFT = {
+  path: "/notifyUsersInLift",
+  method: "POST"
+};

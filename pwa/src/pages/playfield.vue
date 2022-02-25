@@ -4,6 +4,8 @@
     <q-btn label="Bernd" @click="pushTest('Bernd')" />
     <q-btn label="der andere Bernd" @click="pushTest('Bernd2')" />
     <q-btn label="Finn" @click="pushTest('Finn')" />
+    <q-btn label="All in Lift" @click="notifyTest()" />
+
     <span v-for="n in 20" :key="-n">Hier steht dann eine ganze Menge Test</span>
 
     <span v-for="n in 20" :key="n">Hier steht dann eine ganze Menge Test</span>
@@ -19,7 +21,8 @@ import {
   sendApiRequest,
   PING,
   SQL_GET_MARKETPLACE_OFFER,
-  TEST_PUSH
+  TEST_PUSH,
+  NOTIFY_USERS_IN_LIFT
 } from "../ApiAccess";
 
 export default {
@@ -69,6 +72,14 @@ export default {
         _ => {},
         _ => {}
       );
+    },
+
+    notifyTest() {
+      sendApiRequest(NOTIFY_USERS_IN_LIFT, {
+        liftId: 51091511115776,
+        title: "Hey Leute",
+        message: "Bernd hat euch was zu sagen"
+      });
     }
   },
 
