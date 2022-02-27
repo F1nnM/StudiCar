@@ -187,7 +187,7 @@ module.exports = configure(function (ctx) {
           }
         ],
       },
-
+    },
 
     // Full list of options: https://quasar.dev/quasar-cli/developing-cordova-apps/configuring-cordova
     cordova: {

@@ -1,29 +1,21 @@
 <template>
-  <div
-    class="fullscreen bg-blue text-white text-center q-pa-md flex flex-center"
-  >
-    <div>
-      <div style="font-size: 30vh">404</div>
+  <div>
+    <q-img class="fixed-center fixed-full" src="~assets/app-logo.svg" style="filter: blur(3px)" />
+    <div class="fixed-center text-center" style="background-color: rgba(255,255,255,.8)">
+      <p class="text-h4 text-center text-weight-light q-pt-md q-mb-xl">Fehler 404</p>
 
-      <div class="text-h2" style="opacity: 0.4">Oops. Nothing here...</div>
-
-      <q-btn
-        class="q-mt-xl"
-        color="white"
-        text-color="blue"
-        unelevated
-        to="/"
-        label="Go Home"
-        no-caps
-      />
+      <br />
+      <p
+        class="text-h6 text-weight-light q-mt-md"
+      >Die angeforderte Seite existiert nicht. Bitte korrigiere deine Eingaben.</p>
+      <q-btn class="q-mt-sm" color="primary" to="/" label="Zum Marktplatz" />
     </div>
   </div>
 </template>
 
 <script>
 import { defineComponent } from "vue";
-
 export default defineComponent({
-  name: "Error404",
+  name: 'Error404'
 });
 </script>

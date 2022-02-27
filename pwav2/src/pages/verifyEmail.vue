@@ -1,15 +1,12 @@
 <template>
   <q-page class="flex flex-center">
-    <img
-      alt="Quasar logo"
-      src="~assets/quasar-logo-full.svg"
-    >
+    <p>{{JSON.stringify(Firebase.auth().currentUser)}}</p>
   </q-page>
 </template>
 
 <script>
 import { defineComponent } from "vue";
 export default defineComponent({
-  name: 'PageIndex'
+  name: 'verifyEmail'
 });
 </script>
