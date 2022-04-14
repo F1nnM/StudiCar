@@ -74,13 +74,13 @@ function setUpPush(fbid, store) {
                 setUpPush(fbid);
               } else {
                 alert(
-                  "Bitte erlaube StudiCar den Zugriff auf Benachrichtigungen, sonst kriegst du nichts mit."
+                  "Bitte erlaube StudiCar den Zugriff auf Benachrichtigungen, sonst kriegst du nichts mit"
                 );
               }
             })
             .catch(err => {
               alert(
-                "Bitte erlaube StudiCar den Zugriff auf Benachrichtigungen, sonst kriegst du nichts mit."
+                "Bitte erlaube StudiCar den Zugriff auf Benachrichtigungen, sonst kriegst du nichts mit"
               );
               window.location.href = window.location.href;
             });
@@ -98,10 +98,6 @@ function setUpPush(fbid, store) {
           console.warn("Got a new token: " + newToken);
         })
         .catch(err => console.warn(err));
-    });
-
-    messaging.onMessage(payload => {
-      console.warn(payload);
     });
 
     createNotificationSubscription().then(subscription => {

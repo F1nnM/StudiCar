@@ -75,19 +75,19 @@ async function notifyUsersInLift(liftId, title, message) {
     if (result.length == 0) {
       // when no record, no token stored for any of matching users
       res("No token found");
-    } else {
-      var fcmPromises = [];
-      result.forEach((record) => {
-        fcmPromises.push(sendViaCloudMessaging(record.TOKEN, title, message));
-      });
-
-      await Promise.all(fcmPromises).catch((err) => {
-        console.log(err);
-        rej(err);
-      });
-
-      res();
     }
+    var fcmPromises = [];
+    result.forEach((record) => {
+      fcmPromises.push(sendViaCloudMessaging(record.TOKEN, title, message));
+    });
+
+    /* wait for all messages to be sent successfully, if one err then fail */
+    await Promise.all(fcmPromises).catch((err) => {
+      console.log(err);
+      rej(err);
+    });
+
+    res();
   });
 }
 
