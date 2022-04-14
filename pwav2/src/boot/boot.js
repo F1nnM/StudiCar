@@ -1,6 +1,6 @@
-import Firebase from "firebase/app";
-import "firebase/auth";
-import "firebase/messaging";
+import Firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+import "firebase/compat/messaging";
 
 import {
   sendApiRequest,

@@ -71,7 +71,8 @@ module.exports = {
     await runQuery(
       `INSERT INTO database_errors (ID, ENDPOINT, CAUSED_BY, OPTIONS, DB_ERR, DETAILS, TIMESTAMP) VALUES 
 			(NULL, ?, (SELECT ID FROM users WHERE FB_ID = ?), ?, ?, ?, current_timestamp())`,
-      [endpoint, causedFbId, JSON.stringify(options), dbError, errMsg]
+      [endpoint, causedFbId, JSON.stringify(options), dbError, errMsg],
+      'err'
     );
 
     var objToBeSent = {

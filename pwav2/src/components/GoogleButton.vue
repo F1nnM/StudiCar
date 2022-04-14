@@ -32,14 +32,16 @@ I hope you appreciate my work xD -->
 
 <script>
 import { defineComponent } from "vue";
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
 
 export default defineComponent({
   name: "GoogleSignInButton",
   methods: {
     doSignIn() {
-      var provider = new this.$firebase.auth.GoogleAuthProvider();
+      var provider = new firebase.auth.GoogleAuthProvider();
 
-      this.$firebase
+      firebase
         .auth()
         .signInWithPopup(provider)
         .then(_ => _)

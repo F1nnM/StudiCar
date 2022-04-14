@@ -84,9 +84,15 @@ module.exports = configure(function (ctx) {
     devServer: {
       server: {
         type: "https",
+        options: {
+          key: tryReadFile("server.key"),
+          cert: tryReadFile("server.pem"),
+          ca: tryReadFile("ca.pem")
+        }
       },
       port: 3000,
       open: true, // opens browser window automatically
+
     },
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
@@ -138,11 +144,7 @@ module.exports = configure(function (ctx) {
 
     // https://quasar.dev/quasar-cli/developing-pwa/configuring-pwa
     pwa: {
-      workboxPluginMode: "GenerateSW", // 'GenerateSW' or 'InjectManifest'
-      workboxOptions: {
-        skipWaiting: true // found in https://forum.quasar-framework.org/topic/2560/solved-pwa-force-refresh-when-new-version-released/28
-      }, // only for GenerateSW
-
+      workboxPluginMode: "InjectManifest", // 'GenerateSW' or 'InjectManifest'
       // for the custom service worker ONLY (/src-pwa/custom-service-worker.[js|ts])
       // if using workbox in InjectManifest mode
       chainWebpackCustomSW(chain) {

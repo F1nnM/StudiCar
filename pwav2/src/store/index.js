@@ -3,6 +3,13 @@ import { createStore } from "vuex";
 
 import auth from './auth'
 
+function getGreeting () {
+  var h = new Date().getHours()
+  if (h < 9) return 'Guten Morgen'
+  else if (h >= 18) return 'Guten Abend'
+  else return 'Willkommen'
+}
+
 /*
  * If not building with SSR mode, you can
  * directly export the Store instantiation;

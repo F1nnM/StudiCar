@@ -234,6 +234,7 @@
             @shortLiftInfo="openShortLiftInfo"
             v-model="chatPopup.isOpen"
             :detailsOpen="chatPopup.detailsOpen"
+            @detailsOpenUpdate="chatPopup.detailsOpen = $event"
             :lift="chatPopup.data"
             @closeLift="closeLift"
             @closeAndLeave="leave"

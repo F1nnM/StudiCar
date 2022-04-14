@@ -273,12 +273,10 @@
 
 <script>
 import { openURL, date } from "quasar";
-import Vue, { defineComponent } from "vue";
+import { defineComponent } from "vue";
 import LiftEditDateTime from "components/LiftEditDateTime";
 import SettingScope from "components/SettingScope";
 import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
-import VueFriendlyIframe from "vue-friendly-iframe";
-Vue.use(VueFriendlyIframe);
 
 import CompactCarInfo from "components/CompactCarInfo";
 import ExpansionLiftTimeline from "components/ExpansionLiftTimeline";

@@ -585,7 +585,8 @@ export default defineComponent({
       user: this.$store.getters["auth/user"].uid,
       loading: 0, // as always: 0 means not loading, 1 means in progress, 2 means success and -1 error.
       bottomReached: false,
-      medias: {}
+      medias: {},
+      detailsOpenLocal: this.detailsOpen
     };
   },
   model: {
@@ -609,7 +610,8 @@ export default defineComponent({
         }, 50); // has to have short delay to get wanted effect
       } else {
         this.infoDrawerOpen = false;
-        this.detailsOpen = false;
+        this.detailsOpenLocal = false;
+        this.$emit("detailsOpenUpdate", this.detailsOpenLocal)
       }
     },
 

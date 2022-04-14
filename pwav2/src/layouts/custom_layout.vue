@@ -37,9 +37,11 @@
 
     <q-page-container>
       <q-scroll-observer @scroll="scrollHandler" />
-      <transition :name="pageTrans" mode="out-in">
-        <router-view />
-      </transition>
+      <router-view v-slot="{ Component }">
+        <transition :name="pageTrans" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </q-page-container>
 
     <q-slide-transition>

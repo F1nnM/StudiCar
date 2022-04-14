@@ -4,7 +4,7 @@
       <q-item dense class="q-pr-none">
         <q-item-section avatar>
           <q-avatar size="xl">
-            <img :src="requestingUser.imageUrl" />
+            <img :src="requestingUserImageUrl" />
           </q-avatar>
         </q-item-section>
         <q-item-section>
@@ -83,7 +83,8 @@ export default defineComponent({
   components: {},
   data() {
     return {
-      userViewTab: "info"
+      userViewTab: "info",
+      requestingUserImageUrl: null
     };
   },
   model: {
@@ -175,7 +176,7 @@ export default defineComponent({
   },
   mounted() {
     (async _ => {
-      this.requestingUser.imageUrl = await buildGetRequestUrl(
+      this.requestingUserImageUrl = await buildGetRequestUrl(
         GET_USER_PROFILE_PIC,
         {
           fbid: this.requestingUser.id

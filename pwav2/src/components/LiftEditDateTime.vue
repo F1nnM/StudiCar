@@ -168,7 +168,7 @@ export default defineComponent({
   },
   data() {
     return {
-      localValue: value
+      localValue: this.value
     };
   },
   watch: {

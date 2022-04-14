@@ -170,9 +170,11 @@
               >
             </div>
           </div>
-          <transition :name="pageTrans" mode="out-in">
-            <router-view ref="pageContent" />
-          </transition>
+          <router-view v-slot="{ Component }" ref="pageContent" >
+            <transition :name="pageTrans" mode="out-in">
+              <component :is="Component" />
+            </transition>
+          </router-view>
         </q-page-container>
       </div>
     </q-pull-to-refresh>

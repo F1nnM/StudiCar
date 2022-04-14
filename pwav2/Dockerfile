@@ -19,4 +19,4 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY . /app/
 
 ENTRYPOINT [ "npm", "run"]
-CMD "build"
+CMD "dev"

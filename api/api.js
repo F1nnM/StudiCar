@@ -5,10 +5,7 @@ const runQuery = require("./db"),
   apiResponseSimulation = require("./simulation/apiResponse"),
   tickerJS = require("./news/postillon/ticker.js"),
   errorHandler = require("./errorHandler"),
-  admin = require("firebase-admin"),
-  FCM = require("fcm-node"),
-  SERVICE_ACCOUNT = require("./firebaseAccountKey.json"),
-  fcm = new FCM(SERVICE_ACCOUNT);
+  {getMessaging} = require("firebase-admin")
 const { database } = require("./errorHandler");
 
 function isOptionMissing(data, needed, res) {
@@ -84,6 +81,16 @@ function sendViaCloudMessaging(fcmToken, title, body, prio) {
     },
   };
 
+  const message = {
+    data: {
+      title: title || "- no title set -",
+      body: body || "- no body set -",
+    },
+    prio: prio,
+    token: fcmToken
+  };
+  
+
   console.log("starting to send");
 
   /* admin.messaging().sendToDevice(fcmToken, payload, {
@@ -91,19 +98,33 @@ function sendViaCloudMessaging(fcmToken, title, body, prio) {
   }); */
   /* had troubles with above */
 
-  fcm.send(
-    {
-      to: fcmToken,
-      notification: {
-        title: "Lorem",
-        body: "Hello there",
-      },
-    },
-    (err, res) => {
-      if (err) console.log(err);
-      else console.log(res);
-    }
-  );
+  // fcm.send(
+  //   {
+  //     to: fcmToken,
+  //     notification: {
+  //       title: "Lorem",
+  //       body: "Hello there",
+  //     },
+  //   },
+  //   (err, res) => {
+  //     if (err) console.log(err);
+  //     else console.log(res);
+  //   }
+  // );
+
+  
+  // Send a message to the device corresponding to the provided
+  // registration token.
+  getMessaging().send(message)
+    .then((response) => {
+      // Response is a message ID string.
+      console.log('Successfully sent message:', response);
+    })
+    .catch((error) => {
+      console.log('Error sending message:', error);
+    });
+  
+
   console.log("done");
 }
 
@@ -374,12 +395,12 @@ async function getLiftRequests(uid) {
       my_lifts.LIFT_ID
   )
   `,
-      [uid]
+      [uid], 'reqs'
     )
   ).result;
   var arr = [];
   db_requests.forEach((r) => {
-    var a = JSON.parse(r["JSON"]);
+    var a = r["JSON"];
     if (a.length > 1) {
       // more requests, have to merge them
       var b = {};
@@ -393,11 +414,11 @@ async function getLiftRequests(uid) {
     }
   });
 
-  return JSON.stringify(arr);
+  return arr;
 }
 
 async function getMarketplace(fbid) {
-  let JSON = (
+  let result = (
     await runQuery(
       `
   WITH
@@ -529,7 +550,7 @@ async function getMarketplace(fbid) {
       [fbid]
     )
   ).result[0].JSON;
-  return JSON;
+  return JSON.parse(result);
 }
 
 async function getOutgoingRequests(fbid) {
@@ -883,7 +904,7 @@ async function getFriends(fbId) {
     )
   ).result[1][0].JSON;
 
-  friendsFormatted = JSON.parse(friendsFormatted);
+  friendsFormatted = friendsFormatted;
 
   return friendsFormatted;
 }
@@ -966,9 +987,8 @@ module.exports = {
         var data;
         if (options.secretFbId == options.fbid) {
           // ACCESSING PRIVATE PROFILE
-
-          data = (
-            await runQuery(
+          try{
+            db_result = await runQuery(
               `
           SELECT
               users.ID INTO @userid 
@@ -1127,34 +1147,33 @@ module.exports = {
                   rides USING(USER_ID) 
               LEFT OUTER JOIN
                   drives USING(USER_ID)
-            `,
-              [options.fbid]
-            ).catch((err) => {
-              errorHandler.database(
-                "getUserData",
-                options,
-                err,
-                "Could not get user data",
-                res
-              );
-            })
-          ).result[1][0].JSON;
+            `, [options.fbid], 'getuser'
+            )
+            result = db_result.result
+            data = result[1][0].JSON;
+            console.log(typeof data)
+          } catch (err) {
+            console.error(err)
+            errorHandler.database(
+              "getUserData",
+              options,
+              err,
+              "Could not get user data",
+              res
+            );
+            return
+          }
+          
+          data.chatLifts = await getChatLifts(options.fbid);
 
-          data = JSON.parse(data);
-          data.chatLifts = JSON.parse(await getChatLifts(options.fbid));
+          data.liftRequests = await getLiftRequests(options.fbid);
 
-          data.liftRequests = JSON.parse(await getLiftRequests(options.fbid));
-
-          data.outgoingRequests = JSON.parse(
-            await getOutgoingRequests(options.fbid)
-          );
+          data.outgoingRequests = await getOutgoingRequests(options.fbid);
 
           data.topFriends = apiResponseSimulation["topFriends"];
           data.friends = await getFriends(options.fbid);
 
-          data.marketplaceOffers = JSON.parse(
-            await getMarketplace(options.secretFbId)
-          );
+          data.marketplaceOffers = await getMarketplace(options.secretFbId);
         } else {
           // ACCESSING PUBLIC INFORMATION
           var dataOfViewedUser = (
@@ -1247,7 +1266,7 @@ module.exports = {
             })
           ).result[1][0].JSON;
 
-          data = JSON.parse(dataOfViewedUser);
+          data = dataOfViewedUser;
           data.friends = await getFriends(options.fbid);
         }
         data.stats.liftsOffered = Math.floor(Math.random() * 100);
@@ -1482,9 +1501,7 @@ module.exports = {
     },
     "/specificMarketplaceOffer": async (req, res, options) => {
       if (await isUserVerified(options.secretFbId)) {
-        var offers = JSON.parse(
-          await getMarketplaceOfferByUuid(options.uuid, options.invitingUserId)
-        );
+        var offers =  await getMarketplaceOfferByUuid(options.uuid, options.invitingUserId);
         if (offers != null) {
           (wantedOffer = offers[0]), // when specific uuid is wanted, then only one result will be there, which should be returned as single object and not as array with just one element
             (invitingUserName = wantedOffer.invitingUserName);
@@ -1508,7 +1525,7 @@ module.exports = {
         endWithJSON(
           res,
           JSON.stringify({
-            requests: JSON.parse(await getLiftRequests(options.secretFbId)),
+            requests: await getLiftRequests(options.secretFbId),
           })
         );
       }
@@ -1518,7 +1535,7 @@ module.exports = {
         endWithJSON(
           res,
           JSON.stringify({
-            requests: JSON.parse(await getOutgoingRequests(options.secretFbId)),
+            requests: await getOutgoingRequests(options.secretFbId),
           })
         );
       }
