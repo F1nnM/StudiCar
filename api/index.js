@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 var server;
 
 if (process.env.USE_HTTPS){

@@ -1,9 +1,5 @@
-dbConfig.js
 server.key
 server.pem
-firebaseAccountKey.json
-
-mailAuth.js
 
 legal/*.html
 news/postillon/*.js
@@ -12,4 +8,4 @@ news/postillon/*.json
 # ignoring all the modules
 node_modules/
 
-test.json
+.env
