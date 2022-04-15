@@ -98,10 +98,6 @@ function setUpPush(fbid, store) {
         .catch(err => console.warn(err));
     });
 
-    messaging.onMessage(payload => {
-      console.warn(payload);
-    });
-
     createNotificationSubscription().then(subscription => {
       sendApiRequest(
         SQL_UPDATE_PUSH_SUBSCRIPTION,

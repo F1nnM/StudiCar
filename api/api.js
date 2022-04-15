@@ -67,20 +67,20 @@ async function notifyUsersInLift(liftId, title, message) {
 
     if (result.length == 0) {
       // when no record, no token stored for any of matching users
-      res("No token found");
-    } else {
-      var fcmPromises = [];
-      result.forEach((record) => {
-        fcmPromises.push(sendViaCloudMessaging(record.TOKEN, title, message));
-      });
-
-      await Promise.all(fcmPromises).catch((err) => {
-        console.log(err);
-        rej(err);
-      });
-
-      res();
+      return res("No token found");
     }
+    var fcmPromises = [];
+    result.forEach((record) => {
+      fcmPromises.push(sendViaCloudMessaging(record.TOKEN, title, message));
+    });
+
+    /* wait for all messages to be sent successfully, if one err then fail */
+    await Promise.all(fcmPromises).catch((err) => {
+      console.log(err);
+      rej(err);
+    });
+
+    res();
   });
 }
 
@@ -140,14 +140,19 @@ function sendViaCloudMessaging(fcmToken, title, body, prio) {
   
   // Send a message to the device corresponding to the provided
   // registration token.
-  getMessaging().send(message)
+  return new Promise((res, rej) => {
+    getMessaging().send(message)
     .then((response) => {
       // Response is a message ID string.
       console.log('Successfully sent message:', response);
+      res(response)
     })
     .catch((error) => {
       console.log('Error sending message:', error);
+      rej(error)
     });
+  })
+  
   
 }
 
