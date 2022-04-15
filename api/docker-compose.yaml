@@ -54,5 +54,5 @@ services:
     depends_on:
       - mariadb
     command: ["npm", "run", "nodemon"]
-    #volumes:
-    #  - .:/app
+    volumes:
+      - .:/app
