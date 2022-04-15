@@ -3,6 +3,8 @@
  * the ES6 features that are supported by your Node version. https://node.green/
  */
 
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+
 const fs = require("fs");
 
 function tryReadFile(file) {
@@ -159,6 +161,7 @@ module.exports = configure(function (ctx) {
         description: `Green.Cheap.Social`,
         display: "standalone",
         orientation: "portrait",
+        gcm_sender_id: "640124338592",
         background_color: "#ffffff",
         theme_color: "#02a200",
         gcm_sender_id: "640124338592",

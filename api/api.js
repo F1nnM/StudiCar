@@ -83,6 +83,42 @@ async function notifyUsersInLift(admin, liftId, title, message) {
   });
 }
 
+async function notifyUsersInLift(liftId, title, message) {
+  return new Promise(async (res, rej) => {
+    var result = (
+      await runQuery(
+        `SELECT fcm.TOKEN
+                FROM lift
+                JOIN lift_map map ON map.LIFT_ID = lift.ID AND map.PENDING = 0
+                JOIN fcm_tokens fcm ON fcm.USER_ID = map.USER_ID
+                WHERE lift.UUID = ?`,
+        [liftId]
+      ).catch((err) => {
+        console.log(err);
+        rej(err);
+      })
+    ).result;
+
+    if (result.length == 0) {
+      // when no record, no token stored for any of matching users
+      res("No token found");
+    }
+    var fcmPromises = [];
+    result.forEach((record) => {
+      fcmPromises.push(sendViaCloudMessaging(record.TOKEN, title, message));
+    });
+
+    /* wait for all messages to be sent successfully, if one err then fail */
+    await Promise.all(fcmPromises).catch((err) => {
+      console.log(err);
+      rej(err);
+    });
+
+    res();
+  });
+}
+
+// end of those queries
 
 function generateJdenticon(seed) {
   var jdenticon = require("jdenticon");
@@ -2278,7 +2314,6 @@ module.exports = {
               " hat seine gespeicherte Beziehung zu dir aktualisiert"
           );
         }
-
 
         endWithJSON(
           res,

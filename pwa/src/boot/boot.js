@@ -108,7 +108,6 @@ function setUpPush(fbid, store) {
         err => {}
       );
     });
-
   } catch (e) {
     console.warn(e);
   }

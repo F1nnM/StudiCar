@@ -1,6 +1,7 @@
-import { register } from 'register-service-worker'
+import { register } from "register-service-worker";
+import firebase from "src/boot/firebase";
 
-import store from '../src/store'
+import store from "../src/store";
 
 // The ready(), registered(), cached(), updatefound() and updated()
 // events passes a ServiceWorkerRegistration instance in their arguments.
@@ -19,42 +20,42 @@ register(process.env.SERVICE_WORKER_FILE, {
     }
   },
 
-  registered (registration) {
+  registered(registration) {
     if (process.env.DEV) {
-      console.log('Service worker has been registered.')
+      console.log("Service worker has been registered.");
 
-      registration.update()
+      registration.update();
     }
   },
 
-  cached (/* registration */) {
+  cached(/* registration */) {
     if (process.env.DEV) {
-      console.log('Content has been cached for offline use.')
+      console.log("Content has been cached for offline use.");
     }
   },
 
-  updatefound (/* registration */) {
+  updatefound(/* registration */) {
     if (process.env.DEV) {
-      console.log('New content is downloading.')
+      console.log("New content is downloading.");
     }
   },
 
-  updated (/* registration */) {
-
-    console.log('New content is available; please refresh.')
-    store.commit('setOldVersionRunning', true)
+  updated(/* registration */) {
+    console.log("New content is available; please refresh.");
+    store.commit("setOldVersionRunning", true);
   },
 
-  offline () {
+  offline() {
     if (process.env.DEV) {
-      console.log('No internet connection found. App is running in offline mode.')
+      console.log(
+        "No internet connection found. App is running in offline mode."
+      );
     }
   },
 
-  error (err) {
+  error(err) {
     if (process.env.DEV) {
-      console.error('Error during service worker registration:', err)
+      console.error("Error during service worker registration:", err);
     }
   }
-})
-
+});
