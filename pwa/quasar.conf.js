@@ -56,6 +56,10 @@ module.exports = configure(function (ctx) {
     build: {
       vueRouterMode: "hash", // available values: 'hash', 'history'
 
+      env: {
+        API_URL: process.env.API_URL
+      },
+
       // transpile: false,
       // publicPath: '/',
 

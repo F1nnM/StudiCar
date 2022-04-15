@@ -9,7 +9,8 @@
     "lint": "eslint --ext .js,.vue ./",
     "format": "prettier --write \"**/*.{js,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
-    "dev": "quasar dev -m pwa",
+    "dev": "API_URL=\"https://localhost\" quasar dev -m pwa",
+    "dev_docker": "quasar dev -m pwa",
     "build": "quasar build -m pwa"
   },
   "dependencies": {
