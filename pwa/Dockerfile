@@ -1,4 +1,4 @@
-FROM node:alpine as builder
+FROM node:16-alpine as builder
 
 RUN apk add --no-cache python2 make g++
 
