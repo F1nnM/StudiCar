@@ -32,6 +32,10 @@ services:
       DB_DATABASE: "studicar"
       DB_USER: "studicar"
       DB_PASSWORD: "@H1xhm978zX?v67g"
+    # for accessing other database on localhost 
+    # giving docker access to the local network is necessary.
+    # Uncomment the following line to enable.
+    #network_mode: "host"
     depends_on:
       - mariadb
     command: ["npm", "run", "nodemon"]
