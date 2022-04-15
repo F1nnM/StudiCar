@@ -234,7 +234,7 @@
       :label="username"
       linearProgress
       :input="qrInput"
-      text="Lass einen anderen StudiCar Nutzer den Code mit der integrierten Kamera scannen oder teile die Daten direkt über WhatsApp"
+      text="Lass einen anderen StudiCar Nutzer den Code mit dem Scanner (rechts oben in StudiCar) lesen oder teile die Daten direkt über WhatsApp"
     />
 
     <q-dialog v-model="openUpload" full-width>
