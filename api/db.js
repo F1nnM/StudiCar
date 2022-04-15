@@ -7,6 +7,7 @@ const mariadb = require("mariadb"),
     database: config.database,
     connectionLimit: 5,
     multipleStatements: true,
+    charset: "utf8_general_ci"
   });
 
 module.exports = async function runQuery(sql, data, debug=null) {
