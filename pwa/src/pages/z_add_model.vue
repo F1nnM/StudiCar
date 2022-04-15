@@ -35,7 +35,8 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+export default defineComponent({
   data() {
     return {
       car: {
@@ -61,5 +62,5 @@ export default {
       name: "Modell hinzufügen"
     });
   }
-};
+});
 </script>

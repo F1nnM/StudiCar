@@ -1,6 +1,6 @@
-import Firebase from "firebase/app";
-import "firebase/auth";
-import { getMessaging, onMessage } from "firebase/firebase-messaging";
+import Firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+import "firebase/compat/messaging";
 
 import {
   sendApiRequest,
@@ -43,9 +43,7 @@ function setUpPush(fbid, store) {
     const messaging = Firebase.messaging();
 
     messaging
-      .getToken({
-        vapidKey: vapidKey
-      })
+      .getToken({vapidKey: vapidKey})
       .then(currentToken => {
         if (currentToken) {
           console.warn("+++ TOKEN +++ " + currentToken);
@@ -74,13 +72,13 @@ function setUpPush(fbid, store) {
                 setUpPush(fbid);
               } else {
                 alert(
-                  "Bitte erlaube StudiCar den Zugriff auf Benachrichtigungen, sonst kriegst du nichts mit"
+                  "Bitte erlaube StudiCar den Zugriff auf Benachrichtigungen, sonst kriegst du nichts mit."
                 );
               }
             })
             .catch(err => {
               alert(
-                "Bitte erlaube StudiCar den Zugriff auf Benachrichtigungen, sonst kriegst du nichts mit"
+                "Bitte erlaube StudiCar den Zugriff auf Benachrichtigungen, sonst kriegst du nichts mit."
               );
               window.location.href = window.location.href;
             });

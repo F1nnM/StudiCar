@@ -9,7 +9,7 @@ const mariadb = require("mariadb"),
     multipleStatements: true,
   });
 
-module.exports = async function runQuery(sql, data) {
+module.exports = async function runQuery(sql, data, debug=null) {
   return new Promise(async (res, rej) => {
     let conn;
     let result;
@@ -17,10 +17,11 @@ module.exports = async function runQuery(sql, data) {
       conn = await pool.getConnection();
       result = await conn.query(sql, data);
     } catch (error) {
-      rej(error);
+      console.error(error)
+      return rej(error);
     } finally {
       if (conn) conn.release(); // release to pool
     }
-    res({ result });
+    return res({result: result });
   });
 };

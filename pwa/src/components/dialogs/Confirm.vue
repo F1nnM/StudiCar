@@ -57,7 +57,9 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+
+export default defineComponent({
   props: {
     cancelLabel: String,
     okLabel: String,
@@ -112,5 +114,5 @@ export default {
       this.hide();
     }
   }
-};
+});
 </script>

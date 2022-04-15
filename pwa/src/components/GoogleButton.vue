@@ -31,13 +31,17 @@ I hope you appreciate my work xD -->
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+
+export default defineComponent({
   name: "GoogleSignInButton",
   methods: {
     doSignIn() {
-      var provider = new this.$firebase.auth.GoogleAuthProvider();
+      var provider = new firebase.auth.GoogleAuthProvider();
 
-      this.$firebase
+      firebase
         .auth()
         .signInWithPopup(provider)
         .then(_ => _)
@@ -52,7 +56,7 @@ export default {
         });
     }
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>

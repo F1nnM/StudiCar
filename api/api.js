@@ -4,11 +4,7 @@ const runQuery = require("./db"),
   /* longQueries           = require('./longQueries'), */
   apiResponseSimulation = require("./simulation/apiResponse"),
   tickerJS = require("./news/postillon/ticker.js"),
-  errorHandler = require("./errorHandler"),
-  admin = require("firebase-admin"),
-  FCM = require("fcm-node"),
-  SERVICE_ACCOUNT = require("./firebaseAccountKey.json"),
-  fcm = new FCM(SERVICE_ACCOUNT);
+  errorHandler = require("./errorHandler")
 const { database } = require("./errorHandler");
 
 function isOptionMissing(data, needed, res) {
@@ -43,7 +39,7 @@ const b64toBlob = (b64Data, contentType = "", sliceSize = 512) => {
   return blob;
 };
 
-// queries for quick, not-optimized database access
+// query for quick, not-optimized database access
 
 async function getUserId(fbId) {
   let result = (await runQuery("SELECT ID FROM users WHERE FB_ID = ?", [fbId]))
@@ -51,9 +47,40 @@ async function getUserId(fbId) {
   return result ? result.ID : null;
 }
 
-async function getLiftId(liftUuid) {
-  return (await runQuery("SELECT ID FROM lift WHERE UUID = ?", [liftUuid]))
-    .result[0].ID;
+
+async function notifyUsersInLift(admin, liftId, title, message) {
+  return new Promise(async (res, rej) => {
+    var result = (
+      await runQuery(
+        `SELECT fcm.TOKEN
+                FROM lift
+                JOIN lift_map map ON map.LIFT_ID = lift.ID AND map.PENDING = 0
+                JOIN fcm_tokens fcm ON fcm.USER_ID = map.USER_ID
+                WHERE lift.UUID = ?`,
+        [liftId]
+      ).catch((err) => {
+        console.log(err);
+        rej(err);
+      })
+    ).result;
+
+    if (result.length == 0) {
+      // when no record, no token stored for any of matching users
+      return res("No token found");
+    }
+    var fcmPromises = [];
+    result.forEach((record) => {
+      fcmPromises.push(sendViaCloudMessaging(admin, record.TOKEN, title, message));
+    });
+
+    /* wait for all messages to be sent successfully, if one err then fail */
+    await Promise.all(fcmPromises).catch((err) => {
+      console.log(err);
+      rej(err);
+    });
+
+    res();
+  });
 }
 
 async function notifyUsersInLift(liftId, title, message) {
@@ -111,35 +138,37 @@ function generateJdenticon(seed) {
   return jdenticon.toPng(seed, size);
 }
 
-function sendViaCloudMessaging(fcmToken, title, body, prio) {
+function sendViaCloudMessaging(admin, fcmToken, title, body, prio) {
+
+  const message = {
+    data: {
+      title: title || "- no title set -",
+      body: body || "- no body set -",
+    },
+    prio: prio,
+    token: fcmToken,
+    //icon: "/img/app-icon.svg",
+  };
+  
+
   console.log("starting to send");
-
-  /* admin.messaging().sendToDevice(fcmToken, payload, {
-    priority: prio || "normal",
-  }); */
-  /* had troubles with above */
-
+  
+  // Send a message to the device corresponding to the provided
+  // registration token.
   return new Promise((res, rej) => {
-    fcm.send(
-      {
-        to: fcmToken,
-        notification: {
-          title: title || "- no title set -",
-          body: body || "- no body set -",
-          icon: "https://localhost:3000/img/app-icon.svg",
-        },
-      },
-      (err, report) => {
-        if (err) {
-          console.log(err);
-          rej(err);
-        } else {
-          console.log(report);
-          res(report);
-        }
-      }
-    );
-  });
+    admin.messaging().send(message)
+    .then((response) => {
+      // Response is a message ID string.
+      console.log('Successfully sent message:', response);
+      res(response)
+    })
+    .catch((error) => {
+      console.log('Error sending message:', error);
+      rej(error)
+    });
+  })
+  
+  
 }
 
 async function getChatLifts(uid) {
@@ -409,12 +438,12 @@ async function getLiftRequests(uid) {
       my_lifts.LIFT_ID
   )
   `,
-      [uid]
+      [uid], 'reqs'
     )
   ).result;
   var arr = [];
   db_requests.forEach((r) => {
-    var a = JSON.parse(r["JSON"]);
+    var a = r["JSON"];
     if (a.length > 1) {
       // more requests, have to merge them
       var b = {};
@@ -428,11 +457,11 @@ async function getLiftRequests(uid) {
     }
   });
 
-  return JSON.stringify(arr);
+  return arr;
 }
 
 async function getMarketplace(fbid) {
-  let JSON = (
+  let result = (
     await runQuery(
       `
   WITH
@@ -564,7 +593,7 @@ async function getMarketplace(fbid) {
       [fbid]
     )
   ).result[0].JSON;
-  return JSON;
+  return JSON.parse(result);
 }
 
 async function getOutgoingRequests(fbid) {
@@ -918,7 +947,7 @@ async function getFriends(fbId) {
     )
   ).result[1][0].JSON;
 
-  friendsFormatted = JSON.parse(friendsFormatted);
+  friendsFormatted = friendsFormatted;
 
   return friendsFormatted;
 }
@@ -1001,9 +1030,8 @@ module.exports = {
         var data;
         if (options.secretFbId == options.fbid) {
           // ACCESSING PRIVATE PROFILE
-
-          data = (
-            await runQuery(
+          try{
+            db_result = await runQuery(
               `
           SELECT
               users.ID INTO @userid 
@@ -1162,34 +1190,33 @@ module.exports = {
                   rides USING(USER_ID) 
               LEFT OUTER JOIN
                   drives USING(USER_ID)
-            `,
-              [options.fbid]
-            ).catch((err) => {
-              errorHandler.database(
-                "getUserData",
-                options,
-                err,
-                "Could not get user data",
-                res
-              );
-            })
-          ).result[1][0].JSON;
+            `, [options.fbid], 'getuser'
+            )
+            result = db_result.result
+            data = result[1][0].JSON;
+            console.log(typeof data)
+          } catch (err) {
+            console.error(err)
+            errorHandler.database(
+              "getUserData",
+              options,
+              err,
+              "Could not get user data",
+              res
+            );
+            return
+          }
+          
+          data.chatLifts = await getChatLifts(options.fbid);
 
-          data = JSON.parse(data);
-          data.chatLifts = JSON.parse(await getChatLifts(options.fbid));
+          data.liftRequests = await getLiftRequests(options.fbid);
 
-          data.liftRequests = JSON.parse(await getLiftRequests(options.fbid));
-
-          data.outgoingRequests = JSON.parse(
-            await getOutgoingRequests(options.fbid)
-          );
+          data.outgoingRequests = await getOutgoingRequests(options.fbid);
 
           data.topFriends = apiResponseSimulation["topFriends"];
           data.friends = await getFriends(options.fbid);
 
-          data.marketplaceOffers = JSON.parse(
-            await getMarketplace(options.secretFbId)
-          );
+          data.marketplaceOffers = await getMarketplace(options.secretFbId);
         } else {
           // ACCESSING PUBLIC INFORMATION
           var dataOfViewedUser = (
@@ -1282,7 +1309,7 @@ module.exports = {
             })
           ).result[1][0].JSON;
 
-          data = JSON.parse(dataOfViewedUser);
+          data = dataOfViewedUser;
           data.friends = await getFriends(options.fbid);
         }
         data.stats.liftsOffered = Math.floor(Math.random() * 100);
@@ -1517,9 +1544,7 @@ module.exports = {
     },
     "/specificMarketplaceOffer": async (req, res, options) => {
       if (await isUserVerified(options.secretFbId)) {
-        var offers = JSON.parse(
-          await getMarketplaceOfferByUuid(options.uuid, options.invitingUserId)
-        );
+        var offers =  await getMarketplaceOfferByUuid(options.uuid, options.invitingUserId);
         if (offers != null) {
           (wantedOffer = offers[0]), // when specific uuid is wanted, then only one result will be there, which should be returned as single object and not as array with just one element
             (invitingUserName = wantedOffer.invitingUserName);
@@ -1543,7 +1568,7 @@ module.exports = {
         endWithJSON(
           res,
           JSON.stringify({
-            requests: JSON.parse(await getLiftRequests(options.secretFbId)),
+            requests: await getLiftRequests(options.secretFbId),
           })
         );
       }
@@ -1553,7 +1578,7 @@ module.exports = {
         endWithJSON(
           res,
           JSON.stringify({
-            requests: JSON.parse(await getOutgoingRequests(options.secretFbId)),
+            requests: await getOutgoingRequests(options.secretFbId),
           })
         );
       }
@@ -1615,7 +1640,7 @@ module.exports = {
           });
 
           await runQuery(
-            "INSERT INTO fcm_tokens (USER_ID, TOKEN) VALUES ((SELECT ID FROM users WHERE ID = ?), '0') ON DUPLICATE KEY UPDATE TOKEN='0';",
+            "INSERT INTO fcm_tokens (USER_ID, TOKEN) VALUES ((SELECT ID FROM users WHERE ID = ?), '0') ON DUPLICATE KEY UPDATE TOKEN='0'",
             [options.secretFbId]
           ).catch((err) => {
             /* propably duplicate entry, do nothing */
@@ -1658,14 +1683,13 @@ module.exports = {
         res.end();
       }
     },
-    "/testPush": async (req, res, options) => {
-      if (
-        !isOptionMissing(options, ["receiverFbId", "title", "message"], res)
-      ) {
+    "/testPush": async (req, res, options, admin) => {
+      if (!isOptionMissing(options, ["receiverFbId", "title", "message"], res)) {
         var result = (
           await runQuery(
             "SELECT TOKEN FROM fcm_tokens WHERE USER_ID = (SELECT ID FROM users WHERE FB_ID = ?)",
-            [options.receiverFbId]
+            [options.receiverFbId],
+            [options.secretFbId]
           ).catch((err) => {
             throw err;
           })
@@ -1677,16 +1701,15 @@ module.exports = {
         } else {
           var token = result[0].TOKEN;
 
-          sendViaCloudMessaging(token, options.title, options.message);
+          sendViaCloudMessaging(admin, token, options.title, options.message);
 
           res.end();
         }
       }
     },
-
-    "/notifyUsersInLift": async (req, res, options) => {
+    "/notifyUsersInLift": async (req, res, options, admin) => {
       if (!isOptionMissing(options, ["liftId", "title", "message"], res)) {
-        notifyUsersInLift(options.liftId, options.title, options.message)
+        notifyUsersInLift(admin, options.liftId, options.title, options.message)
           .then((result) => {
             res.end(result);
           })
@@ -1695,7 +1718,6 @@ module.exports = {
           });
       }
     },
-
     "/updateDescription": async (req, res, options) => {
       if (
         !isOptionMissing(options, ["description"], res) &&
@@ -2156,7 +2178,7 @@ module.exports = {
         res.end();
       }
     },
-    "/sendMessage": async (req, res, options) => {
+    "/sendMessage": async (req, res, options, admin) => {
       if (
         !isOptionMissing(options, ["message"], res) &&
         (await isUserVerified(options.secretFbId))
@@ -2211,6 +2233,7 @@ module.exports = {
           ).result[0].NAME;
 
           await notifyUsersInLift(
+            admin,
             message.liftId,
             "Nachricht von " + nameOfUser,
             message.content
@@ -2226,7 +2249,7 @@ module.exports = {
         } else res.end();
       }
     },
-    "/changeFriendRelation": async (req, res, options) => {
+    "/changeFriendRelation": async (req, res, options, admin) => {
       if (
         !isOptionMissing(options, ["otherFbId", "mySideOfHeart"], res) &&
         (await isUserVerified(options.secretFbId))
@@ -2260,20 +2283,21 @@ module.exports = {
           });
         }
 
+
         var dataForPushMessage = (
           await runQuery(
             `WITH a as (
-SELECT NAME
-FROM users
-WHERE FB_ID = ?
-),
-b as (
-SELECT TOKEN
-FROM fcm_tokens
-WHERE USER_ID = (SELECT ID FROM users WHERE FB_ID = ?)
-)
-SELECT a.NAME as INIT_NAME, b.TOKEN as RECEIPIENT_TOKEN
-FROM a JOIN b ON 1`,
+              SELECT NAME
+              FROM users
+              WHERE FB_ID = ?
+              ),
+              b as (
+              SELECT TOKEN
+              FROM fcm_tokens
+              WHERE USER_ID = (SELECT ID FROM users WHERE FB_ID = ?)
+              )
+              SELECT a.NAME as INIT_NAME, b.TOKEN as RECEIPIENT_TOKEN
+              FROM a JOIN b ON 1`,
             [options.secretFbId, otherFbId]
           )
         ).result;
@@ -2283,6 +2307,7 @@ FROM a JOIN b ON 1`,
             receipientFcmToken = dataForPushMessage[0].RECEIPIENT_TOKEN;
 
           sendViaCloudMessaging(
+            admin,
             receipientFcmToken,
             "Freundschaft in StudiCar",
             initiatorName +

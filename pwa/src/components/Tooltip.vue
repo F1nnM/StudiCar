@@ -20,14 +20,16 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+
+export default defineComponent({
   name: "Tooltip",
   props: {
     transparent: Boolean,
     rgba: Boolean,
     dark: Boolean
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>

@@ -3,7 +3,7 @@
   <div class="relative-position q-ma-none q-pa-none">
     <div
       class="absolute"
-      style="position: top: 0; right: 0; transform: translateY(-200%)"
+      style="top: 0; right: 0; transform: translateY(-200%)"
     >
       <slot></slot>
     </div>
@@ -11,7 +11,9 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+
+export default defineComponent({
   name: "TitleButtonAnchor"
-};
+});
 </script>

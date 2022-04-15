@@ -103,7 +103,9 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+
+export default defineComponent({
   components: {},
   name: "CompactCarInfo",
   props: {
@@ -127,5 +129,5 @@ export default {
       else return c;
     }
   }
-};
+});
 </script>

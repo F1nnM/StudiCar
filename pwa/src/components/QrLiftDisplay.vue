@@ -95,8 +95,9 @@ import { date } from "quasar";
 import ExtHr from "components/ExtendedHr";
 import LiftOffer from "components/LiftOffer";
 import { sendApiRequest, SQL_GET_MARKETPLACE_OFFER } from "../ApiAccess";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "QRLiftDisplay",
   components: {
     LiftOffer
@@ -204,7 +205,7 @@ export default {
   mounted() {
     this.refresh();
   }
-};
+});
 </script>
 
 <style lang="scss" scoped></style>

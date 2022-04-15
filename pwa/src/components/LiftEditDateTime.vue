@@ -8,7 +8,8 @@
 
         <q-item-section>
           <q-btn-toggle
-            v-model="value.dateTab"
+            v-bind:value="value.dateTab"
+            v-on:input="dateTabChanged($event)"
             @click="setDateTab"
             no-caps
             rounded
@@ -61,7 +62,8 @@
                     :subtitle="`Maximal 30 Tage im Voraus`"
                     event-color="primary"
                     mask="YYYY-MM-DD"
-                    v-model="value.date"
+                    v-bind:value="value.date"
+                    v-on:input="dateChanged($event)"
                     :events="[todayString]"
                     :options="dateOptions"
                     @input="$refs.datepicker.hide()"
@@ -75,7 +77,8 @@
                   label="Wochentag auswählen"
                   transition-show="jump-down"
                   transition-hide="jump-up"
-                  v-model="value.date"
+                  v-bind:value="value.date"
+                  v-on:input="dateChanged($event)"
                   :options="getRepeatingDayOptions"
                 />
               </q-btn>
@@ -93,7 +96,8 @@
 
         <q-item-section>
           <q-btn-toggle
-            v-model="value.timeTab"
+            v-bind:value="value.timeTab"
+            v-on:input="dateChanged($event)"
             no-caps
             rounded
             unelevated
@@ -132,7 +136,8 @@
                   >
                     <q-time
                       format24h
-                      v-model="value.time"
+                      v-bind:value="value.time"
+                      v-on:input="timeChanged($event)"
                       mask="HH:mm"
                       color="primary"
                     />
@@ -151,8 +156,9 @@
 import { date } from "quasar";
 import ExtHR from "components/ExtendedHr";
 import Tooltip from "components/Tooltip";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "LiftEditDateTime",
   components: {
     Tooltip
@@ -161,7 +167,9 @@ export default {
     value: Object
   },
   data() {
-    return {};
+    return {
+      localValue: this.value
+    };
   },
   watch: {
     open: function(val) {}
@@ -210,15 +218,36 @@ export default {
     }
   },
   methods: {
+    dateChanged($event) {
+      this.localValue.date = $event
+      this.$emit("input", this.localValue)
+    },
+
+    dateTabChanged($event) {
+      this.localValue.dateTab = $event
+      this.$emit("input", this.localValue)
+    },
+
+    timeChanged($event) {
+      this.localValue.time = $event
+      this.$emit("input", this.localValue)
+    },
+
+    timeTabChanged($event) {
+      this.localValue.timeTab = $event
+      this.$emit("input", this.localValue)
+    },
+
     emit(val) {
       this.$emit("input", val);
     },
 
     setDateTab() {
       var tab = this.value.dateTab;
-      if (tab == "weekly") this.value.date = 1;
+      if (tab == "weekly") this.localValue.date = 1;
       // default on monday
-      else this.value.date = date.formatDate(new Date(), "YYYY-MM-DD");
+      else this.localValue.date = date.formatDate(new Date(), "YYYY-MM-DD");
+      this.$emit("input", this.localValue);
     },
 
     dateOptions(d) {
@@ -229,7 +258,7 @@ export default {
       return a;
     }
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>

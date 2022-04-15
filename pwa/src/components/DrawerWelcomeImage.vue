@@ -28,7 +28,9 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+
+export default defineComponent({
   name: "DrawerWelcomeImage",
   props: {
     timeText: {
@@ -120,5 +122,5 @@ export default {
       return array[Math.floor(Math.random() * array.length)];
     }
   }
-};
+});
 </script>

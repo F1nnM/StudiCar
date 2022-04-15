@@ -84,9 +84,10 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import SignOutButton from "components/SignOutButton";
 
-export default {
+export default defineComponent({
   data() {
     return {
       notificationTestRunning: false,
@@ -209,5 +210,5 @@ export default {
       if (this.notificationTestRunning) this.notificationTestPassed = true;
     };
   }
-};
+});
 </script>

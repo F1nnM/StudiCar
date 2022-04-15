@@ -37,7 +37,9 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+
+export default defineComponent({
   name: "LoadingDisplay",
   model: {
     prop: "state",
@@ -67,5 +69,5 @@ export default {
       this.$emit("input", this.state);
     },
   },
-};
+});
 </script>

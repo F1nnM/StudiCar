@@ -22,7 +22,9 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+
+export default defineComponent({
   name: "ColoredMeter",
   components: {},
   model: {
@@ -82,7 +84,7 @@ export default {
       this.$emit("input", this.angle);
     }
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>

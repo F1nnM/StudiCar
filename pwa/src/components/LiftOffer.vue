@@ -199,9 +199,10 @@
 
 <script>
 import { date } from "quasar";
+import { defineComponent } from "vue";
 import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
 
-export default {
+export default defineComponent({
   name: "LiftOffer",
   components: {},
   props: {
@@ -363,7 +364,7 @@ export default {
   updated() {
     this.refreshImage();
   }
-};
+});
 </script>
 
 <style scoped lang="scss">

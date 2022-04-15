@@ -15,10 +15,11 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import { scroll } from "quasar";
 import * as api from "../ApiAccess";
 
-export default {
+export default defineComponent({
   components: {},
   data() {
     return {
@@ -65,5 +66,5 @@ export default {
   mounted() {
     this.$store.commit("setPage", "Spielhölle");
   }
-};
+});
 </script>

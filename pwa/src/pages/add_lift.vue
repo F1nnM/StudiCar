@@ -541,13 +541,14 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import ExtHr from "components/ExtendedHr";
 import CompactCarInfo from "components/CompactCarInfo";
 import LiftEditDateTime from "components/LiftEditDateTime";
 
 import { date } from "quasar";
 
-export default {
+export default defineComponent({
   components: { ExtHr, CompactCarInfo, LiftEditDateTime },
 
   data() {
@@ -803,7 +804,7 @@ export default {
       onlyInNav: true
     });
   }
-};
+});
 </script>
 
 <style scoped lang="scss">

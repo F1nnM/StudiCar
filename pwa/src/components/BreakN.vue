@@ -8,7 +8,9 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+
+export default defineComponent({
   name: "BreakN",
   props: {
     value: {
@@ -16,5 +18,5 @@ export default {
       required: true
     }
   }
-};
+});
 </script>

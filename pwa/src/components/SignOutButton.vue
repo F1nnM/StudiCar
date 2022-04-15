@@ -13,14 +13,16 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+
+export default defineComponent({
   name: "SignOutButton",
   methods: {
     signOut() {
       this.$store.dispatch("auth/signOut");
     },
   },
-};
+});
 </script>
 
 <style scoped>

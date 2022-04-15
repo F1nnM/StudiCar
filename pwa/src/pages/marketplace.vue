@@ -344,12 +344,13 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import { sendApiRequest } from "../ApiAccess";
 import LiftOffer from "../components/LiftOffer";
 import QrLiftDisplay from "components/QrLiftDisplay";
 import TitleButton from "components/TitleButtonAnchor";
 
-export default {
+export default defineComponent({
   components: { LiftOffer, QrLiftDisplay, TitleButton },
   data() {
     return {
@@ -699,5 +700,5 @@ export default {
     });
     /*  this.recomputeView(); */
   }
-};
+});
 </script>

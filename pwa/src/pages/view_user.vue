@@ -478,6 +478,7 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import { date, colors } from "quasar";
 import ColoredMeter from "components/ColoredMeter";
 import FriendHeart from "components/FriendHeart";
@@ -489,7 +490,7 @@ import {
   buildGetRequestUrl
 } from "../ApiAccess";
 const { lighten } = colors;
-export default {
+export default defineComponent({
   components: {
     ColoredMeter,
     FriendHeart
@@ -704,7 +705,7 @@ export default {
       });
     });
   }
-};
+});
 </script>
 
 <style scoped lang="scss">

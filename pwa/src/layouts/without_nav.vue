@@ -14,8 +14,9 @@
 
 <script>
 import GetUserDataLoading from "components/GetUserDataLoading";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "without_nav",
   components: { GetUserDataLoading },
   computed: {
@@ -23,7 +24,7 @@ export default {
       return !this.$store.getters["auth/signinLoaded"];
     }
   }
-};
+});
 </script>
 
 <style scoped>

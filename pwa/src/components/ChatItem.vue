@@ -64,8 +64,9 @@
 <script>
 import { date } from "quasar";
 import QrIcon from "components/QrIcon";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "chat_item",
   components: {
     QrIcon
@@ -153,5 +154,5 @@ export default {
   },
 
   mounted() {}
-};
+});
 </script>

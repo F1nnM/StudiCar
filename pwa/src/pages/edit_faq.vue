@@ -136,6 +136,7 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import {
   sendApiRequest,
   SQL_GET_ALL_FAQ,
@@ -144,7 +145,7 @@ import {
 
 import { date } from "quasar";
 
-export default {
+export default defineComponent({
   name: "edit_faq",
   data() {
     return {
@@ -281,5 +282,5 @@ export default {
       }
     );
   },
-};
+});
 </script>

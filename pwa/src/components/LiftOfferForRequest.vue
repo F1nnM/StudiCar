@@ -107,8 +107,9 @@
 
 <script>
 import { date } from "quasar";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "LiftOfferForRequest",
   components: {},
   props: {
@@ -225,7 +226,7 @@ export default {
     }
   },
   mounted() {}
-};
+});
 </script>
 
 <style scoped lang="scss">

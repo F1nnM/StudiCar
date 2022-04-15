@@ -6,7 +6,9 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+
+export default defineComponent({
   name: "ExtendedHr",
   computed: {
     classAttr() {
@@ -27,7 +29,7 @@ export default {
     borderRadius: String,
     hex: Boolean
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>

@@ -5,10 +5,11 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+export default defineComponent({
   name: 'Contact',
   mounted(){
       this.$store.state.pageName = 'Kontakt'
   }
-}
+});
 </script>

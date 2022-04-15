@@ -27,7 +27,9 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+
+export default defineComponent({
   name: "FriendHeart",
   props: {
     left: {
@@ -55,7 +57,7 @@ export default {
       this.$emit("click");
     }
   }
-};
+});
 </script>
 
 <style scoped lang="scss">

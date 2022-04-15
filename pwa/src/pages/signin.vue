@@ -82,8 +82,9 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import GoogleSignInButton from "../components/GoogleButton";
-export default {
+export default defineComponent({
   components: {
     GoogleSignInButton
   },
@@ -111,5 +112,5 @@ export default {
         });
     }
   }
-};
+});
 </script>
