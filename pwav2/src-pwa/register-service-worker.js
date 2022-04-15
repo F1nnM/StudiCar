@@ -13,10 +13,9 @@ register(process.env.SERVICE_WORKER_FILE, {
 
   // registrationOptions: { scope: './' },
 
-  ready (/* registration */) {
+  ready (registration) {
     if (process.env.DEV) {
       console.log('Service worker is active.')
-
     }
   },
 

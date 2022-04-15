@@ -161,6 +161,7 @@ module.exports = configure(function (ctx) {
         orientation: "portrait",
         background_color: "#ffffff",
         theme_color: "#02a200",
+        gcm_sender_id: "640124338592",
         icons: [
           {
             src: "icons/icon-128x128.png",

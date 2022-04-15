@@ -295,7 +295,17 @@ export const SQL_UPDATE_FCM_TOKEN = {
   method: "POST"
 };
 
+export const SQL_UPDATE_PUSH_SUBSCRIPTION = {
+  path: "/updateSubscription",
+  method: "POST"
+};
+
 export const TEST_PUSH = {
   path: "/testPush",
+  method: "POST"
+};
+
+export const NOTIFY_USERS_IN_LIFT = {
+  path: "/notifyUsersInLift",
   method: "POST"
 };
