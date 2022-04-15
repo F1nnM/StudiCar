@@ -4,7 +4,7 @@
       <q-item dense class="q-pr-none">
         <q-item-section avatar>
           <q-avatar size="xl">
-            <img :src="requestingUser.imageUrl" />
+            <img :src="requestingUserImageUrl" />
           </q-avatar>
         </q-item-section>
         <q-item-section>
@@ -76,13 +76,15 @@ import ExtHr from "components/ExtendedHr";
 import ColoredMeter from "components/ColoredMeter";
 
 import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "IncomingLiftRequest",
   components: {},
   data() {
     return {
-      userViewTab: "info"
+      userViewTab: "info",
+      requestingUserImageUrl: null
     };
   },
   model: {
@@ -174,7 +176,7 @@ export default {
   },
   mounted() {
     (async _ => {
-      this.requestingUser.imageUrl = await buildGetRequestUrl(
+      this.requestingUserImageUrl = await buildGetRequestUrl(
         GET_USER_PROFILE_PIC,
         {
           fbid: this.requestingUser.id
@@ -182,7 +184,7 @@ export default {
       );
     })();
   }
-};
+});
 </script>
 
 <style scoped lang="scss">

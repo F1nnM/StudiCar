@@ -125,10 +125,11 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import { openURL } from "quasar";
 import { Dialog } from "quasar";
 
-export default {
+export default defineComponent({
   data() {
     return {
       email: "",
@@ -394,5 +395,5 @@ einer gerichtlichen oder behördlichen Anordnung oder Aufforderung, (iii) zur Du
         });
     }
   }
-};
+});
 </script>

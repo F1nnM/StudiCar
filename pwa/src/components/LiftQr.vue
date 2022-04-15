@@ -47,8 +47,9 @@
 <script>
 import VueQrcode from "vue-qrcode";
 import ExtHr from "components/ExtendedHr";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "LiftQr",
   components: { VueQrcode, ExtHr },
   props: {
@@ -67,7 +68,7 @@ export default {
       this.$emit("input", val);
     }
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>

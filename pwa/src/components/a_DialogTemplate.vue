@@ -9,8 +9,9 @@
 <script>
 import { date } from "quasar";
 import ExtHR from "components/ExtendedHr";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "a_DialogTemplate",
   components: {},
   props: {
@@ -28,7 +29,7 @@ export default {
       this.$emit("input", val);
     },
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

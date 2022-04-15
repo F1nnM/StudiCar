@@ -21,8 +21,9 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import SettingScope from "components/SettingScope";
-export default {
+export default defineComponent({
   components: {
     SettingScope
   },
@@ -40,5 +41,5 @@ export default {
   mounted() {
     this.$store.commit("setPage", "Spielplatz");
   }
-};
+});
 </script>

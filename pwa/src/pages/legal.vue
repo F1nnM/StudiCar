@@ -25,9 +25,10 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import { sendApiRequest, GET_LEGAL } from "../ApiAccess";
 
-export default {
+export default defineComponent({
   name: "legal",
   components: {},
   data() {
@@ -115,7 +116,7 @@ export default {
     });
     this.recomputeView();
   }
-};
+});
 </script>
 
 <style lang="scss">

@@ -29,7 +29,9 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+
+export default defineComponent({
   data() {
     return {};
   },
@@ -38,7 +40,7 @@ export default {
       return !this.$store.getters["auth/signinLoaded"];
     }
   }
-};
+});
 </script>
 
 <style scoped lang="scss">

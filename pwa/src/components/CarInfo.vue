@@ -11,7 +11,7 @@
             spinner-color="primary"
             spinner-size="82px"
             class="full-height full-width"
-            style="max-height: 10vh max-width: 10vh"
+            style="max-height: 10vh; max-width: 10vh"
           />
         </div>
         <div class="col-8 q-pl-lg">
@@ -55,8 +55,9 @@
 
 <script>
 import ExtHr from "components/ExtendedHr";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "CarInfo",
   components: {
     ExtHr
@@ -70,7 +71,7 @@ export default {
   computed: {},
   methods: {},
   mounted() {}
-};
+});
 </script>
 
 <style scoped></style>

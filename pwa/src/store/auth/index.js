@@ -1,5 +1,5 @@
-import Firebase from "firebase/app";
-import "firebase/auth";
+import Firebase from "firebase/compat/app";
+import "firebase/compat/auth";
 import {
   SQL_CREATE_USER_IF_NOT_EXISTING,
   sendApiRequest,

@@ -273,18 +273,16 @@
 
 <script>
 import { openURL, date } from "quasar";
-import Vue from "vue";
+import { defineComponent } from "vue";
 import LiftEditDateTime from "components/LiftEditDateTime";
 import SettingScope from "components/SettingScope";
 import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
-import VueFriendlyIframe from "vue-friendly-iframe";
-Vue.use(VueFriendlyIframe);
 
 import CompactCarInfo from "components/CompactCarInfo";
 import ExpansionLiftTimeline from "components/ExpansionLiftTimeline";
 /* import { sendApiRequest } from "../ApiAccess"; */
 
-export default {
+export default defineComponent({
   name: "LiftInfoDialog",
   components: {
     ExpansionLiftTimeline,
@@ -546,7 +544,7 @@ export default {
       this.keyToRefreshImages++;
     })();
   }
-};
+});
 </script>
 
 <style lang="scss" scoped></style>

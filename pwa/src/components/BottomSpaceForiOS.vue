@@ -11,7 +11,9 @@ otherwise that would overlay important nav elements -->
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+
+export default defineComponent({
   name: "BottomSpaceForiOS",
   data() {
     return {
@@ -24,5 +26,5 @@ export default {
       this.forceHideBottomSpace = true;
     }
   }
-};
+});
 </script>

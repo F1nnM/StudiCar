@@ -1,0 +1,36 @@
+# docker-compose to build the image and set up a mariadb database
+version: "3.7"
+services:
+  mariadb:
+    image: mariadb:10
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_DATABASE: "studicar"
+      MYSQL_USER: "studicar"
+      MYSQL_PASSWORD: "@H1xhm978zX?v67g"
+    restart: always
+    volumes:
+      - ./mariadb:/var/lib/mysql
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      - PMA_HOST=mariadb
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+    depends_on:
+      - mariadb
+  api:
+    build: .
+    ports:
+      - "443:443"
+    restart: always
+    depends_on:
+      - mariadb
+    command: ["npm", "run", "nodemon"]
+    volumes:
+      - .:/app

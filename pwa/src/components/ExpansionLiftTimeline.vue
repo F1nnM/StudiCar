@@ -63,8 +63,9 @@
 
 <script>
 import { date } from "quasar";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "ExpansionTimeline",
   props: {
     lift: Object
@@ -161,7 +162,7 @@ export default {
       }
     }
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>

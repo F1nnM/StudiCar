@@ -23,9 +23,10 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import { QrcodeStream, QrcodeDropZone, QrcodeCapture } from "vue-qrcode-reader";
 
-export default {
+export default defineComponent({
   components: { QrcodeStream },
 
   mounted() {
@@ -96,7 +97,7 @@ export default {
       this.result = "";
     }
   }
-};
+});
 </script>
 
 <style lang="scss">

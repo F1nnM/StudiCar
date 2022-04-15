@@ -62,9 +62,10 @@ Is not really a module/component by nature as it is that hard connected to MainL
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import { QrcodeStream, QrcodeDropZone, QrcodeCapture } from "vue-qrcode-reader";
 
-export default {
+export default defineComponent({
   components: { QrcodeStream },
   name: "QrScanner",
 
@@ -192,7 +193,7 @@ export default {
   ready() {
     this.scannerReady = false;
   }
-};
+});
 </script>
 
 <style lang="scss">

@@ -109,6 +109,7 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import { date } from "quasar";
 
 import ProfileUserData from "components/ProfileUserData";
@@ -117,7 +118,7 @@ import ProfileOtherData from "components/ProfileOtherData";
 import TitleButtonAnchor from "../components/TitleButtonAnchor";
 import { mdiAccountGroupOutline } from "@quasar/extras/mdi-v5";
 
-export default {
+export default defineComponent({
   components: {
     ProfileUserData,
     ProfileOtherData,
@@ -201,5 +202,5 @@ export default {
       name: "Profil"
     });
   }
-};
+});
 </script>

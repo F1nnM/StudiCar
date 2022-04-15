@@ -54,8 +54,9 @@
 
 <script>
 import { date } from "quasar";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "ImageColorPicker",
   props: {
     imageSrc: String
@@ -78,7 +79,7 @@ export default {
       }
     };
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>

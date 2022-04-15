@@ -462,8 +462,9 @@ import CompactCarInfo from "components/CompactCarInfo";
 import SettingScope from "components/SettingScope";
 
 import { sendApiRequest, GET_CAR_MODELS } from "../ApiAccess";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "ProfileOtherData",
   components: {
     ImageColorPicker,
@@ -655,7 +656,7 @@ export default {
       }
     );
   }
-};
+});
 </script>
 
 <style scoped></style>

@@ -236,13 +236,14 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import {
   sendApiRequest,
   SQL_ADD_QUESTION,
   SQL_GET_SUPPORT_DATA
 } from "../ApiAccess";
 
-export default {
+export default defineComponent({
   name: "Support",
   components: {},
   data() {
@@ -360,7 +361,7 @@ export default {
       onlyInNav: true
     });
   }
-};
+});
 </script>
 
 <style scoped lang="scss">

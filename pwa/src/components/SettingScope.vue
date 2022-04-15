@@ -101,8 +101,9 @@
 
 <script>
 import Tooltip from "components/Tooltip";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "SettingScope",
   components: {
     Tooltip
@@ -154,7 +155,7 @@ export default {
       this.$emit("save");
     }
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>

@@ -131,12 +131,13 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import ExtHr from "components/ExtendedHr";
 import TitleButton from "components/TitleButtonAnchor";
 import TeamPicture from "components/TeamPicture";
 import { sendApiRequest, SQL_GET_TEAM } from "../ApiAccess";
 
-export default {
+export default defineComponent({
   name: "team",
   components: { ExtHr, TitleButton, TeamPicture },
   data() {
@@ -229,7 +230,7 @@ export default {
       this.htmlText = this.info.infoText;
     }
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>

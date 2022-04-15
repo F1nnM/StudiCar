@@ -214,8 +214,9 @@
 import VueQrcode from "vue-qrcode"; // docs: https://github.com/rx-ts/vue/tree/master/packages/vue-qrcode
 import ExtHr from "components/ExtendedHr";
 import { colors, copyToClipboard, dom } from "quasar";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "QrGenerator",
   components: {
     VueQrcode,
@@ -354,7 +355,7 @@ export default {
         .catch(e => alert("Fehler beim Kopieren: " + e));
     }
   }
-};
+});
 </script>
 
 <style lang="scss">

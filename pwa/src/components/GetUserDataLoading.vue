@@ -48,9 +48,10 @@
 
 <script>
 import ExtendedHr from "components/ExtendedHr";
+import { defineComponent } from "vue";
 import { sendApiRequest } from "../ApiAccess";
 
-export default {
+export default defineComponent({
   name: "GetUserDataLoading.vue",
   components: {},
   data() {
@@ -97,7 +98,7 @@ export default {
       this.reverse = !this.reverse;
     }, 1800); */
   }
-};
+});
 </script>
 
 <style scoped lang="scss">

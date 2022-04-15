@@ -1,13 +1,41 @@
-import Firebase from "firebase/app";
-import "firebase/auth";
-import "firebase/firebase-messaging";
+import Firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+import "firebase/compat/messaging";
 
 import {
   sendApiRequest,
   SQL_CREATE_USER_IF_NOT_EXISTING,
   SQL_GET_USER_DATA,
-  SQL_UPDATE_FCM_TOKEN
+  SQL_UPDATE_FCM_TOKEN,
+  SQL_UPDATE_PUSH_SUBSCRIPTION,
+  TEST_PUSH
 } from "../ApiAccess";
+
+const vapidKey =
+  "BEkNfar1xxwvXxxSAlgjdXmivUZtcudfXZiN5Hd8Xjksv1rzDNF44f8U9heFv8UeQlC0l42qW1dpKzv9cG4k9lw";
+
+function createNotificationSubscription() {
+  return navigator.serviceWorker
+    .getRegistration()
+    .then(reg => {
+      return reg.pushManager
+        .subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: vapidKey
+        })
+        .then(sub => {
+          console.warn("User is subscribed: " + sub);
+          return sub;
+        })
+        .catch(err => {
+          alert(
+            "Bitte erlaube StudiCar den Zugriff auf Benachrichtigungen, sonst kriegst du nichts mit."
+          );
+          console.log(err);
+        });
+    })
+    .catch(err => console.warn(err));
+}
 
 function setUpPush(fbid, store) {
   // propably not the best way to pass store object, but very simple
@@ -15,10 +43,7 @@ function setUpPush(fbid, store) {
     const messaging = Firebase.messaging();
 
     messaging
-      .getToken({
-        vapidKey:
-          "BEkNfar1xxwvXxxSAlgjdXmivUZtcudfXZiN5Hd8Xjksv1rzDNF44f8U9heFv8UeQlC0l42qW1dpKzv9cG4k9lw"
-      })
+      .getToken({vapidKey: vapidKey})
       .then(currentToken => {
         if (currentToken) {
           console.warn("+++ TOKEN +++ " + currentToken);
@@ -46,18 +71,44 @@ function setUpPush(fbid, store) {
 
                 setUpPush(fbid);
               } else {
-                console.log("Permission Denied");
+                alert(
+                  "Bitte erlaube StudiCar den Zugriff auf Benachrichtigungen, sonst kriegst du nichts mit."
+                );
               }
             })
             .catch(err => {
-              console.log(err);
+              alert(
+                "Bitte erlaube StudiCar den Zugriff auf Benachrichtigungen, sonst kriegst du nichts mit."
+              );
               window.location.href = window.location.href;
             });
         }
       })
       .catch(err => {
         console.log("An error occurred while retrieving token. ", err);
+        alert("Could not get token: " + err);
       });
+
+    messaging.onTokenRefresh(_ => {
+      messaging
+        .getToken()
+        .then(newToken => {
+          console.warn("Got a new token: " + newToken);
+        })
+        .catch(err => console.warn(err));
+    });
+
+    createNotificationSubscription().then(subscription => {
+      sendApiRequest(
+        SQL_UPDATE_PUSH_SUBSCRIPTION,
+        {
+          pushSubscription: JSON.stringify(subscription)
+        },
+        _ => {},
+        err => {}
+      );
+    });
+
   } catch (e) {
     console.warn(e);
   }

@@ -1,5 +1,5 @@
-import Firebase from "firebase/app";
-import "firebase/auth";
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
 
 const hostname = (_ => {
   var name = window.location.hostname;
@@ -31,7 +31,7 @@ export function sendApiRequest(
 
   var axios = require("axios");
 
-  Firebase.auth()
+  firebase.auth()
     .currentUser.getIdToken(/* forceRefresh */ true)
     .then(idToken_ => {
       if (process.env.DEV)
@@ -61,7 +61,7 @@ export function sendApiRequest(
 }
 
 export async function buildGetRequestUrl(action, options) {
-  const idToken_ = await Firebase.auth()
+  const idToken_ = await firebase.auth()
     .currentUser.getIdToken(/* forceRefresh */ true)
     .catch(err => {
       throw err;
@@ -295,7 +295,17 @@ export const SQL_UPDATE_FCM_TOKEN = {
   method: "POST"
 };
 
+export const SQL_UPDATE_PUSH_SUBSCRIPTION = {
+  path: "/updateSubscription",
+  method: "POST"
+};
+
 export const TEST_PUSH = {
   path: "/testPush",
+  method: "POST"
+};
+
+export const NOTIFY_USERS_IN_LIFT = {
+  path: "/notifyUsersInLift",
   method: "POST"
 };

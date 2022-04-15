@@ -1,5 +1,7 @@
-// Configuration for your app
-// https://quasar.dev/quasar-cli/quasar-conf-js
+/*
+ * This file runs in a Node context (it's NOT transpiled by Babel), so use only
+ * the ES6 features that are supported by your Node version. https://node.green/
+ */
 
 const fs = require("fs");
 
@@ -11,12 +13,25 @@ function tryReadFile(file) {
   }
 }
 
-module.exports = function(ctx) {
+// Configuration for your app
+// https://quasar.dev/quasar-cli/quasar-conf-js
+
+/* eslint-env node */
+const ESLintPlugin = require("eslint-webpack-plugin");
+const { configure } = require("quasar/wrappers");
+
+module.exports = configure(function (ctx) {
   return {
+    // https://quasar.dev/quasar-cli/supporting-ts
+    supportTS: false,
+
+    // https://quasar.dev/quasar-cli/prefetch-feature
+    // preFetch: true,
+
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
-    // https://quasar.dev/quasar-cli/cli-documentation/boot-files
-    boot: ["auth", "axios", "firebase", "boot", "addressbar-color"],
+    // https://quasar.dev/quasar-cli/boot-files
+    boot: ["i18n", "axios", "auth", "firebase", "boot", "addressbar-color"],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
     css: ["app.scss", "transitions.scss", "fontStyling.scss"],
@@ -24,7 +39,7 @@ module.exports = function(ctx) {
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
       // 'ionicons-v4',
-      // 'mdi-v4',
+      // 'mdi-v5',
       // 'fontawesome-v5',
       // 'eva-icons',
       // 'themify',
@@ -32,149 +47,159 @@ module.exports = function(ctx) {
       // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
 
       "roboto-font", // optional, you are not bound to it
-      "material-icons" // optional, you are not bound to it
+      "material-icons", // optional, you are not bound to it
     ],
-
-    // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
-    framework: {
-      iconSet: "material-icons", // Quasar icon set
-      lang: "en-us", // Quasar language pack
-
-      // Possible values for "all":
-      // * 'auto' - Auto-import needed Quasar components & directives
-      //            (slightly higher compile time; next to minimum bundle size; most convenient)
-      // * false  - Manually specify what to import
-      //            (fastest compile time; minimum bundle size; most tedious)
-      // * true   - Import everything from Quasar
-      //            (not treeshaking Quasar; biggest bundle size; convenient)
-      all: "auto",
-
-      components: [],
-      directives: [],
-
-      // Quasar plugins
-      plugins: ["Dialog", "Notify", "AddressbarColor"]
-    },
-
-    // https://quasar.dev/quasar-cli/cli-documentation/supporting-ie
-    supportIE: false,
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
       vueRouterMode: "hash", // available values: 'hash', 'history'
 
-      // rtl: false, // https://quasar.dev/options/rtl-support
+      // transpile: false,
+      // publicPath: '/',
+
+      // Add dependencies for transpiling with Babel (Array of string/regex)
+      // (from node_modules, which are by default not transpiled).
+      // Applies only if "transpile" is set to true.
+      // transpileDependencies: [],
+
+      // rtl: true, // https://quasar.dev/options/rtl-support
+      // preloadChunks: true,
       // showProgress: false,
       // gzip: true,
       // analyze: true,
 
       // Options below are automatically set depending on the env, set them if you want to override
-      // preloadChunks: false,
       // extractCSS: false,
 
-      // https://quasar.dev/quasar-cli/cli-documentation/handling-webpack
-      extendWebpack(cfg) {
-        cfg.module.rules.push({
-          enforce: "pre",
-          test: /\.(js|vue)$/,
-          loader: "eslint-loader",
-          exclude: /node_modules/,
-          options: {
-            formatter: require("eslint").CLIEngine.getFormatter("stylish")
-          }
-        });
-      }
+      // https://quasar.dev/quasar-cli/handling-webpack
+      // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
+      chainWebpack(chain) {
+        chain
+          .plugin("eslint-webpack-plugin")
+          .use(ESLintPlugin, [{ extensions: ["js", "vue"] }]);
+      },
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
     devServer: {
-      https: true,
+      server: {
+        type: "https",
+        options: {
+          key: tryReadFile("server.key"),
+          cert: tryReadFile("server.pem"),
+          ca: tryReadFile("ca.pem")
+        }
+      },
       port: 3000,
       open: true, // opens browser window automatically
-      key: tryReadFile("server.key"),
-      cert: tryReadFile("server.pem"),
-      ca: tryReadFile("ca.pem")
+
+    },
+
+    // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
+    framework: {
+      config: {},
+
+      iconSet: 'material-icons', // Quasar icon set
+      lang: 'en-US', // Quasar language pack
+
+      // For special cases outside of where the auto-import strategy can have an impact
+      // (like functional components as one of the examples),
+      // you can manually specify Quasar components/directives to be available everywhere:
+      //
+      // components: [],
+      // directives: [],
+
+      // Quasar plugins
+      plugins: ["Dialog", "Notify", "AddressbarColor"],
     },
 
     // animations: 'all', // --- includes all animations
     // https://quasar.dev/options/animations
-    animations: "all", // default setting was animations: []
+    animations: 'all', //default was []
 
     // https://quasar.dev/quasar-cli/developing-ssr/configuring-ssr
     ssr: {
-      pwa: false
+      pwa: true,
+
+      // manualStoreHydration: true,
+      // manualPostHydrationTrigger: true,
+
+      prodPort: 3000, // The default port that the production server should use
+      // (gets superseded if process.env.PORT is specified at runtime)
+
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+      // Tell browser when a file from the server should expire from cache (in ms)
+
+      chainWebpackWebserver(chain) {
+        chain
+          .plugin("eslint-webpack-plugin")
+          .use(ESLintPlugin, [{ extensions: ["js"] }]);
+      },
+
+      middlewares: [
+        ctx.prod ? "compression" : "",
+        "render", // keep this as last one
+      ],
     },
 
     // https://quasar.dev/quasar-cli/developing-pwa/configuring-pwa
     pwa: {
-      workboxPluginMode: "GenerateSW", // 'GenerateSW' or 'InjectManifest'
-      workboxOptions: {
-        skipWaiting: true // found in https://forum.quasar-framework.org/topic/2560/solved-pwa-force-refresh-when-new-version-released/28
-      }, // only for GenerateSW
+      workboxPluginMode: "InjectManifest", // 'GenerateSW' or 'InjectManifest'
+      // for the custom service worker ONLY (/src-pwa/custom-service-worker.[js|ts])
+      // if using workbox in InjectManifest mode
+      chainWebpackCustomSW(chain) {
+        chain
+          .plugin("eslint-webpack-plugin")
+          .use(ESLintPlugin, [{ extensions: ["js"] }]);
+      },
+
       manifest: {
-        name: "StudiCar" + (ctx.dev ? " LOCAL" : ""),
-        short_name: "StudiCar",
-        description: "Green.Cheap.Social",
+        name: `Studicar`,
+        short_name: `Studicar`,
+        description: `Green.Cheap.Social`,
         display: "standalone",
         orientation: "portrait",
         background_color: "#ffffff",
-        theme_color: "#02a200", // blue color: 027be3
+        theme_color: "#02a200",
+        gcm_sender_id: "640124338592",
         icons: [
           {
-            src: "statics/icons/icon-128x128.png",
+            src: "icons/icon-128x128.png",
             sizes: "128x128",
-            type: "image/png"
-          },
-          {
-            src: "statics/icons/icon-192x192.png",
-            sizes: "192x192",
-            type: "image/png"
-          },
-          {
-            src: "statics/icons/icon-256x256.png",
-            sizes: "256x256",
-            type: "image/png"
-          },
-          {
-            src: "statics/icons/icon-384x384.png",
-            sizes: "384x384",
-            type: "image/png"
-          },
-          {
-            src: "statics/icons/icon-512x512.png",
-            sizes: "512x512",
-            type: "image/png"
-          },
-          {
-            src: "statics/app-icon-maskable.png", // this is just to pass lighthouse audit, tutorial at https://web.dev/maskable-icon-audit/?utm_source=lighthouse&utm_medium=devtools
-            sizes: "128x128 196x196 256x256 384x384 512x512", // just for the common sizes
             type: "image/png",
-            purpose: "any maskable"
+          },
+          {
+            src: "icons/icon-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+          {
+            src: "icons/icon-256x256.png",
+            sizes: "256x256",
+            type: "image/png",
+          },
+          {
+            src: "icons/icon-384x384.png",
+            sizes: "384x384",
+            type: "image/png",
+          },
+          {
+            src: "icons/icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
           }
-        ]
+        ],
       },
-      metaVariables: {
-        appleMobileWebAppCapable: "yes",
-        appleMobileWebAppStatusBarStyle: "default",
-        appleTouchIcon120: "icons/apple-icon-120x120.png",
-        appleTouchIcon180: "icons/apple-icon-180x180.png",
-        appleTouchIcon152: "icons/apple-icon-152x152.png",
-        appleTouchIcon167: "icons/apple-icon-167x167.png",
-        appleSafariPinnedTab: "icons/safari-pinned-tab.svg",
-        msapplicationTileImage: "icons/ms-icon-144x144.png",
-        msapplicationTileColor: "#000000"
-      }
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/developing-cordova-apps/configuring-cordova
     cordova: {
       // noIosLegacyBuildFlag: true, // uncomment only if you know what you are doing
-      id: ""
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/developing-capacitor-apps/configuring-capacitor
     capacitor: {
-      hideSplashscreen: true
+      hideSplashscreen: true,
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/developing-electron-apps/configuring-electron
@@ -195,16 +220,22 @@ module.exports = function(ctx) {
       builder: {
         // https://www.electron.build/configuration/configuration
 
-        appId: "studicar"
+        appId: "pwa",
       },
 
-      // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration
-      nodeIntegration: true,
+      // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
+      chainWebpackMain(chain) {
+        chain
+          .plugin("eslint-webpack-plugin")
+          .use(ESLintPlugin, [{ extensions: ["js"] }]);
+      },
 
-      extendWebpack(cfg) {
-        // do something with Electron main process Webpack cfg
-        // chainWebpack also available besides this extendWebpack
-      }
-    }
+      // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
+      chainWebpackPreload(chain) {
+        chain
+          .plugin("eslint-webpack-plugin")
+          .use(ESLintPlugin, [{ extensions: ["js"] }]);
+      },
+    },
   };
-};
+});

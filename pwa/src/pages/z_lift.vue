@@ -189,13 +189,14 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import { dom } from "quasar";
 
 import { openURL } from "quasar";
 
 import { date } from "quasar";
 
-export default {
+export default defineComponent({
   computed: {},
 
   mounted() {
@@ -496,5 +497,5 @@ export default {
       window.location.href = "/#/chats";
     }
   }
-};
+});
 </script>

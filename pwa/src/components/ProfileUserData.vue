@@ -471,8 +471,6 @@ import ExtHr from "components/ExtendedHr";
 import QrGen from "components/QrGenerator";
 import QrIcon from "components/QrIcon";
 
-import Vibrant from "node-vibrant";
-
 import {
   buildGetRequestUrl,
   sendApiRequest,
@@ -480,8 +478,9 @@ import {
   SQL_UPDATE_PROFILE_PICTURE,
   SQL_RESET_PROFILE_PICTURE
 } from "../ApiAccess";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "ProfileUserData",
   components: {
     ExtHr,
@@ -755,7 +754,7 @@ export default {
       });
     })();
   }
-};
+});
 </script>
 
 <style scoped></style>

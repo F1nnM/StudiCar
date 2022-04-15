@@ -557,8 +557,9 @@ import LiftInfoDialog from "components/LiftInfoDialog";
 import BottomSpaceForiOS from "components/BottomSpaceForiOS";
 
 import { sendApiRequest, SQL_LOAD_MESSAGE_MEDIA } from "../ApiAccess";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "LiftPopup",
   components: {
     LiftInfoDialog,
@@ -584,7 +585,8 @@ export default {
       user: this.$store.getters["auth/user"].uid,
       loading: 0, // as always: 0 means not loading, 1 means in progress, 2 means success and -1 error.
       bottomReached: false,
-      medias: {}
+      medias: {},
+      detailsOpenLocal: this.detailsOpen
     };
   },
   model: {
@@ -608,7 +610,8 @@ export default {
         }, 50); // has to have short delay to get wanted effect
       } else {
         this.infoDrawerOpen = false;
-        this.detailsOpen = false;
+        this.detailsOpenLocal = false;
+        this.$emit("detailsOpenUpdate", this.detailsOpenLocal)
       }
     },
 
@@ -997,7 +1000,7 @@ export default {
   },
 
   mounted() {}
-};
+});
 </script>
 
 <style scoped lang="scss">

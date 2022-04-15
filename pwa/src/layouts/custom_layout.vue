@@ -37,9 +37,11 @@
 
     <q-page-container>
       <q-scroll-observer @scroll="scrollHandler" />
-      <transition :name="pageTrans" mode="out-in">
-        <router-view />
-      </transition>
+      <router-view v-slot="{ Component }">
+        <transition :name="pageTrans" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </q-page-container>
 
     <q-slide-transition>
@@ -67,8 +69,9 @@
 
 <script>
 import { scroll } from "quasar";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   components: {},
 
   computed: {
@@ -119,5 +122,5 @@ export default {
       this.scrolled = info.position > 30;
     },
   },
-};
+});
 </script>

@@ -33,8 +33,9 @@
 import ExtHr from "components/ExtendedHr";
 
 import { date } from "quasar";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "AudioPlayer",
   components: {},
   data() {
@@ -128,5 +129,5 @@ export default {
         this.metaLoaded = true;
       }, 200);
   }
-};
+});
 </script>

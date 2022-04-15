@@ -1,5 +1,5 @@
-import Firebase from 'firebase/app'
-import 'firebase/auth'
+import Firebase from 'firebase/compat/app'
+import 'firebase/compat/auth'
 
 export default ({ app, router, Vue, store, urlPath }) => {
   router.beforeEach(async (to, from, next) => {

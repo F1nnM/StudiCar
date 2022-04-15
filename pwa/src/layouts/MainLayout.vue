@@ -170,9 +170,11 @@
               >
             </div>
           </div>
-          <transition :name="pageTrans" mode="out-in">
-            <router-view ref="pageContent" />
-          </transition>
+          <router-view v-slot="{ Component }" ref="pageContent" >
+            <transition :name="pageTrans" mode="out-in">
+              <component :is="Component" />
+            </transition>
+          </router-view>
         </q-page-container>
       </div>
     </q-pull-to-refresh>
@@ -265,8 +267,9 @@ import {
   buildGetRequestUrl,
   GET_USER_PROFILE_PIC
 } from "../ApiAccess";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "MainLayout",
 
   components: {
@@ -607,5 +610,5 @@ export default {
         );
       })();
   }
-};
+});
 </script>

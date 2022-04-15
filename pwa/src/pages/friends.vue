@@ -165,6 +165,7 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import Tooltip from "components/Tooltip";
 import FriendHeart from "../components/FriendHeart.vue";
 import {
@@ -174,7 +175,7 @@ import {
   SQL_GET_FRIENDS,
   SQL_CHANGE_FRIEND_RELATION
 } from "../ApiAccess";
-export default {
+export default defineComponent({
   components: { FriendHeart, Tooltip },
   data() {
     return {
@@ -348,7 +349,7 @@ du ${otherUser.name} dann nur über eine Fahrgemeinschaft oder einen StudiCar Co
       });
     });
   }
-};
+});
 </script>
 
 <style scoped lang="scss">

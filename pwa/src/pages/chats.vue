@@ -234,6 +234,7 @@
             @shortLiftInfo="openShortLiftInfo"
             v-model="chatPopup.isOpen"
             :detailsOpen="chatPopup.detailsOpen"
+            @detailsOpenUpdate="chatPopup.detailsOpen = $event"
             :lift="chatPopup.data"
             @closeLift="closeLift"
             @closeAndLeave="leave"
@@ -260,6 +261,7 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import ChatItem from "components/ChatItem";
 import LiftPopup from "components/LiftPopup";
 import QrGen from "components/QrGenerator";
@@ -271,7 +273,7 @@ import LiftOfferForRequest from "components/LiftOfferForRequest";
 
 import { date } from "quasar";
 
-export default {
+export default defineComponent({
   components: {
     ChatItem,
     LiftPopup,
@@ -633,5 +635,5 @@ export default {
       name: "Fahrten"
     });
   }
-};
+});
 </script>
