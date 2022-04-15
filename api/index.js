@@ -68,7 +68,7 @@ server.on('request', async (req, res) => {
       admin.auth().verifyIdToken(options.idtoken)
         .then(async decodedToken => {
           options.secretFbId = decodedToken.uid;
-          await api.GET[urlParts.pathname](req, res, options);
+          await api.GET[urlParts.pathname](req, res, options, admin);
         })
         .catch(err => { throw err })
 
@@ -97,7 +97,7 @@ server.on('request', async (req, res) => {
         admin.auth().verifyIdToken(options.idtoken)
           .then(async decodedToken => {
             options.secretFbId = decodedToken.uid;
-            await api.POST[urlParts.pathname](req, res, options);
+            await api.POST[urlParts.pathname](req, res, options, admin);
           })
           .catch(err => { throw err })
 

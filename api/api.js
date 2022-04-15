@@ -4,8 +4,7 @@ const runQuery = require("./db"),
   /* longQueries           = require('./longQueries'), */
   apiResponseSimulation = require("./simulation/apiResponse"),
   tickerJS = require("./news/postillon/ticker.js"),
-  errorHandler = require("./errorHandler"),
-  {getMessaging} = require("firebase-admin")
+  errorHandler = require("./errorHandler")
 const { database } = require("./errorHandler");
 
 function isOptionMissing(data, needed, res) {
@@ -49,7 +48,7 @@ async function getUserId(fbId) {
 }
 
 
-async function notifyUsersInLift(liftId, title, message) {
+async function notifyUsersInLift(admin, liftId, title, message) {
   return new Promise(async (res, rej) => {
     var result = (
       await runQuery(
@@ -71,7 +70,7 @@ async function notifyUsersInLift(liftId, title, message) {
     }
     var fcmPromises = [];
     result.forEach((record) => {
-      fcmPromises.push(sendViaCloudMessaging(record.TOKEN, title, message));
+      fcmPromises.push(sendViaCloudMessaging(admin, record.TOKEN, title, message));
     });
 
     /* wait for all messages to be sent successfully, if one err then fail */
@@ -103,7 +102,7 @@ function generateJdenticon(seed) {
   return jdenticon.toPng(seed, size);
 }
 
-function sendViaCloudMessaging(fcmToken, title, body, prio) {
+function sendViaCloudMessaging(admin, fcmToken, title, body, prio) {
 
   const message = {
     data: {
@@ -112,36 +111,16 @@ function sendViaCloudMessaging(fcmToken, title, body, prio) {
     },
     prio: prio,
     token: fcmToken,
-    icon: "/img/app-icon.svg",
+    //icon: "/img/app-icon.svg",
   };
   
 
   console.log("starting to send");
-
-  /* admin.messaging().sendToDevice(fcmToken, payload, {
-    priority: prio || "normal",
-  }); */
-  /* had troubles with above */
-
-  // fcm.send(
-  //   {
-  //     to: fcmToken,
-  //     notification: {
-  //       title: "Lorem",
-  //       body: "Hello there",
-  //     },
-  //   },
-  //   (err, res) => {
-  //     if (err) console.log(err);
-  //     else console.log(res);
-  //   }
-  // );
-
   
   // Send a message to the device corresponding to the provided
   // registration token.
   return new Promise((res, rej) => {
-    getMessaging().send(message)
+    admin.messaging().send(message)
     .then((response) => {
       // Response is a message ID string.
       console.log('Successfully sent message:', response);
@@ -1668,7 +1647,7 @@ module.exports = {
         res.end();
       }
     },
-    "/testPush": async (req, res, options) => {
+    "/testPush": async (req, res, options, admin) => {
       if (!isOptionMissing(options, ["receiverFbId", "title", "message"], res)) {
         var result = (
           await runQuery(
@@ -1686,15 +1665,15 @@ module.exports = {
         } else {
           var token = result[0].TOKEN;
 
-          sendViaCloudMessaging(token, options.title, options.message);
+          sendViaCloudMessaging(admin, token, options.title, options.message);
 
           res.end();
         }
       }
     },
-    "/notifyUsersInLift": async (req, res, options) => {
+    "/notifyUsersInLift": async (req, res, options, admin) => {
       if (!isOptionMissing(options, ["liftId", "title", "message"], res)) {
-        notifyUsersInLift(options.liftId, options.title, options.message)
+        notifyUsersInLift(admin, options.liftId, options.title, options.message)
           .then((result) => {
             res.end(result);
           })
@@ -2163,7 +2142,7 @@ module.exports = {
         res.end();
       }
     },
-    "/sendMessage": async (req, res, options) => {
+    "/sendMessage": async (req, res, options, admin) => {
       if (
         !isOptionMissing(options, ["message"], res) &&
         (await isUserVerified(options.secretFbId))
@@ -2218,6 +2197,7 @@ module.exports = {
           ).result[0].NAME;
 
           await notifyUsersInLift(
+            admin,
             message.liftId,
             "Nachricht von " + nameOfUser,
             message.content
@@ -2233,7 +2213,7 @@ module.exports = {
         } else res.end();
       }
     },
-    "/changeFriendRelation": async (req, res, options) => {
+    "/changeFriendRelation": async (req, res, options, admin) => {
       if (
         !isOptionMissing(options, ["otherFbId", "mySideOfHeart"], res) &&
         (await isUserVerified(options.secretFbId))
@@ -2291,6 +2271,7 @@ module.exports = {
             receipientFcmToken = dataForPushMessage[0].RECEIPIENT_TOKEN;
 
           sendViaCloudMessaging(
+            admin,
             receipientFcmToken,
             "Freundschaft in StudiCar",
             initiatorName +
