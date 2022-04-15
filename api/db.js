@@ -1,13 +1,12 @@
 const mariadb = require("mariadb"),
-  config = require("./dbConfig"),
   pool = mariadb.createPool({
-    host: config.host,
-    user: config.username,
-    password: config.password,
-    database: config.database,
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
     connectionLimit: 5,
     multipleStatements: true,
-    charset: "utf8_general_ci"
+    charset: "utf8"
   });
 
 module.exports = async function runQuery(sql, data, debug=null) {

@@ -3,8 +3,6 @@ version: "3.7"
 services:
   mariadb:
     image: mariadb:10
-    ports:
-      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: "root"
       MYSQL_DATABASE: "studicar"
@@ -29,6 +27,11 @@ services:
     ports:
       - "443:443"
     restart: always
+    environment:
+      DB_HOST: "mariadb"
+      DB_DATABASE: "studicar"
+      DB_USER: "studicar"
+      DB_PASSWORD: "@H1xhm978zX?v67g"
     depends_on:
       - mariadb
     command: ["npm", "run", "nodemon"]
