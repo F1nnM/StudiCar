@@ -11,7 +11,7 @@ function tryReadFile(file) {
   try {
     return fs.readFileSync(file);
   } catch (e) {
-    console.log(e);
+    console.warn("Skipping file:"+file)
   }
 }
 
