@@ -2,7 +2,7 @@ require('dotenv').config()
 
 var server;
 
-if (process.env.USE_HTTPS){
+if (process.env.USE_HTTPS=="true"){
   var https = require('https');
   const fs = require('fs');
 
