@@ -1,10 +1,6 @@
 var server;
 
-if (typeof (PhusionPassenger) !== 'undefined') {
-  PhusionPassenger.configure({ autoInstall: false });
-  var http = require('http');
-  server = http.createServer();
-} else {
+if (process.env.USE_HTTPS){
   var https = require('https');
   const fs = require('fs');
 
@@ -14,6 +10,9 @@ if (typeof (PhusionPassenger) !== 'undefined') {
   };
 
   server = https.createServer(options);
+} else {
+  var http = require('http');
+  server = http.createServer();
 }
 
 var admin = require("firebase-admin");
@@ -107,8 +106,5 @@ server.on('request', async (req, res) => {
 
 });
 
-if (typeof (PhusionPassenger) !== 'undefined') {
-  server.listen('passenger');
-} else {
-  server.listen(443);
-}
+
+server.listen(443);
