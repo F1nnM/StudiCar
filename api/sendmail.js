@@ -1,13 +1,11 @@
-const nodemailer = require('nodemailer'),
-    mailCreds = require('./mailAuth')
-
+const nodemailer = require('nodemailer')
 
 var transport = nodemailer.createTransport({
-    host: 'bernd.one',
-    port: 25,
+    host: process.env.MAIL_HOST,
+    port: process.env.MAIL_PORT,
     auth: {
-        user: mailCreds.USER,
-        pass: mailCreds.PASS
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS
     },
     tls: {
         // do not fail on invalid certs

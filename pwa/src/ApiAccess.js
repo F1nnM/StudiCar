@@ -1,19 +1,7 @@
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 
-const hostname = (_ => {
-  var name = window.location.hostname;
-  if (name == "desktop-le7kk5f.fritz.box") return "192.168.0.22";
-  else return name;
-})();
-
-export const ApiBasePath = process.env.DEV
-  ? "https://" + hostname
-  : window.location.hostname.startsWith("dev")
-  ? "https://dev.api.studicar.mfinn.de"
-  : "https://api.studicar.mfinn.de";
-
-console.warn(hostname);
+export const ApiBasePath = process.env.API_URL;
 
 export function sendApiRequest(
   action,

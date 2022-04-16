@@ -1,10 +1,13 @@
 version: "3.7"
 services:
   pwa:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile_dev
+    environment:
+      API_URL: "${API_URL}"
     ports:
       - "3000:3000"
     restart: always
-    command: ["dev"]
     volumes:
       - .:/app

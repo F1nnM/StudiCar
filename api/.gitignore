@@ -1,9 +1,5 @@
-dbConfig.js
 server.key
 server.pem
-firebaseAccountKey.json
-
-mailAuth.js
 
 legal/*.html
 news/postillon/*.js

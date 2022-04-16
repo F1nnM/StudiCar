@@ -9,45 +9,63 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-      - uses: actions/cache@v2
+      - 
+        name: Checkout
+        uses: actions/checkout@v2
+      - 
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - 
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - 
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v1 
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - run: npm install -g @quasar/cli
-      - run: npm install -g @quasar/icongenie
-      - run: cd ./pwa && npm ci
-      - run: cd ./pwa && npm run build
-      - run: cp -R ./pwa/src/statics ./pwa/dist/pwa/
-      - run: cd ./pwa && tree .
-      - uses: SamKirkland/FTP-Deploy-Action@4.0.0
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - 
+        name: Build dockerfile and push image to Docker Hub and Github Registry
+        uses: docker/build-push-action@v2
         with:
-          server: mfinn.de
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./pwa/dist/pwa/
-          server-dir: /dev/pwa/
+          context: ./pwa
+          push: true
+          tags: |
+            ghcr.io/f1nnm/studicar_pwa:${{ github.run_number }}
+            ghcr.io/f1nnm/studicar_pwa:latest
+      -
+        name: Print tag
+        run: echo "Tagged images with latest and $GITHUB_RUN_NUMBER"
   api:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-      - uses: actions/cache@v2
+      - 
+        name: Checkout
+        uses: actions/checkout@v2
+      - 
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - 
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - 
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v1 
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - run: cd ./api && npm ci && mkdir tmp && date > ./tmp/restart.txt && npm run build
-      - uses: SamKirkland/FTP-Deploy-Action@4.0.0
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - 
+        name: Build dockerfile and push image to Docker Hub and Github Registry
+        uses: docker/build-push-action@v2
         with:
-          server: mfinn.de
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./api/
-          server-dir: /dev/api/
-          exclude: .git* .git*/**
+          context: ./api
+          push: true
+          tags: |
+            ghcr.io/f1nnm/studicar_api:${{ github.run_number }}
+            ghcr.io/f1nnm/studicar_api:latest
+      -
+        name: Print tag
+        run: echo "Tagged images with latest and $GITHUB_RUN_NUMBER"

@@ -10,10 +10,12 @@ COPY ./package-lock.json ./
 
 RUN npm install
 
+FROM node:alpine as app
+
+RUN mkdir /app
+WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
+
 COPY . /app/
 
-RUN npm run build
-
-FROM httpd:2.4
-
-COPY --from=builder /app/dist/pwa /usr/local/apache2/htdocs/
+ENTRYPOINT [ "npm", "run", "dev"]
