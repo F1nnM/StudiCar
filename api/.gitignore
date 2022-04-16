@@ -13,3 +13,5 @@ news/postillon/*.json
 node_modules/
 
 test.json
+
+.env
