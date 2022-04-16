@@ -169,7 +169,7 @@
                     <p class="text-center">
                       <span
                         class="rounded-borders bg-grey-3 text-dark q-pa-xs text-weight-light"
-                        style="font-size:0.8em"
+                        style="font-size: 0.8em"
                         v-if="checkDayBreak(m) != ''"
                         >{{ checkDayBreak(m) }}</span
                       >
@@ -180,7 +180,7 @@
                     >
                       <span
                         class="rounded-borders bg-grey-4 text-dark q-pa-xs text-weight-light"
-                        style="font-size:1.0em"
+                        style="font-size: 1em"
                         >{{ m.content }}</span
                       >
                     </p>
@@ -210,10 +210,10 @@
                             dense
                             clickable
                             @click="
-                              _ => {
+                              (_) => {
                                 showMoreMessageOptions = {
                                   message: m,
-                                  open: true
+                                  open: true,
                                 };
                               }
                             "
@@ -556,6 +556,8 @@ import { openURL, date, copyToClipboard, Notify } from "quasar";
 import LiftInfoDialog from "components/LiftInfoDialog";
 import BottomSpaceForiOS from "components/BottomSpaceForiOS";
 
+import ExtHr from "components/ExtendedHr";
+
 import { sendApiRequest, SQL_LOAD_MESSAGE_MEDIA } from "../ApiAccess";
 import { defineComponent } from "vue";
 
@@ -563,7 +565,8 @@ export default defineComponent({
   name: "LiftPopup",
   components: {
     LiftInfoDialog,
-    BottomSpaceForiOS
+    ExtHr,
+    BottomSpaceForiOS,
   },
   data() {
     return {
@@ -577,7 +580,7 @@ export default defineComponent({
       showPassengersToBeMentioned: false,
       showMoreMessageOptions: {
         open: false,
-        message: null
+        message: null,
       },
       showMembersInTitle: false,
       quickMessagesTab: "text",
@@ -586,36 +589,36 @@ export default defineComponent({
       loading: 0, // as always: 0 means not loading, 1 means in progress, 2 means success and -1 error.
       bottomReached: false,
       medias: {},
-      detailsOpenLocal: this.detailsOpen
+      detailsOpenLocal: this.detailsOpen,
     };
   },
   model: {
     prop: "open",
-    event: "input"
+    event: "input",
   },
   props: {
     open: Boolean,
     detailsOpen: Boolean,
-    lift: Object
+    lift: Object,
   },
   watch: {
-    open: function(newValue) {
+    open: function (newValue) {
       if (newValue) {
         this.showMembersInTitle = false; // so that each time you open tap-for-info is displayed again
-        setTimeout(_ => {
+        setTimeout((_) => {
           this.showMembersInTitle = true;
         }, 2000); // after that time, hide tap-for-info-hint and show members instead
-        setTimeout(_ => {
+        setTimeout((_) => {
           this.scrollToEnd();
         }, 50); // has to have short delay to get wanted effect
       } else {
         this.infoDrawerOpen = false;
         this.detailsOpenLocal = false;
-        this.$emit("detailsOpenUpdate", this.detailsOpenLocal)
+        this.$emit("detailsOpenUpdate", this.detailsOpenLocal);
       }
     },
 
-    messageText: function(val) {
+    messageText: function (val) {
       if (val.slice(-1) == "@") {
         this.showPassengersToBeMentioned = true;
       } else {
@@ -623,9 +626,9 @@ export default defineComponent({
       }
     },
 
-    detailsOpen: function(val) {
+    detailsOpen: function (val) {
       if (val) this.infoDrawerOpen = true;
-    }
+    },
   },
   computed: {
     showRecorder() {
@@ -655,7 +658,7 @@ export default defineComponent({
 
     passengersThatCanBeMentioned() {
       var all = [];
-      this.lift.passengers.forEach(p => {
+      this.lift.passengers.forEach((p) => {
         if (p.id != this.myFbId) all.push(p.name);
       });
       if (!this.isDriver) all.push(this.lift.driver.name);
@@ -667,7 +670,7 @@ export default defineComponent({
       return {
         user: {
           light: "green-3",
-          dark: "dark"
+          dark: "dark",
         },
         light: [
           "blue-1",
@@ -678,7 +681,7 @@ export default defineComponent({
           "blue-grey-11",
           "brown-4",
           "grey-6",
-          "blue-grey-4"
+          "blue-grey-4",
         ],
         dark: [
           /* just some standard colors from the quasar palette, a lift hasn't more people */
@@ -689,8 +692,8 @@ export default defineComponent({
           "brown",
           "grey-10",
           "red-14",
-          "blue-grey-10"
-        ] // dark/colored selection
+          "blue-grey-10",
+        ], // dark/colored selection
       };
     },
 
@@ -699,7 +702,7 @@ export default defineComponent({
       var people = {},
         firstNamesAlreadyFound = [],
         firstNamesNotUnique = [];
-      this.lift.passengers.forEach(p => {
+      this.lift.passengers.forEach((p) => {
         // we first have to get an overview and do a pre-sorting
         if (firstNamesAlreadyFound.includes(p.name)) {
           firstNamesNotUnique.push(p.name);
@@ -720,20 +723,20 @@ export default defineComponent({
         JSON.parse(JSON.stringify(this.lift.driver))
       );
 
-      allPeopleToBeHandled.forEach(p => {
+      allPeopleToBeHandled.forEach((p) => {
         var nameToBeShown = p.name;
         if (firstNamesNotUnique.includes(p.name))
           nameToBeShown += " " + p.surname;
         people[p.id] = nameToBeShown;
       });
       return people;
-    }
+    },
   },
 
   methods: {
     async scrollToEnd(delay) {
       if (delay)
-        await new Promise(res => {
+        await new Promise((res) => {
           setTimeout(res, delay);
         });
       try {
@@ -744,7 +747,7 @@ export default defineComponent({
           delay
             ? {
                 behavior: "smooth", // delay is used when user is expected to see scrolling, a hard jump when not (e.g. on opening)
-                block: "start"
+                block: "start",
               }
             : null
         );
@@ -758,7 +761,7 @@ export default defineComponent({
         oftmals gezwungen, eine Minute lang zuzuhören für den Inhalt von zwei Zeilen Text. StudiCar verweist daher 
         auf die in den meisten Tastaturen eingebaute Speech-To-Text Funktion, die Gesprochenes
         direkt in Text umwandelt. Schau in deinen Einstellungen nach, nutze die Funktion und ermögliche so auch den anderen Mitfahrern 
-        deine Nachrichten datenschonend, von den Umgebungsgeräuschen unabhängig und vor allem schnell zu lesen.`
+        deine Nachrichten datenschonend, von den Umgebungsgeräuschen unabhängig und vor allem schnell zu lesen.`,
       });
     },
 
@@ -888,8 +891,8 @@ export default defineComponent({
           "September",
           "Oktober",
           "November",
-          "Dezember"
-        ]
+          "Dezember",
+        ],
       });
     },
 
@@ -898,7 +901,7 @@ export default defineComponent({
     },
 
     focusTextInput() {
-      setTimeout(_ => {
+      setTimeout((_) => {
         this.$refs.messageInput.$el.focus();
       });
     },
@@ -909,7 +912,7 @@ export default defineComponent({
       this.focusTextInput();
       var a = this.messageText;
       this.messageText = "";
-      setTimeout(_ => (this.messageText = a), 10);
+      setTimeout((_) => (this.messageText = a), 10);
       this.scrollToEnd(50);
     },
 
@@ -922,7 +925,7 @@ export default defineComponent({
       this.showQuickMessages = false;
       var msgObj = {
         type: 0, // 1 means raw text, 2 means audio, 3 will mean image when implemented in future
-        liftId: this.lift.id
+        liftId: this.lift.id,
       };
       switch (type) {
         case 1: // only text
@@ -934,7 +937,7 @@ export default defineComponent({
           await new Promise((res, rej) => {
             var reader = new FileReader();
             reader.readAsDataURL(blob);
-            reader.onloadend = _ => {
+            reader.onloadend = (_) => {
               msgObj.content = reader.result;
 
               res();
@@ -953,12 +956,12 @@ export default defineComponent({
       sendApiRequest(
         SQL_LOAD_MESSAGE_MEDIA,
         {
-          uuid: uuid
+          uuid: uuid,
         },
-        media => {
+        (media) => {
           this.medias[uuid] = media;
         },
-        err => {
+        (err) => {
           alert("Error at fetching media: " + err);
         }
       );
@@ -977,29 +980,29 @@ export default defineComponent({
         toBeCopied = JSON.stringify({
           text: obj.content,
           timestamp: obj.timestamp,
-          sentByName: this.getNameFromId(obj.sentBy)
+          sentByName: this.getNameFromId(obj.sentBy),
         });
       }
       copyToClipboard(toBeCopied)
-        .then(_ => {
+        .then((_) => {
           /*  this.$q.notify({
             message: "Inhalt wurde kopiert",
             color: "white",
           }); */
         })
-        .catch(e => alert("Fehler beim Kopieren: " + e));
+        .catch((e) => alert("Fehler beim Kopieren: " + e));
     },
     async reloadMessages(done) {
       await this.$store.dispatch("auth/reloadChatLifts", {
         res: done,
-        rej: _ => {
+        rej: (_) => {
           alert("Fehler");
-        }
+        },
       });
-    }
+    },
   },
 
-  mounted() {}
+  mounted() {},
 });
 </script>
 
