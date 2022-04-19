@@ -140,20 +140,20 @@
                   v-for="pref in [
                     {
                       val: 'talk',
-                      icon: 'record_voice_over'
+                      icon: 'record_voice_over',
                     },
                     {
                       val: 'talkMorning',
-                      icon: 'alarm'
+                      icon: 'alarm',
                     },
                     {
                       val: 'smoking',
-                      icon: 'smoking_rooms'
+                      icon: 'smoking_rooms',
                     },
                     {
                       val: 'music',
-                      icon: 'music_note'
-                    }
+                      icon: 'music_note',
+                    },
                   ]"
                   :key="pref.val"
                 >
@@ -208,11 +208,11 @@ export default defineComponent({
   props: {
     lift: Object,
     noShadow: Boolean,
-    isAlreadyRequested: Boolean
+    isAlreadyRequested: Boolean,
   },
   data() {
     return {
-      imageUrl: ""
+      imageUrl: "",
     };
   },
   computed: {
@@ -236,7 +236,7 @@ export default defineComponent({
         "Mittwoch",
         "Donnerstag",
         "Freitag",
-        "Samstag"
+        "Samstag",
       ].forEach((d, index) => {
         obj[index + 1] = d;
       });
@@ -255,8 +255,8 @@ export default defineComponent({
             "Mittwoch",
             "Donnerstag",
             "Freitag",
-            "Samstag"
-          ]
+            "Samstag",
+          ],
         }),
         daysLeft = date.getDateDiff(dateObj, new Date(), "days"),
         nextWeekText = "";
@@ -280,7 +280,7 @@ export default defineComponent({
 
     prefsDocu() {
       return this.$store.state.prefsDocu;
-    }
+    },
   },
   methods: {
     betterPrefColor(prefName) {
@@ -293,14 +293,14 @@ export default defineComponent({
       if (this.prefViewTab != "legend") {
         this.prefViewTab = "legend";
         this.prefsExpanded = false;
-        setTimeout(_ => {
+        setTimeout((_) => {
           this.prefsExpanded = true;
         }, 50);
       } else {
         this.prefViewTab = "short";
         this.prefsExpanded = false;
 
-        setTimeout(_ => {
+        setTimeout((_) => {
           this.prefsExpanded = true;
         }, 0); // just that we have a transition, otherwise there would be no pretty scaling effect
       }
@@ -316,18 +316,17 @@ export default defineComponent({
           title: "Anfragen",
           message: `${this.lift.driver.name} fragen, ob du mitfahren kannst?`,
           ok: {
-            color: "positive"
+            color: "positive",
           },
           cancel: {
-            color: "white"
+            color: "white",
           },
           cancel: true,
-          persistent: true
+          persistent: true,
         })
-        .onOk(data => {
+        .onOk((data) => {
           this.$emit("request", this.lift.id);
-        })
-        .onCancel();
+        });
     },
 
     cancelRequest() {
@@ -336,25 +335,24 @@ export default defineComponent({
           title: "Zurückziehen",
           message: `Deine Anfrage zur Fahrt zurückziehen?`,
           ok: {
-            color: "positive"
+            color: "positive",
           },
           cancel: {
-            color: "white"
+            color: "white",
           },
           cancel: true,
-          persistent: true
+          persistent: true,
         })
-        .onOk(_ => {
+        .onOk((_) => {
           this.$emit("cancelRequest", this.lift.id);
-        })
-        .onCancel();
+        });
     },
 
     async refreshImage() {
       this.imageUrl = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
-        fbid: this.lift.driver.id
+        fbid: this.lift.driver.id,
       });
-    }
+    },
   },
 
   mounted() {
@@ -363,7 +361,7 @@ export default defineComponent({
 
   updated() {
     this.refreshImage();
-  }
+  },
 });
 </script>
 

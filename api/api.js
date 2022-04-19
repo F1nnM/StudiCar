@@ -4,7 +4,7 @@ const runQuery = require("./db"),
   /* longQueries           = require('./longQueries'), */
   apiResponseSimulation = require("./simulation/apiResponse"),
   tickerJS = require("./news/postillon/ticker.js"),
-  errorHandler = require("./errorHandler")
+  errorHandler = require("./errorHandler");
 const { database } = require("./errorHandler");
 
 function isOptionMissing(data, needed, res) {
@@ -47,7 +47,6 @@ async function getUserId(fbId) {
   return result ? result.ID : null;
 }
 
-
 async function notifyUsersInLift(admin, liftId, title, message) {
   return new Promise(async (res, rej) => {
     var result = (
@@ -70,7 +69,9 @@ async function notifyUsersInLift(admin, liftId, title, message) {
     }
     var fcmPromises = [];
     result.forEach((record) => {
-      fcmPromises.push(sendViaCloudMessaging(admin, record.TOKEN, title, message));
+      fcmPromises.push(
+        sendViaCloudMessaging(admin, record.TOKEN, title, message)
+      );
     });
 
     /* wait for all messages to be sent successfully, if one err then fail */
@@ -139,7 +140,6 @@ function generateJdenticon(seed) {
 }
 
 function sendViaCloudMessaging(admin, fcmToken, title, body, prio) {
-
   const message = {
     data: {
       title: title || "- no title set -",
@@ -149,26 +149,25 @@ function sendViaCloudMessaging(admin, fcmToken, title, body, prio) {
     token: fcmToken,
     //icon: "/img/app-icon.svg",
   };
-  
 
   console.log("starting to send");
-  
+
   // Send a message to the device corresponding to the provided
   // registration token.
   return new Promise((res, rej) => {
-    admin.messaging().send(message)
-    .then((response) => {
-      // Response is a message ID string.
-      console.log('Successfully sent message:', response);
-      res(response)
-    })
-    .catch((error) => {
-      console.log('Error sending message:', error);
-      rej(error)
-    });
-  })
-  
-  
+    admin
+      .messaging()
+      .send(message)
+      .then((response) => {
+        // Response is a message ID string.
+        console.log("Successfully sent message:", response);
+        res(response);
+      })
+      .catch((error) => {
+        console.log("Error sending message:", error);
+        rej(error);
+      });
+  });
 }
 
 async function getChatLifts(uid) {
@@ -438,7 +437,8 @@ async function getLiftRequests(uid) {
       my_lifts.LIFT_ID
   )
   `,
-      [uid], 'reqs'
+      [uid],
+      "reqs"
     )
   ).result;
   var arr = [];
@@ -1030,7 +1030,7 @@ module.exports = {
         var data;
         if (options.secretFbId == options.fbid) {
           // ACCESSING PRIVATE PROFILE
-          try{
+          try {
             db_result = await runQuery(
               `
           SELECT
@@ -1190,13 +1190,14 @@ module.exports = {
                   rides USING(USER_ID) 
               LEFT OUTER JOIN
                   drives USING(USER_ID)
-            `, [options.fbid], 'getuser'
-            )
-            result = db_result.result
+            `,
+              [options.fbid],
+              "getuser"
+            );
+            result = db_result.result;
             data = result[1][0].JSON;
-            console.log(typeof data)
           } catch (err) {
-            console.error(err)
+            console.error(err);
             errorHandler.database(
               "getUserData",
               options,
@@ -1204,9 +1205,9 @@ module.exports = {
               "Could not get user data",
               res
             );
-            return
+            return;
           }
-          
+
           data.chatLifts = await getChatLifts(options.fbid);
 
           data.liftRequests = await getLiftRequests(options.fbid);
@@ -1544,7 +1545,10 @@ module.exports = {
     },
     "/specificMarketplaceOffer": async (req, res, options) => {
       if (await isUserVerified(options.secretFbId)) {
-        var offers =  await getMarketplaceOfferByUuid(options.uuid, options.invitingUserId);
+        var offers = await getMarketplaceOfferByUuid(
+          options.uuid,
+          options.invitingUserId
+        );
         if (offers != null) {
           (wantedOffer = offers[0]), // when specific uuid is wanted, then only one result will be there, which should be returned as single object and not as array with just one element
             (invitingUserName = wantedOffer.invitingUserName);
@@ -1684,7 +1688,9 @@ module.exports = {
       }
     },
     "/testPush": async (req, res, options, admin) => {
-      if (!isOptionMissing(options, ["receiverFbId", "title", "message"], res)) {
+      if (
+        !isOptionMissing(options, ["receiverFbId", "title", "message"], res)
+      ) {
         var result = (
           await runQuery(
             "SELECT TOKEN FROM fcm_tokens WHERE USER_ID = (SELECT ID FROM users WHERE FB_ID = ?)",
@@ -2282,7 +2288,6 @@ module.exports = {
             /* relation not there any more */
           });
         }
-
 
         var dataForPushMessage = (
           await runQuery(
