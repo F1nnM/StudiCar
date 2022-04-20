@@ -2,9 +2,9 @@
   <!-- one of the most important components in StudiCar, shows the StudiCar Code and the public link of the content -->
   <div>
     <q-dialog
-      :value="value"
+      :modelValue="modelValue"
       :position="position || 'standard'"
-      @input="emit"
+      @update:model-value="emit"
       full-width
       transition-show="slide-up"
       :transition-hide="position == 'bottom' ? 'slide-down' : 'jump-down'"
@@ -32,7 +32,8 @@
               <q-tab-panel name="qr">
                 <div
                   :class="
-                    'relative-position studicar-code' + (value ? ' show' : '')
+                    'relative-position studicar-code' +
+                    (modelValue ? ' show' : '')
                   "
                 >
                   <div class="pan-anchor"></div>
@@ -40,11 +41,12 @@
                     v-touch-swipe.mouse.left="setDataTabToRaw"
                     style="border: 1px solid black"
                     class="rounded-borders"
-                    :width="200"
+                    :options="{ width: 200 }"
                     :color="color"
                     errorCorrectionLevel="H"
                     :value="qrInput"
                   />
+                  <!-- <p>{{ qrInput }}</p> -->
                   <q-img
                     src="~assets/app-icon_from_web_filled.png"
                     class="absolute-center qrcode-image"
@@ -78,11 +80,15 @@
                     <div class="text-h6 q-mb-md">Öffentlicher Link</div>
                     <div
                       class="text-overline"
-                      style="max-width: 90%; word-break: break-all; line-height: 1.1rem"
+                      style="
+                        max-width: 90%;
+                        word-break: break-all;
+                        line-height: 1.1rem;
+                      "
                     >
                       {{
                         publicUrl ||
-                          "- es steht aktuell keine Url zur Verfügung -"
+                        "- es steht aktuell keine Url zur Verfügung -"
                       }}
                     </div>
                   </q-card-section>
@@ -191,7 +197,7 @@
               :thickness="0.05"
               :color="progressColorWhite ? 'white' : 'primary'"
               :track-color="progressColorWhite ? 'primary' : 'white'"
-              :value="qrProgress * 100"
+              :modelValue="qrProgress * 100"
               readonly
               :reverse="progressColorWhite"
             />
@@ -202,7 +208,7 @@
           class="q-mt-xs full-width"
           :color="progressColorWhite ? 'white' : 'primary'"
           :track-color="progressColorWhite ? 'primary' : 'white'"
-          :value="linearProgress ? qrProgress : 1"
+          :modelValue="linearProgress ? qrProgress : 1"
           :reverse="progressColorWhite"
         />
       </q-card>
@@ -211,7 +217,7 @@
 </template>
 
 <script>
-import VueQrcode from "vue-qrcode"; // docs: https://github.com/rx-ts/vue/tree/master/packages/vue-qrcode
+import VueQrcode from "@chenfengyuan/vue-qrcode";
 import ExtHr from "components/ExtendedHr";
 import { colors, copyToClipboard, dom } from "quasar";
 import { defineComponent } from "vue";
@@ -220,38 +226,38 @@ export default defineComponent({
   name: "QrGenerator",
   components: {
     VueQrcode,
-    ExtHr
+    ExtHr,
   },
   props: {
     input: {
       type: Object,
-      required: true
+      required: true,
     },
-    value: Boolean,
+    modelValue: Boolean,
     primColor: Boolean,
     text: String,
     label: String,
     fakeRefresh: Boolean,
     linearProgress: Boolean,
-    position: String
+    position: String,
   },
 
   data() {
     return {
       color: {
         dark: this.primColor ? colors.getBrand("primary") : "#000000FF",
-        light: "#FFFFFFFF"
+        light: "#FFFFFFFF",
       },
       showInfo: false,
       qrProgress: 1,
       interval: null,
       progressColorWhite: false,
       random: "01",
-      dataTab: "qr"
+      dataTab: "qr",
     };
   },
   watch: {
-    value: function(isOpen) {
+    modelValue: function (isOpen) {
       if (this.fakeRefresh) {
         const step = 5, // in hundreths, e.g. 100 means just one step to complete
           duration = 5000;
@@ -265,7 +271,7 @@ export default defineComponent({
           }, duration / numberOfSteps);
         else clearInterval(this.interval); */
       }
-    }
+    },
   },
 
   computed: {
@@ -306,12 +312,12 @@ export default defineComponent({
           break;
       }
       return domainEtc + path + data;
-    }
+    },
   },
 
   methods: {
     emit(val) {
-      this.$emit("input", val);
+      this.$emit("update:model-value", val);
     },
 
     async progressReset() {
@@ -346,15 +352,15 @@ export default defineComponent({
 
     copy() {
       copyToClipboard(this.publicUrl)
-        .then(_ => {
+        .then((_) => {
           this.$q.notify({
             message: "Inhalt wurde kopiert",
-            color: "positive"
+            color: "positive",
           });
         })
-        .catch(e => alert("Fehler beim Kopieren: " + e));
-    }
-  }
+        .catch((e) => alert("Fehler beim Kopieren: " + e));
+    },
+  },
 });
 </script>
 

@@ -13,17 +13,19 @@
     "build": "quasar build -m pwa"
   },
   "dependencies": {
+    "@chenfengyuan/vue-qrcode": "^2.0.0",
     "@firebase/messaging": "^0.9.8",
     "@quasar/extras": "^1.0.0",
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
     "dotenv": "^16.0.0",
     "firebase": "^9.6.7",
+    "qrcode": "^1.5.0",
     "quasar": "^2.0.0",
     "vue": "^3.0.0",
     "vue-friendly-iframe": "^0.20.0",
     "vue-i18n": "^9.0.0",
-    "vue-qrcode": "^1.0.0",
+    "vue-qrcode": "^1.0.1",
     "vue-qrcode-reader": "^3.1.0",
     "vue-router": "^4.0.0",
     "vuex": "^4.0.1"

@@ -1,7 +1,10 @@
 <template>
   <!-- this component was made to split the profile file in smaller pieces to improve maintining, just the advantages of modularizing -->
   <div>
-    <q-splitter :value="50" :separator-style="'background-color: transparent '">
+    <q-splitter
+      :modelValue="50"
+      :separator-style="'background-color: transparent '"
+    >
       <template v-slot:before>
         <q-card class="q-ml-md q-mt-md q-mb-xs q-mr-sm">
           <q-card-section class="q-py-sm">
@@ -156,11 +159,9 @@
       </template>
     </q-splitter>
     <q-card class="q-ma-md q-mt-sm">
-      <q-card-section class="q-pb-sm q-pt-xs ">
+      <q-card-section class="q-pb-sm q-pt-xs">
         <div class="row justify-between q-mb-xs">
-          <div class="text-uppercase text-caption q-mt-xs">
-            Über Mich
-          </div>
+          <div class="text-uppercase text-caption q-mt-xs">Über Mich</div>
           <q-btn
             size="sm"
             flat
@@ -171,15 +172,13 @@
         </div>
         <div class="text-weight-light q-mt-sm">
           <div v-if="description">{{ description }}</div>
-          <div v-else>
-            - noch keine Beschreibung hinterlegt -
-          </div>
+          <div v-else>- noch keine Beschreibung hinterlegt -</div>
         </div>
       </q-card-section>
     </q-card>
     <q-dialog
       :value="!!friendInfoData"
-      @input="e => (friendInfoData = !!e)"
+      @input="(e) => (friendInfoData = !!e)"
       position="right"
       class="bg-white"
       style="min-width: 45vw; min-height: 40vh"
@@ -409,20 +408,20 @@
                 v-for="cat in [
                   {
                     prop: 'talk',
-                    label: 'Redseligkeit'
+                    label: 'Redseligkeit',
                   },
                   {
                     prop: 'talkMorning',
-                    label: '... am Morgen'
+                    label: '... am Morgen',
                   },
                   {
                     prop: 'smoking',
-                    label: 'Rauchen im Auto'
+                    label: 'Rauchen im Auto',
                   },
                   {
                     prop: 'music',
-                    label: 'Musik im Auto'
-                  }
+                    label: 'Musik im Auto',
+                  },
                 ]"
                 :key="cat.prop"
                 :name="cat.prop"
@@ -476,7 +475,7 @@ import {
   sendApiRequest,
   GET_USER_PROFILE_PIC,
   SQL_UPDATE_PROFILE_PICTURE,
-  SQL_RESET_PROFILE_PICTURE
+  SQL_RESET_PROFILE_PICTURE,
 } from "../ApiAccess";
 import { defineComponent } from "vue";
 
@@ -485,10 +484,10 @@ export default defineComponent({
   components: {
     ExtHr,
     QrGen,
-    QrIcon
+    QrIcon,
   },
   props: {
-    username: String
+    username: String,
   },
   data() {
     return {
@@ -510,13 +509,13 @@ export default defineComponent({
         talk: "",
         talkMorning: "",
         smoking: "",
-        music: ""
+        music: "",
       },
       prefsDocu: this.$store.state.prefsDocu,
       imageForColors: null,
 
       openEditDescription: false,
-      newDescription: ""
+      newDescription: "",
     };
   },
   computed: {
@@ -571,8 +570,8 @@ export default defineComponent({
             "September",
             "Oktober",
             "November",
-            "Dezember"
-          ]
+            "Dezember",
+          ],
         }
       );
     },
@@ -583,7 +582,7 @@ export default defineComponent({
 
       return {
         type: "user",
-        data: uid
+        data: uid,
       };
     },
 
@@ -593,7 +592,7 @@ export default defineComponent({
       },
       set(value) {
         this.$store.dispatch("auth/updatePrefs", value);
-      }
+      },
     },
 
     description: {
@@ -602,8 +601,8 @@ export default defineComponent({
       },
       set(value) {
         this.$store.dispatch("auth/updateDescription", value);
-      }
-    }
+      },
+    },
   },
   methods: {
     loadFile(file) {
@@ -614,9 +613,9 @@ export default defineComponent({
       const width = size * ratio,
         fileName = file.name,
         reader = new FileReader();
-      reader.onerror = error => console.log(error);
+      reader.onerror = (error) => console.log(error);
       reader.readAsDataURL(file);
-      reader.onload = event => {
+      reader.onload = (event) => {
         var img = new Image();
         img.src = event.target.result;
 
@@ -639,7 +638,7 @@ export default defineComponent({
           }
           this.newPPictureBase64 = elem.toDataURL();
         }),
-          (reader.onerror = error => {
+          (reader.onerror = (error) => {
             alert(error);
           });
       };
@@ -651,16 +650,16 @@ export default defineComponent({
         sendApiRequest(
           SQL_UPDATE_PROFILE_PICTURE,
           {
-            imageData: this.newPPictureBase64
+            imageData: this.newPPictureBase64,
           },
-          _ => {
+          (_) => {
             this.ppPath += "&timestamp=" + Date.now();
             this.openUpload = false;
             this.file = null;
             this.newPPictureBase64 = "";
             this.uploadingProfilePicture = false;
           },
-          err => {
+          (err) => {
             this.uploadingProfilePicture = false;
           }
         );
@@ -674,19 +673,19 @@ export default defineComponent({
           message:
             "Willst du dein Bild wirklich zurücksetzen? StudiCar speichert dann ein anonymes Ersatzbild.",
           cancel: true,
-          persistent: true
+          persistent: true,
         })
         .onOk(() => {
           this.uploadingProfilePicture = true;
           sendApiRequest(
             SQL_RESET_PROFILE_PICTURE,
             {},
-            _ => {
+            (_) => {
               this.ppPath += "&timestamp=" + Date.now();
               this.openUpload = false;
               this.uploadingProfilePicture = false;
             },
-            err => {
+            (err) => {
               this.uploadingProfilePicture = false;
             }
           );
@@ -710,7 +709,7 @@ export default defineComponent({
             talk: "",
             talkMorning: "",
             smoking: "",
-            music: ""
+            music: "",
           };
         } else {
           this.newPrefs = {
@@ -718,7 +717,7 @@ export default defineComponent({
             talk: "",
             talkMorning: "",
             smoking: "",
-            music: ""
+            music: "",
           };
         }
       } else {
@@ -745,15 +744,15 @@ export default defineComponent({
       const img = this.$refs.profile_image;
 
       console.log("Image has been loaded");
-    }
+    },
   },
   mounted() {
-    (async _ => {
+    (async (_) => {
       this.ppPath = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
-        fbid: this.$store.getters["auth/user"].uid
+        fbid: this.$store.getters["auth/user"].uid,
       });
     })();
-  }
+  },
 });
 </script>
 
