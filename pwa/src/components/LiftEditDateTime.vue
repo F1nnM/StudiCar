@@ -8,8 +8,8 @@
 
         <q-item-section>
           <q-btn-toggle
-            v-bind:value="value.dateTab"
-            v-on:input="dateTabChanged($event)"
+            v-bind:modelValue="modelValue.dateTab"
+            v-on:update:model-value="dateTabChanged($event)"
             @click="setDateTab"
             no-caps
             rounded
@@ -21,22 +21,22 @@
             text-color="grey-5"
             :options="[
               { label: 'Einmalig', value: 'fix' },
-              { label: 'Wöchentlich', value: 'weekly' }
+              { label: 'Wöchentlich', value: 'weekly' },
             ]"
           />
           <q-input
             clickable
             @click="
-              _ => {
-                if (this.value.dateTab == 'fix') $refs.datepicker.toggle();
+              (_) => {
+                if (this.modelValue.dateTab == 'fix') $refs.datepicker.toggle();
                 else $refs.datepicker.showPopup();
               }
             "
             borderless
             readonly
-            :value="
-              value.dateTab == 'fix'
-                ? value.date || '- Datum -'
+            :modelValue="
+              modelValue.dateTab == 'fix'
+                ? modelValue.date || '- Datum -'
                 : getWeekDayFromIndex
             "
           >
@@ -46,13 +46,14 @@
                 color="grey-9"
                 flat
                 @click="
-                  _ => {
-                    if (value.dateTab == 'weekly') $refs.datepicker.showPopup();
+                  (_) => {
+                    if (modelValue.dateTab == 'weekly')
+                      $refs.datepicker.showPopup();
                   }
                 "
               >
                 <q-menu
-                  v-if="value.dateTab == 'fix'"
+                  v-if="modelValue.dateTab == 'fix'"
                   ref="datepicker"
                   transition-show="jump-down"
                   transition-hide="jump-up"
@@ -62,11 +63,11 @@
                     :subtitle="`Maximal 30 Tage im Voraus`"
                     event-color="primary"
                     mask="YYYY-MM-DD"
-                    v-bind:value="value.date"
-                    v-on:input="dateChanged($event)"
+                    v-bind:modelValue="modelValue.date"
+                    v-on:update:modelValue="dateChanged($event)"
                     :events="[todayString]"
                     :options="dateOptions"
-                    @input="$refs.datepicker.hide()"
+                    @update:model-value="$refs.datepicker.hide()"
                   />
                 </q-menu>
                 <q-select
@@ -77,8 +78,8 @@
                   label="Wochentag auswählen"
                   transition-show="jump-down"
                   transition-hide="jump-up"
-                  v-bind:value="value.date"
-                  v-on:input="dateChanged($event)"
+                  v-bind:modelValue="modelValue.date"
+                  v-on:update:modelValue="dateChanged($event)"
                   :options="getRepeatingDayOptions"
                 />
               </q-btn>
@@ -96,8 +97,8 @@
 
         <q-item-section>
           <q-btn-toggle
-            v-bind:value="value.timeTab"
-            v-on:input="dateChanged($event)"
+            v-bind:modelValue="modelValue.timeTab"
+            v-on:update:model-value="dateChanged($event)"
             no-caps
             rounded
             unelevated
@@ -109,7 +110,7 @@
             text-color="g rey-3"
             :options="[
               { label: 'Ankunft um', value: arriveValue },
-              { label: 'Abfahrt um', value: departValue }
+              { label: 'Abfahrt um', value: departValue },
             ]"
           />
           <Tooltip rgba>
@@ -121,11 +122,11 @@
             <q-input
               class="col-6"
               clickable
-              @click="_ => $refs.timepicker.toggle()"
+              @click="(_) => $refs.timepicker.toggle()"
               readonly
               borderless
               square
-              :value="value.time || '- Zeit -'"
+              :modelValue="modelValue.time || '- Zeit -'"
             >
               <template v-slot:append>
                 <q-btn icon="edit" color="grey-9" flat>
@@ -136,8 +137,8 @@
                   >
                     <q-time
                       format24h
-                      v-bind:value="value.time"
-                      v-on:input="timeChanged($event)"
+                      v-bind:modelValue="modelValue.time"
+                      v-on:update:model-value="timeChanged($event)"
                       mask="HH:mm"
                       color="primary"
                     />
@@ -154,31 +155,30 @@
 
 <script>
 import { date } from "quasar";
-import ExtHR from "components/ExtendedHr";
 import Tooltip from "components/Tooltip";
 import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "LiftEditDateTime",
   components: {
-    Tooltip
+    Tooltip,
   },
   props: {
-    value: Object
+    modelValue: Object,
   },
   data() {
     return {
-      localValue: this.value
+      localValue: this.modelValue,
     };
   },
   watch: {
-    open: function(val) {}
+    open: function (val) {},
   },
   computed: {
     getWeekDayFromIndex() {
       // getter for display while editing
       var day = this.getRepeatingDayOptions.find(
-        d => d.value == this.value.date
+        (d) => d.value == this.modelValue.date
       );
       return day ? day.label : null;
     },
@@ -194,15 +194,15 @@ export default defineComponent({
         "Mittwoch",
         "Donnerstag",
         "Freitag",
-        "Samstag"
+        "Samstag",
       ].map((val, index) => ({
         label: val,
-        value: index + 1
+        value: index + 1,
       }));
     },
 
     isDirectionValueCorrect() {
-      const l = this.value;
+      const l = this.modelValue;
       return (
         (l.destination == "home" && l.timeTab == "depart") ||
         (l.destination == "school" && l.timeTab == "arrive")
@@ -215,27 +215,27 @@ export default defineComponent({
 
     departValue() {
       return this.isDirectionValueCorrect ? "depart" : "arrive";
-    }
+    },
   },
   methods: {
     dateChanged($event) {
-      this.localValue.date = $event
-      this.$emit("input", this.localValue)
+      this.localValue.date = $event;
+      this.$emit("input", this.localValue);
     },
 
     dateTabChanged($event) {
-      this.localValue.dateTab = $event
-      this.$emit("input", this.localValue)
+      this.localValue.dateTab = $event;
+      this.$emit("input", this.localValue);
     },
 
     timeChanged($event) {
-      this.localValue.time = $event
-      this.$emit("input", this.localValue)
+      this.localValue.time = $event;
+      this.$emit("input", this.localValue);
     },
 
     timeTabChanged($event) {
-      this.localValue.timeTab = $event
-      this.$emit("input", this.localValue)
+      this.localValue.timeTab = $event;
+      this.$emit("input", this.localValue);
     },
 
     emit(val) {
@@ -243,7 +243,7 @@ export default defineComponent({
     },
 
     setDateTab() {
-      var tab = this.value.dateTab;
+      var tab = this.modelValue.dateTab;
       if (tab == "weekly") this.localValue.date = 1;
       // default on monday
       else this.localValue.date = date.formatDate(new Date(), "YYYY-MM-DD");
@@ -256,8 +256,8 @@ export default defineComponent({
       var a = date.getDateDiff(d, new Date(), "days");
       a = a < limit && a >= 0;
       return a;
-    }
-  }
+    },
+  },
 });
 </script>
 

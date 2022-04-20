@@ -39,7 +39,7 @@
     </div>
     <q-dialog
       v-else
-      :value="true"
+      :modelValue="true"
       :maximized="uploading == 0"
       persistent
       transition-show="slide-up"
@@ -520,7 +520,7 @@
                 show-value
                 font-size="16px"
                 class="text-primary q-ma-md"
-                :value="uploadingDoneValue"
+                :modelValue="uploadingDoneValue"
                 size="xl"
                 :thickness="0.05"
                 color="primary"
@@ -567,13 +567,13 @@ export default defineComponent({
         stops: [
           {
             addressId: 31,
-            time: 1593684157000
+            time: 1593684157000,
           },
           {
             addressId: 34,
-            time: 1593684175000
-          }
-        ]
+            time: 1593684175000,
+          },
+        ],
       },
       step: 1,
       showTimePicker: false,
@@ -581,17 +581,17 @@ export default defineComponent({
       overviewExpanded: false,
       uploadingDoneValue: 0,
       uploading: 0, // 0 means not uploading, 1 means upload in progress, 2 means upload successful and -1 means error
-      overviewTab: "route"
+      overviewTab: "route",
     };
   },
   watch: {
-    uploading: function(newv) {
+    uploading: function (newv) {
       if (newv == 2) {
-        setTimeout(_ => {
+        setTimeout((_) => {
           this.uploadingDoneValue = 100;
         }, 100); // when uploading done, this value is set to 100 to make cool check animation possible
       } else this.uploadingDoneValue = 0;
-    }
+    },
   },
   computed: {
     todayString() {
@@ -603,7 +603,7 @@ export default defineComponent({
     },
 
     hasOwnAddresses() {
-      return this.allAddresses.filter(item => item.id > 3).length > 0;
+      return this.allAddresses.filter((item) => item.id > 3).length > 0;
     },
 
     hasOwnCars() {
@@ -625,26 +625,26 @@ export default defineComponent({
     getCarData() {
       // returns data of selected car, so that user for example can see how many seats would be default
       let cars = this.userCars;
-      let obj = cars.find(item => {
+      let obj = cars.find((item) => {
         return item.carId == this.lift.carId;
       });
       return obj
         ? obj
         : {
             seats: 0,
-            color: "white"
+            color: "white",
           }; // fallback when no car has been selected yet
     },
 
     startCity() {
       var start = this.lift.startAddressId || 1,
-        address = this.allAddresses.find(a => a.id == start);
+        address = this.allAddresses.find((a) => a.id == start);
       return address.city;
     },
 
     destCity() {
       var dest = this.lift.destinationAddressId || 1,
-        address = this.allAddresses.find(a => a.id == dest);
+        address = this.allAddresses.find((a) => a.id == dest);
       return address.city;
     },
 
@@ -655,27 +655,27 @@ export default defineComponent({
       set(value) {
         this.lift = value;
         this.step += 1;
-      }
+      },
     },
 
     getExactAddresses() {
       if (this.lift.destination == "school") {
-        return this.allAddresses.filter(item => item.id < 4); // filter only the schools, which have IDs 1 to 3
+        return this.allAddresses.filter((item) => item.id < 4); // filter only the schools, which have IDs 1 to 3
 
         // a[0].imagePath = require(pathBegin + 'HDH_cube.jpg')
         // a[1].imagePath = require(pathBegin + 'HDH_old.jpg')
         // a[2].imagePath = require(pathBegin + 'WIB_ext.jpg')
       } else if (this.lift.destination == "home") {
-        return this.allAddresses.filter(item => item.id > 3); // filter only private adresses, IDs 1 to 3 are reserved for schools
+        return this.allAddresses.filter((item) => item.id > 3); // filter only private adresses, IDs 1 to 3 are reserved for schools
       }
       return null;
     },
 
     getExactStartingPoints() {
       if (this.lift.destination != "school") {
-        return this.allAddresses.filter(item => item.id < 4); // filter only the schools, which have IDs 1 to 3
+        return this.allAddresses.filter((item) => item.id < 4); // filter only the schools, which have IDs 1 to 3
       } else if (this.lift.destination != "home") {
-        return this.allAddresses.filter(item => item.id > 3); // filter only private adresses, IDs 1 to 3 are reserved for schools
+        return this.allAddresses.filter((item) => item.id > 3); // filter only private adresses, IDs 1 to 3 are reserved for schools
       }
       return null;
     },
@@ -685,7 +685,7 @@ export default defineComponent({
       if (dest == "home") return true;
       else if (dest == "school") return false;
       else return null;
-    }
+    },
   },
 
   methods: {
@@ -701,13 +701,13 @@ export default defineComponent({
         stops: [
           {
             addressId: 31,
-            time: 1593684157000
+            time: 1593684157000,
           },
           {
             addressId: 34,
-            time: 1593684175000
-          }
-        ]
+            time: 1593684175000,
+          },
+        ],
       };
       this.step = 7;
     },
@@ -738,12 +738,12 @@ export default defineComponent({
         destinationAddressId: 0,
         startingPoint: 0,
         car: null,
-        seats: 0 // just to avoid error when rendering slider
+        seats: 0, // just to avoid error when rendering slider
       };
       this.uploading = 2;
       this.step = 1;
 
-      await new Promise(res => setTimeout(res, 1500)); // wait so that user can see success message
+      await new Promise((res) => setTimeout(res, 1500)); // wait so that user can see success message
       this.goHome();
     },
 
@@ -767,7 +767,7 @@ export default defineComponent({
 
     getDataFromAddressId(id) {
       let data = this.$store.getters["auth/user"].addresses.find(
-        item => item.id == id
+        (item) => item.id == id
       );
       if (data) {
         if (!data.nickname) {
@@ -779,7 +779,7 @@ export default defineComponent({
       return {
         nickname: null,
         street: null,
-        city: null // cases when no id has been set yet though method has been called
+        city: null, // cases when no id has been set yet though method has been called
       };
     },
 
@@ -789,21 +789,21 @@ export default defineComponent({
       else
         return {
           brand: null,
-          model: null // similar case to above method
+          model: null, // similar case to above method
         };
     },
 
     getStopTime(stamp) {
       return date.formatDate(stamp, "H:mm");
-    }
+    },
   },
 
   mounted() {
     this.$store.commit("setPage", {
       name: "Fahrt hinzufügen",
-      onlyInNav: true
+      onlyInNav: true,
     });
-  }
+  },
 });
 </script>
 
