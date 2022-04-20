@@ -1,0 +1,146 @@
+.rise-content {
+    animation: rise 1s ease-out;
+
+    @keyframes rise {
+        from {
+            transform: translateY(50px);
+        }
+        to {
+            transform: translateY(0px);
+        }
+    }
+}
+
+.slide-leave-active,
+.slide-enter-active {
+    transition: all 0.1s ease-out;
+}
+
+.slide-leave-to,
+.slide-enter {
+    transform: translateX(-10px);
+}
+
+.slide-up-leave-active {
+    transition: all 0.1s ease-out;
+    transform-origin: left center;
+}
+
+.slide-up-leave-to {
+    transform: translateX(-100vw);
+}
+
+.slide-up-enter-active {
+    transition: all 0.2s ease-out;
+    transform-origin: center top;
+}
+
+.slide-up-enter {
+    transform: translateY(90vh) scale(0.8);
+}
+
+.slide-full-enter-active,
+.slide-full-leave-active {
+    transition: all 0.3s;
+    transform-origin: left center;
+    perspective: 300px;
+}
+
+.slide-full-enter {
+    transform: rotateY(60deg);
+}
+
+.slide-full-leave-to {
+    transform: rotateY(60deg);
+}
+
+.expand-enter-active,
+.collapse-leave-active {
+    transition: all 0.1s;
+    transform-origin: center center;
+}
+
+.expand-enter,
+.collapse-leave-to {
+    transform: scaleY(0);
+    opacity: 0;
+}
+
+.expand-leave-active,
+.collapse-enter-active {
+    transition: all 0.1s;
+    transform-origin: center center;
+}
+
+.expand-leave-to,
+.collapse-enter {
+    transform: scaleY(1.4);
+    opacity: 0;
+}
+
+.swipe-away-enter-active,
+.swipe-away-leave-active {
+    transition: all 0.5s;
+    transition-delay: 0.1s;
+    transform-origin: right top;
+}
+
+.swipe-away-active,
+.swipe-away-leave-to {
+    transform: scale(0);
+}
+
+.icon-zoom-enter-active,
+.icon-zoom-leave-active {
+    transition: all 0.2s;
+    transform-origin: center center;
+}
+
+.icon-zoom-enter,
+.icon-zoom-leave-to {
+    transform: translateY(100%);
+}
+
+.title-up-trans-enter-active,
+.title-up-trans-leave-active,
+.title-down-trans-enter-active,
+.title-down-trans-leave-active {
+    transition: all 0.15s;
+}
+
+.title-up-trans-enter,
+.title-up-trans-leave-to {
+    transform: translateY(-50%);
+    opacity: 0;
+}
+
+.title-down-trans-enter,
+.title-down-trans-leave-to {
+    transform: translateY(50%);
+    opacity: 0;
+}
+
+.title-slide {
+    transition: all 0.3s;
+    opacity: 0.5;
+    transform: translateY(100%);
+
+    &.show {
+        opacity: 1;
+        transform: translateY(0%);
+    }
+}
+
+.jump-up-enter-active,
+.jump-up-leave-active {
+    transition: all 0.1s;
+    transform-origin: center top;
+}
+
+.jump-up-leave-to {
+    transform: translateY(-5vh);
+}
+
+.jump-up-enter {
+    transform: translateY(5vh);
+}

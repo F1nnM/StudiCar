@@ -259,67 +259,8 @@ export default {
   },
 
   actions: {
-    async signIn({ commit }, payload) {
-      let email = payload.email;
-      let password = payload.password;
 
-      await Firebase.auth()
-        .signInWithEmailAndPassword(email, password)
-        .catch(error => {
-          alert("Bei der Anmeldung ist ein Problem aufgetreten: " + error);
-        });
-    },
-
-    async register({ commit }, payload) {
-      let email = payload.email;
-      let password = payload.password;
-      let name = payload.name;
-      let surname = payload.surname;
-
-      await Firebase.auth()
-        .createUserWithEmailAndPassword(email, password)
-        .then(user => {
-          Firebase.auth()
-            .currentUser.updateProfile({
-              displayName: name + " " + surname
-            })
-            .then(_ => {
-              let currentUser = Firebase.auth().currentUser;
-              sendApiRequest(
-                SQL_CREATE_USER_IF_NOT_EXISTING,
-                { name, surname, mail: currentUser.email },
-                _ =>
-                  sendApiRequest(
-                    SQL_GET_USER_DATA,
-                    { fbid: currentUser.uid },
-                    data => {
-                      commit("SET_USER", data);
-                      router.replace({ name: "marketplace" }).catch(() => {});
-                      new Vue(app); /* eslint-disable-line no-new */
-                    },
-                    error => dispatch("signOut")
-                  ),
-                error => {
-                  dispatch("signOut");
-                }
-              );
-            })
-            .catch(error => {
-              throw error;
-            });
-        })
-        .catch(error => {
-          throw error;
-        });
-    },
-
-    async signOut({ commit }) {
-      await Firebase.auth()
-        .signOut()
-        .then(() => {
-          commit("RESET_USER");
-        });
-    },
+    
 
     async testPushNotification({ commit }) {
       sendApiRequest(
