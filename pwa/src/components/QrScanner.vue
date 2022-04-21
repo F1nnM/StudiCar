@@ -2,15 +2,15 @@
   <!-- explaining by itself, had to play around a lot to get it work pretty with MainLayout and Navbar
 Is not really a module/component by nature as it is that hard connected to MainLayout -->
   <div>
-    <div :class="'bg-primary scanner-container' + (open ? ' open' : '')">
+    <div :class="'bg-primary scanner-container' + (modelValue ? ' open' : '')">
       <q-slide-transition>
         <div class="scanning-overlay">
           <qrcode-stream
             :style="
               'height: 100vh; transition: .5s; opacity:' +
-                (scannerReady ? 1 : 0)
+              (scannerReady ? 1 : 0)
             "
-            v-if="open"
+            v-if="modelValue"
             @init="onInit"
             @decode="decoded"
             v-touch-swipe.mouse="swiped"
@@ -27,7 +27,13 @@ Is not really a module/component by nature as it is that hard connected to MainL
             <div class="overlay-inner">
               <p>
                 <b>StudiCar</b> Code
-                <!-- <q-btn round flat size="sm" icon="help_outline" @click="scannerHelp = true" /> -->
+                <!-- <q-btn
+                  round
+                  flat
+                  size="sm"
+                  icon="help_outline"
+                  @click="scannerHelp = true"
+                /> -->
               </p>
               <p>
                 <small>Bitte halte dein Gerät ruhig</small>
@@ -37,7 +43,7 @@ Is not really a module/component by nature as it is that hard connected to MainL
           </qrcode-stream>
         </div>
       </q-slide-transition>
-      <div v-if="!open" style="height: 100vh;"></div>
+      <div v-if="!modelValue" style="height: 100vh"></div>
       <q-dialog v-model="scannerHelp">
         <q-card>
           <q-card-section class="row items-center q-pa-md">
@@ -63,22 +69,22 @@ Is not really a module/component by nature as it is that hard connected to MainL
 
 <script>
 import { defineComponent } from "vue";
-import { QrcodeStream, QrcodeDropZone, QrcodeCapture } from "vue-qrcode-reader";
+import {
+  QrcodeStream,
+  QrcodeDropZone,
+  QrcodeCapture,
+} from "vue3-qrcode-reader";
 
 export default defineComponent({
-  components: { QrcodeStream },
+  components: {
+    QrcodeStream,
+  },
   name: "QrScanner",
 
   props: {
-    open: {
-      type: Boolean,
-      required: true
-    }
+    modelValue: Boolean,
   },
-  model: {
-    prop: "open",
-    event: "input"
-  },
+  emits: ["swipe", "result"],
 
   data() {
     return {
@@ -86,71 +92,66 @@ export default defineComponent({
       otherQR: false,
       error: "",
       scannerReady: false,
-      scannerHelp: false
+      scannerHelp: false,
     };
   },
   computed: {},
   watch: {
-    open: {
+    modelValue: {
       immediate: true,
       handler(new_, old_) {
         if (new_ == true && old_ == false) this.scannerReady = false; // so that we always have fade animation on scanner init
-      }
-    }
+      },
+    },
   },
   methods: {
     emit() {
-      this.$emit("input", this.open);
+      this.$emit("update:modelValue", this.modelValue);
     },
 
     async onInit(promise) {
       promise
-        .then(_ => {
+        .then((_) => {
           this.scannerReady = true;
         })
-        .catch(error => {
+        .catch((error) => {
           this.scannerReady = false;
-          var errObj = (_ => {
+          var errObj = ((_) => {
             switch (error.name) {
               case "NotAllowedError":
                 return {
                   m: "Zugriff blockiert",
-                  c:
-                    "Du hast StudiCar verboten, auf die Kamera zuzugreifen. Für dieses Problem haben wir im Support Lösungen bereitgestellt."
+                  c: "Du hast StudiCar verboten, auf die Kamera zuzugreifen. Für dieses Problem haben wir im Support Lösungen bereitgestellt.",
                 };
               case "NotFoundError":
                 return {
                   m: "Keine Kamera",
-                  c: "StudiCar konnte keine Kamera finden"
+                  c: "StudiCar konnte keine Kamera finden",
                 };
               case "NotSupportedError":
                 return {
                   m: "Zertifikatsfehler",
-                  c:
-                    "Bitte melde dich beim Support, wenn das Problem weiterhin besteht"
+                  c: "Bitte melde dich beim Support, wenn das Problem weiterhin besteht",
                 };
               case "NotReadableError":
                 return {
                   m: "Zugriff verweigert",
-                  c:
-                    "Deine Kamera wird im Moment von einem anderen Prozess verwendet"
+                  c: "Deine Kamera wird im Moment von einem anderen Prozess verwendet",
                 };
               case "OverconstrainedError":
                 return {
                   m: "Nicht kompatibel",
-                  c:
-                    "Deine Kamera scheint nicht kompatibel zu sein. Bitte schreibe dem Support dein Gerätemodell"
+                  c: "Deine Kamera scheint nicht kompatibel zu sein. Bitte schreibe dem Support dein Gerätemodell",
                 };
               case "StreamApiNotSupportedError":
                 return {
                   m: "Stream API Fehler",
-                  c:
-                    "Dein Browser unterstützt die Stream API nicht. Probier es bitte mit einem anderen Browser"
+                  c: "Dein Browser unterstützt die Stream API nicht. Probier es bitte mit einem anderen Browser",
                 };
               default:
                 return {
                   m: "Fehler aufgetreten",
-                  c: error.toString()
+                  c: error.toString(),
                 };
             }
           })();
@@ -164,7 +165,7 @@ export default defineComponent({
       this.$q.notify({
         type: "negative",
         message: errObj.m,
-        caption: errObj.c || "" // when no caption set, empty string
+        caption: errObj.c || "", // when no caption set, empty string
       });
     },
 
@@ -175,7 +176,7 @@ export default defineComponent({
       if ("ul".includes(type))
         this.$emit("result", {
           type: type,
-          res: key
+          res: key,
         });
       else {
         this.otherQR = true;
@@ -187,12 +188,12 @@ export default defineComponent({
 
     swiped(info) {
       this.$emit("swipe", info);
-    }
+    },
   },
 
   ready() {
     this.scannerReady = false;
-  }
+  },
 });
 </script>
 

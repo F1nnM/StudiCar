@@ -107,7 +107,7 @@
       </div>
       <QrScanner
         overlay="primary"
-        :open="scannerOpen"
+        :modelValue="scannerOpen"
         @result="gotScanResult"
         @help="scannerHelpNeeded"
         @swipe="closeScanner"
@@ -170,7 +170,7 @@
               >
             </div>
           </div>
-          <router-view v-slot="{ Component }" ref="pageContent" >
+          <router-view v-slot="{ Component }" ref="pageContent">
             <transition :name="pageTrans" mode="out-in">
               <component :is="Component" />
             </transition>
@@ -265,7 +265,7 @@ import {
   sendApiRequest,
   GET_NEWSTICKER,
   buildGetRequestUrl,
-  GET_USER_PROFILE_PIC
+  GET_USER_PROFILE_PIC,
 } from "../ApiAccess";
 import { defineComponent } from "vue";
 
@@ -277,7 +277,7 @@ export default defineComponent({
     QrScanner,
     DrawerWelcomeImage,
     ExtHr,
-    BottomSpaceForiOS
+    BottomSpaceForiOS,
   },
 
   data() {
@@ -294,7 +294,7 @@ export default defineComponent({
       liftQrId: null,
       refreshErr: null,
       hideUpdateField: false,
-      profilePictureUrl: null
+      profilePictureUrl: null,
     };
   },
 
@@ -351,21 +351,21 @@ export default defineComponent({
               title: "Marktplatz",
               caption: "Zur Übersicht",
               icon: "home",
-              link: "/#/"
+              link: "/#/",
             },
             {
               title: "Team",
               caption: "Wer hinter dem Projekt steckt",
               icon: "emoji_people",
-              link: "/#/das-team"
+              link: "/#/das-team",
             },
             {
               title: "Support",
               caption: "Wie können wir dir helfen?",
               icon: "accessibility_new",
-              link: "/#/hilfe"
-            }
-          ]
+              link: "/#/hilfe",
+            },
+          ],
         },
         {
           title: "Rechtliches",
@@ -374,21 +374,21 @@ export default defineComponent({
               title: "AGB",
               caption: "Unsere Nutzungsbedingungen",
               icon: "format_list_numbered",
-              link: "/#/rechtliches?view=agb"
+              link: "/#/rechtliches?view=agb",
             },
             {
               title: "Datenschutz",
               caption: "Was mit deinen Daten passiert",
               icon: "verified_user",
-              link: "/#/rechtliches?view=datenschutz"
+              link: "/#/rechtliches?view=datenschutz",
             } /* ,
           {
             title: "Impressum",
             caption: "Muss auch sein",
             icon: "policy",
             link: "/#/rechtliches"
-          } */
-          ]
+          } */,
+          ],
         },
         {
           title: "BETA-Bereich",
@@ -397,19 +397,19 @@ export default defineComponent({
               title: "Einstellungen",
               caption: "Personalisiere die App",
               icon: "settings",
-              link: "/#/einstellungen"
+              link: "/#/einstellungen",
             },
             {
               title: "Spielwiese",
               caption: "Endlich wieder Kind sein",
               icon: "toys",
               link: "/#/spielwiese",
-              onlyDev: true
-            }
-          ]
-        }
+              onlyDev: true,
+            },
+          ],
+        },
       ];
-    }
+    },
   },
 
   methods: {
@@ -426,7 +426,7 @@ export default defineComponent({
         }
       })
         .then()
-        .catch(response => {
+        .catch((response) => {
           this.refreshErr = response;
         })
         .finally(done); // stop showing the refresh icon
@@ -457,7 +457,7 @@ export default defineComponent({
         else
           clipboard
             .readText()
-            .then(content => {
+            .then((content) => {
               content = content.trim();
               if (!this.isClipboardValid(content)) {
                 res("");
@@ -478,7 +478,7 @@ export default defineComponent({
                     details:
                       content.length > 1000
                         ? content.substr(0, 1000) + "..."
-                        : content
+                        : content,
                   })
                   .onOk(() => {
                     res(content);
@@ -491,7 +491,7 @@ export default defineComponent({
                   });
               }
             })
-            .catch(err => {
+            .catch((err) => {
               rej(err);
             });
       });
@@ -500,9 +500,9 @@ export default defineComponent({
     isClipboardValid(text) {
       var conditions = [
         text.length > 10,
-        text.startsWith("https://" + window.location.hostname)
+        text.startsWith("https://" + window.location.hostname),
       ];
-      return conditions.every(item => item == true);
+      return conditions.every((item) => item == true);
     },
 
     gotScanResult(e) {
@@ -532,7 +532,7 @@ export default defineComponent({
       // first check whether clipboard contains data to be processed
       var clipboardContent;
       if (!this.scannerOpen)
-        clipboardContent = await this.askAndReadClipboard().catch(err => {
+        clipboardContent = await this.askAndReadClipboard().catch((err) => {
           var isDomException = (err + "").includes("NotAllowedError");
 
           this.$q.notify({
@@ -541,15 +541,15 @@ export default defineComponent({
             caption: isDomException
               ? "Bitte sieh in den FAQ nach, wir haben dafür eine Lösung veröffentlicht."
               : "StudiCar kann aus irgendeinem Grund keine Daten aus der Zwischenablage laden: " +
-                err
+                err,
           });
-          setTimeout(_ => {
+          setTimeout((_) => {
             this.scannerOpen = false;
             this.$q.notify({
               type: "info",
               message: "Kamera geschlossen",
               caption:
-                "StudiCar hat den Scanner wieder geschlossen, weil wie gesagt der Zugriff auf die Kamera geblockt ist"
+                "StudiCar hat den Scanner wieder geschlossen, weil wie gesagt der Zugriff auf die Kamera geblockt ist",
             });
           }, 500);
         });
@@ -559,10 +559,10 @@ export default defineComponent({
         if (clipboardContent.includes("#i")) {
           window.location.href = "#/"; // when detecting a lift, first go to marketplace
         }
-        await new Promise(res => {
+        await new Promise((res) => {
           setTimeout(res, 200); // has to wait until site has been changed, 200ms should be enough
         });
-        this.$router.replace(clipboardContent).catch(_ => {});
+        this.$router.replace(clipboardContent).catch((_) => {});
       } else {
         this.scannerOpen = !this.scannerOpen;
         if (this.scannerOpen) {
@@ -583,14 +583,14 @@ export default defineComponent({
       sendApiRequest(
         GET_NEWSTICKER,
         {},
-        data => {
+        (data) => {
           this.newsticker = data.ticker;
         },
-        err => {
+        (err) => {
           this.newsticker = "Fehler aufgetreten";
         }
       );
-    }
+    },
   },
 
   created() {
@@ -603,12 +603,12 @@ export default defineComponent({
     if (!user) location.reload();
     // bug: when other user first signs in, no data are displayed. Reloading is then the second sign-in and everything is working properly
     else
-      (async _ => {
+      (async (_) => {
         this.profilePictureUrl = await buildGetRequestUrl(
           GET_USER_PROFILE_PIC,
           { fbid: user.uid }
         );
       })();
-  }
+  },
 });
 </script>
