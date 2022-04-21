@@ -53,6 +53,6 @@ services:
     #network_mode: "host"
     depends_on:
       - mariadb
-    command: ["npm", "run", "nodemon"]
+    command: ["npm", "run", "${NPM_SCRIPT}"]
     volumes:
       - .:/app
