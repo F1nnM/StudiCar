@@ -1,5 +1,5 @@
 <template>
-  <q-dialog :value="value" @input="emit">
+  <q-dialog :model-value="modelValue" @update:model-value="emit">
     <q-card class="bg-white">
       <q-card-section></q-card-section>
     </q-card>
@@ -7,15 +7,13 @@
 </template>
 
 <script>
-import { date } from "quasar";
-import ExtHR from "components/ExtendedHr";
 import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "a_DialogTemplate",
   components: {},
   props: {
-    value: Boolean,
+    modelValue: Boolean,
   },
   data() {
     return {};
@@ -26,11 +24,10 @@ export default defineComponent({
   computed: {},
   methods: {
     emit(val) {
-      this.$emit("input", val);
+      this.$emit("update:model-value", val);
     },
   },
 });
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

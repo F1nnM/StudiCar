@@ -108,6 +108,7 @@
       <QrScanner
         overlay="primary"
         :modelValue="scannerOpen"
+        @update:model-value="updateScannerOpen"
         @result="gotScanResult"
         @help="scannerHelpNeeded"
         @swipe="closeScanner"
@@ -119,8 +120,7 @@
       v-model="leftDrawerOpen"
       show-if-above
       bordered
-      content-class="bg-grey-1"
-      class="drawer-no-border"
+      class="bg-grey-1 drawer-no-border"
     >
       <DrawerWelcomeImage
         :timeText="greeting"
@@ -180,7 +180,7 @@
     </q-pull-to-refresh>
 
     <q-dialog
-      :value="oldVersionRunning"
+      :model-value="oldVersionRunning"
       transition-show="fade"
       transition-hide="fade"
       persistent
@@ -519,6 +519,10 @@ export default defineComponent({
           break;
         }
       }
+    },
+
+    updateScannerOpen(newModelValue) {
+      this.scannerOpen = newModelValue;
     },
 
     closeScanner(e) {

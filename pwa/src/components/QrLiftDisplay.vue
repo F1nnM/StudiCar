@@ -1,7 +1,7 @@
 <template>
   <!-- this component is used to display a lift transferred via StudiCar Code -->
   <q-dialog
-    :value="!!liftData && !denied"
+    :model-value="!!liftData && !denied"
     persistent
     @hide="hide"
     full-width
@@ -100,7 +100,7 @@ import { defineComponent } from "vue";
 export default defineComponent({
   name: "QRLiftDisplay",
   components: {
-    LiftOffer
+    LiftOffer,
   },
   data() {
     return {
@@ -110,7 +110,7 @@ export default defineComponent({
       alreadyMemberOfLift: false,
       invitingUserName: null,
       denied: false,
-      liftData: "" // computed property makes no sence because url as depending value is not reactive as well
+      liftData: "", // computed property makes no sence because url as depending value is not reactive as well
     };
   },
   computed: {
@@ -127,7 +127,7 @@ export default defineComponent({
     prefsMatching() {
       if (!this.lift) return null;
       var liftPrefs = this.lift.driver.prefs;
-      var matching = Object.keys(liftPrefs).every(pref => {
+      var matching = Object.keys(liftPrefs).every((pref) => {
         var liftPrefValue = prefToInt(liftPrefs[pref]),
           userPrefValue = prefToInt(this.userPrefs[pref]);
 
@@ -145,7 +145,7 @@ export default defineComponent({
       });
 
       return matching;
-    }
+    },
   },
   watch: {
     $route() {
@@ -153,7 +153,7 @@ export default defineComponent({
 
       this.denied = false; // new round, new luck
       this.refresh();
-    }
+    },
   },
   methods: {
     emitRequest(val) {
@@ -175,7 +175,7 @@ export default defineComponent({
           this.lift = null; // when new data wanted, vars are reset again
         }
         var currentLifts = this.$store.getters["auth/user"].chatLifts,
-          a = currentLifts.find(l => l.id == this.liftId);
+          a = currentLifts.find((l) => l.id == this.liftId);
         if (a) {
           this.alreadyMemberOfLift = true;
           this.lift = null; // to be sure
@@ -190,21 +190,21 @@ export default defineComponent({
         SQL_GET_MARKETPLACE_OFFER,
         {
           uuid: this.liftId, // a uuid, is as a longer and more secure liftId
-          invitingUserId: this.invitingUserId
+          invitingUserId: this.invitingUserId,
         },
-        data => {
+        (data) => {
           this.lift = data.lift;
           this.invitingUserName = data.invitingUserName;
         },
-        err_ => {
+        (err_) => {
           this.err = err_;
         }
       );
-    }
+    },
   },
   mounted() {
     this.refresh();
-  }
+  },
 });
 </script>
 

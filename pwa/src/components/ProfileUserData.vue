@@ -2,7 +2,7 @@
   <!-- this component was made to split the profile file in smaller pieces to improve maintining, just the advantages of modularizing -->
   <div>
     <q-splitter
-      :modelValue="50"
+      :model-value="50"
       :separator-style="'background-color: transparent '"
     >
       <template v-slot:before>
@@ -177,7 +177,7 @@
       </q-card-section>
     </q-card>
     <q-dialog
-      :value="!!friendInfoData"
+      :model-value="!!friendInfoData"
       @input="(e) => (friendInfoData = !!e)"
       position="right"
       class="bg-white"
@@ -385,7 +385,7 @@
           v-close-popup
           @click="toggleOpenEditPrefs(true)"
         />
-        <q-splitter :value="20">
+        <q-splitter :model-value="20">
           <template v-slot:before class="full-height">
             <q-tabs v-model="openEditPrefsTab" vertical class="text-primary">
               <q-tab name="talk" icon="record_voice_over" />

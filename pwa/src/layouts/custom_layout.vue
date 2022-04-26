@@ -30,7 +30,7 @@
       </q-header>
     </q-slide-transition>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered content-class="bg-grey-1">
+    <q-drawer v-model="leftDrawerOpen" show-if-above bordered class="bg-grey-1">
       <q-btn to="/">Marktplatz</q-btn>
       <q-toggle v-model="fullscreen" label="Vollbild" />
     </q-drawer>

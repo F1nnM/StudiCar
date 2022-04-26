@@ -75,7 +75,7 @@
         </template>
         <template v-slot:after v-if="splitterPos.current <= 70">
           <q-slide-transition>
-            <q-list class="rounded-borders" style="width: 100%;">
+            <q-list class="rounded-borders" style="width: 100%">
               <q-item class="q-my-md">
                 <q-item-section>
                   <span
@@ -123,7 +123,10 @@
                       name="arrow_back_ios"
                       size="sm"
                       color="grey-5"
-                      style="transform: rotate(-45deg); transform-origin: right center"
+                      style="
+                        transform: rotate(-45deg);
+                        transform-origin: right center;
+                      "
                     />
                     <!-- <q-btn @click="toggleFriend" flat dense :ripple="false">
                       <q-avatar>
@@ -152,7 +155,7 @@
                       :right="friended.me"
                       @click="toggleFriend"
                       v-touch-hold.mouse="
-                        _ => {
+                        (_) => {
                           showFriendGuide = true;
                         }
                       "
@@ -218,20 +221,20 @@
                       v-for="pref in [
                         {
                           val: 'talk',
-                          icon: 'record_voice_over'
+                          icon: 'record_voice_over',
                         },
                         {
                           val: 'talkMorning',
-                          icon: 'alarm'
+                          icon: 'alarm',
                         },
                         {
                           val: 'smoking',
-                          icon: 'smoking_rooms'
+                          icon: 'smoking_rooms',
                         },
                         {
                           val: 'music',
-                          icon: 'music_note'
-                        }
+                          icon: 'music_note',
+                        },
                       ]"
                       :key="pref.val"
                       outline
@@ -249,7 +252,7 @@
                         :content-class="`bg-white text-dark`"
                         :content-style="
                           'border-bottom: 1px solid ' +
-                            betterPrefColor(pref.val)
+                          betterPrefColor(pref.val)
                         "
                         self="bottom middle"
                         :offset="[10, 10]"
@@ -402,7 +405,7 @@
                     <img
                       :src="
                         imagePaths[f.fbId] ||
-                          'https://cdn.quasar.dev/img/boy-avatar.png'
+                        'https://cdn.quasar.dev/img/boy-avatar.png'
                       "
                     />
                   </q-avatar>
@@ -454,8 +457,8 @@
                 {
                   icon: 'half',
                   title: 'Angefragt',
-                  text: `Einer von euch beiden will eine Freundschaft eingehen. Die ausgefüllte Hälfte des Herzes zeigt an, wer. Das abgebildete Herz zeigt z.B. an, dass der andere Nutzer die von dir gestellte Anfrage noch nicht bestätigt hat.`
-                }
+                  text: `Einer von euch beiden will eine Freundschaft eingehen. Die ausgefüllte Hälfte des Herzes zeigt an, wer. Das abgebildete Herz zeigt z.B. an, dass der andere Nutzer die von dir gestellte Anfrage noch nicht bestätigt hat.`,
+                },
               ]"
               :key="s.icon"
             >
@@ -487,13 +490,13 @@ import {
   sendApiRequest,
   SQL_GET_USER_DATA,
   GET_USER_PROFILE_PIC,
-  buildGetRequestUrl
+  buildGetRequestUrl,
 } from "../ApiAccess";
 const { lighten } = colors;
 export default defineComponent({
   components: {
     ColoredMeter,
-    FriendHeart
+    FriendHeart,
   },
   data() {
     return {
@@ -502,7 +505,7 @@ export default defineComponent({
       splitterPos: {
         current: 0,
         normal: 46,
-        big: 98
+        big: 98,
       },
       viewTab: "data",
       viewedUser: null,
@@ -511,10 +514,10 @@ export default defineComponent({
       hearts: {
         half: ionMdHeartHalf,
         entire: ionMdHeart,
-        border: "favorite_border"
+        border: "favorite_border",
       },
       notFound: false,
-      imagePaths: []
+      imagePaths: [],
     };
   },
 
@@ -526,13 +529,13 @@ export default defineComponent({
 
     friended() {
       var friends = this.$store.getters["auth/user"].friends,
-        wanted = friends.find(u => u.fbId == this.viewedUser.uid);
+        wanted = friends.find((u) => u.fbId == this.viewedUser.uid);
       if (wanted) return wanted.friended;
       else
         return {
           // when not found, there's no relation between current and viewed user
           in: false,
-          me: false
+          me: false,
         };
     },
 
@@ -559,8 +562,8 @@ export default defineComponent({
           "September",
           "Oktober",
           "November",
-          "Dezember"
-        ]
+          "Dezember",
+        ],
       });
     },
 
@@ -589,17 +592,17 @@ export default defineComponent({
 
     commonFriends() {
       var myFriends = this.$store.getters["auth/user"].friends.filter(
-          e => e.friended.in && e.friended.me // just to be sure, as error still exists in backend query
+          (e) => e.friended.in && e.friended.me // just to be sure, as error still exists in backend query
         ),
         fbIdsOfFriendsOfVisitedUser = this.viewedUser.friends
-          .filter(e => e.friended.in && e.friended.me)
-          .map(e => e.fbId);
+          .filter((e) => e.friended.in && e.friended.me)
+          .map((e) => e.fbId);
 
-      return myFriends.filter(e =>
+      return myFriends.filter((e) =>
         fbIdsOfFriendsOfVisitedUser.includes(e.fbId)
       );
       // not the best way as O(n²), but can be accepted as a single user has not hundreds of friends
-    }
+    },
   },
 
   watch: {},
@@ -607,7 +610,7 @@ export default defineComponent({
   methods: {
     async refreshContent(res, rej) {
       this.initLoad()
-        .catch(err => {
+        .catch((err) => {
           rej(err); // will be sent to MainLayout
         })
         .finally(res);
@@ -638,19 +641,19 @@ export default defineComponent({
               this.viewedUser.name.split(" ")[0]
             } wirklich beenden?`,
             cancel: true,
-            persistent: true
+            persistent: true,
           })
           .onOk(() => {
             this.sendRelationChange({
               fbId: this.viewedUser.uid,
-              mySideOfHeart: this.friended.me // is true when interpreting this line
+              mySideOfHeart: this.friended.me, // is true when interpreting this line
             });
           });
       } else {
         // when the last relation is supposed to be deleted, don't warn, because user obviously could revert directly
         this.sendRelationChange({
           fbId: this.viewedUser.uid,
-          mySideOfHeart: this.friended.me // is true when interpreting this line
+          mySideOfHeart: this.friended.me, // is true when interpreting this line
         });
       }
     },
@@ -664,9 +667,9 @@ export default defineComponent({
       let loc = document.location.href;
       let otherFbId = loc.split("?userFbId=")[1];
 
-      (async _ => {
+      (async (_) => {
         this.imageUrl = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
-          fbid: otherFbId
+          fbid: otherFbId,
         });
       })();
 
@@ -677,34 +680,34 @@ export default defineComponent({
           SQL_GET_USER_DATA,
           {
             fbid: otherFbId,
-            secretFbId: "/°" // I hope nobody will ever have this secretFbId, cause then our server is gonna crash
+            secretFbId: "/°", // I hope nobody will ever have this secretFbId, cause then our server is gonna crash
           },
-          userData => {
+          (userData) => {
             if (userData.status == 204) this.notFound = true;
             // profile not found
             else this.viewedUser = userData; // actually wanted to store both imageUrl and userData in one object,
             // but had troubles with v-if
             res();
           },
-          error => {
+          (error) => {
             rej(error);
             throw error;
           }
         );
       });
-    }
+    },
   },
 
   mounted() {
     this.initLoad();
     this.$store.commit("setPage", "");
 
-    this.commonFriends.forEach(async e => {
+    this.commonFriends.forEach(async (e) => {
       this.imagePaths[e.fbId] = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
-        fbid: e.fbId
+        fbid: e.fbId,
       });
     });
-  }
+  },
 });
 </script>
 

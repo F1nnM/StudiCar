@@ -2,7 +2,7 @@
   <!-- one of the most important components in StudiCar, shows the StudiCar Code and the public link of the content -->
   <div>
     <q-dialog
-      :modelValue="modelValue"
+      :model-value="modelValue"
       :position="position || 'standard'"
       @update:model-value="emit"
       full-width
@@ -197,7 +197,7 @@
               :thickness="0.05"
               :color="progressColorWhite ? 'white' : 'primary'"
               :track-color="progressColorWhite ? 'primary' : 'white'"
-              :modelValue="qrProgress * 100"
+              :value="qrProgress * 100"
               readonly
               :reverse="progressColorWhite"
             />
@@ -208,7 +208,7 @@
           class="q-mt-xs full-width"
           :color="progressColorWhite ? 'white' : 'primary'"
           :track-color="progressColorWhite ? 'primary' : 'white'"
-          :modelValue="linearProgress ? qrProgress : 1"
+          :value="linearProgress ? qrProgress : 1"
           :reverse="progressColorWhite"
         />
       </q-card>
@@ -219,7 +219,7 @@
 <script>
 import VueQrcode from "@chenfengyuan/vue-qrcode";
 import ExtHr from "components/ExtendedHr";
-import { colors, copyToClipboard, dom } from "quasar";
+import { getCssVar, copyToClipboard, dom } from "quasar";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -245,7 +245,7 @@ export default defineComponent({
   data() {
     return {
       color: {
-        dark: this.primColor ? colors.getBrand("primary") : "#000000FF",
+        dark: this.primColor ? getCssVar("primary") : "#000000FF",
         light: "#FFFFFFFF",
       },
       showInfo: false,

@@ -3,12 +3,12 @@
     <div class="q-ma-none q-pa-none">
       <!-- <span v-if="isLayoutOpen"></span> -->
       <q-dialog
-        :value="open"
+        :model-value="open"
         persistent
         maximized
         transition-show="slide-up"
         transition-hide="slide-down"
-        @input="emit"
+        @update:model-value="emit"
       >
         <q-layout v-if="lift" view="hHh lpR fFr" class="bg-white q-pa-none">
           <q-header reveal elevated class="bg-primary text-white">
@@ -230,7 +230,6 @@
                         :name="m.sentBy == user ? '' : getNameFromId(m.sentBy)"
                         :sent="m.sentBy == user"
                         size="8"
-                        text-sanitize
                         :text="m.type == 2 ? [] : [m.content]"
                         :stamp="formatAsTime(m.timestamp)"
                         :bg-color="getColor(m.sentBy)"
@@ -361,7 +360,7 @@
                 v-if="showQuickMessages"
               >
                 <div class="q-pl-sm q-pt-md">
-                  <q-splitter :value="10">
+                  <q-splitter :model-value="10">
                     <template v-slot:before>
                       <q-tabs
                         v-model="quickMessagesTab"
@@ -596,6 +595,7 @@ export default defineComponent({
     prop: "open",
     event: "input",
   },
+  emits: ["detailsOpenUpdate", "closeLift", "closeAndLeave", "shortLiftInfo"],
   props: {
     open: Boolean,
     detailsOpen: Boolean,
@@ -789,7 +789,7 @@ export default defineComponent({
     },
 
     emit(val) {
-      this.$emit("input", val);
+      this.$emit("update:model-value", val);
     },
 
     closeLift() {
@@ -1001,8 +1001,6 @@ export default defineComponent({
       });
     },
   },
-
-  mounted() {},
 });
 </script>
 

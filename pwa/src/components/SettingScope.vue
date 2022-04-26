@@ -1,7 +1,7 @@
 <template>
   <!-- just a pretty display header and scope for most of the settings -->
   <q-dialog
-    :value="value"
+    :model-value="modelValue"
     @input="emit"
     position="bottom"
     full-width
@@ -67,13 +67,13 @@
           </q-btn>
         </q-toolbar>
         <q-linear-progress
-          v-if="value && uploading && !hasBeenSaved"
+          v-if="modelValue && uploading && !hasBeenSaved"
           :indeterminate="uploading"
           :value="100"
           track-color="white"
         />
         <q-slide-transition>
-          <div class="bg-white row " v-if="help && !uploading">
+          <div class="bg-white row" v-if="help && !uploading">
             <div class="q-px-lg col-2">
               <div class="text-primary text-h5 q-mt-md">›</div>
             </div>
@@ -106,36 +106,36 @@ import { defineComponent } from "vue";
 export default defineComponent({
   name: "SettingScope",
   components: {
-    Tooltip
+    Tooltip,
   },
   props: {
-    value: {
+    modelValue: {
       type: Boolean,
-      required: true
+      required: true,
     },
     disableSave: Boolean,
     uploading: Boolean,
     property: {
       type: String,
-      required: true
+      required: true,
     },
-    descriptionLabel: String
+    descriptionLabel: String,
   },
   data() {
     return {
       help: false,
-      hasBeenSaved: false
+      hasBeenSaved: false,
     };
   },
   watch: {
-    value: function(val) {
+    modelValue: function (val) {
       if (val == true) this.hasBeenSaved = false; // reset when re-opening
-    }
+    },
   },
   computed: {
     hasDescriptionSlot() {
       return !!this.$slots.description;
-    }
+    },
   },
   methods: {
     emit(val) {
@@ -153,8 +153,8 @@ export default defineComponent({
     save() {
       this.hasBeenSaved = true;
       this.$emit("save");
-    }
-  }
+    },
+  },
 });
 </script>
 

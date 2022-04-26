@@ -39,7 +39,7 @@
     </div>
     <q-dialog
       v-else
-      :modelValue="true"
+      :model-value="true"
       :maximized="uploading == 0"
       persistent
       transition-show="slide-up"
@@ -520,7 +520,7 @@
                 show-value
                 font-size="16px"
                 class="text-primary q-ma-md"
-                :modelValue="uploadingDoneValue"
+                :model-value="uploadingDoneValue"
                 size="xl"
                 :thickness="0.05"
                 color="primary"

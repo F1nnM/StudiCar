@@ -174,9 +174,9 @@
                   label="Straße"
                   lazy-rules
                   :rules="[
-                    val =>
+                    (val) =>
                       (val && val.length > 0 && val.length <= 52) ||
-                      'Bitte gib eine Straße ein'
+                      'Bitte gib eine Straße ein',
                   ]"
                 />
               </div>
@@ -188,9 +188,9 @@
                   label="Hausnummer"
                   lazy-rules
                   :rules="[
-                    val =>
+                    (val) =>
                       (val.length > 0 && val.length < 10) ||
-                      'Bitte gib eine Hausnummer ein'
+                      'Bitte gib eine Hausnummer ein',
                   ]"
                 />
               </div>
@@ -204,7 +204,8 @@
                 label="Postleitzahl"
                 lazy-rules
                 :rules="[
-                  val => (val && ('' + val).length == 5) || 'Fünf Stellen bitte'
+                  (val) =>
+                    (val && ('' + val).length == 5) || 'Fünf Stellen bitte',
                 ]"
               />
 
@@ -216,9 +217,9 @@
                 label="Ort"
                 lazy-rules
                 :rules="[
-                  val =>
+                  (val) =>
                     (val !== null && val !== '') ||
-                    'Ohne Stadt kann StudiCar lange suchen...'
+                    'Ohne Stadt kann StudiCar lange suchen...',
                 ]"
               />
               <q-input
@@ -227,7 +228,7 @@
                 v-model="newAddress.nickname"
                 label="Private Beschreibung"
                 lazy-rules
-                :rules="[val => val.length <= 10 || 'Maximal 10 Zeichen']"
+                :rules="[(val) => val.length <= 10 || 'Maximal 10 Zeichen']"
                 hint="Optional, kann dir helfen Adressen leichter zu unterscheiden. Ist nur für dich selber sichtbar."
               />
             </div>
@@ -254,7 +255,7 @@
     </q-dialog>
 
     <SettingScope
-      :value="openAddCar"
+      :model-value="openAddCar"
       descriptionLabel="cool"
       property="Fahrzeug hinzufügen"
     >
@@ -399,9 +400,7 @@
           </p>
           <q-slider
             markers
-            :thumb-path="
-              'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'
-            "
+            :thumb-path="'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'"
             :min="1"
             :max="9"
             snap
@@ -470,7 +469,7 @@ export default defineComponent({
     ImageColorPicker,
     CarInfo,
     CompactCarInfo,
-    SettingScope
+    SettingScope,
   },
   props: {},
   data() {
@@ -486,7 +485,7 @@ export default defineComponent({
         "SUV",
         "Sportwagen",
         "Transporter",
-        "Pickup"
+        "Pickup",
       ],
 
       newAddress: {
@@ -494,7 +493,7 @@ export default defineComponent({
         street: "",
         number: "",
         postcode: "",
-        city: ""
+        city: "",
       },
 
       carInfo: {
@@ -504,7 +503,7 @@ export default defineComponent({
         type: "",
         color: "",
         licensePlate: "",
-        seats: null
+        seats: null,
       },
       carInfoOpen: false,
       newCar: {
@@ -514,28 +513,28 @@ export default defineComponent({
         color: "",
         year: "XXXX",
         seats: 3,
-        licensePlate: ""
+        licensePlate: "",
       },
       newCarOptions: {},
       openNewCarTab: 1,
       openEditCars: false,
       openAddCar: false,
-      openAddCarConfirm: false
+      openAddCarConfirm: false,
     };
   },
   computed: {
     addresses: {
       get() {
-        return this.$store.getters["auth/user"].addresses.filter(item => {
+        return this.$store.getters["auth/user"].addresses.filter((item) => {
           return item.id > 3; // filter only private adresses, IDs 1 to 3 are reserved for schools
         });
-      }
+      },
     },
 
     cars: {
       get() {
         return this.$store.getters["auth/user"].cars;
-      }
+      },
     },
 
     possibleBuildYears() {
@@ -552,7 +551,7 @@ export default defineComponent({
         if (!this.newAddress[key] && key != "nickname") return false; // only nickname can be blank
       }
       return true;
-    }
+    },
   },
   methods: {
     validNumberPlate() {
@@ -574,7 +573,7 @@ export default defineComponent({
         street: "",
         number: "",
         postcode: "",
-        city: ""
+        city: "",
       };
     },
 
@@ -607,7 +606,7 @@ export default defineComponent({
             title: "Entfernen",
             message: `Deinen ${brand} ${model} aus der Liste entfernen?`,
             cancel: true,
-            persistent: true
+            persistent: true,
           })
           .onOk(() => {
             this.$store.dispatch("auth/removeCar", id);
@@ -626,12 +625,7 @@ export default defineComponent({
         "#" + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, "0"); // just random hex color
       this.newCar.seats = this.randomItemFromArray([1, 2, 3, 4, 5, 6, 7]);
       this.newCar.year = this.randomItemFromArray([
-        2020,
-        2019,
-        2018,
-        2017,
-        2016,
-        2015
+        2020, 2019, 2018, 2017, 2016, 2015,
       ]);
 
       let validPlate = true;
@@ -641,21 +635,21 @@ export default defineComponent({
 
     randomItemFromArray(array) {
       return array[Math.floor(Math.random() * array.length)];
-    }
+    },
   },
 
   mounted() {
     sendApiRequest(
       GET_CAR_MODELS,
       {},
-      data => {
+      (data) => {
         this.newCarOptions = data;
       },
-      error => {
+      (error) => {
         throw error;
       }
     );
-  }
+  },
 });
 </script>
 

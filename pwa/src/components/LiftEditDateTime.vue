@@ -8,7 +8,7 @@
 
         <q-item-section>
           <q-btn-toggle
-            v-bind:modelValue="modelValue.dateTab"
+            v-bind:model-value="modelValue.dateTab"
             v-on:update:model-value="dateTabChanged($event)"
             @click="setDateTab"
             no-caps
@@ -34,7 +34,7 @@
             "
             borderless
             readonly
-            :modelValue="
+            :model-value="
               modelValue.dateTab == 'fix'
                 ? modelValue.date || '- Datum -'
                 : getWeekDayFromIndex
@@ -63,8 +63,8 @@
                     :subtitle="`Maximal 30 Tage im Voraus`"
                     event-color="primary"
                     mask="YYYY-MM-DD"
-                    v-bind:modelValue="modelValue.date"
-                    v-on:update:modelValue="dateChanged($event)"
+                    v-bind:model-value="modelValue.date"
+                    v-on:update:model-value="dateChanged($event)"
                     :events="[todayString]"
                     :options="dateOptions"
                     @update:model-value="$refs.datepicker.hide()"
@@ -78,8 +78,8 @@
                   label="Wochentag auswählen"
                   transition-show="jump-down"
                   transition-hide="jump-up"
-                  v-bind:modelValue="modelValue.date"
-                  v-on:update:modelValue="dateChanged($event)"
+                  v-bind:model-value="modelValue.date"
+                  v-on:update:model-value="dateChanged($event)"
                   :options="getRepeatingDayOptions"
                 />
               </q-btn>
@@ -97,7 +97,7 @@
 
         <q-item-section>
           <q-btn-toggle
-            v-bind:modelValue="modelValue.timeTab"
+            v-bind:model-value="modelValue.timeTab"
             v-on:update:model-value="dateChanged($event)"
             no-caps
             rounded
@@ -126,7 +126,7 @@
               readonly
               borderless
               square
-              :modelValue="modelValue.time || '- Zeit -'"
+              :model-value="modelValue.time || '- Zeit -'"
             >
               <template v-slot:append>
                 <q-btn icon="edit" color="grey-9" flat>
@@ -137,7 +137,7 @@
                   >
                     <q-time
                       format24h
-                      v-bind:modelValue="modelValue.time"
+                      v-bind:model-value="modelValue.time"
                       v-on:update:model-value="timeChanged($event)"
                       mask="HH:mm"
                       color="primary"

@@ -3,7 +3,7 @@
   <div>
     <div class="q-pa-md">
       <q-dialog
-        :value="open"
+        :model-value="open"
         persistent
         maximized
         transition-show="jump-up"
@@ -31,7 +31,7 @@
 
           <div class="fixed-bottom overflow-hidden-y text-center">
             <q-tab-panels
-              :value="open || showBranding"
+              :model-value="open || showBranding"
               animated
               transition-show="jump-up"
             >
@@ -58,46 +58,46 @@ export default defineComponent({
     return {
       loadingTexts: [
         "Bitte hab noch einen Moment Geduld",
-        "Daten werden geladen"
+        "Daten werden geladen",
       ],
       showBranding: false,
-      reverse: false
+      reverse: false,
     };
   },
   model: {
     prop: "open",
-    event: "input"
+    event: "input",
   },
   watch: {
-    open: function(isOpen) {
+    open: function (isOpen) {
       if (isOpen) {
-        setTimeout(_ => {
+        setTimeout((_) => {
           this.showBranding = true;
         }, 500);
       }
-    }
+    },
   },
   props: {
-    open: Boolean
+    open: Boolean,
   },
   computed: {
     loadingText() {
       const pos = 1;
 
       return this.loadingTexts[pos];
-    }
+    },
   },
   methods: {
     async adac() {
-      return new Promise(res => setTimeout(res, 1000));
-    }
+      return new Promise((res) => setTimeout(res, 1000));
+    },
   },
 
   mounted() {
     /* setInterval(_ => {
       this.reverse = !this.reverse;
     }, 1800); */
-  }
+  },
 });
 </script>
 

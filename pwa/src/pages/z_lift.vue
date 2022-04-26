@@ -1,9 +1,15 @@
 <template>
   <div>
-    <div style="position: fixed; top: 0; width: 100vw; z-index: 2900;">
+    <div style="position: fixed; top: 0; width: 100vw; z-index: 2900">
       <div class="row">
         <q-toolbar class="col-10 bg-primary">
-          <q-btn flat dense clickable @click="goBack()" :label="'‹ ' +  lift.id" />
+          <q-btn
+            flat
+            dense
+            clickable
+            @click="goBack()"
+            :label="'‹ ' + lift.id"
+          />
           <q-toolbar-title class="text-white">Title</q-toolbar-title>
           <q-btn flat round dense icon="search" />
         </q-toolbar>
@@ -36,32 +42,41 @@
           <q-card-section>
             <div class="row items-center no-wrap">
               <div class="col">
-                <div class="text-h6">{{lift.car.brand}} {{lift.car.model}}</div>
-                <div class="text-subtitle2">{{lift.car.type}} - {{lift.car.color}}</div>
+                <div class="text-h6">
+                  {{ lift.car.brand }} {{ lift.car.model }}
+                </div>
+                <div class="text-subtitle2">
+                  {{ lift.car.type }} - {{ lift.car.color }}
+                </div>
               </div>
 
               <div class="col-auto">
                 <q-btn color="grey-7" round flat icon="more_vert">
                   <q-menu cover auto-close>
-                    <q-btn flat clickable @click="viewCar()">Modell online ansehen</q-btn>
+                    <q-btn flat clickable @click="viewCar()"
+                      >Modell online ansehen</q-btn
+                    >
                   </q-menu>
                 </q-btn>
               </div>
             </div>
           </q-card-section>
-          <q-card-section>{{lift.car.number_plate}}</q-card-section>
+          <q-card-section>{{ lift.car.number_plate }}</q-card-section>
           <q-separator />
         </q-card>
         <q-card class="my-card" flat bordered>
           <q-card-section horizontal>
             <q-card-section class="q-pt-xs">
               <div class="text-overline">Angeboten von</div>
-              <div class="text-h5 q-mt-sm q-mb-xs">{{lift.created_by}}</div>
+              <div class="text-h5 q-mt-sm q-mb-xs">{{ lift.created_by }}</div>
               <div class="text-caption text-grey">Lorem</div>
             </q-card-section>
 
             <q-card-section class="col-5 flex flex-center">
-              <q-img class="rounded-borders" src="https://cdn.quasar.dev/img/parallax2.jpg" />
+              <q-img
+                class="rounded-borders"
+                src="https://cdn.quasar.dev/img/parallax2.jpg"
+              />
             </q-card-section>
           </q-card-section>
 
@@ -71,9 +86,10 @@
           <q-item-label header>
             <p>
               Mitfahrer
-              <span
-                class="text-caption float-right"
-              >({{lift.users.length}} von {{lift.car.seats}} möglichen)</span>
+              <span class="text-caption float-right"
+                >({{ lift.users.length }} von
+                {{ lift.car.seats }} möglichen)</span
+              >
             </p>
           </q-item-label>
           <q-item v-for="item in lift.users" :key="item.uid">
@@ -84,7 +100,7 @@
             </q-item-section>
 
             <q-item-section>
-              <q-item-label>{{item.uid}}</q-item-label>
+              <q-item-label>{{ item.uid }}</q-item-label>
               <q-item-label caption lines="2">
                 Musterstraße 4
                 <br />84846 Holzheim
@@ -106,7 +122,7 @@
         :duration="50"
         :offset="[10, 18]"
       >
-        <div style="z-index: 9000;">
+        <div style="z-index: 9000">
           <q-btn flat class="rotate-90 text-h4">›</q-btn>
         </div>
       </q-page-scroller>
@@ -115,7 +131,7 @@
           class="custom-chat-label"
           v-if="checkDayBreak(item) != ''"
           :label="checkDayBreak(item)"
-          style="margin-top: 40px;"
+          style="margin-top: 40px"
         />
         <q-chat-message
           :name="item.sender == user ? '' : '' + item.sender"
@@ -126,11 +142,9 @@
           :bg-color="getColor(item.sender)"
         >
           <div v-if="item.audio">
-            <audio
-              v-if="item.audio"
-              :src="makeBLOB(item.audio)"
-              controls
-            >Dein Browser unterstützt keine Audios.</audio>
+            <audio v-if="item.audio" :src="makeBLOB(item.audio)" controls>
+              Dein Browser unterstützt keine Audios.
+            </audio>
             <div>
               <p>[Custom Controls]</p>
             </div>
@@ -140,9 +154,16 @@
     </div>
     <div
       class="row"
-      style="z-index: 2900; position: fixed; bottom: 0; left: 0; width: 100vw; border-radius: 50%;"
+      style="
+        z-index: 2900;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100vw;
+        border-radius: 50%;
+      "
     >
-      <hr style="height: 1px;" class="full-width bg-accent q-ma-none" />
+      <hr style="height: 1px" class="full-width bg-accent q-ma-none" />
       <q-toolbar class="col-xs-10 col-md-11 bg-grey-3">
         <q-btn flat dense icon="call_split" v-if="false"></q-btn>
         <q-toolbar-title>
@@ -163,7 +184,7 @@
       <q-toolbar class="col-xs-2 col-md-1 bg-white text-center">
         <div class="full-height full-width q-py-sm">
           <vue-record-audio
-            :style="'transform: scale(' +  (recorderBig ? 2.4 : 1) + ')'"
+            :style="'transform: scale(' + (recorderBig ? 2.4 : 1) + ')'"
             v-show="!messageText"
             mode="hold"
             @result="sendMessage"
@@ -181,7 +202,7 @@
           round
           dense
           class="q-mr-sm bg-green-10 text-white"
-          style="transition: all .1s"
+          style="transition: all 0.1s"
         />
       </q-toolbar>
     </div>
@@ -203,7 +224,7 @@ export default defineComponent({
     if (document.location.href.includes("lift")) {
       setTimeout(() => window.scrollTo(0, 1000000), 200);
       this.$store.commit("setPage", {
-        name: "Irgendwas"
+        name: "Irgendwas",
       });
     }
 
@@ -229,17 +250,17 @@ export default defineComponent({
         created_at: 1573618642779,
         users: [
           {
-            uid: 61668646
+            uid: 61668646,
           },
           {
-            uid: 65163163
+            uid: 65163163,
           },
           {
-            uid: 611655814
+            uid: 611655814,
           },
           {
-            uid: 61565165
-          }
+            uid: 61565165,
+          },
         ],
         car: {
           brand: "Audi",
@@ -247,89 +268,89 @@ export default defineComponent({
           color: "grün",
           type: "Limousine",
           number_plate: "B-HU-569",
-          seats: 4
+          seats: 4,
         },
         messages: [
           {
             sender: 61668646,
             timestamp: 1580778889523,
             content: [
-              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
-            ]
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus",
+            ],
           },
           {
             sender: 65163163,
             timestamp: 1581778889523,
             content: [
-              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
-            ]
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus",
+            ],
           },
           {
             sender: 61565165,
             timestamp: 1582778889523,
             content: [
               "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus",
-              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
-            ]
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus",
+            ],
           },
           {
             sender: 61668646,
             timestamp: 1583778889523,
             content: [
-              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
-            ]
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus",
+            ],
           },
           {
             sender: 65163163,
             timestamp: 1584778889523,
             content: [
-              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
-            ]
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus",
+            ],
           },
           {
             sender: 61668646,
             timestamp: 1585778889523,
             content: [
-              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
-            ]
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus",
+            ],
           },
           {
             sender: 65163163,
             timestamp: 1586210889523,
             content: [
               "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus",
-              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
-            ]
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus",
+            ],
           },
           {
             sender: 611655814,
             timestamp: 1586297289523,
             content: [
-              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
-            ]
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus",
+            ],
           },
           {
             sender: 65163163,
             timestamp: 1586470089523,
             content: [
               "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus",
-              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
-            ]
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus",
+            ],
           },
           {
             sender: 61668646,
             timestamp: 1586642889523,
             content: [
-              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus"
-            ]
+              "Dies ist ein relativ kurzer Text, reicht für seinen Zweck aber völlig aus",
+            ],
           },
           {
             sender: 65163163,
             timestamp: 1586646489523,
-            content: ["Kein Content"]
-          }
-        ]
-      }
+            content: ["Kein Content"],
+          },
+        ],
+      },
     };
   },
 
@@ -363,7 +384,7 @@ export default defineComponent({
           "brown",
           "grey-10",
           "red-14",
-          "blue-grey-10"
+          "blue-grey-10",
         ]; // dark/colorful selection
         var light = [
           "red-3",
@@ -375,12 +396,12 @@ export default defineComponent({
           "orange-4",
           "deep-orange-2",
           "brown-4",
-          "grey-6"
+          "grey-6",
         ];
 
         var colors = light;
 
-        var obj = this.lift.users.find(o => o.uid == user);
+        var obj = this.lift.users.find((o) => o.uid == user);
         var pos = this.lift.users.indexOf(obj);
         //console.log(user + ': ' + pos)
         var color = "black";
@@ -469,7 +490,7 @@ export default defineComponent({
           sender: this.user,
           timestamp: new Date().getTime(),
           content: data ? [] : [this.messageText],
-          audio: data // when no data,
+          audio: data, // when no data,
         };
         this.lift.messages.push(newMsg);
       }
@@ -495,7 +516,7 @@ export default defineComponent({
       this.chatOpen = false;
 
       window.location.href = "/#/chats";
-    }
-  }
+    },
+  },
 });
 </script>

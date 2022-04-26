@@ -3,7 +3,7 @@
   <q-dialog
     transition-show="scale"
     transition-hide="slide-down"
-    :value="value"
+    :model-value="modelValue"
     @input="emit"
     position="bottom"
   >
@@ -15,7 +15,7 @@
               :width="200"
               :color="{
                 dark: '#000000',
-                light: '#FFFFFF'
+                light: '#FFFFFF',
               }"
               errorCorrectionLevel="H"
               :value="input"
@@ -53,21 +53,21 @@ export default defineComponent({
   name: "LiftQr",
   components: { VueQrcode, ExtHr },
   props: {
-    value: Boolean,
-    input: String
+    modelValue: Boolean,
+    input: String,
   },
   data() {
     return {};
   },
   watch: {
-    open: function(val) {}
+    open: function (val) {},
   },
   computed: {},
   methods: {
     emit(val) {
       this.$emit("input", val);
-    }
-  }
+    },
+  },
 });
 </script>
 

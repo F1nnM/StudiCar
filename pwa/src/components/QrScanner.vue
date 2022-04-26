@@ -1,70 +1,37 @@
 <template>
-  <!-- explaining by itself, had to play around a lot to get it work pretty with MainLayout and Navbar
-Is not really a module/component by nature as it is that hard connected to MainLayout -->
-  <div>
-    <div :class="'bg-primary scanner-container' + (modelValue ? ' open' : '')">
-      <q-slide-transition>
+  <!-- obviously I had to play around a lot to get it work pretty with MainLayout and Navbar
+Is not really a module/component by literal sense as it is very tight connected to MainLayout -->
+  <q-dialog
+    :model-value="modelValue"
+    @update:model-value="emit"
+    persistent
+    maximized
+    transition-show="slide-down"
+    transition-hide="slide-up"
+    class="bg-white"
+  >
+    <div>
+      <q-toolbar :shrink="false" class="bg-primary text-white">
+        <q-toolbar-title>StudiCar Code Scanner</q-toolbar-title>
+
+        <q-btn dense flat size="md" icon="close" @click="closeScanner">
+          <q-tooltip class="bg-white text-primary">Close</q-tooltip>
+        </q-btn>
+      </q-toolbar>
+      <div>
         <div class="scanning-overlay">
           <qrcode-stream
-            :style="
-              'height: 100vh; transition: .5s; opacity:' +
-              (scannerReady ? 1 : 0)
-            "
+            :style="'transition .5s; opacity:' + (scannerReady ? 1 : 0)"
             v-if="modelValue"
             @init="onInit"
-            @decode="decoded"
+            @decode="onDecode"
             v-touch-swipe.mouse="swiped"
           >
-            <q-dialog
-              v-model="otherQR"
-              transition-show="jump-up"
-              transition-hide="jump-up"
-            >
-              <div class="text-no-wrap text-h5 q-pa-xl bg-black text-primary">
-                kein StudiCar Code
-              </div>
-            </q-dialog>
-            <div class="overlay-inner">
-              <p>
-                <b>StudiCar</b> Code
-                <!-- <q-btn
-                  round
-                  flat
-                  size="sm"
-                  icon="help_outline"
-                  @click="scannerHelp = true"
-                /> -->
-              </p>
-              <p>
-                <small>Bitte halte dein Gerät ruhig</small>
-              </p>
-              <div></div>
-            </div>
           </qrcode-stream>
         </div>
-      </q-slide-transition>
-      <div v-if="!modelValue" style="height: 100vh"></div>
-      <q-dialog v-model="scannerHelp">
-        <q-card>
-          <q-card-section class="row items-center q-pa-md">
-            <div class="text-h6">Hilfe zum Code</div>
-            <q-space />
-            <q-btn icon="close" flat round dense v-close-popup />
-          </q-card-section>
-
-          <q-card-section class="q-pa-md">
-            Der StudiCar Code kann benutzt werden, um Fahrtangebote zu teilen
-            oder andere Benutzerprofile anzusehen. Um einen Code zu erzeugen,
-            geh einfach in deinem Profil auf eine deiner Fahrten und tipp auf
-            das kleine Code-Symbol. Diesen Code kann dann ein anderer StudiCar
-            Benutzer scannen und sieht direkt den geteilten Inhalt.
-            <br />Du musst den Code übrigens nicht besonders genau platzieren.
-            Es reicht, wenn er vollständig im Bild und gut zu sehen ist.
-          </q-card-section>
-        </q-card>
-      </q-dialog>
+      </div>
     </div>
-  </div>
+  </q-dialog>
 </template>
 
 <script>
@@ -84,7 +51,7 @@ export default defineComponent({
   props: {
     modelValue: Boolean,
   },
-  emits: ["swipe", "result"],
+  emits: ["swipe", "result", "update:model-value"],
 
   data() {
     return {
@@ -106,7 +73,11 @@ export default defineComponent({
   },
   methods: {
     emit() {
-      this.$emit("update:modelValue", this.modelValue);
+      this.$emit("update:model-value", this.modelValue);
+    },
+
+    closeScanner() {
+      this.$emit("update:model-value", false);
     },
 
     async onInit(promise) {
@@ -165,11 +136,11 @@ export default defineComponent({
       this.$q.notify({
         type: "negative",
         message: errObj.m,
-        caption: errObj.c || "", // when no caption set, empty string
+        caption: errObj.c || "",
       });
     },
 
-    decoded(res) {
+    onDecode(res) {
       const type = res.slice(0, 1),
         key = res.slice(1);
 

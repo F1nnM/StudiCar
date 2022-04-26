@@ -1,6 +1,6 @@
 <template>
   <q-dialog
-    :value="value"
+    :model-value="modelValue"
     transition-show="slide-left"
     transition-hide="slide-right"
     maximized
@@ -66,7 +66,7 @@
             <div v-if="lift.passengers">
               Teilnehmer
               <br />
-              <small class="text-caption" style="font-size: .7em;"
+              <small class="text-caption" style="font-size: 0.7em"
                 >Tippe, um zum jeweiligen Profil zu kommen</small
               >
               <span class="text-caption float-right">
@@ -110,20 +110,20 @@
                   v-for="pref in [
                     {
                       val: 'talk',
-                      icon: 'record_voice_over'
+                      icon: 'record_voice_over',
                     },
                     {
                       val: 'talkMorning',
-                      icon: 'alarm'
+                      icon: 'alarm',
                     },
                     {
                       val: 'smoking',
-                      icon: 'smoking_rooms'
+                      icon: 'smoking_rooms',
                     },
                     {
                       val: 'music',
-                      icon: 'music_note'
-                    }
+                      icon: 'music_note',
+                    },
                   ]"
                   :key="pref.val"
                   outline
@@ -288,11 +288,11 @@ export default defineComponent({
     ExpansionLiftTimeline,
     CompactCarInfo,
     LiftEditDateTime,
-    SettingScope
+    SettingScope,
   },
   props: {
-    value: Boolean,
-    lift: Object
+    modelValue: Boolean,
+    lift: Object,
   },
   data() {
     return {
@@ -307,12 +307,12 @@ export default defineComponent({
         dateTab: "fix",
         timeTab: "arrive",
         date: null,
-        time: null
+        time: null,
       },
       oldTime: {},
       newTimeHelp: false,
       uploading: false,
-      keyToRefreshImages: 0
+      keyToRefreshImages: 0,
     };
   },
   watch: {},
@@ -349,10 +349,10 @@ export default defineComponent({
         "Mittwoch",
         "Donnerstag",
         "Freitag",
-        "Samstag"
+        "Samstag",
       ].map((val, index) => ({
         label: val,
-        value: index + 1
+        value: index + 1,
       }));
     },
 
@@ -360,7 +360,7 @@ export default defineComponent({
       // getter for display in overview
       if (!this.isRepeating) return null;
       var day = this.getRepeatingDayOptions.find(
-        d => d.value == this.lift.repeatsOn
+        (d) => d.value == this.lift.repeatsOn
       );
       return day ? day.label : null;
     },
@@ -368,7 +368,7 @@ export default defineComponent({
     getWeekDayFromIndex() {
       // getter for display while editing
       var day = this.getRepeatingDayOptions.find(
-        d => d.value == this.newTime.date
+        (d) => d.value == this.newTime.date
       );
       return day ? day.label : null;
     },
@@ -385,7 +385,7 @@ export default defineComponent({
       if (this.isRepeating) return "jeden " + this.getRepeatingWeekday;
       var liftDate = new Date(this.lift.date + " " + this.lift.arriveBy),
         daysLeft = date.getDateDiff(liftDate, new Date(), "days"),
-        text = _ => {
+        text = (_) => {
           switch (daysLeft) {
             case 0:
               return "Fahrt ist heute";
@@ -414,7 +414,7 @@ export default defineComponent({
 
     areTimeChanges() {
       return JSON.stringify(this.oldTime) != JSON.stringify(this.newTime);
-    }
+    },
   },
   methods: {
     emit(val) {
@@ -473,7 +473,7 @@ export default defineComponent({
           time: t.time,
           isArriveBy: t.timeTab == "arrive",
           date: t.date,
-          isFixDate: t.dateTab == "fix"
+          isFixDate: t.dateTab == "fix",
         };
 
       this.uploading = true;
@@ -484,7 +484,7 @@ export default defineComponent({
 
     async getImageOfUser(id) {
       this.imageUrlTable[id] = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
-        fbid: id
+        fbid: id,
       });
     },
 
@@ -516,26 +516,26 @@ export default defineComponent({
               : "verlassen? Deine Nachrichten bleiben ohne Namensanzeige erhalten."
           }`,
           ok: {
-            color: "negative"
+            color: "negative",
           },
           cancel: {
-            color: "white"
+            color: "white",
           },
           cancel: true,
-          persistent: true
+          persistent: true,
         })
-        .onOk(data => {
+        .onOk((data) => {
           this.$emit("closeAndLeave", {
             liftId: this.lift.id,
-            wasDriver: this.isDriver
+            wasDriver: this.isDriver,
           });
         })
         .onCancel();
-    }
+    },
   },
 
   mounted() {
-    (async _ => {
+    (async (_) => {
       await this.getImageOfUser(this.lift.driver.id);
       for (const p of this.lift.passengers) {
         await this.getImageOfUser(p.id);
@@ -543,7 +543,7 @@ export default defineComponent({
       const lift = this.imageUrlTable;
       this.keyToRefreshImages++;
     })();
-  }
+  },
 });
 </script>
 

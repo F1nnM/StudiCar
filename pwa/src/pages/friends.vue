@@ -57,7 +57,7 @@
                       readonly
                       v-if="f.rating"
                       size="1em"
-                      :value="f.rating"
+                      :model-value="f.rating"
                       :max="5"
                       icon="emoji_people"
                       color="primary"
@@ -108,7 +108,7 @@
                       <img
                         :src="
                           imagePaths[f.fbId] ||
-                            'https://cdn.quasar.dev/img/boy-avatar.png'
+                          'https://cdn.quasar.dev/img/boy-avatar.png'
                         "
                       />
                     </q-avatar>
@@ -173,7 +173,7 @@ import {
   GET_USER_PROFILE_PIC,
   sendApiRequest,
   SQL_GET_FRIENDS,
-  SQL_CHANGE_FRIEND_RELATION
+  SQL_CHANGE_FRIEND_RELATION,
 } from "../ApiAccess";
 export default defineComponent({
   components: { FriendHeart, Tooltip },
@@ -188,8 +188,8 @@ export default defineComponent({
           rating: 3,
           friended: {
             in: true,
-            me: false
-          }
+            me: false,
+          },
         },
         {
           id: 2,
@@ -198,8 +198,8 @@ export default defineComponent({
           rating: 1,
           friended: {
             in: true,
-            me: true
-          }
+            me: true,
+          },
         },
         {
           id: 3,
@@ -208,8 +208,8 @@ export default defineComponent({
           rating: 5,
           friended: {
             in: true,
-            me: true
-          }
+            me: true,
+          },
         },
         {
           id: 4,
@@ -218,12 +218,12 @@ export default defineComponent({
           rating: 2,
           friended: {
             in: false,
-            me: true
-          }
-        }
+            me: true,
+          },
+        },
       ],
       ppPath: "",
-      imagePaths: {}
+      imagePaths: {},
     };
   },
 
@@ -233,17 +233,19 @@ export default defineComponent({
     },
 
     friends() {
-      return this.friendsFromStore.filter(u => u.friended.in && u.friended.me);
+      return this.friendsFromStore.filter(
+        (u) => u.friended.in && u.friended.me
+      );
     },
 
     friendsFbId() {
-      return this.friends.map(e => e.fbId);
+      return this.friends.map((e) => e.fbId);
     },
 
     pending() {
       return this.friendsFromStore
         .filter(
-          u =>
+          (u) =>
             !(u.friended.in && u.friended.me) &&
             !this.friendsFbId.includes(u.fbId) // this line is just a workaround to fix an existing bug in the sql query
         )
@@ -256,7 +258,7 @@ export default defineComponent({
     currentList() {
       if (this.mainTab == "friends") return this.friends;
       else return this.pending;
-    }
+    },
   },
 
   watch: {},
@@ -265,12 +267,12 @@ export default defineComponent({
     async refreshContent(res, rej) {
       this.$store.dispatch("auth/reloadFriends", {
         res: res,
-        rej: rej
+        rej: rej,
       });
     },
 
     async userConfirm(fbId) {
-      var otherUser = this.friendsFromStore.find(u => u.fbId == fbId);
+      var otherUser = this.friendsFromStore.find((u) => u.fbId == fbId);
       var friended = otherUser.friended;
       // propably not the best way to extra find the wanted item, alternative would be to pass all as params
       // this definitely is the cleaner way
@@ -283,12 +285,12 @@ export default defineComponent({
             message: `Willst du die Freundschaft mit ${otherUser.name} wirklich beenden? Die Anfrage wird dann wieder als ausstehend
             gespeichert.`,
             cancel: true,
-            persistent: true
+            persistent: true,
           })
-          .onOk(_ => {
+          .onOk((_) => {
             this.sendRelationChange({
               fbId: fbId,
-              mySideOfHeart: friended.me
+              mySideOfHeart: friended.me,
             });
           })
           .onCancel(console.warn("Friendship isn't supposed to be quit"));
@@ -299,56 +301,56 @@ export default defineComponent({
             message: `Willst du die Freundschaftsanfrage an ${otherUser.name} wirklich zurückziehen? Denk dran, dass
 du ${otherUser.name} dann nur über eine Fahrgemeinschaft oder einen StudiCar Code wiederfinden kannst!`,
             cancel: true,
-            persistent: true
+            persistent: true,
           })
-          .onOk(_ => {
+          .onOk((_) => {
             this.sendRelationChange({
               fbId: fbId,
-              mySideOfHeart: friended.me
+              mySideOfHeart: friended.me,
             });
           })
           .onCancel(console.warn("Request isn't supposed to be deleted"));
       else
         this.sendRelationChange({
           fbId: fbId,
-          mySideOfHeart: friended.me
+          mySideOfHeart: friended.me,
         });
     },
 
     async toggleHeart(fbId) {
       this.userConfirm(fbId)
-        .then(_ => {
+        .then((_) => {
           this.sendRelationChange({
             fbId: fbId,
-            mySideOfHeart: friended.me
+            mySideOfHeart: friended.me,
           });
         })
-        .catch(err => {
+        .catch((err) => {
           console.warn("Changing aborted: " + err);
         });
     },
 
     sendRelationChange(payloadObj) {
       this.$store.dispatch("auth/changeFriendRelation", payloadObj);
-    }
+    },
   },
 
   mounted() {
     this.$store.commit("setPage", {
-      name: "Freunde"
+      name: "Freunde",
     });
 
-    (async _ => {
+    (async (_) => {
       this.ppPath = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
-        fbid: this.$store.getters["auth/user"].uid
+        fbid: this.$store.getters["auth/user"].uid,
       });
     })();
-    this.friendsFromStore.forEach(async e => {
+    this.friendsFromStore.forEach(async (e) => {
       this.imagePaths[e.fbId] = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
-        fbid: e.fbId
+        fbid: e.fbId,
       });
     });
-  }
+  },
 });
 </script>
 
