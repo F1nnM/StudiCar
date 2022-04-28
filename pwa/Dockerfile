@@ -12,8 +12,6 @@ RUN npm install
 
 COPY . /app/
 
-RUN npm run build
+EXPOSE 80
 
-FROM httpd:2.4
-
-COPY --from=builder /app/dist/pwa /usr/local/apache2/htdocs/
+CMD ["quasar build -m pwa && quasar serve ./dist/pwa -p 80"]
