@@ -5,6 +5,8 @@ RUN apk add --no-cache python2 make g++
 RUN mkdir /app
 WORKDIR /app
 
+RUN npm i -g @quasar/cli
+
 COPY ./package.json ./
 COPY ./package-lock.json ./
 
