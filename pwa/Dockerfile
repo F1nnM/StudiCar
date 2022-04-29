@@ -14,4 +14,4 @@ COPY . /app/
 
 EXPOSE 80
 
-CMD ["quasar build -m pwa && quasar serve ./dist/pwa -p 80"]
+ENTRYPOINT ["sh", "entrypoint.sh"]
