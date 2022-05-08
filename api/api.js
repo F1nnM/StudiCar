@@ -597,7 +597,7 @@ async function getMarketplace(fbid) {
 }
 
 async function getOutgoingRequests(fbid) {
-  let JSON = (
+  let jsonResult = (
     await runQuery(
       `
   WITH
@@ -722,7 +722,7 @@ async function getOutgoingRequests(fbid) {
       [fbid]
     )
   ).result[0].JSON;
-  return JSON;
+  return JSON.parse(jsonResult);
 }
 
 async function getMarketplaceOfferByUuid(uuidOnly, invitingUserId) {
@@ -947,7 +947,7 @@ async function getFriends(fbId) {
     )
   ).result[1][0].JSON;
 
-  friendsFormatted = friendsFormatted;
+  friendsFormatted = JSON.parse(friendsFormatted);
 
   return friendsFormatted;
 }
