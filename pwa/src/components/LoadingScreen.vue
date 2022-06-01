@@ -2,12 +2,15 @@
   <div>
     <div
       v-if="showLoadingScreen"
-      :class="'loading-screen-background z-top fixed-full fullscreen ' + showLoadingScreen ? 'hide-screen':''"
+      :class="
+        'loading-screen-background z-top fixed-full fullscreen ' +
+        showLoadingScreen
+          ? 'hide-screen'
+          : ''
+      "
     >
       <div class="text-caption full-width text-center q-mt-xl q-pt-xl">
-        <p class="text-h4">
-          <span class="text-primary">Studi</span>Car
-        </p>
+        <p class="text-h4"><span class="text-primary">Studi</span>Car</p>
         <p>Green. Cheap. Social.</p>
       </div>
       <br />
@@ -16,31 +19,29 @@
       <div class="full-width q-mt-xl q-px-xl">
         <p class="col-9 q-ma-none">Bitte hab noch einen Moment Geduld</p>
 
-        <q-linear-progress indeterminate rounded color="primary" class="q-mt-sm" />
+        <q-linear-progress
+          indeterminate
+          rounded
+          color="primary"
+          class="q-mt-sm"
+        />
       </div>
       <div class="fixed-bottom overflow-hidden-y q-mb-lg q-mx-lg text-center">
         <div class="branding-rise">
-          Mit freundlicher Unterstützung des
-          ADAC e.V.
+          Mit freundlicher Unterstützung des ADAC e.V.
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
+<script setup>
+import { useUserStore } from 'src/stores/user';
 
-export default defineComponent({
-  data() {
-    return {};
-  },
-  computed: {
-    showLoadingScreen() {
-      return !this.$store.getters["auth/signinLoaded"];
-    }
-  }
-});
+const userStore = useUserStore();
+function showLoadingScreen() {
+  return !userStore.loggedIn;
+}
 </script>
 
 <style scoped lang="scss">

@@ -45,7 +45,7 @@
                         clickable
                         @click="hideUpdateField = false"
                         dense
-                        v-if="oldVersionRunning && hideUpdateField"
+                        v-if="appStore.oldVersionRunning && hideUpdateField"
                         color="deep-orange"
                         text-color="white"
                         icon="new_releases"
@@ -138,11 +138,16 @@
           />
         </div>
       </q-list>
-      <ExtHr color="grey-7" size="xs" />
+      <ExtendedHr color="grey-7" size="xs" />
       <div class="q-pa-md text-grey-7 row justify-between">
         <span>
           StudiCar
-          <q-chip v-if="isDev" label="LOCAL" size="sm" color="primary"></q-chip>
+          <q-chip
+            v-if="process.env.DEV"
+            label="LOCAL"
+            size="sm"
+            color="primary"
+          ></q-chip>
         </span>
         <span>Quasar v{{ $q.version }}</span>
       </div>
@@ -160,7 +165,7 @@
                 dense
                 size="md"
                 class="q-ml-sm q-mb-sm"
-                @click="goBack"
+                @click="() => $router.go(-1)"
               >
                 <span class="text-h4 font-weight-light">‹</span>
               </q-btn> -->
@@ -170,7 +175,7 @@
               >
             </div>
           </div>
-          <router-view v-slot="{ Component }" ref="pageContent" >
+          <router-view v-slot="{ Component }" ref="pageContent">
             <transition :name="pageTrans" mode="out-in">
               <component :is="Component" />
             </transition>
@@ -180,7 +185,7 @@
     </q-pull-to-refresh>
 
     <q-dialog
-      :value="oldVersionRunning"
+      :value="appStore.oldVersionRunning"
       transition-show="fade"
       transition-hide="fade"
       persistent
@@ -252,363 +257,275 @@
   </q-layout>
 </template>
 
-<script>
-import QrScanner from "components/QrScanner";
-
-import EssentialLink from "components/EssentialLink";
-import DrawerWelcomeImage from "components/DrawerWelcomeImage";
-import ExtHr from "components/ExtendedHr";
-import ConfirmDialog from "components/dialogs/Confirm";
-import BottomSpaceForiOS from "components/BottomSpaceForiOS";
-
+<script setup>
+import { useAppStore } from 'src/stores/app';
+import { useUserStore } from 'src/stores/user';
 import {
   sendApiRequest,
   GET_NEWSTICKER,
   buildGetRequestUrl,
-  GET_USER_PROFILE_PIC
-} from "../ApiAccess";
-import { defineComponent } from "vue";
+  GET_USER_PROFILE_PIC,
+} from '../utils/ApiAccess';
 
-export default defineComponent({
-  name: "MainLayout",
+const userStore = useUserStore();
+const appStore = useAppStore();
 
-  components: {
-    EssentialLink,
-    QrScanner,
-    DrawerWelcomeImage,
-    ExtHr,
-    BottomSpaceForiOS
+const $q = useQuasar()
+
+let greeting = appStore.greeting;
+let newsticker = null;
+let leftDrawerOpen = false;
+let scannerOpen = false;
+let scrolled = false;
+let tab = 'home';
+let refreshErr = null;
+let hideUpdateField = false;
+let profilePictureUrl = null;
+
+let navTitle = computed(() => appStore.navTitle);
+let pageName = computed(() => appStore.pageName);
+let pageTrans = computed(() => appStore.pageTrans);
+let titleOnlyInNav = computed(() => appStore.onlyInNav);
+
+const navigationLinks = [
+  {
+    title: 'Hauptseiten',
+    links: [
+      {
+        title: 'Marktplatz',
+        caption: 'Zur Übersicht',
+        icon: 'home',
+        link: '/#/',
+      },
+      {
+        title: 'Team',
+        caption: 'Wer hinter dem Projekt steckt',
+        icon: 'emoji_people',
+        link: '/#/das-team',
+      },
+      {
+        title: 'Support',
+        caption: 'Wie können wir dir helfen?',
+        icon: 'accessibility_new',
+        link: '/#/hilfe',
+      },
+    ],
   },
-
-  data() {
-    return {
-      greeting: this.$store.state.greeting,
-      newsticker: null,
-      leftDrawerOpen: false,
-      pageTransY: 15,
-      scannerOpen: false,
-      scrolled: false,
-      tab: "home",
-      chats: "Main",
-      show: true,
-      liftQrId: null,
-      refreshErr: null,
-      hideUpdateField: false,
-      profilePictureUrl: null
-    };
-  },
-
-  computed: {
-    username() {
-      return this.$store.getters["auth/user"].name.split(" ")[0];
-    },
-
-    loadingScreenVisible() {
-      return !this.$store.getters["auth/signinLoaded"];
-    },
-
-    navTitle() {
-      return this.$store.state.navTitle;
-    },
-
-    pageName() {
-      return this.$store.state.pageName;
-    },
-
-    loc() {
-      return document.location.href;
-    },
-
-    pageTrans() {
-      return this.$store.state.pageTrans;
-    },
-
-    titleOnlyInNav() {
-      return this.$store.state.onlyInNav;
-    },
-
-    oldVersionRunning() {
-      const reloadWithoutPrompt = true;
-
-      var old = this.$store.state.oldVersionRunning,
-        isDev = process.env.DEV;
-      if (old && (reloadWithoutPrompt ? true : isDev)) {
-        this.reloadPage();
-        return false;
-      } else return old;
-    },
-
-    isDev() {
-      return process.env.DEV;
-    },
-
-    navigationLinks() {
-      return [
-        {
-          title: "Hauptseiten",
-          links: [
-            {
-              title: "Marktplatz",
-              caption: "Zur Übersicht",
-              icon: "home",
-              link: "/#/"
-            },
-            {
-              title: "Team",
-              caption: "Wer hinter dem Projekt steckt",
-              icon: "emoji_people",
-              link: "/#/das-team"
-            },
-            {
-              title: "Support",
-              caption: "Wie können wir dir helfen?",
-              icon: "accessibility_new",
-              link: "/#/hilfe"
-            }
-          ]
-        },
-        {
-          title: "Rechtliches",
-          links: [
-            {
-              title: "AGB",
-              caption: "Unsere Nutzungsbedingungen",
-              icon: "format_list_numbered",
-              link: "/#/rechtliches?view=agb"
-            },
-            {
-              title: "Datenschutz",
-              caption: "Was mit deinen Daten passiert",
-              icon: "verified_user",
-              link: "/#/rechtliches?view=datenschutz"
-            } /* ,
+  {
+    title: 'Rechtliches',
+    links: [
+      {
+        title: 'AGB',
+        caption: 'Unsere Nutzungsbedingungen',
+        icon: 'format_list_numbered',
+        link: '/#/rechtliches?view=agb',
+      },
+      {
+        title: 'Datenschutz',
+        caption: 'Was mit deinen Daten passiert',
+        icon: 'verified_user',
+        link: '/#/rechtliches?view=datenschutz',
+      } /* ,
           {
             title: "Impressum",
             caption: "Muss auch sein",
             icon: "policy",
             link: "/#/rechtliches"
-          } */
-          ]
-        },
-        {
-          title: "BETA-Bereich",
-          links: [
-            {
-              title: "Einstellungen",
-              caption: "Personalisiere die App",
-              icon: "settings",
-              link: "/#/einstellungen"
-            },
-            {
-              title: "Spielwiese",
-              caption: "Endlich wieder Kind sein",
-              icon: "toys",
-              link: "/#/spielwiese",
-              onlyDev: true
-            }
-          ]
-        }
-      ];
+          } */,
+    ],
+  },
+  {
+    title: 'BETA-Bereich',
+    links: [
+      {
+        title: 'Einstellungen',
+        caption: 'Personalisiere die App',
+        icon: 'settings',
+        link: '/#/einstellungen',
+      },
+      {
+        title: 'Spielwiese',
+        caption: 'Endlich wieder Kind sein',
+        icon: 'toys',
+        link: '/#/spielwiese',
+        onlyDev: true,
+      },
+    ],
+  },
+];
+
+let reloadPage = () => {
+  location.reload();
+};
+
+let refresh = async (done) => {
+  new Promise((res, rej) => {
+    try {
+      $refs.pageContent.refreshContent(res, rej);
+    } catch (e) {
+      rej(e);
     }
-  },
+  })
+    .then()
+    .catch((response) => {
+      refreshErr = response;
+    })
+    .finally(done); // stop showing the refresh icon
+};
 
-  methods: {
-    reloadPage() {
-      location.reload();
-    },
+let refreshAgain = () => {
+  refreshErr = null;
+  refresh();
+};
 
-    async refresh(done) {
-      var pageRefresh = new Promise((res, rej) => {
-        try {
-          this.$refs.pageContent.refreshContent(res, rej);
-        } catch (e) {
-          res();
-        }
-      })
-        .then()
-        .catch(response => {
-          this.refreshErr = response;
-        })
-        .finally(done); // stop showing the refresh icon
-    },
+let scrollHandler = (info) => {
+  scrolled = !scannerOpen ? info.position > 30 : false;
+};
 
-    refreshAgain() {
-      this.refreshErr = null;
-      this.$refs.refresher.trigger();
-    },
-
-    scannerSwiped(e) {
-      alert(e);
-    },
-
-    scrollHandler(info) {
-      this.scrolled = !this.scannerOpen ? info.position > 30 : false;
-    },
-
-    goBack() {
-      this.$router.go(-1);
-    },
-
-    askAndReadClipboard(e) {
-      var duration = e ? e.duration : null, // makes duration handling possible
-        clipboard = navigator.clipboard;
-      return new Promise((res, rej) => {
-        if (!clipboard) rej("No clipboard");
-        else
-          clipboard
-            .readText()
-            .then(content => {
-              content = content.trim();
-              if (!this.isClipboardValid(content)) {
-                res("");
-              } else {
-                content = content.replaceAll("$", "#"); // resetting the workaround needed on mobile phones
-
-                this.$q
-                  .dialog({
-                    component: ConfirmDialog,
-                    parent: this,
-                    cancelLabel: "Egal, scannen",
-                    okLabel: "Ok, übernehmen",
-                    title: "Daten gefunden",
-                    message: `StudiCar hat passende Daten in deiner Zwischenablage gefunden. Daten übernehmen oder
-                    trotzdem einen StudiCar Code scannen?`,
-                    persistent: true,
-                    animation: "fade",
-                    details:
-                      content.length > 1000
-                        ? content.substr(0, 1000) + "..."
-                        : content
-                  })
-                  .onOk(() => {
-                    res(content);
-                  })
-                  .onCancel(() => {
-                    res(""); // when no confirm, return empty string
-                  })
-                  .onDismiss(() => {
-                    // console.log('I am triggered on both OK and Cancel')
-                  });
-              }
-            })
-            .catch(err => {
-              rej(err);
-            });
-      });
-    },
-
-    isClipboardValid(text) {
-      var conditions = [
-        text.length > 10,
-        text.startsWith("https://" + window.location.hostname)
-      ];
-      return conditions.every(item => item == true);
-    },
-
-    gotScanResult(e) {
-      this.scannerOpen = false;
-      switch (e.type) {
-        case "u":
-          window.location.href = "#/benutzerinfo?userFbId=" + e.res;
-          break;
-        case "l": {
-          var suffix = "";
-          if (window.location.href.includes(e.res))
-            suffix = "#" + Math.random().toFixed(5); // when already a qrLift is shown:
-          window.location.href = "#/?qrLiftData=" + e.res + suffix;
-          break;
-        }
-      }
-    },
-
-    closeScanner(e) {
-      if (e.direction == "up") {
-        this.scannerOpen = false;
-        setTimeout(() => window.scrollTo(0, 0), 300);
-      }
-    },
-
-    async toggleScannerOpen() {
-      // first check whether clipboard contains data to be processed
-      var clipboardContent;
-      if (!this.scannerOpen)
-        clipboardContent = await this.askAndReadClipboard().catch(err => {
-          var isDomException = (err + "").includes("NotAllowedError");
-
-          this.$q.notify({
-            type: "negative",
-            message: "Zwischenablage blockiert",
-            caption: isDomException
-              ? "Bitte sieh in den FAQ nach, wir haben dafür eine Lösung veröffentlicht."
-              : "StudiCar kann aus irgendeinem Grund keine Daten aus der Zwischenablage laden: " +
-                err
-          });
-          setTimeout(_ => {
-            this.scannerOpen = false;
-            this.$q.notify({
-              type: "info",
-              message: "Kamera geschlossen",
-              caption:
-                "StudiCar hat den Scanner wieder geschlossen, weil wie gesagt der Zugriff auf die Kamera geblockt ist"
-            });
-          }, 500);
-        });
-      if (clipboardContent) {
-        if (clipboardContent.includes("/#/"))
-          clipboardContent = clipboardContent.split("/#/")[1];
-        if (clipboardContent.includes("#i")) {
-          window.location.href = "#/"; // when detecting a lift, first go to marketplace
-        }
-        await new Promise(res => {
-          setTimeout(res, 200); // has to wait until site has been changed, 200ms should be enough
-        });
-        this.$router.replace(clipboardContent).catch(_ => {});
-      } else {
-        this.scannerOpen = !this.scannerOpen;
-        if (this.scannerOpen) {
-          this.leftDrawerOpen = false;
-        }
-      }
-    },
-
-    scannerHelpNeeded() {
-      this.scannerOpen = false;
-    },
-
-    randomArrayItem(array) {
-      return array[Math.floor(Math.random() * array.length)];
-    },
-
-    reloadNews() {
-      sendApiRequest(
-        GET_NEWSTICKER,
-        {},
-        data => {
-          this.newsticker = data.ticker;
-        },
-        err => {
-          this.newsticker = "Fehler aufgetreten";
-        }
-      );
-    }
-  },
-
-  created() {
-    this.$q.addressbarColor.set();
-  },
-
-  mounted() {
-    setTimeout(this.reloadNews, 50); // simple call was buggy, no idea why
-    var user = this.$store.getters["auth/user"];
-    if (!user) location.reload();
-    // bug: when other user first signs in, no data are displayed. Reloading is then the second sign-in and everything is working properly
+let askAndReadClipboard = () => {
+  const clipboard = navigator.clipboard;
+  return new Promise((res, rej) => {
+    if (!clipboard) rej('No clipboard');
     else
-      (async _ => {
-        this.profilePictureUrl = await buildGetRequestUrl(
-          GET_USER_PROFILE_PIC,
-          { fbid: user.uid }
-        );
-      })();
+      clipboard
+        .readText()
+        .then((content) => {
+          content = content.trim();
+          if (!isClipboardValid(content)) {
+            res('');
+          } else {
+            content = content.replaceAll('$', '#'); // resetting the workaround needed on mobile phones
+
+            $q.dialog({
+              component: ConfirmDialog,
+              parent: this,
+              cancelLabel: 'Egal, scannen',
+              okLabel: 'Ok, übernehmen',
+              title: 'Daten gefunden',
+              message: `StudiCar hat passende Daten in deiner Zwischenablage gefunden. Daten übernehmen oder
+                    trotzdem einen StudiCar Code scannen?`,
+              persistent: true,
+              animation: 'fade',
+              details:
+                content.length > 1000
+                  ? content.substr(0, 1000) + '...'
+                  : content,
+            })
+              .onOk(() => {
+                res(content);
+              })
+              .onCancel(() => {
+                res(''); // when no confirm, return empty string
+              })
+              .onDismiss(() => {
+                // console.log('I am triggered on both OK and Cancel')
+              });
+          }
+        })
+        .catch((err) => {
+          rej(err);
+        });
+  });
+};
+
+let isClipboardValid = (text) => {
+  var conditions = [
+    text.length > 10,
+    text.startsWith('https://' + window.location.hostname),
+  ];
+  return conditions.every((item) => item == true);
+};
+
+let gotScanResult = (e) => {
+  scannerOpen = false;
+  switch (e.type) {
+    case 'u':
+      window.location.href = '#/benutzerinfo?userFbId=' + e.res;
+      break;
+    case 'l': {
+      var suffix = '';
+      if (window.location.href.includes(e.res))
+        suffix = '#' + Math.random().toFixed(5); // when already a qrLift is shown:
+      window.location.href = '#/?qrLiftData=' + e.res + suffix;
+      break;
+    }
   }
+};
+
+let closeScanner = (e) => {
+  if (e.direction == 'up') {
+    scannerOpen = false;
+    setTimeout(() => window.scrollTo(0, 0), 300);
+  }
+};
+
+let toggleScannerOpen = async () => {
+  // first check whether clipboard contains data to be processed
+  var clipboardContent;
+  if (!scannerOpen)
+    clipboardContent = await askAndReadClipboard().catch((err) => {
+      var isDomException = (err + '').includes('NotAllowedError');
+
+      $q.notify({
+        type: 'negative',
+        message: 'Zwischenablage blockiert',
+        caption: isDomException
+          ? 'Bitte sieh in den FAQ nach, wir haben dafür eine Lösung veröffentlicht.'
+          : 'StudiCar kann aus irgendeinem Grund keine Daten aus der Zwischenablage laden: ' +
+            err,
+      });
+      setTimeout(() => {
+        scannerOpen = false;
+        $q.notify({
+          type: 'info',
+          message: 'Kamera geschlossen',
+          caption:
+            'StudiCar hat den Scanner wieder geschlossen, weil der Zugriff auf die Kamera geblockt ist',
+        });
+      }, 500);
+    });
+  if (clipboardContent) {
+    if (clipboardContent.includes('/#/'))
+      clipboardContent = clipboardContent.split('/#/')[1];
+    if (clipboardContent.includes('#i')) {
+      window.location.href = '#/'; // when detecting a lift, first go to marketplace
+    }
+    await new Promise((res) => {
+      setTimeout(res, 200); // has to wait until site has been changed, 200ms should be enough
+    });
+    $router.replace(clipboardContent);
+  } else {
+    scannerOpen = !scannerOpen;
+    if (scannerOpen) {
+      leftDrawerOpen = false;
+    }
+  }
+};
+
+let scannerHelpNeeded = () => {
+  scannerOpen = false;
+};
+
+let reloadNews = () => {
+  sendApiRequest(GET_NEWSTICKER, {})
+    .then((data) => {
+      newsticker = data.ticker;
+    })
+    .catch((err) => {
+      console.warn(err);
+      newsticker = 'Fehler aufgetreten';
+    });
+};
+
+onMounted(() => {
+  setTimeout(reloadNews, 50); // simple call was buggy, no idea why
+  if (!userStore.user) location.reload();
+  // bug: when other user first signs in, no data are displayed. Reloading is then the second sign-in and everything is working properly
+  else
+    buildGetRequestUrl(GET_USER_PROFILE_PIC, {
+      fbid: userStore.user.uid,
+    }).then((url) => (profilePictureUrl = url));
 });
+
+$q.addressbarColor.set();
 </script>

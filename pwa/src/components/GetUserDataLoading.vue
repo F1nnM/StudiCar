@@ -46,57 +46,31 @@
   </div>
 </template>
 
-<script>
-import ExtendedHr from "components/ExtendedHr";
-import { defineComponent } from "vue";
-import { sendApiRequest } from "../ApiAccess";
+<script setup>
 
-export default defineComponent({
-  name: "GetUserDataLoading.vue",
-  components: {},
-  data() {
-    return {
-      loadingTexts: [
-        "Bitte hab noch einen Moment Geduld",
-        "Daten werden geladen"
-      ],
-      showBranding: false,
-      reverse: false
-    };
-  },
-  model: {
-    prop: "open",
-    event: "input"
-  },
-  watch: {
-    open: function(isOpen) {
-      if (isOpen) {
-        setTimeout(_ => {
-          this.showBranding = true;
-        }, 500);
-      }
-    }
-  },
-  props: {
-    open: Boolean
-  },
-  computed: {
-    loadingText() {
-      const pos = 1;
+const props = defineProps({
+  open: Boolean,
+});
 
-      return this.loadingTexts[pos];
-    }
-  },
-  methods: {
-    async adac() {
-      return new Promise(res => setTimeout(res, 1000));
-    }
-  },
+let loadingTexts = [
+  'Bitte hab noch einen Moment Geduld',
+  'Daten werden geladen',
+];
+let showBranding = false;
+let reverse = false;
 
-  mounted() {
-    /* setInterval(_ => {
-      this.reverse = !this.reverse;
-    }, 1800); */
+const loadingText = computed(() => {
+  const pos = 1;
+
+  return loadingTexts[pos];
+});
+
+const open = ref(props.open);
+watch(open, (isOpen) => {
+  if (isOpen) {
+    setTimeout((_) => {
+      showBranding = true;
+    }, 500);
   }
 });
 </script>

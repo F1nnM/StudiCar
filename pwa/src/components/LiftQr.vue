@@ -15,7 +15,7 @@
               :width="200"
               :color="{
                 dark: '#000000',
-                light: '#FFFFFF'
+                light: '#FFFFFF',
               }"
               errorCorrectionLevel="H"
               :value="input"
@@ -44,31 +44,14 @@
   </q-dialog>
 </template>
 
-<script>
-import VueQrcode from "vue-qrcode";
-import ExtHr from "components/ExtendedHr";
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "LiftQr",
-  components: { VueQrcode, ExtHr },
-  props: {
-    value: Boolean,
-    input: String
-  },
-  data() {
-    return {};
-  },
-  watch: {
-    open: function(val) {}
-  },
-  computed: {},
-  methods: {
-    emit(val) {
-      this.$emit("input", val);
-    }
-  }
+<script setup>
+defineProps({
+  value: Boolean,
+  input: String,
 });
+function emit(val) {
+  $emit('input', val);
+}
 </script>
 
 <style lang="scss" scoped>

@@ -11,7 +11,6 @@
                 class="rounded-borders"
                 spinner-size="82px"
                 ref="profile_image"
-                @load="imageHasBeenLoaded"
                 :src="ppPath"
               >
                 <template v-slot:error>
@@ -156,11 +155,9 @@
       </template>
     </q-splitter>
     <q-card class="q-ma-md q-mt-sm">
-      <q-card-section class="q-pb-sm q-pt-xs ">
+      <q-card-section class="q-pb-sm q-pt-xs">
         <div class="row justify-between q-mb-xs">
-          <div class="text-uppercase text-caption q-mt-xs">
-            Über Mich
-          </div>
+          <div class="text-uppercase text-caption q-mt-xs">Über Mich</div>
           <q-btn
             size="sm"
             flat
@@ -171,15 +168,13 @@
         </div>
         <div class="text-weight-light q-mt-sm">
           <div v-if="description">{{ description }}</div>
-          <div v-else>
-            - noch keine Beschreibung hinterlegt -
-          </div>
+          <div v-else>- noch keine Beschreibung hinterlegt -</div>
         </div>
       </q-card-section>
     </q-card>
     <q-dialog
       :value="!!friendInfoData"
-      @input="e => (friendInfoData = !!e)"
+      @input="(e) => (friendInfoData = !!e)"
       position="right"
       class="bg-white"
       style="min-width: 45vw; min-height: 40vh"
@@ -275,9 +270,7 @@
                     color="primary"
                     dense
                     no-caps
-                    :disable="
-                      !this.newPPictureBase64 || uploadingProfilePicture
-                    "
+                    :disable="!newPPictureBase64 || uploadingProfilePicture"
                     @click="uploadProfilePicture"
                   />
                   <br />
@@ -409,20 +402,20 @@
                 v-for="cat in [
                   {
                     prop: 'talk',
-                    label: 'Redseligkeit'
+                    label: 'Redseligkeit',
                   },
                   {
                     prop: 'talkMorning',
-                    label: '... am Morgen'
+                    label: '... am Morgen',
                   },
                   {
                     prop: 'smoking',
-                    label: 'Rauchen im Auto'
+                    label: 'Rauchen im Auto',
                   },
                   {
                     prop: 'music',
-                    label: 'Musik im Auto'
-                  }
+                    label: 'Musik im Auto',
+                  },
                 ]"
                 :key="cat.prop"
                 :name="cat.prop"
@@ -465,295 +458,266 @@
     </q-dialog>
   </div>
 </template>
-<script>
-import { date } from "quasar";
-import ExtHr from "components/ExtendedHr";
-import QrGen from "components/QrGenerator";
-import QrIcon from "components/QrIcon";
 
-import {
-  buildGetRequestUrl,
-  sendApiRequest,
-  GET_USER_PROFILE_PIC,
-  SQL_UPDATE_PROFILE_PICTURE,
-  SQL_RESET_PROFILE_PICTURE
-} from "../ApiAccess";
-import { defineComponent } from "vue";
+<script setup>
+import { useAppStore } from 'src/stores/app';
+import { useUserStore } from 'src/stores/user';
 
-export default defineComponent({
-  name: "ProfileUserData",
-  components: {
-    ExtHr,
-    QrGen,
-    QrIcon
-  },
-  props: {
-    username: String
-  },
-  data() {
-    return {
-      ppPath: "",
-      openUpload: false,
-      shareProfileQR: false,
-      friendInfoData: null,
-      statsFriendsTab: "stats",
-      statsTimeTab: "current",
-      file: null,
-      newPPictureBase64: "",
-      friendsPage: 0,
-      uploadingProfilePicture: false,
-      prefExpanded: false,
+defineProps({
+  username: String,
+});
 
-      openEditPrefs: false, // prefs settings
-      openEditPrefsTab: "talk",
-      newPrefs: {
-        talk: "",
-        talkMorning: "",
-        smoking: "",
-        music: ""
-      },
-      prefsDocu: this.$store.state.prefsDocu,
-      imageForColors: null,
+const userStore = useUserStore();
+const appStore = useAppStore();
 
-      openEditDescription: false,
-      newDescription: ""
-    };
-  },
-  computed: {
-    friends() {
-      return this.$store.getters["auth/user"].topFriends;
-    },
+let ppPath = '';
+let openUpload = false;
+let shareProfileQR = false;
+let friendInfoData = null;
+let statsFriendsTab = 'stats';
+let statsTimeTab = 'current';
+let file = null;
+let newPPictureBase64 = '';
+let friendsPage = 0;
+let uploadingProfilePicture = false;
+let prefExpanded = false;
 
-    friendsGroup4() {
-      const pageSize = 4;
+let openEditPrefs = false; // prefs settings
+let openEditPrefsTab = 'talk';
+let newPrefs = {
+  talk: '',
+  talkMorning: '',
+  smoking: '',
+  music: '',
+};
+let prefsDocu = appStore.prefsDocu;
+let imageForColors = null;
 
-      var arr = [];
+let openEditDescription = false;
+let newDescription = '';
 
-      this.friends.forEach((f, index) => {
-        if (index % pageSize == 0) {
-          // e.g. when pageSize is 4 then a new "page" will be generated at indices 4, 8, 12 ...
-          arr.push([f]); // directly push new page and this friend
-        } else arr[Math.floor(index / pageSize)].push(f);
-      });
-      return arr;
-    },
+function loadFile(file) {
+  file = file;
+  const size = 300, // represents the height
+    ratio = 1; // default ratio at profile pictures
 
-    profileColor() {
-      return "white";
-    },
+  const width = size * ratio,
+    fileName = file.name,
+    reader = new FileReader();
+  reader.onerror = (error) => console.log(error);
+  reader.readAsDataURL(file);
+  reader.onload = (event) => {
+    var img = new Image();
+    img.src = event.target.result;
 
-    atLeastFiveWords() {
-      if (this.username == "Bernd") {
-        return true;
+    (img.onload = () => {
+      const elem = document.getElementById('newImage');
+      elem.width = width;
+      elem.height = size;
+
+      const ctx = elem.getContext('2d');
+      if (img.width >= img.height) {
+        // landscape or square: width has to be cropped
+        var scale = img.height / size,
+          indent = (img.width - img.height) / scale; // indent has to be half of the difference and negative, additionally divided by scale
+        ctx.drawImage(img, indent / -2, 0, width + indent, size);
       } else {
-        var splitted = this.newDescription.split(" ");
-        var length = splitted.length;
-        var lastItemIsWord = splitted[length - 1] != "";
-        return length > 5 ? true : length >= 5 && lastItemIsWord; // when more than 5 words, just return true
+        // portrait
+        var scale = img.width / size,
+          indent = (img.height - img.width) / scale; // indent has to be half of the difference and negative, additionally divided by scale
+        ctx.drawImage(img, 0, indent / -2, width, size + indent);
       }
-    },
+      newPPictureBase64 = elem.toDataURL();
+    }),
+      (reader.onerror = (error) => {
+        alert(error);
+      });
+  };
+}
 
-    since() {
-      return date.formatDate(
-        // user statistics, cannot directly be changed by user
-        this.$store.getters["auth/user"].stats.createdAt,
-        "MMMM YYYY",
-        {
-          months: [
-            "Januar",
-            "Februar",
-            "März",
-            "April",
-            "Mai",
-            "Juni",
-            "Juli",
-            "August",
-            "September",
-            "Oktober",
-            "November",
-            "Dezember"
-          ]
+function uploadProfilePicture() {
+  if (newPPictureBase64) {
+    uploadingProfilePicture = true;
+    sendApiRequest(
+      SQL_UPDATE_PROFILE_PICTURE,
+      {
+        imageData: newPPictureBase64,
+      },
+      (_) => {
+        ppPath += '&timestamp=' + Date.now();
+        openUpload = false;
+        file = null;
+        newPPictureBase64 = '';
+        uploadingProfilePicture = false;
+      },
+      (err) => {
+        uploadingProfilePicture = false;
+      }
+    );
+  }
+}
+
+function resetPP() {
+  $q.dialog({
+    title: 'Bild zurücksetzen',
+    message:
+      'Willst du dein Bild wirklich zurücksetzen? StudiCar speichert dann ein anonymes Ersatzbild.',
+    cancel: true,
+    persistent: true,
+  })
+    .onOk(() => {
+      uploadingProfilePicture = true;
+      sendApiRequest(
+        SQL_RESET_PROFILE_PICTURE,
+        {},
+        (_) => {
+          ppPath += '&timestamp=' + Date.now();
+          openUpload = false;
+          uploadingProfilePicture = false;
+        },
+        (err) => {
+          uploadingProfilePicture = false;
         }
       );
-    },
+    })
+    .onCancel(() => {});
+}
 
-    qrInput() {
-      const uid = this.$store.getters["auth/user"].uid,
-        host = process.env.DEV ? "localhost:3000" : "dev.pwa.studicar.mfinn.de";
+function betterPrefColor(color) {
+  if (color == 'GREEN') color = 'green-8';
+  // first convert color if neccessary
+  else if (color == 'YELLOW') color = 'orange';
+  return color.toLowerCase(); // always return lower case
+}
 
-      return {
-        type: "user",
-        data: uid
+function toggleOpenEditPrefs(save) {
+  if (openEditPrefs) {
+    // open, shall be closed, so prefs have to be converted and stored back to original var (only when save)
+    if (save) {
+      prefs = newPrefs; // just to minimize traffic, prefs are only stored when clicking on save (respectively closing dialog)
+      newPrefs = {
+        talk: '',
+        talkMorning: '',
+        smoking: '',
+        music: '',
       };
-    },
-
-    prefs: {
-      get() {
-        return this.$store.getters["auth/user"].prefs;
-      },
-      set(value) {
-        this.$store.dispatch("auth/updatePrefs", value);
-      }
-    },
-
-    description: {
-      get() {
-        return this.$store.getters["auth/user"].bio;
-      },
-      set(value) {
-        this.$store.dispatch("auth/updateDescription", value);
-      }
-    }
-  },
-  methods: {
-    loadFile(file) {
-      this.file = file;
-      const size = 300, // represents the height
-        ratio = 1; // default ratio at profile pictures
-
-      const width = size * ratio,
-        fileName = file.name,
-        reader = new FileReader();
-      reader.onerror = error => console.log(error);
-      reader.readAsDataURL(file);
-      reader.onload = event => {
-        var img = new Image();
-        img.src = event.target.result;
-
-        (img.onload = () => {
-          const elem = document.getElementById("newImage");
-          elem.width = width;
-          elem.height = size;
-
-          const ctx = elem.getContext("2d");
-          if (img.width >= img.height) {
-            // landscape or square: width has to be cropped
-            var scale = img.height / size,
-              indent = (img.width - img.height) / scale; // indent has to be half of the difference and negative, additionally divided by scale
-            ctx.drawImage(img, indent / -2, 0, width + indent, size);
-          } else {
-            // portrait
-            var scale = img.width / size,
-              indent = (img.height - img.width) / scale; // indent has to be half of the difference and negative, additionally divided by scale
-            ctx.drawImage(img, 0, indent / -2, width, size + indent);
-          }
-          this.newPPictureBase64 = elem.toDataURL();
-        }),
-          (reader.onerror = error => {
-            alert(error);
-          });
+    } else {
+      newPrefs = {
+        // just to make sure
+        talk: '',
+        talkMorning: '',
+        smoking: '',
+        music: '',
       };
-    },
-
-    uploadProfilePicture() {
-      if (this.newPPictureBase64) {
-        this.uploadingProfilePicture = true;
-        sendApiRequest(
-          SQL_UPDATE_PROFILE_PICTURE,
-          {
-            imageData: this.newPPictureBase64
-          },
-          _ => {
-            this.ppPath += "&timestamp=" + Date.now();
-            this.openUpload = false;
-            this.file = null;
-            this.newPPictureBase64 = "";
-            this.uploadingProfilePicture = false;
-          },
-          err => {
-            this.uploadingProfilePicture = false;
-          }
-        );
-      }
-    },
-
-    resetPP() {
-      this.$q
-        .dialog({
-          title: "Bild zurücksetzen",
-          message:
-            "Willst du dein Bild wirklich zurücksetzen? StudiCar speichert dann ein anonymes Ersatzbild.",
-          cancel: true,
-          persistent: true
-        })
-        .onOk(() => {
-          this.uploadingProfilePicture = true;
-          sendApiRequest(
-            SQL_RESET_PROFILE_PICTURE,
-            {},
-            _ => {
-              this.ppPath += "&timestamp=" + Date.now();
-              this.openUpload = false;
-              this.uploadingProfilePicture = false;
-            },
-            err => {
-              this.uploadingProfilePicture = false;
-            }
-          );
-        })
-        .onCancel(() => {});
-    },
-
-    betterPrefColor(color) {
-      if (color == "GREEN") color = "green-8";
-      // first convert color if neccessary
-      else if (color == "YELLOW") color = "orange";
-      return color.toLowerCase(); // always return lower case
-    },
-
-    toggleOpenEditPrefs(save) {
-      if (this.openEditPrefs) {
-        // open, shall be closed, so prefs have to be converted and stored back to original var (only when save)
-        if (save) {
-          this.prefs = this.newPrefs; // just to minimize traffic, prefs are only stored when clicking on save (respectively closing dialog)
-          this.newPrefs = {
-            talk: "",
-            talkMorning: "",
-            smoking: "",
-            music: ""
-          };
-        } else {
-          this.newPrefs = {
-            // just to make sure
-            talk: "",
-            talkMorning: "",
-            smoking: "",
-            music: ""
-          };
-        }
-      } else {
-        // still closed, shall be opened, so we have to copy (and first convert) prefs to another var
-
-        this.newPrefs = this.prefs;
-      }
-
-      this.openEditPrefs = !this.openEditPrefs;
-    },
-
-    toggleOpenEditDescription() {
-      if (this.openEditDescription) {
-        // already open
-        this.description = this.newDescription;
-      } else {
-        // still closed
-        this.newDescription = this.description;
-      }
-      this.openEditDescription = !this.openEditDescription;
-    },
-
-    imageHasBeenLoaded() {
-      const img = this.$refs.profile_image;
-
-      console.log("Image has been loaded");
     }
-  },
-  mounted() {
-    (async _ => {
-      this.ppPath = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
-        fbid: this.$store.getters["auth/user"].uid
-      });
-    })();
+  } else {
+    // still closed, shall be opened, so we have to copy (and first convert) prefs to another var
+
+    newPrefs = prefs;
   }
+
+  openEditPrefs = !openEditPrefs;
+}
+
+function toggleOpenEditDescription() {
+  if (openEditDescription) {
+    // already open
+    description = newDescription;
+  } else {
+    // still closed
+    newDescription = description;
+  }
+  openEditDescription = !openEditDescription;
+}
+
+const friends = computed(() => {
+  return userStore.user.topFriends;
+});
+
+const friendsGroup4 = computed(() => {
+  const pageSize = 4;
+
+  var arr = [];
+
+  friends.forEach((f, index) => {
+    if (index % pageSize == 0) {
+      // e.g. when pageSize is 4 then a new "page" will be generated at indices 4, 8, 12 ...
+      arr.push([f]); // directly push new page and this friend
+    } else arr[Math.floor(index / pageSize)].push(f);
+  });
+  return arr;
+});
+
+const profileColor = computed(() => {
+  return 'white';
+});
+
+const atLeastFiveWords = computed(() => {
+  if (username == 'Bernd') {
+    return true;
+  } else {
+    var splitted = newDescription.split(' ');
+    var length = splitted.length;
+    var lastItemIsWord = splitted[length - 1] != '';
+    return length > 5 ? true : length >= 5 && lastItemIsWord; // when more than 5 words, just return true
+  }
+});
+
+const since = computed(() => {
+  return date.formatDate(
+    // user statistics, cannot directly be changed by user
+    userStore.user.stats.createdAt,
+    'MMMM YYYY',
+    {
+      months: [
+        'Januar',
+        'Februar',
+        'März',
+        'April',
+        'Mai',
+        'Juni',
+        'Juli',
+        'August',
+        'September',
+        'Oktober',
+        'November',
+        'Dezember',
+      ],
+    }
+  );
+});
+
+const qrInput = computed(() => {
+  const uid = userStore.user.uid;
+  return {
+    type: 'user',
+    data: uid,
+  };
+});
+
+const prefs = computed({
+  get: () => {
+    return userStore.user.prefs;
+  },
+  set: (value) => {
+    userStore.updatePrefs(value);
+  },
+});
+const description = computed({
+  get: () => {
+    return userStore.user.bio;
+  },
+  set: (value) => {
+    userStore.updateDescription(value);
+  },
+});
+
+onMounted(() => {
+  buildGetRequestUrl(GET_USER_PROFILE_PIC, {
+    fbid: userStore.user.uid,
+  }).then((url) => {
+    ppPath = url;
+  });
 });
 </script>
 

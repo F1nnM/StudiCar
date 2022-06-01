@@ -2,7 +2,7 @@
   <!-- one of the most important components in StudiCar, shows the StudiCar Code and the public link of the content -->
   <div>
     <q-dialog
-      :value="value"
+      :value="isOpen"
       :position="position || 'standard'"
       @input="emit"
       full-width
@@ -32,7 +32,7 @@
               <q-tab-panel name="qr">
                 <div
                   :class="
-                    'relative-position studicar-code' + (value ? ' show' : '')
+                    'relative-position studicar-code' + (isOpen ? ' show' : '')
                   "
                 >
                   <div class="pan-anchor"></div>
@@ -78,11 +78,15 @@
                     <div class="text-h6 q-mb-md">Öffentlicher Link</div>
                     <div
                       class="text-overline"
-                      style="max-width: 90%; word-break: break-all; line-height: 1.1rem"
+                      style="
+                        max-width: 90%;
+                        word-break: break-all;
+                        line-height: 1.1rem;
+                      "
                     >
                       {{
                         publicUrl ||
-                          "- es steht aktuell keine Url zur Verfügung -"
+                        '- es steht aktuell keine Url zur Verfügung -'
                       }}
                     </div>
                   </q-card-section>
@@ -210,152 +214,127 @@
   </div>
 </template>
 
-<script>
-import VueQrcode from "vue-qrcode"; // docs: https://github.com/rx-ts/vue/tree/master/packages/vue-qrcode
-import ExtHr from "components/ExtendedHr";
-import { colors, copyToClipboard, dom } from "quasar";
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "QrGenerator",
-  components: {
-    VueQrcode,
-    ExtHr
+<script setup>
+defineProps({
+  input: {
+    type: Object,
+    required: true,
   },
-  props: {
-    input: {
-      type: Object,
-      required: true
-    },
-    value: Boolean,
-    primColor: Boolean,
-    text: String,
-    label: String,
-    fakeRefresh: Boolean,
-    linearProgress: Boolean,
-    position: String
-  },
+  isOpen: Boolean,
+  primColor: Boolean,
+  text: String,
+  label: String,
+  fakeRefresh: Boolean,
+  linearProgress: Boolean,
+  position: String,
+});
 
-  data() {
-    return {
-      color: {
-        dark: this.primColor ? colors.getBrand("primary") : "#000000FF",
-        light: "#FFFFFFFF"
-      },
-      showInfo: false,
-      qrProgress: 1,
-      interval: null,
-      progressColorWhite: false,
-      random: "01",
-      dataTab: "qr"
-    };
-  },
-  watch: {
-    value: function(isOpen) {
-      if (this.fakeRefresh) {
-        const step = 5, // in hundreths, e.g. 100 means just one step to complete
-          duration = 5000;
+let color = {
+  dark: primColor ? colors.getBrand('primary') : '#000000FF',
+  light: '#FFFFFFFF',
+};
+let showInfo = false;
+let qrProgress = 1;
+let interval = null;
+let progressColorWhite = false;
+let random = '01';
+let dataTab = 'qr';
 
-        var computedStep = step / 100,
-          numberOfSteps = 1 / computedStep;
-        /* if (isOpen)
-          this.interval = setInterval(_ => {
-            if (this.qrProgress <= computedStep) this.progressReset();
-            else this.qrProgress -= computedStep;
+watch(isOpen, (isOpen) => {
+  if (fakeRefresh) {
+    const step = 5, // in hundreths, e.g. 100 means just one step to complete
+      duration = 5000;
+
+    var computedStep = step / 100,
+      numberOfSteps = 1 / computedStep;
+    /* if (isOpen)
+          interval = setInterval(_ => {
+            if (qrProgress <= computedStep) progressReset();
+            else qrProgress -= computedStep;
           }, duration / numberOfSteps);
-        else clearInterval(this.interval); */
-      }
-    }
-  },
-
-  computed: {
-    qrInput() {
-      /* return JSON.stringify({ // just a joke, isn't more secure, just that qr code will change every interval, but important content stays the same xD
-        q: this.input,
-        f: this.random
-      }) */
-      var prefix = "";
-      switch (this.input.type) {
-        case "user":
-          prefix = "u";
-          break;
-        case "lift":
-          prefix = "l";
-          break;
-      }
-      return prefix + this.input.data;
-    },
-
-    publicUrl() {
-      var domainEtc =
-          "https://" +
-          (process.env.DEV
-            ? window.location.hostname
-            : "dev.pwa.studicar.mfinn.de"),
-        path = "",
-        data = this.input.data;
-      data = data.replaceAll("#", "$");
-      if (process.env.DEV) domainEtc += ":3000";
-      domainEtc += "/$/"; // '/#/' didn't work on mobile phones, will be replaced when decoding
-      switch (this.input.type) {
-        case "user":
-          path = "benutzerinfo?userFbId=";
-          break;
-        case "lift":
-          path = "?qrLiftData=";
-          break;
-      }
-      return domainEtc + path + data;
-    }
-  },
-
-  methods: {
-    emit(val) {
-      this.$emit("input", val);
-    },
-
-    async progressReset() {
-      this.qrProgress = 1.15;
-      this.random = Math.round(Math.random() * 100) + "";
-      /* this.progressColorWhite = !this.progressColorWhite */
-    },
-
-    setDataTabToRaw() {
-      this.dataTab = "raw";
-    },
-
-    shareViaWhatsApp() {
-      var type = "";
-      switch (this.input.type) {
-        case "user":
-          type = "Nutzerprofil";
-          break;
-        case "lift":
-          type = "Mitfahrangebot";
-          break;
-      }
-      var textToWhatsApp =
-        "whatsapp://send?text=" +
-        "Kopiere diesen Link für ein " +
-        type +
-        " in deine Zwischenablage öffne dann deinen StudiCar Scanner: " +
-        this.publicUrl;
-      textToWhatsApp = textToWhatsApp.replaceAll(" ", "%20");
-      window.location.href = textToWhatsApp;
-    },
-
-    copy() {
-      copyToClipboard(this.publicUrl)
-        .then(_ => {
-          this.$q.notify({
-            message: "Inhalt wurde kopiert",
-            color: "positive"
-          });
-        })
-        .catch(e => alert("Fehler beim Kopieren: " + e));
-    }
+        else clearInterval(interval); */
   }
 });
+
+const qrInput = computed(() => {
+  var prefix = '';
+  switch (input.type) {
+    case 'user':
+      prefix = 'u';
+      break;
+    case 'lift':
+      prefix = 'l';
+      break;
+  }
+  return prefix + input.data;
+});
+
+const publicUrl = computed(() => {
+  var domainEtc =
+      'https://' +
+      (process.env.DEV
+        ? window.location.hostname
+        : 'dev.pwa.studicar.mfinn.de'),
+    path = '',
+    data = input.data;
+  data = data.replaceAll('#', '$');
+  if (process.env.DEV) domainEtc += ':3000';
+  domainEtc += '/$/'; // '/#/' didn't work on mobile phones, will be replaced when decoding
+  switch (input.type) {
+    case 'user':
+      path = 'benutzerinfo?userFbId=';
+      break;
+    case 'lift':
+      path = '?qrLiftData=';
+      break;
+  }
+  return domainEtc + path + data;
+});
+
+function emit(val) {
+  $emit('input', val);
+}
+
+async function progressReset() {
+  qrProgress = 1.15;
+  random = Math.round(Math.random() * 100) + '';
+  /* progressColorWhite = !progressColorWhite */
+}
+
+function setDataTabToRaw() {
+  dataTab = 'raw';
+}
+
+function shareViaWhatsApp() {
+  var type = '';
+  switch (input.type) {
+    case 'user':
+      type = 'Nutzerprofil';
+      break;
+    case 'lift':
+      type = 'Mitfahrangebot';
+      break;
+  }
+  var textToWhatsApp =
+    'whatsapp://send?text=' +
+    'Kopiere diesen Link für ein ' +
+    type +
+    ' in deine Zwischenablage öffne dann deinen StudiCar Scanner: ' +
+    publicUrl;
+  textToWhatsApp = textToWhatsApp.replaceAll(' ', '%20');
+  window.location.href = textToWhatsApp;
+}
+
+function copy() {
+  copyToClipboard(publicUrl)
+    .then((_) => {
+      $q.notify({
+        message: 'Inhalt wurde kopiert',
+        color: 'positive',
+      });
+    })
+    .catch((e) => alert('Fehler beim Kopieren: ' + e));
+}
 </script>
 
 <style lang="scss">
@@ -395,7 +374,7 @@ export default defineComponent({
     left: 50%;
     transform: translateX(-50%);
     bottom: -50%;
-    content: "";
+    content: '';
     position: absolute;
     border: 1px solid $primary;
     border-top: none;

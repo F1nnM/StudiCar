@@ -312,19 +312,14 @@ m2286 -999 c182 -34 340 -187 384 -371 22 -96 22 -2142 0 -2238 -42 -178 -188
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "QrIcon",
-  props: {
-    type: {
-      type: Number,
-      default: 0
-    },
-    size: String,
-    showLogo: Boolean
-  }
+<script setup>
+defineProps({
+  type: {
+    type: Number,
+    default: 0,
+  },
+  size: String,
+  showLogo: Boolean,
 });
 </script>
 

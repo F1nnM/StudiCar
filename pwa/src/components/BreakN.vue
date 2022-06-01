@@ -7,16 +7,11 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "BreakN",
-  props: {
-    value: {
+<script setup>
+defineProps({
+  value: {
       type: Number,
       required: true
     }
-  }
-});
+})
 </script>

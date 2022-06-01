@@ -26,38 +26,29 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "FriendHeart",
-  props: {
-    left: {
-      type: Boolean,
-      required: true
-    },
-    right: {
-      type: Boolean,
-      required: true
-    },
-    size: String,
-    backColor: String
+<script setup>
+defineProps({
+  left: {
+    type: Boolean,
+    required: true,
   },
-  computed: {
-    heartIconHalf() {
-      var l = this.left,
-        r = this.right;
-      if (l && !r) return "only-left-half";
-      else if (!l && r) return "only-right-half";
-      else return "";
-    }
+  right: {
+    type: Boolean,
+    required: true,
   },
-  methods: {
-    emit() {
-      this.$emit("click");
-    }
-  }
+  size: String,
+  backColor: String,
 });
+const heartIconHalf = () => {
+  var l = left,
+    r = right;
+  if (l && !r) return 'only-left-half';
+  else if (!l && r) return 'only-right-half';
+  else return '';
+};
+function emit() {
+  $emit('click');
+}
 </script>
 
 <style scoped lang="scss">

@@ -108,99 +108,83 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import { date } from "quasar";
+<script setup>
+import { useAppStore } from 'src/stores/app';
+import { useUserStore } from 'src/stores/user';
 
-import ProfileUserData from "components/ProfileUserData";
-import ProfileOtherData from "components/ProfileOtherData";
+const userStore = useUserStore();
+const appStore = useAppStore();
 
-import TitleButtonAnchor from "components/TitleButtonAnchor";
-import { mdiAccountGroupOutline } from "@quasar/extras/mdi-v5";
+let stats = userStore.user.stats;
+let username = userStore.user.name.split(' ')[0];
+let newLiftMaxDistance = 0; // basic profile setting
+let editDistance = false;
+let genderOptions = ['Männlich', 'Weiblich', 'Divers'];
 
-export default defineComponent({
-  components: {
-    ProfileUserData,
-    ProfileOtherData,
-    TitleButtonAnchor
-  },
+let groupIcon = mdiAccountGroupOutline;
 
-  data() {
-    return {
-      stats: this.$store.getters["auth/user"].stats,
-      username: this.$store.getters["auth/user"].name.split(" ")[0],
-      newLiftMaxDistance: 0, // basic profile settings
-      editDistance: false,
-      genderOptions: ["Männlich", "Weiblich", "Divers"],
+let tab = 'data'; // vue models which doesn't belong to specific function
 
-      groupIcon: mdiAccountGroupOutline,
+onMounted(() => {
+  var locArr = window.location.href.split('?tab=');
+  tab = locArr.length > 1 ? locArr[1] : 'data';
 
-      tab: "data" // vue models which doesn't belong to specific function
-    };
-  },
-  computed: {
-    gender: {
-      get() {
-        switch (this.$store.getters["auth/user"].gender) {
-          case "W":
-            return "Weiblich";
-          case "M":
-            return "Männlich";
-          case "D":
-            return "Divers";
-          case "X":
-            return "Keine Angabe";
-          default:
-            return "Ein Fehler ist aufgetreten";
-        }
-      },
-      set(value) {
-        this.$store.dispatch("auth/updateGender", value);
-      }
-    },
+  appStore.setPage({
+    name: 'Profil',
+  });
+});
 
-    liftMaxDistance: {
-      get() {
-        return this.$store.getters["auth/user"].settings.liftMaxDistance;
-      },
-      set(value) {
-        this.$store.dispatch("auth/updateLiftMaxDistance", value);
-      }
-    },
-
-    dataSaver: {
-      get() {
-        return this.$store.getters["auth/user"].dataSaver;
-      },
-      set(value) {
-        this.$store.dispatch("auth/updateDataSaver", value);
-      }
-    },
-
-    meterModelBefore() {
-      var a = this.stats;
-      return a.liftsOffered / a.liftsAll;
-    }
-  },
-  methods: {
-    toggleEditLiftMaxDistance() {
-      if (this.editDistance) {
-        // already open
-        this.liftMaxDistance = this.newLiftMaxDistance;
-      } else {
-        // still closed
-        this.newLiftMaxDistance = this.liftMaxDistance;
-      }
-      this.editDistance = !this.editDistance;
-    }
-  },
-  mounted() {
-    var locArr = window.location.href.split("?tab=");
-    this.tab = locArr.length > 1 ? locArr[1] : "data";
-
-    this.$store.commit("setPage", {
-      name: "Profil"
-    });
+function toggleEditLiftMaxDistance() {
+  if (editDistance) {
+    // already open
+    liftMaxDistance = newLiftMaxDistance;
+  } else {
+    // still closed
+    newLiftMaxDistance = liftMaxDistance;
   }
+  editDistance = !editDistance;
+}
+
+const gender = computed({
+  get() {
+    switch (userStore.user.gender) {
+      case 'W':
+        return 'Weiblich';
+      case 'M':
+        return 'Männlich';
+      case 'D':
+        return 'Divers';
+      case 'X':
+        return 'Keine Angabe';
+      default:
+        return 'Ein Fehler ist aufgetreten';
+    }
+  },
+  set(value) {
+    userStore.updateGender(value);
+  },
+});
+
+const liftMaxDistance = computed({
+  get() {
+    return userStore.user.settings.liftMaxDistance;
+  },
+  set(value) {
+    userStore.updateLiftMaxDistance(value);
+  },
+});
+
+const dataSaver = computed({
+  get() {
+    return userStore.user.dataSaver;
+  },
+  set(value) {
+    userStore.updateDataSaver(value);
+  },
+});
+
+const meterModelBefore = computed(() => {
+  var a = stats;
+  return a.liftsOffered / a.liftsAll;
 });
 </script>

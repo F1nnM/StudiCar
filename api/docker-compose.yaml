@@ -8,12 +8,12 @@ services:
       MYSQL_DATABASE: "studicar"
       MYSQL_USER: "studicar"
       MYSQL_PASSWORD: "@H1xhm978zX?v67g"
-    restart: always
+    restart: on-failure
     volumes:
-      - ./mariadb:/var/lib/mysql
+      - mariadb_studicar_dev:/var/lib/mysql
   phpmyadmin:
     image: phpmyadmin
-    restart: always
+    restart: on-failure
     ports:
       - 8080:80
     environment:
@@ -26,7 +26,7 @@ services:
     build: .
     ports:
       - "443:443"
-    restart: always
+    restart: on-failure
     environment:
       DB_HOST: "mariadb"
       DB_DATABASE: "studicar"
@@ -56,3 +56,7 @@ services:
     command: ["npm", "run", "nodemon"]
     volumes:
       - .:/app
+
+volumes:
+  mariadb_studicar_dev:
+  

@@ -6,31 +6,14 @@
   </q-dialog>
 </template>
 
-<script>
-import { date } from "quasar";
-import ExtHR from "components/ExtendedHr";
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "a_DialogTemplate",
-  components: {},
-  props: {
-    value: Boolean,
-  },
-  data() {
-    return {};
-  },
-  watch: {
-    open: function (val) {},
-  },
-  computed: {},
-  methods: {
-    emit(val) {
-      this.$emit("input", val);
-    },
-  },
+<script setup>
+defineProps({
+  value: Boolean,
 });
+
+function emit(val) {
+  $emit('input', val);
+}
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

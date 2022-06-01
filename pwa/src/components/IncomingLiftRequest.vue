@@ -12,10 +12,12 @@
           <div>{{ requestingUser.surname }}</div>
           <div class="row full-width">
             <div
-              v-for="(p,index) in requestingUser.prefs"
+              v-for="(p, index) in requestingUser.prefs"
               :key="index"
-              :class="`col-auto q-px-xs text-${ betterPrefColor(p) }`"
-            >●</div>
+              :class="`col-auto q-px-xs text-${betterPrefColor(p)}`"
+            >
+              ●
+            </div>
           </div>
         </q-item-section>
         <q-item-section side class="q-px-none">
@@ -50,7 +52,9 @@
           <q-item dense>
             <q-item-section>
               <q-item-label>Kurzbeschreibung</q-item-label>
-              <q-item-label caption>{{ requestingUser.bio || '- keine Beschreibung eingestellt -' }}</q-item-label>
+              <q-item-label caption>{{
+                requestingUser.bio || '- keine Beschreibung eingestellt -'
+              }}</q-item-label>
             </q-item-section>
             <q-item-section side>
               <q-btn
@@ -70,122 +74,102 @@
   </div>
 </template>
 
-<script>
-import { date } from "quasar";
-import ExtHr from "components/ExtendedHr";
-import ColoredMeter from "components/ColoredMeter";
+<script setup>
+import { useAppStore } from 'src/stores/app';
+import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from 'src/utils/ApiAccess';
+import { toRef } from 'vue';
 
-import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
-import { defineComponent } from "vue";
+let requestingUserImageUrl = null;
 
-export default defineComponent({
-  name: "IncomingLiftRequest",
-  components: {},
-  data() {
-    return {
-      userViewTab: "info",
-      requestingUserImageUrl: null
-    };
-  },
-  model: {
-    prop: "request",
-    event: "input"
-  },
-  props: {
-    requestingUser: Object,
-    liftId: Number,
-    acceptDisabled: Boolean
-  },
-  computed: {},
+const props = defineProps({
+  requestingUser: Object,
+  liftId: Number,
+  acceptDisabled: Boolean,
+});
 
-  methods: {
-    betterPrefColor(color) {
-      if (color == "GREEN") return "green-8";
-      else if (color == "YELLOW") return "orange";
-      else return color.toLowerCase();
-    },
+const requestingUser = toRef(props, 'requestingUser');
 
-    async respondLiftRequest(accepted) {
-      var user = this.requestingUser,
-        responseReason = "";
-      if (accepted == false)
-        responseReason = await new Promise((res, rej) => {
-          this.$q
-            .dialog({
-              title: "Ablehnen",
-              message: `Willst du die Anfrage von ${user.name} ablehnen?`,
-              ok: {
-                color: "negative"
-              },
-              cancel: {
-                color: "positive"
-              },
-              cancel: true,
-              persistent: true
-            })
-            .onOk(data => {
-              res(data);
-            })
-            .onCancel(rej);
-        });
-      else {
-        var confirmationRequired = this.$store.state.settings
-          .askAgainWhenAppreciatingNewPassenger;
-        if (confirmationRequired)
-          var doNotAskAgain = await new Promise((res, rej) => {
-            this.$q
-              .dialog({
-                title: "Zusagen",
-                message: `${user.name} in die Fahrgemeinschaft mit aufnehmen?`,
-                ok: {
-                  color: "positive"
-                },
-                cancel: {
-                  color: "white"
-                },
-                /* options: {
+const appStore = useAppStore();
+
+function betterPrefColor(color) {
+  if (color == 'GREEN') return 'green-8';
+  else if (color == 'YELLOW') return 'orange';
+  else return color.toLowerCase();
+}
+
+async function respondLiftRequest(accepted) {
+  let responseReason = '';
+  if (accepted == false)
+    responseReason = await new Promise((res, rej) => {
+      $q.dialog({
+        title: 'Ablehnen',
+        message: `Willst du die Anfrage von ${requestingUser.value.name} ablehnen?`,
+        ok: {
+          color: 'negative',
+        },
+        cancel: {
+          color: 'positive',
+        },
+        cancel: true,
+        persistent: true,
+      })
+        .onOk((data) => {
+          res(data);
+        })
+        .onCancel(rej);
+    });
+  else {
+    var confirmationRequired =
+      appStore.settings.askAgainWhenAppreciatingNewPassenger;
+    if (confirmationRequired)
+      new Promise((res, rej) => {
+        $q.dialog({
+          title: 'Zusagen',
+          message: `${requestingUser.value.name} in die Fahrgemeinschaft mit aufnehmen?`,
+          ok: {
+            color: 'positive',
+          },
+          cancel: {
+            color: 'white',
+          },
+          /* options: {
                   type: "checkbox",
                   model: [],
                   // inline: true
                   items: [{ label: "Nicht mehr fragen", value: true }]
                 }, */
-                cancel: true,
-                persistent: true
-              })
-              .onOk(data => {
-                // via data setting can be saved
-                res();
-              })
-              .onCancel(rej);
-          });
-        if (doNotAskAgain)
-          this.$store.commit("setAskAgainWhenAppreciatingNewPassenger", false);
-      }
-      this.$emit("respond", {
-        liftId: this.liftId,
-        user: {
-          // on purpose NOT copying user obj, because containing much not needed data
-          id: user.id,
-          name: user.name,
-          surname: user.surname
-        },
-        accepted: accepted,
-        reason: responseReason || null
+          cancel: true,
+          persistent: true,
+        })
+          .onOk((data) => {
+            // res(true) to disable asking again
+            res(false);
+          })
+          .onCancel(rej);
+      }).then((dontAskAnymore) => {
+        appStore.setAskAgainWhenAppreciatingNewPassenger(!dontAskAnymore);
       });
-    }
-  },
-  mounted() {
-    (async _ => {
-      this.requestingUserImageUrl = await buildGetRequestUrl(
-        GET_USER_PROFILE_PIC,
-        {
-          fbid: this.requestingUser.id
-        }
-      );
-    })();
   }
+  $emit('respond', {
+    liftId: liftId,
+    user: {
+      // on purpose NOT copying user obj, because it's containing much not needed data
+      id: requestingUser.value.id,
+      name: requestingUser.value.name,
+      surname: requestingUser.value.surname,
+    },
+    accepted: accepted,
+    reason: responseReason || null,
+  });
+}
+
+onMounted(() => {
+  buildGetRequestUrl(GET_USER_PROFILE_PIC, {
+    fbid: requestingUser.value.id,
+  }).then((url) => {
+    requestingUserImageUrl = url;
+  });
 });
 </script>
 
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>

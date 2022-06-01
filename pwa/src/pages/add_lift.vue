@@ -12,8 +12,8 @@
         <q-item-section>
           <q-item-label>Du kannst noch keine Angebote hinzufügen</q-item-label>
           <q-item-label caption v-if="!(hasOwnCars && hasOwnAddresses)"
-            >Weder Fahrzeuge noch Adressen gespeichert</q-item-label
-          >
+            >Weder Fahrzeuge noch Adressen gespeichert
+          </q-item-label>
           <q-item-label caption v-else-if="!hasOwnCars"
             >Noch keine Fahrzeuge gespeichert</q-item-label
           >
@@ -165,7 +165,7 @@
                         <q-item-label>{{
                           address.nickname
                             ? address.nickname
-                            : "nach " + address.city
+                            : 'nach ' + address.city
                         }}</q-item-label>
                         <q-item-label caption class="row">
                           <div class="overflow-hidden">
@@ -227,7 +227,7 @@
                         <q-item-label>{{
                           address.nickname
                             ? address.nickname
-                            : "in " + address.city
+                            : 'in ' + address.city
                         }}</q-item-label>
                         <q-item-label caption class="row">
                           <div class="overflow-hidden">
@@ -438,7 +438,7 @@
                           </q-item-label>
                           <q-item-label caption>
                             {{
-                              lift.destination == "home" ? "Abfahrt" : "Ankunft"
+                              lift.destination == 'home' ? 'Abfahrt' : 'Ankunft'
                             }}
                             <br />
                             um {{ lift.time }}
@@ -540,270 +540,250 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import ExtHr from "components/ExtendedHr";
-import CompactCarInfo from "components/CompactCarInfo";
-import LiftEditDateTime from "components/LiftEditDateTime";
+<script setup>
+import { useUserStore } from 'src/stores/user';
 
-import { date } from "quasar";
-
-export default defineComponent({
-  components: { ExtHr, CompactCarInfo, LiftEditDateTime },
-
-  data() {
-    return {
-      maxDaysAhead: 30,
-      lift: {
-        destination: "school", // default set to school, user selects first home/school, then exact address
-        destinationAddressId: 0,
-        startAddressId: 0,
-        carId: null,
-        time: null,
-        timeTab: "arrive",
-        date: 1,
-        dateTab: "weekly",
-        seats: 0, // just to avoid error when rendering slider
-        stops: [
-          {
-            addressId: 31,
-            time: 1593684157000
-          },
-          {
-            addressId: 34,
-            time: 1593684175000
-          }
-        ]
-      },
-      step: 1,
-      showTimePicker: false,
-      openAddLiftConfirm: false,
-      overviewExpanded: false,
-      uploadingDoneValue: 0,
-      uploading: 0, // 0 means not uploading, 1 means upload in progress, 2 means upload successful and -1 means error
-      overviewTab: "route"
-    };
-  },
-  watch: {
-    uploading: function(newv) {
-      if (newv == 2) {
-        setTimeout(_ => {
-          this.uploadingDoneValue = 100;
-        }, 100); // when uploading done, this value is set to 100 to make cool check animation possible
-      } else this.uploadingDoneValue = 0;
-    }
-  },
-  computed: {
-    todayString() {
-      return date.formatDate(new Date(), "YYYY/MM/DD");
+let maxDaysAhead = 30;
+let lift = {
+  destination: 'school', // default set to school, user selects first home/school, then exact address
+  destinationAddressId: 0,
+  startAddressId: 0,
+  carId: null,
+  time: null,
+  timeTab: 'arrive',
+  date: 1,
+  dateTab: 'weekly',
+  seats: 0, // just to avoid error when rendering slider
+  stops: [
+    {
+      addressId: 31,
+      time: 1593684157000,
     },
-
-    allAddresses() {
-      return this.$store.getters["auth/user"].addresses;
+    {
+      addressId: 34,
+      time: 1593684175000,
     },
+  ],
+};
+let step = 1;
+let showTimePicker = false;
+let openAddLiftConfirm = false;
+let overviewExpanded = false;
+let uploadingDoneValue = 0;
+let uploading = 0; // 0 means not uploading, 1 means upload in progress, 2 means upload successful and -1 means error
+let overviewTab = 'route';
 
-    hasOwnAddresses() {
-      return this.allAddresses.filter(item => item.id > 3).length > 0;
-    },
+const appStore = useAppStore();
+const userStore = useUserStore();
 
-    hasOwnCars() {
-      return this.userCars.length > 0;
-    },
+watch(uploading, (newv) => {
+  if (newv == 2) {
+    setTimeout((_) => {
+      uploadingDoneValue = 100;
+    }, 100); // when uploading done, this value is set to 100 to make cool check animation possible
+  } else uploadingDoneValue = 0;
+});
 
-    carOptions() {
-      let cars = [];
-      for (let car of this.userCars) {
-        cars.push(car.licensePlate + " - " + car.brand + " " + car.model);
-      }
-      return cars;
-    },
+const todayString = computed(() => {
+  return date.formatDate(new Date(), 'YYYY/MM/DD');
+});
 
-    userCars() {
-      return this.$store.getters["auth/user"].cars;
-    },
+const allAddresses = computed(() => {
+  return userStore.user.addresses;
+});
 
-    getCarData() {
-      // returns data of selected car, so that user for example can see how many seats would be default
-      let cars = this.userCars;
-      let obj = cars.find(item => {
-        return item.carId == this.lift.carId;
-      });
-      return obj
-        ? obj
-        : {
-            seats: 0,
-            color: "white"
-          }; // fallback when no car has been selected yet
-    },
+const hasOwnAddresses = computed(() => {
+  return allAddresses.filter((item) => item.id > 3).length > 0;
+});
 
-    startCity() {
-      var start = this.lift.startAddressId || 1,
-        address = this.allAddresses.find(a => a.id == start);
-      return address.city;
-    },
+const hasOwnCars = computed(() => {
+  return userCars.length > 0;
+});
 
-    destCity() {
-      var dest = this.lift.destinationAddressId || 1,
-        address = this.allAddresses.find(a => a.id == dest);
-      return address.city;
-    },
-
-    liftValue: {
-      get() {
-        return this.lift;
-      },
-      set(value) {
-        this.lift = value;
-        this.step += 1;
-      }
-    },
-
-    getExactAddresses() {
-      if (this.lift.destination == "school") {
-        return this.allAddresses.filter(item => item.id < 4); // filter only the schools, which have IDs 1 to 3
-
-        // a[0].imagePath = require(pathBegin + 'HDH_cube.jpg')
-        // a[1].imagePath = require(pathBegin + 'HDH_old.jpg')
-        // a[2].imagePath = require(pathBegin + 'WIB_ext.jpg')
-      } else if (this.lift.destination == "home") {
-        return this.allAddresses.filter(item => item.id > 3); // filter only private adresses, IDs 1 to 3 are reserved for schools
-      }
-      return null;
-    },
-
-    getExactStartingPoints() {
-      if (this.lift.destination != "school") {
-        return this.allAddresses.filter(item => item.id < 4); // filter only the schools, which have IDs 1 to 3
-      } else if (this.lift.destination != "home") {
-        return this.allAddresses.filter(item => item.id > 3); // filter only private adresses, IDs 1 to 3 are reserved for schools
-      }
-      return null;
-    },
-
-    departing() {
-      var dest = this.lift.destination;
-      if (dest == "home") return true;
-      else if (dest == "school") return false;
-      else return null;
-    }
-  },
-
-  methods: {
-    fillAndJump() {
-      this.lift = {
-        destination: "school", // default set to school, user selects first home/school, then exact address
-        destinationAddressId: 2,
-        startAddressId: -1,
-        carId: 47,
-        timestamp: "18:30",
-        datestamp: "2021-01-31",
-        seats: 0, // just to avoid error when rendering slider
-        stops: [
-          {
-            addressId: 31,
-            time: 1593684157000
-          },
-          {
-            addressId: 34,
-            time: 1593684175000
-          }
-        ]
-      };
-      this.step = 7;
-    },
-
-    goHome() {
-      window.location.href = "/#/";
-    },
-
-    dateOptions(d) {
-      const limit = this.maxDaysAhead;
-
-      var a = date.getDateDiff(d, new Date(), "days");
-      a = a < limit && a >= 0;
-      return a;
-    },
-
-    async addLift() {
-      if (this.lift.seats == 0) {
-        // case when user didn't want to change number of seats at this lift
-        this.lift.seats = this.getCarData.seats;
-      }
-      this.uploading = 1;
-      this.lift.departAt = this.departing;
-      this.lift.timeTab = this.departing ? "depart" : "arrive";
-      await this.$store.dispatch("auth/addLift", this.lift);
-      this.lift = {
-        destination: "school", // default set to school, user selects first home/school, then exact address
-        destinationAddressId: 0,
-        startingPoint: 0,
-        car: null,
-        seats: 0 // just to avoid error when rendering slider
-      };
-      this.uploading = 2;
-      this.step = 1;
-
-      await new Promise(res => setTimeout(res, 1500)); // wait so that user can see success message
-      this.goHome();
-    },
-
-    resetFields() {
-      location.reload();
-    },
-
-    getImagePath(id) {
-      /* let pathBegin = "../assets/school_images/"; */
-      switch (id) {
-        case 1:
-          return require("../assets/school_images/HDH_cube_resized.jpg");
-        case 2:
-          return require("../assets/school_images/HDH_old_resized.jpg");
-        case 3:
-          return require("../assets/school_images/WIB_ext_resized.jpg");
-        default:
-          return false; // When returning false, no image is shown as fallback.
-      }
-    },
-
-    getDataFromAddressId(id) {
-      let data = this.$store.getters["auth/user"].addresses.find(
-        item => item.id == id
-      );
-      if (data) {
-        if (!data.nickname) {
-          // when no nickname saved, use city as nickname
-          data.nickname = data.city;
-        }
-        return data;
-      }
-      return {
-        nickname: null,
-        street: null,
-        city: null // cases when no id has been set yet though method has been called
-      };
-    },
-
-    getCarFromId(id) {
-      let data = null; // this.userCars.find(item => item.carId == id);
-      if (data) return data;
-      else
-        return {
-          brand: null,
-          model: null // similar case to above method
-        };
-    },
-
-    getStopTime(stamp) {
-      return date.formatDate(stamp, "H:mm");
-    }
-  },
-
-  mounted() {
-    this.$store.commit("setPage", {
-      name: "Fahrt hinzufügen",
-      onlyInNav: true
-    });
+const carOptions = computed(() => {
+  let cars = [];
+  for (let car of userCars) {
+    cars.push(car.licensePlate + ' - ' + car.brand + ' ' + car.model);
   }
+  return cars;
+});
+
+const userCars = computed(() => {
+  return userStore.user.cars;
+});
+
+const getCarData = computed(() => {
+  // returns data of selected car, so that user for example can see how many seats would be default
+  let cars = userCars;
+  let obj = cars.find((item) => {
+    return item.carId == lift.carId;
+  });
+  return obj
+    ? obj
+    : {
+        seats: 0,
+        color: 'white',
+      }; // fallback when no car has been selected yet
+});
+
+const startCity = computed(() => {
+  var start = lift.startAddressId || 1,
+    address = allAddresses.find((a) => a.id == start);
+  return address.city;
+});
+
+const destCity = computed(() => {
+  var dest = lift.destinationAddressId || 1,
+    address = allAddresses.find((a) => a.id == dest);
+  return address.city;
+});
+
+const liftValue = computed({
+  get() {
+    return lift;
+  },
+  set(value) {
+    lift = value;
+    step += 1;
+  },
+});
+
+const getExactAddresses = computed(() => {
+  if (lift.destination == 'school') {
+    return allAddresses.filter((item) => item.id < 4); // filter only the schools, which have IDs 1 to 3
+
+    // a[0].imagePath = require(pathBegin + 'HDH_cube.jpg')
+    // a[1].imagePath = require(pathBegin + 'HDH_old.jpg')
+    // a[2].imagePath = require(pathBegin + 'WIB_ext.jpg')
+  } else if (lift.destination == 'home') {
+    return allAddresses.filter((item) => item.id > 3); // filter only private adresses, IDs 1 to 3 are reserved for schools
+  }
+  return null;
+});
+
+const getExactStartingPoints = computed(() => {
+  if (lift.destination != 'school') {
+    return allAddresses.filter((item) => item.id < 4); // filter only the schools, which have IDs 1 to 3
+  } else if (lift.destination != 'home') {
+    return allAddresses.filter((item) => item.id > 3); // filter only private adresses, IDs 1 to 3 are reserved for schools
+  }
+  return null;
+});
+
+const departing = computed(() => {
+  var dest = lift.destination;
+  if (dest == 'home') return true;
+  else if (dest == 'school') return false;
+  else return null;
+});
+
+function fillAndJump() {
+  lift = {
+    destination: 'school', // default set to school, user selects first home/school, then exact address
+    destinationAddressId: 2,
+    startAddressId: -1,
+    carId: 47,
+    timestamp: '18:30',
+    datestamp: '2021-01-31',
+    seats: 0, // just to avoid error when rendering slider
+    stops: [
+      {
+        addressId: 31,
+        time: 1593684157000,
+      },
+      {
+        addressId: 34,
+        time: 1593684175000,
+      },
+    ],
+  };
+  step = 7;
+}
+
+function goHome() {
+  window.location.href = '/#/';
+}
+
+function dateOptions(d) {
+  const limit = maxDaysAhead;
+
+  var a = date.getDateDiff(d, new Date(), 'days');
+  a = a < limit && a >= 0;
+  return a;
+}
+
+async function addLift() {
+  if (lift.seats == 0) {
+    // case when user didn't want to change number of seats at this lift
+    lift.seats = getCarData.seats;
+  }
+  uploading = 1;
+  lift.departAt = departing;
+  lift.timeTab = departing ? 'depart' : 'arrive';
+  await userStore.addLift(lift);
+  lift = {
+    destination: 'school', // default set to school, user selects first home/school, then exact address
+    destinationAddressId: 0,
+    startingPoint: 0,
+    car: null,
+    seats: 0, // just to avoid error when rendering slider
+  };
+  uploading = 2;
+  step = 1;
+
+  await new Promise((res) => setTimeout(res, 1500)); // wait so that user can see success message
+  goHome();
+}
+
+function getImagePath(id) {
+  /* let pathBegin = "../assets/school_images/"; */
+  switch (id) {
+    case 1:
+      return require('../assets/school_images/HDH_cube_resized.jpg');
+    case 2:
+      return require('../assets/school_images/HDH_old_resized.jpg');
+    case 3:
+      return require('../assets/school_images/WIB_ext_resized.jpg');
+    default:
+      return false; // When returning false, no image is shown as fallback.
+  }
+}
+
+function getDataFromAddressId(id) {
+  let data = userStore.user.addresses.find((item) => item.id == id);
+  if (data) {
+    if (!data.nickname) {
+      // when no nickname saved, use city as nickname
+      data.nickname = data.city;
+    }
+    return data;
+  }
+  return {
+    nickname: null,
+    street: null,
+    city: null, // cases when no id has been set yet though method has been called
+  };
+}
+
+function getCarFromId(id) {
+  let data = null; // userCars.find(item => item.carId == id);
+  if (data) return data;
+  else
+    return {
+      brand: null,
+      model: null, // similar case to above method
+    };
+}
+
+function getStopTime(stamp) {
+  return date.formatDate(stamp, 'H:mm');
+}
+
+onMounted(() => {
+  appStore.setPage({
+    name: 'Fahrt hinzufügen',
+    onlyInNav: true,
+  });
 });
 </script>
 
@@ -813,6 +793,7 @@ export default defineComponent({
     border-right: 1px solid gray;
     padding-right: 5px;
   }
+
   > .col-10 {
     padding-left: 10px;
   }

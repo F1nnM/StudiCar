@@ -21,14 +21,14 @@
             text-color="grey-5"
             :options="[
               { label: 'Einmalig', value: 'fix' },
-              { label: 'Wöchentlich', value: 'weekly' }
+              { label: 'Wöchentlich', value: 'weekly' },
             ]"
           />
           <q-input
             clickable
             @click="
-              _ => {
-                if (this.value.dateTab == 'fix') $refs.datepicker.toggle();
+              (_) => {
+                if (value.dateTab == 'fix') $refs.datepicker.toggle();
                 else $refs.datepicker.showPopup();
               }
             "
@@ -46,7 +46,7 @@
                 color="grey-9"
                 flat
                 @click="
-                  _ => {
+                  (_) => {
                     if (value.dateTab == 'weekly') $refs.datepicker.showPopup();
                   }
                 "
@@ -109,7 +109,7 @@
             text-color="g rey-3"
             :options="[
               { label: 'Ankunft um', value: arriveValue },
-              { label: 'Abfahrt um', value: departValue }
+              { label: 'Abfahrt um', value: departValue },
             ]"
           />
           <Tooltip rgba>
@@ -121,7 +121,7 @@
             <q-input
               class="col-6"
               clickable
-              @click="_ => $refs.timepicker.toggle()"
+              @click="(_) => $refs.timepicker.toggle()"
               readonly
               borderless
               square
@@ -152,113 +152,87 @@
   </div>
 </template>
 
-<script>
-import { date } from "quasar";
-import ExtHR from "components/ExtendedHr";
-import Tooltip from "components/Tooltip";
-import { defineComponent } from "vue";
+<script setup>
 
-export default defineComponent({
-  name: "LiftEditDateTime",
-  components: {
-    Tooltip
-  },
-  props: {
-    value: Object
-  },
-  data() {
-    return {
-      localValue: this.value
-    };
-  },
-  watch: {
-    open: function(val) {}
-  },
-  computed: {
-    getWeekDayFromIndex() {
-      // getter for display while editing
-      var day = this.getRepeatingDayOptions.find(
-        d => d.value == this.value.date
-      );
-      return day ? day.label : null;
-    },
-
-    todayString() {
-      return date.formatDate(new Date(), "YYYY/MM/DD");
-    },
-
-    getRepeatingDayOptions() {
-      return [
-        "Montag",
-        "Dienstag",
-        "Mittwoch",
-        "Donnerstag",
-        "Freitag",
-        "Samstag"
-      ].map((val, index) => ({
-        label: val,
-        value: index + 1
-      }));
-    },
-
-    isDirectionValueCorrect() {
-      const l = this.value;
-      return (
-        (l.destination == "home" && l.timeTab == "depart") ||
-        (l.destination == "school" && l.timeTab == "arrive")
-      );
-    },
-
-    arriveValue() {
-      return this.isDirectionValueCorrect ? "arrive" : "depart";
-    },
-
-    departValue() {
-      return this.isDirectionValueCorrect ? "depart" : "arrive";
-    }
-  },
-  methods: {
-    dateChanged($event) {
-      this.localValue.date = $event
-      this.$emit("input", this.localValue)
-    },
-
-    dateTabChanged($event) {
-      this.localValue.dateTab = $event
-      this.$emit("input", this.localValue)
-    },
-
-    timeChanged($event) {
-      this.localValue.time = $event
-      this.$emit("input", this.localValue)
-    },
-
-    timeTabChanged($event) {
-      this.localValue.timeTab = $event
-      this.$emit("input", this.localValue)
-    },
-
-    emit(val) {
-      this.$emit("input", val);
-    },
-
-    setDateTab() {
-      var tab = this.value.dateTab;
-      if (tab == "weekly") this.localValue.date = 1;
-      // default on monday
-      else this.localValue.date = date.formatDate(new Date(), "YYYY-MM-DD");
-      this.$emit("input", this.localValue);
-    },
-
-    dateOptions(d) {
-      const limit = 30;
-
-      var a = date.getDateDiff(d, new Date(), "days");
-      a = a < limit && a >= 0;
-      return a;
-    }
-  }
+const props = defineProps({
+  value: Object,
 });
+
+let localValue = toRef(props.value);
+
+const getWeekDayFromIndex = computed(() => {
+  // getter for display while editing
+  var day = getRepeatingDayOptions.find((d) => d.value == value.date);
+  return day ? day.label : null;
+});
+const todayString = computed(() => {
+  return date.formatDate(new Date(), 'YYYY/MM/DD');
+});
+const getRepeatingDayOptions = computed(() => {
+  return [
+    'Montag',
+    'Dienstag',
+    'Mittwoch',
+    'Donnerstag',
+    'Freitag',
+    'Samstag',
+  ].map((val, index) => ({
+    label: val,
+    value: index + 1,
+  }));
+});
+const isDirectionValueCorrect = computed(() => {
+  const l = value;
+  return (
+    (l.destination == 'home' && l.timeTab == 'depart') ||
+    (l.destination == 'school' && l.timeTab == 'arrive')
+  );
+});
+const arriveValue = computed(() => {
+  return isDirectionValueCorrect.value ? 'arrive' : 'depart';
+});
+const departValue = computed(() => {
+  return isDirectionValueCorrect.value ? 'depart' : 'arrive';
+});
+function dateChanged($event) {
+  localValue.date = $event;
+  $emit('input', localValue);
+}
+
+function dateTabChanged($event) {
+  localValue.dateTab = $event;
+  $emit('input', localValue);
+}
+
+function timeChanged($event) {
+  localValue.time = $event;
+  $emit('input', localValue);
+}
+
+function timeTabChanged($event) {
+  localValue.timeTab = $event;
+  $emit('input', localValue);
+}
+
+function emit(val) {
+  $emit('input', val);
+}
+
+function setDateTab() {
+  var tab = value.dateTab;
+  if (tab == 'weekly') localValue.date = 1;
+  // default on monday
+  else localValue.date = date.formatDate(new Date(), 'YYYY-MM-DD');
+  $emit('input', localValue);
+}
+
+function dateOptions(d) {
+  const limit = 30;
+
+  var a = date.getDateDiff(d, new Date(), 'days');
+  a = a < limit && a >= 0;
+  return a;
+}
 </script>
 
 <style lang="scss" scoped>

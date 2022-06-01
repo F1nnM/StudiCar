@@ -90,122 +90,111 @@
   </q-dialog>
 </template>
 
-<script>
-import { date } from "quasar";
-import ExtHr from "components/ExtendedHr";
-import LiftOffer from "components/LiftOffer";
-import { sendApiRequest, SQL_GET_MARKETPLACE_OFFER } from "../ApiAccess";
-import { defineComponent } from "vue";
+<script setup>
+import { useUserStore } from 'src/stores/user';
 
-export default defineComponent({
-  name: "QRLiftDisplay",
-  components: {
-    LiftOffer
-  },
-  data() {
-    return {
-      viewTab: "info",
-      lift: null, // is the lift object returned by the server
-      err: null,
-      alreadyMemberOfLift: false,
-      invitingUserName: null,
-      denied: false,
-      liftData: "" // computed property makes no sence because url as depending value is not reactive as well
-    };
-  },
-  computed: {
-    liftId() {
-      if (this.liftData) return parseInt(this.liftData.split("#i")[0]);
-      else return -1;
-    },
-    invitingUserId() {
-      return this.liftData.split("#i")[1];
-    },
-    userPrefs() {
-      return this.$store.getters["auth/user"].prefs;
-    },
-    prefsMatching() {
-      if (!this.lift) return null;
-      var liftPrefs = this.lift.driver.prefs;
-      var matching = Object.keys(liftPrefs).every(pref => {
-        var liftPrefValue = prefToInt(liftPrefs[pref]),
-          userPrefValue = prefToInt(this.userPrefs[pref]);
+let viewTab = 'info';
+let lift = null; // is the lift object returned by the server
+let err = null;
+let alreadyMemberOfLift = false;
+let invitingUserName = null;
+let denied = false;
+let liftData = ''; // computed property makes no sence because url as depending value is not reactive as well
 
-        return liftPrefValue >= userPrefValue;
-        function prefToInt(val) {
-          switch (val) {
-            case "GREEN":
-              return 0;
-            case "YELLOW":
-              return 1;
-            case "RED":
-              return 2;
-          }
-        }
-      });
+const userStore = useUserStore()
 
-      return matching;
-    }
-  },
-  watch: {
-    $route() {
-      // const forceReloadData = true
-
-      this.denied = false; // new round, new luck
-      this.refresh();
-    }
-  },
-  methods: {
-    emitRequest(val) {
-      this.$emit("request", val); // model is string
-      this.hide(); // close it after requesting
-    },
-
-    hide() {
-      this.denied = true; // just to be sure, in case user made it to close without denying
-    },
-
-    refresh() {
-      var locArr = window.location.href.split("?qrLiftData=");
-      if (locArr.length > 1) {
-        var data = locArr[1];
-        data = data.split("#0.")[0]; // cut the random part
-        if (this.liftData != data) {
-          this.liftData = data;
-          this.lift = null; // when new data wanted, vars are reset again
-        }
-        var currentLifts = this.$store.getters["auth/user"].chatLifts,
-          a = currentLifts.find(l => l.id == this.liftId);
-        if (a) {
-          this.alreadyMemberOfLift = true;
-          this.lift = null; // to be sure
-        } else {
-          this.callServer();
-        }
-      } else this.liftData = "";
-    },
-
-    callServer() {
-      sendApiRequest(
-        SQL_GET_MARKETPLACE_OFFER,
-        {
-          uuid: this.liftId, // a uuid, is as a longer and more secure liftId
-          invitingUserId: this.invitingUserId
-        },
-        data => {
-          this.lift = data.lift;
-          this.invitingUserName = data.invitingUserName;
-        },
-        err_ => {
-          this.err = err_;
-        }
-      );
-    }
-  },
-  mounted() {
-    this.refresh();
-  }
+const liftId = computed(() => {
+  if (liftData) return parseInt(liftData.split('#i')[0]);
+  else return -1;
 });
+
+const invitingUserId = computed(() => {
+  return liftData.split('#i')[1];
+});
+
+const userPrefs = computed(() => {
+  return userStore.user.prefs;
+});
+
+const prefsMatching = computed(() => {
+  if (!lift) return null;
+  var liftPrefs = lift.driver.prefs;
+  var matching = Object.keys(liftPrefs).every((pref) => {
+    var liftPrefValue = prefToInt(liftPrefs[pref]),
+      userPrefValue = prefToInt(userPrefs[pref]);
+
+    return liftPrefValue >= userPrefValue;
+    function prefToInt(val) {
+      switch (val) {
+        case 'GREEN':
+          return 0;
+        case 'YELLOW':
+          return 1;
+        case 'RED':
+          return 2;
+      }
+    }
+  });
+
+  return matching;
+});
+
+watch($route, () => {
+  // const forceReloadData = true
+
+  denied = false; // new round, new luck
+  refresh();
+});
+
+function emitRequest(val) {
+  $emit('request', val); // model is string
+  hide(); // close it after requesting
+}
+
+function hide() {
+  denied = true; // just to be sure, in case user made it to close without denying
+}
+
+function refresh() {
+  var locArr = window.location.href.split('?qrLiftData=');
+  if (locArr.length > 1) {
+    var data = locArr[1];
+    data = data.split('#0.')[0]; // cut the random part
+    if (liftData != data) {
+      liftData = data;
+      lift = null; // when new data wanted, vars are reset again
+    }
+    var currentLifts = userStore.user.chatLifts,
+      a = currentLifts.find((l) => l.id == liftId);
+    if (a) {
+      alreadyMemberOfLift = true;
+      lift = null; // to be sure
+    } else {
+      callServer();
+    }
+  } else liftData = '';
+}
+
+function callServer() {
+  sendApiRequest(
+    SQL_GET_MARKETPLACE_OFFER,
+    {
+      uuid: liftId, // a uuid, is as a longer and more secure liftId
+      invitingUserId: invitingUserId,
+    },
+    (data) => {
+      lift = data.lift;
+      invitingUserName = data.invitingUserName;
+    },
+    (err_) => {
+      err = err_;
+    }
+  );
+}
+
+onMounted(() => {
+  refresh();
+})
 </script>
 
 <style lang="scss" scoped></style>

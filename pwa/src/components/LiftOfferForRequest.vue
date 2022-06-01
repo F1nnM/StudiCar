@@ -58,7 +58,7 @@
           }}</q-badge>
           <div>
             Am {{ dateText }} (in {{ daysLeft }} Tage{{
-              daysLeft != 1 ? "n" : ""
+              daysLeft != 1 ? 'n' : ''
             }})
           </div>
           <div>{{ timeText }} Uhr</div>
@@ -92,11 +92,11 @@
             </q-avatar>
             <div class="self-center">
               {{ numberOfRequests }} Anfrage{{
-                numberOfRequests != 1 ? "n" : ""
+                numberOfRequests != 1 ? 'n' : ''
               }}
               <span class="text-h5 q-mx-sm">☞</span>
-              {{ seatsLeft }} freie{{ seatsLeft == 1 ? "r" : "" }}
-              {{ seatsLeft != 1 ? "Plätze" : "Platz" }}
+              {{ seatsLeft }} freie{{ seatsLeft == 1 ? 'r' : '' }}
+              {{ seatsLeft != 1 ? 'Plätze' : 'Platz' }}
             </div>
           </div>
         </q-slide-item>
@@ -105,115 +105,95 @@
   </div>
 </template>
 
-<script>
-import { date } from "quasar";
-import { defineComponent } from "vue";
+<script setup>
+defineProps({
+  lift: Object,
+  numberOfRequests: Number,
+});
+let showLiftDetails = false;
+const enoughSeatsLeft = computed(() => {
+  return numberOfRequests <= seatsLeft && seatsLeft > 0;
+});
 
-export default defineComponent({
-  name: "LiftOfferForRequest",
-  components: {},
-  props: {
-    lift: Object,
-    numberOfRequests: Number
-  },
-  data() {
-    return {
-      showLiftDetails: false
-    };
-  },
-  computed: {
-    enoughSeatsLeft() {
-      return this.numberOfRequests <= this.seatsLeft && this.seatsLeft > 0;
-    },
+const timeText = computed(() => {
+  var isArriveBy = lift.arriveBy != '00:00:00';
+  var time = isArriveBy ? lift.arriveBy : lift.departAt,
+    text = isArriveBy ? 'Ankunft' : 'Abfahrt';
+  time = time.slice(0, 5); // simply cut the seconds
+  return text + ' um ' + time;
+});
 
-    timeText() {
-      var isArriveBy = this.lift.arriveBy != "00:00:00";
-      var time = isArriveBy ? this.lift.arriveBy : this.lift.departAt,
-        text = isArriveBy ? "Ankunft" : "Abfahrt";
-      time = time.slice(0, 5); // simply cut the seconds
-      return text + " um " + time;
-    },
+const dateText = computed(() => {
+  return date.formatDate(new Date(lift.date), 'dddd, DD. MMMM', {
+    days: [
+      'Sonntag',
+      'Montag',
+      'Dienstag',
+      'Mittwoch',
+      'Donnerstag',
+      'Freitag',
+      'Samstag',
+    ],
+    months: [
+      'Januar',
+      'Februar',
+      'März',
+      'April',
+      'Mai',
+      'Juni',
+      'Juli',
+      'August',
+      'September',
+      'Oktober',
+      'November',
+      'Dezember',
+    ],
+  });
+});
 
-    dateText() {
-      return date.formatDate(new Date(this.lift.date), "dddd, DD. MMMM", {
-        days: [
-          "Sonntag",
-          "Montag",
-          "Dienstag",
-          "Mittwoch",
-          "Donnerstag",
-          "Freitag",
-          "Samstag"
-        ],
-        months: [
-          "Januar",
-          "Februar",
-          "März",
-          "April",
-          "Mai",
-          "Juni",
-          "Juli",
-          "August",
-          "September",
-          "Oktober",
-          "November",
-          "Dezember"
-        ]
-      });
-    },
+const daysLeft = computed(() => {
+  return date.getDateDiff(new Date(lift.date), new Date(), 'days');
+});
 
-    daysLeft() {
-      return date.getDateDiff(new Date(this.lift.date), new Date(), "days");
-    },
+const liftSoonLabel = computed(() => {
+  const diff = date.getDateDiff(
+    lift.arriveBy || lift.departAt,
+    new Date()
+  );
+  switch (diff) {
+    case 0:
+      return 'Heute';
+      break;
+    case 1:
+      return 'Morgen';
+      break;
+    case 2:
+      return 'Übermorgen';
+      break;
+    default:
+      return false;
+  }
+});
 
-    liftSoonLabel() {
-      const diff = date.getDateDiff(
-        this.lift.arriveBy || this.lift.departAt,
-        new Date()
-      );
-      switch (diff) {
-        case 0:
-          return "Heute";
-          break;
-        case 1:
-          return "Morgen";
-          break;
-        case 2:
-          return "Übermorgen";
-          break;
-        default:
-          return false;
-      }
-    },
+const seatsLeft = computed(() => {
+  return lift.car.seatsWithoutDriver - lift.passengers.length;
+});
 
-    seatsLeft() {
-      return this.lift.car.seatsWithoutDriver - this.lift.passengers.length;
-    }
-  },
-  methods: {
-    timeFormatted(dateString) {
-      return date.formatDate(new Date(dateString), "H:mm");
-    },
+function getCampusLabel(campusId, name) {
+  switch (campusId) {
+    case 1:
+      return 'Würfel';
+    case 2:
+      return 'Alte DH';
+    case 3:
+      return 'Kloster';
+    default:
+      return name;
+  }
+}
 
-    emit(type) {
-      this.$emit(type);
-    },
-
-    getCampusLabel(campusId, name) {
-      switch (campusId) {
-        case 1:
-          return "Würfel";
-        case 2:
-          return "Alte DH";
-        case 3:
-          return "Kloster";
-        default:
-          return name;
-      }
-    },
-
-    acceptAll() {
-      /* this.$q
+function acceptAll() {
+  /* $q
         .dialog({
           title: "Alle annehmen",
           message: "Willst du alle Anfragen direkt annehmen?",
@@ -221,12 +201,9 @@ export default defineComponent({
           persistent: true
         })
         .onOk(() => { */
-      this.$emit("acceptAll", this.lift.id);
-      /* }); */
-    }
-  },
-  mounted() {}
-});
+  $emit('acceptAll', lift.id);
+  /* }); */
+}
 </script>
 
 <style scoped lang="scss">

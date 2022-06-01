@@ -6,12 +6,11 @@
   >
     <div
       class="colored-scale overflow-hidden full-width"
-      :style="coloredScaleGradient"
     >
       <div v-if="showLine" class="display-line" :style="lineTransform"></div>
       <div class="circle-shaper full-width full-height text-center q-pb-md">
         <div class="text-anchor flex flex-center q-ma-md vertical-bottom">
-          <p class="q-pa-none q-pt-sm text-red-3" v-if="!angle">
+          <p class="q-pa-none q-pt-sm text-red-3" v-if="!value">
             Noch keine Daten
           </p>
           <slot></slot>
@@ -21,70 +20,47 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "ColoredMeter",
-  components: {},
-  model: {
-    prop: "angle",
-    event: "input"
+<script setup>
+defineProps({
+  value: {
+    type: Number,
+    required: true,
   },
-  props: {
-    angle: {
-      type: Number,
-      required: true
-    },
-    width: {
-      type: String,
-      required: true
-    },
-    minInput: {
-      type: Number,
-      default: -50
-    },
-    maxInput: {
-      type: Number,
-      default: 50
-    }
+  width: {
+    type: String,
+    required: true,
   },
-  data() {
-    return {
-      gradient: this.$store.state.liftDriverRatioGradient,
-      angleMin: 1, // smalled rotation value, should be bit outer the left red area
-      angleMax: 178 // should be bit outer the righ red area
-    };
+  minInput: {
+    type: Number,
+    default: -50,
   },
-  computed: {
-    coloredScaleGradient() {
-      return `background: ${this.gradient.replace("\n", "")} !important;`;
-    },
-
-    lineTransform() {
-      return `transform: translate(-50%, -50%) rotate(${this.angleToRotate}deg);`;
-    },
-
-    angleToRotate() {
-      var partOfInputRange =
-          (this.angle - this.minInput) / (this.maxInput - this.minInput), // value smaller or equal 1
-        angleDiff = this.angleMax - this.angleMin;
-      return partOfInputRange * angleDiff + this.angleMin;
-    },
-
-    showLine() {
-      return (
-        this.angle >= this.minInput && this.angle <= this.maxInput && this.angle
-      );
-    }
+  maxInput: {
+    type: Number,
+    default: 50,
   },
-  watch: {},
-  methods: {
-    emit() {
-      this.$emit("input", this.angle);
-    }
-  }
 });
+
+let angleMin = 1; // smalled rotation value, should be bit outer the left red area
+let angleMax = 178; // should be bit outer the righ red area
+
+const lineTransform = computed(() => {
+  let partOfInputRange =
+      (value - minInput) / (maxInput - minInput), // value smaller or equal 1
+    angleDiff = angleMax - angleMin;
+  let angleForCss = partOfInputRange * angleDiff + angleMin;
+  return `transform: translate(-50%, -50%) rotate(${angleForCss}deg);`;
+});
+
+
+const showLine = computed(() => {
+  return (
+    value >= minInput && value <= maxInput && value
+  );
+});
+
+function emit() {
+  $emit('input', value);
+}
 </script>
 
 <style lang="scss" scoped>
@@ -100,6 +76,8 @@ export default defineComponent({
   height: 200%;
   border-top-left-radius: 50%;
   border-top-right-radius: 50%;
+  background: linear-gradient(90deg, rgba(255,0,0,1) 0%, rgba(236,255,0,1) 8%, 
+    rgba(0,255,0,1) 21%, rgba(81,255,0,1) 41%, rgba(236,255,0,1) 66%, rgba(255,0,0,1) 100%) !important
 }
 
 .display-line {

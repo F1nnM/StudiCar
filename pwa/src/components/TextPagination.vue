@@ -14,57 +14,44 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
+<script setup>
+defineProps({
+  value: String,
+  options: Array,
+  color: String,
+  labelCapitalized: Boolean,
+  specialLabel: Boolean,
+});
 
-export default defineComponent({
-  name: "TextPagination",
-  props: {
-    value: String,
-    options: Array,
-    color: String,
-    labelCapitalized: Boolean,
-    specialLabel: Boolean,
-  },
-  methods: {
-    emit(val) {
-      this.$emit("input", val);
-    },
+function emit(val) {
+  $emit('input', val);
+}
 
-    pageLabel(page) {
-      var text = page.label || page;
-      if (this.specialLabel) {
-        text = text.replace("/", ".") + "."; // special label, needed for this use
-      } else {
-        if (this.labelCapitalized)
-          text = text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-      }
-      return text;
-    },
-  },
-  computed: {
-    optionsComputed() {
-      if (this.options.length) {
-        if (this.options[0].val) return this.options;
-        else {
-          var newOptions = [];
-          this.options.forEach((page) =>
-            newOptions.push({
-              val: page,
-            })
-          );
-          return newOptions;
-        }
-      } else return [];
-    },
-  },
-  data() {
-    return {};
-  },
+function pageLabel(page) {
+  var text = page.label || page;
+  if (specialLabel) {
+    text = text.replace('/', '.') + '.'; // special label, needed for this use
+  } else {
+    if (labelCapitalized)
+      text = text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+  }
+  return text;
+}
 
-  mounted() {},
+const optionsComputed = computed(() => {
+  if (options.length) {
+    if (options[0].val) return options;
+    else {
+      var newOptions = [];
+      options.forEach((page) =>
+        newOptions.push({
+          val: page,
+        })
+      );
+      return newOptions;
+    }
+  } else return [];
 });
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

@@ -20,26 +20,14 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import SettingScope from "components/SettingScope";
-export default defineComponent({
-  components: {
-    SettingScope
-  },
+<script setup>
+import { useAppStore } from 'src/stores/app';
 
-  data() {
-    return {
-      test: true
-    };
-  },
+const appStore = useAppStore();
 
-  computed: {},
+let test = true;
 
-  methods: {},
-
-  mounted() {
-    this.$store.commit("setPage", "Spielplatz");
-  }
+onMounted(() => {
+  appStore.setPage('Spielplatz');
 });
 </script>

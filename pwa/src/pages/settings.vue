@@ -83,25 +83,21 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import SignOutButton from "components/SignOutButton";
+<script setup>
+import { useAppStore } from 'src/stores/app';
+import { useUserStore } from 'src/stores/user';
+import { onMounted } from 'vue';
 
-export default defineComponent({
-  data() {
-    return {
-      notificationTestRunning: false,
-      notificationTestPassed: false,
-      clipboardTestPassed: false
-    };
-  },
-  components: {
-    SignOutButton
-  },
-  computed: {
-    allSettings() {
-      return {
-        /* {
+let notificationTestRunning = false;
+let notificationTestPassed = false;
+let clipboardTestPassed = false;
+
+const appStore = useAppStore();
+const userStore = useUserStore();
+
+const allSettings = computed(() => {
+  return {
+    /* {
           title: "Ticker vom Postillon anzeigen",
           enabledText:
             "Im Moment wird der Ticker vom Postillon in der Seitenansicht angezeigt",
@@ -109,106 +105,105 @@ export default defineComponent({
             "Im Moment wird kein Ticker vom Postillon in der Seitenansicht angezeigt",
           setterProp: "enablePostillonNewsFeed",
         }, */
-      };
-    },
-    test: {
-      get() {
-        return true;
-      },
-      set(value) {
-        alert("New value: " + value);
-      }
-    },
-    dataSaver: {
-      get() {
-        return this.$store.dataSaver;
-      },
-      set(value) {
-        this.$store.dispatch("dataSaver", value);
-      }
-    },
+  };
+});
 
-    askAgainWhenAppreciatingNewPassenger: {
-      get() {
-        return this.$store.state.settings.askAgainWhenAppreciatingNewPassenger;
-      },
-      set(value) {
-        this.$store.commit("setAskAgainWhenAppreciatingNewPassenger", value);
-      }
-    },
-
-    enablePostillonNewsFeed: {
-      get() {
-        return this.$store.state.settings.enablePostillonNewsFeed;
-      },
-      set(value) {
-        this.$store.commit("setEnablePostillonNewsFeed", value);
-      }
-    }
+const test = computed({
+  get() {
+    return true;
   },
-  methods: {
-    changeComputedProp(setterProp) {
-      this[setterProp] = !this[setterProp];
-    },
-
-    getValueOfProp(prop) {
-      return this[prop];
-    },
-
-    async testNotification() {
-      this.notificationTestRunning = true;
-      this.$q
-        .dialog({
-          cancel: true,
-          persistent: true,
-          title: "Testablauf",
-          message: `Wenn du den Test startest, senden wir dir über den Server eine Nachricht. Wenn du keine Benachrichtigung
-              kriegen solltest, dann schau in den FAQ nach, woran es liegen könnte.`
-        })
-        .onOk(_ => {
-          this.$store.dispatch("auth/testPushNotification");
-        });
-    },
-
-    async testClipboardAccess() {
-      try {
-        var board = navigator.clipboard;
-        if (!board) throw Error;
-        board
-          .readText()
-          .then(_ => {
-            this.clipboardTestPassed = true;
-            this.$q.dialog({
-              title: "Test erfolgreich",
-              message: `StudiCar hat Zugriff auf deine Zwischenablage. 
-            Jetzt kannst du Inhalte daraus über den StudiCar Scanner verarbeiten lassen.`
-            });
-          })
-          .catch(err => {
-            this.$q.notify({
-              type: "Zugriff verweigert",
-              message: `Bitte erlaube den Zugriff auf die Zwischenablage, wenn danach gefragt wird
-              und stelle in den Einstellungen sicher, dass du den Zugriff nicht bereits blockiert hast.`
-            });
-          });
-      } catch (e) {
-        this.$q.notify({
-          type: "Test fehlgeschlagen",
-          message: `Ein ungewöhnlicher Fehler ist aufgetreten, bitte melde dich beim Support`
-        });
-      }
-    }
+  set(value) {
+    alert('New value: ' + value);
   },
-  mounted() {
-    this.$store.commit("setPage", {
-      name: "Einstellungen"
+});
+
+const dataSaver = computed({
+  get() {
+    return appStore.dataSaver;
+  },
+  set(value) {
+    appStore.setDataSaver(value);
+  },
+});
+
+const askAgainWhenAppreciatingNewPassenger = computed({
+  get() {
+    return appStore.askAgainWhenAppreciatingNewPassenger;
+  },
+  set(value) {
+    appStore.setAskAgainWhenAppreciatingNewPassenger(value);
+  },
+});
+
+const enablePostillonNewsFeed = computed({
+  get() {
+    return appStore.enablePostillonNewsFeed;
+  },
+  set(value) {
+    appStore.setEnablePostillonNewsFeed(value);
+  },
+});
+
+function changeComputedProp(setterProp) {
+  this[setterProp] = !this[setterProp];
+}
+
+function getValueOfProp(prop) {
+  return this[prop];
+}
+
+async function testNotification() {
+  notificationTestRunning = true;
+  $q.dialog({
+    cancel: true,
+    persistent: true,
+    title: 'Testablauf',
+    message: `Wenn du den Test startest, senden wir dir über den Server eine Nachricht. Wenn du keine Benachrichtigung
+              kriegen solltest, dann schau in den FAQ nach, woran es liegen könnte.`,
+  }).onOk(() => {
+    userStore.testPushNotification();
+  });
+}
+
+async function testClipboardAccess() {
+  try {
+    var board = navigator.clipboard;
+    if (!board) throw Error;
+    board
+      .readText()
+      .then(() => {
+        clipboardTestPassed = true;
+        $q.dialog({
+          title: 'Test erfolgreich',
+          message: `StudiCar hat Zugriff auf deine Zwischenablage.
+            Jetzt kannst du Inhalte daraus über den StudiCar Scanner verarbeiten lassen.`,
+        });
+      })
+      .catch((err) => {
+        $q.notify({
+          type: 'Zugriff verweigert',
+          message: `Bitte erlaube den Zugriff auf die Zwischenablage, wenn danach gefragt wird
+              und stelle in den Einstellungen sicher, dass du den Zugriff nicht bereits blockiert hast.`,
+        });
+      });
+  } catch (e) {
+    $q.notify({
+      type: 'Test fehlgeschlagen',
+      message:
+        'Ein ungewöhnlicher Fehler ist aufgetreten, bitte melde dich beim Support',
     });
-
-    navigator.serviceWorker.onnotificationclick = notifEvent => {
-      notifEvent.notification.close();
-
-      if (this.notificationTestRunning) this.notificationTestPassed = true;
-    };
   }
+}
+
+onMounted(() => {
+  appStore.setPage({
+    name: 'Einstellungen',
+  });
+
+  navigator.serviceWorker.onnotificationclick = (notifEvent) => {
+    notifEvent.notification.close();
+
+    if (notificationTestRunning) notificationTestPassed = true;
+  };
 });
 </script>

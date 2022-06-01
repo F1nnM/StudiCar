@@ -1167,7 +1167,6 @@ module.exports = {
                           (SELECT
                               JSON_ARRAYAGG(
                                   JSON_OBJECT(
-                                      'modelId', cars.MODEL_ID,
                                       'carId', cars.ID,
                                       'brand', cars.BRAND,
                                       'model', cars.MODEL,
@@ -1644,12 +1643,12 @@ module.exports = {
           });
 
           await runQuery(
-            "INSERT INTO fcm_tokens (USER_ID, TOKEN) VALUES ((SELECT ID FROM users WHERE ID = ?), '0') ON DUPLICATE KEY UPDATE TOKEN='0'",
+            "INSERT INTO fcm_tokens (USER_ID, TOKEN) VALUES ((SELECT ID FROM users WHERE FB_ID = ?), '0') ON DUPLICATE KEY UPDATE TOKEN='0'",
             [options.secretFbId]
           ).catch((err) => {
             /* propably duplicate entry, do nothing */
           });
-          res.end("added");
+          return res.end("added");
         }
         res.end("existed");
       }

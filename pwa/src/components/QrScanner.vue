@@ -8,7 +8,7 @@ Is not really a module/component by nature as it is that hard connected to MainL
           <qrcode-stream
             :style="
               'height: 100vh; transition: .5s; opacity:' +
-                (scannerReady ? 1 : 0)
+              (scannerReady ? 1 : 0)
             "
             v-if="open"
             @init="onInit"
@@ -37,7 +37,7 @@ Is not really a module/component by nature as it is that hard connected to MainL
           </qrcode-stream>
         </div>
       </q-slide-transition>
-      <div v-if="!open" style="height: 100vh;"></div>
+      <div v-if="!open" style="height: 100vh"></div>
       <q-dialog v-model="scannerHelp">
         <q-card>
           <q-card-section class="row items-center q-pa-md">
@@ -61,138 +61,112 @@ Is not really a module/component by nature as it is that hard connected to MainL
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import { QrcodeStream, QrcodeDropZone, QrcodeCapture } from "vue-qrcode-reader";
-
-export default defineComponent({
-  components: { QrcodeStream },
-  name: "QrScanner",
-
-  props: {
-    open: {
-      type: Boolean,
-      required: true
-    }
+<script setup>
+defineProps({
+  open: {
+    type: Boolean,
+    required: true,
   },
-  model: {
-    prop: "open",
-    event: "input"
+});
+
+let result = '';
+let otherQR = false;
+let error = '';
+let scannerReady = false;
+let scannerHelp = false;
+
+watch(
+  open,
+  (newValue, oldValue) => {
+    if (newValue == true && oldValue == false) scannerReady = false; // so that we always have fade animation on scanner init
   },
+  { immediate: true }
+);
 
-  data() {
-    return {
-      result: "",
-      otherQR: false,
-      error: "",
-      scannerReady: false,
-      scannerHelp: false
-    };
-  },
-  computed: {},
-  watch: {
-    open: {
-      immediate: true,
-      handler(new_, old_) {
-        if (new_ == true && old_ == false) this.scannerReady = false; // so that we always have fade animation on scanner init
-      }
-    }
-  },
-  methods: {
-    emit() {
-      this.$emit("input", this.open);
-    },
+function emit() {
+  $emit('input', open);
+}
 
-    async onInit(promise) {
-      promise
-        .then(_ => {
-          this.scannerReady = true;
-        })
-        .catch(error => {
-          this.scannerReady = false;
-          var errObj = (_ => {
-            switch (error.name) {
-              case "NotAllowedError":
-                return {
-                  m: "Zugriff blockiert",
-                  c:
-                    "Du hast StudiCar verboten, auf die Kamera zuzugreifen. Für dieses Problem haben wir im Support Lösungen bereitgestellt."
-                };
-              case "NotFoundError":
-                return {
-                  m: "Keine Kamera",
-                  c: "StudiCar konnte keine Kamera finden"
-                };
-              case "NotSupportedError":
-                return {
-                  m: "Zertifikatsfehler",
-                  c:
-                    "Bitte melde dich beim Support, wenn das Problem weiterhin besteht"
-                };
-              case "NotReadableError":
-                return {
-                  m: "Zugriff verweigert",
-                  c:
-                    "Deine Kamera wird im Moment von einem anderen Prozess verwendet"
-                };
-              case "OverconstrainedError":
-                return {
-                  m: "Nicht kompatibel",
-                  c:
-                    "Deine Kamera scheint nicht kompatibel zu sein. Bitte schreibe dem Support dein Gerätemodell"
-                };
-              case "StreamApiNotSupportedError":
-                return {
-                  m: "Stream API Fehler",
-                  c:
-                    "Dein Browser unterstützt die Stream API nicht. Probier es bitte mit einem anderen Browser"
-                };
-              default:
-                return {
-                  m: "Fehler aufgetreten",
-                  c: error.toString()
-                };
-            }
-          })();
+async function onInit(promise) {
+  promise
+    .then((_) => {
+      scannerReady = true;
+    })
+    .catch((error) => {
+      scannerReady = false;
+      var errObj = ((_) => {
+        switch (error.name) {
+          case 'NotAllowedError':
+            return {
+              m: 'Zugriff blockiert',
+              c: 'Du hast StudiCar verboten, auf die Kamera zuzugreifen. Für dieses Problem haben wir im Support Lösungen bereitgestellt.',
+            };
+          case 'NotFoundError':
+            return {
+              m: 'Keine Kamera',
+              c: 'StudiCar konnte keine Kamera finden',
+            };
+          case 'NotSupportedError':
+            return {
+              m: 'Zertifikatsfehler',
+              c: 'Bitte melde dich beim Support, wenn das Problem weiterhin besteht',
+            };
+          case 'NotReadableError':
+            return {
+              m: 'Zugriff verweigert',
+              c: 'Deine Kamera wird im Moment von einem anderen Prozess verwendet',
+            };
+          case 'OverconstrainedError':
+            return {
+              m: 'Nicht kompatibel',
+              c: 'Deine Kamera scheint nicht kompatibel zu sein. Bitte schreibe dem Support dein Gerätemodell',
+            };
+          case 'StreamApiNotSupportedError':
+            return {
+              m: 'Stream API Fehler',
+              c: 'Dein Browser unterstützt die Stream API nicht. Probier es bitte mit einem anderen Browser',
+            };
+          default:
+            return {
+              m: 'Fehler aufgetreten',
+              c: error.toString(),
+            };
+        }
+      })();
 
-          this.errorMessage(errObj);
-          this.emit();
-        });
-    },
+      errorMessage(errObj);
+      emit();
+    });
+}
+function errorMessage(errObj) {
+  $q.notify({
+    type: 'negative',
+    message: errObj.m,
+    caption: errObj.c || '', // when no caption set, empty string
+  });
+}
+function decoded(res) {
+  const type = res.slice(0, 1),
+    key = res.slice(1);
 
-    errorMessage(errObj) {
-      this.$q.notify({
-        type: "negative",
-        message: errObj.m,
-        caption: errObj.c || "" // when no caption set, empty string
-      });
-    },
-
-    decoded(res) {
-      const type = res.slice(0, 1),
-        key = res.slice(1);
-
-      if ("ul".includes(type))
-        this.$emit("result", {
-          type: type,
-          res: key
-        });
-      else {
-        this.otherQR = true;
-        setTimeout(() => {
-          this.otherQR = false;
-        }, 1500);
-      }
-    },
-
-    swiped(info) {
-      this.$emit("swipe", info);
-    }
-  },
-
-  ready() {
-    this.scannerReady = false;
+  if ('ul'.includes(type))
+    $emit('result', {
+      type: type,
+      res: key,
+    });
+  else {
+    otherQR = true;
+    setTimeout(() => {
+      otherQR = false;
+    }, 1500);
   }
+}
+function swiped(info) {
+  $emit('swipe', info);
+}
+
+onMounted(() => {
+  scannerReady = false;
 });
 </script>
 
@@ -200,7 +174,7 @@ export default defineComponent({
 .scanning {
   position: relative;
   &:after {
-    content: "";
+    content: '';
     position: absolute;
     top: 0%;
     left: 0;
@@ -222,7 +196,7 @@ export default defineComponent({
   height: 100%;
   width: 100%;
   &:after {
-    content: "";
+    content: '';
     position: absolute;
     width: 5px;
     height: 5px;
@@ -257,7 +231,7 @@ export default defineComponent({
   max-height: 0vh;
   position: relative;
   &:after {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
@@ -321,7 +295,7 @@ export default defineComponent({
       position: relative;
       &:after {
         position: absolute;
-        content: "";
+        content: '';
         bottom: 0;
         left: 0;
         display: block;

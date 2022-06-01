@@ -75,12 +75,12 @@
         </template>
         <template v-slot:after v-if="splitterPos.current <= 70">
           <q-slide-transition>
-            <q-list class="rounded-borders" style="width: 100%;">
+            <q-list class="rounded-borders" style="width: 100%">
               <q-item class="q-my-md">
                 <q-item-section>
                   <span
                     class="text-h5 overflow q-pt-xs custom-underline c-u-3 c-u-md c-u-l"
-                    >{{ viewedUser.name.split(" ")[0] }}</span
+                    >{{ viewedUser.name.split(' ')[0] }}</span
                   >
                 </q-item-section>
                 <q-item-section avatar class="q-mr-md">
@@ -123,7 +123,10 @@
                       name="arrow_back_ios"
                       size="sm"
                       color="grey-5"
-                      style="transform: rotate(-45deg); transform-origin: right center"
+                      style="
+                        transform: rotate(-45deg);
+                        transform-origin: right center;
+                      "
                     />
                     <!-- <q-btn @click="toggleFriend" flat dense :ripple="false">
                       <q-avatar>
@@ -152,7 +155,7 @@
                       :right="friended.me"
                       @click="toggleFriend"
                       v-touch-hold.mouse="
-                        _ => {
+                        (_) => {
                           showFriendGuide = true;
                         }
                       "
@@ -218,20 +221,20 @@
                       v-for="pref in [
                         {
                           val: 'talk',
-                          icon: 'record_voice_over'
+                          icon: 'record_voice_over',
                         },
                         {
                           val: 'talkMorning',
-                          icon: 'alarm'
+                          icon: 'alarm',
                         },
                         {
                           val: 'smoking',
-                          icon: 'smoking_rooms'
+                          icon: 'smoking_rooms',
                         },
                         {
                           val: 'music',
-                          icon: 'music_note'
-                        }
+                          icon: 'music_note',
+                        },
                       ]"
                       :key="pref.val"
                       outline
@@ -249,12 +252,12 @@
                         :content-class="`bg-white text-dark`"
                         :content-style="
                           'border-bottom: 1px solid ' +
-                            betterPrefColor(pref.val)
+                          betterPrefColor(pref.val)
                         "
                         self="bottom middle"
                         :offset="[10, 10]"
                         >{{
-                          prefsDocu[pref.val][
+                          appStore.prefsDocu[pref.val][
                             viewedUser.prefs[pref.val].toLowerCase()
                           ]
                         }}</q-tooltip
@@ -402,7 +405,7 @@
                     <img
                       :src="
                         imagePaths[f.fbId] ||
-                          'https://cdn.quasar.dev/img/boy-avatar.png'
+                        'https://cdn.quasar.dev/img/boy-avatar.png'
                       "
                     />
                   </q-avatar>
@@ -454,8 +457,8 @@
                 {
                   icon: 'half',
                   title: 'Angefragt',
-                  text: `Einer von euch beiden will eine Freundschaft eingehen. Die ausgefüllte Hälfte des Herzes zeigt an, wer. Das abgebildete Herz zeigt z.B. an, dass der andere Nutzer die von dir gestellte Anfrage noch nicht bestätigt hat.`
-                }
+                  text: `Einer von euch beiden will eine Freundschaft eingehen. Die ausgefüllte Hälfte des Herzes zeigt an, wer. Das abgebildete Herz zeigt z.B. an, dass der andere Nutzer die von dir gestellte Anfrage noch nicht bestätigt hat.`,
+                },
               ]"
               :key="s.icon"
             >
@@ -477,234 +480,199 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import { date, colors } from "quasar";
-import ColoredMeter from "components/ColoredMeter";
-import FriendHeart from "components/FriendHeart";
-import { ionMdHeartHalf, ionMdHeart } from "@quasar/extras/ionicons-v4";
-import {
-  sendApiRequest,
-  SQL_GET_USER_DATA,
-  GET_USER_PROFILE_PIC,
-  buildGetRequestUrl
-} from "../ApiAccess";
-const { lighten } = colors;
-export default defineComponent({
-  components: {
-    ColoredMeter,
-    FriendHeart
-  },
-  data() {
+<script setup>
+import { useAppStore } from 'src/stores/app';
+import { useUserStore } from 'src/stores/user';
+import { onMounted } from 'vue';
+
+const userStore = useUserStore();
+const appStore = useAppStore();
+
+let prefInfo = false;
+let bigImage = false;
+let splitterPos = {
+  current: 0,
+  normal: 46,
+  big: 98,
+};
+let viewTab = 'data';
+let viewedUser = null;
+let imageUrl = '';
+let showFriendGuide = false;
+let hearts = {
+  half: ionMdHeartHalf,
+  entire: ionMdHeart,
+  border: 'favorite_border',
+};
+let notFound = false;
+let imagePaths = [];
+
+const meterModelBefore = computed(() => {
+  var a = viewedUser.stats;
+  return a.liftsOffered / a.liftsAll;
+});
+
+const friended = computed(() => {
+  var friends = userStore.user.friends,
+    wanted = friends.find((u) => u.fbId == viewedUser.uid);
+  if (wanted) return wanted.friended;
+  else
     return {
-      prefInfo: false,
-      bigImage: false,
-      splitterPos: {
-        current: 0,
-        normal: 46,
-        big: 98
-      },
-      viewTab: "data",
-      viewedUser: null,
-      imageUrl: "",
-      showFriendGuide: false,
-      hearts: {
-        half: ionMdHeartHalf,
-        entire: ionMdHeart,
-        border: "favorite_border"
-      },
-      notFound: false,
-      imagePaths: []
+      // when not found, there's no relation between current and viewed user
+      in: false,
+      me: false,
     };
-  },
+});
 
-  computed: {
-    meterModelBefore() {
-      var a = this.viewedUser.stats;
-      return a.liftsOffered / a.liftsAll;
-    },
+const meterModelCurrent = computed(() => {
+  var a = viewedUser.stats;
+  return a.driverCount / a.liftCount;
+});
 
-    friended() {
-      var friends = this.$store.getters["auth/user"].friends,
-        wanted = friends.find(u => u.fbId == this.viewedUser.uid);
-      if (wanted) return wanted.friended;
-      else
-        return {
-          // when not found, there's no relation between current and viewed user
-          in: false,
-          me: false
-        };
-    },
+const since = computed(() => {
+  return date.formatDate(viewedUser.stats.createdAt, 'MMMM YYYY', {
+    months: [
+      'Januar',
+      'Februar',
+      'März',
+      'April',
+      'Mai',
+      'Juni',
+      'Juli',
+      'August',
+      'September',
+      'Oktober',
+      'November',
+      'Dezember',
+    ],
+  });
+});
 
-    meterModelCurrent() {
-      var a = this.viewedUser.stats;
-      return a.driverCount / a.liftCount;
-    },
-
-    prefsDocu() {
-      return this.$store.state.prefsDocu;
-    },
-
-    since() {
-      return date.formatDate(this.viewedUser.stats.createdAt, "MMMM YYYY", {
-        months: [
-          "Januar",
-          "Februar",
-          "März",
-          "April",
-          "Mai",
-          "Juni",
-          "Juli",
-          "August",
-          "September",
-          "Oktober",
-          "November",
-          "Dezember"
-        ]
-      });
-    },
-
-    call() {
-      var gender = this.viewedUser.gender;
-      switch (gender) {
-        case "M":
-          return "";
-        case "W":
-          return "in";
-        default:
-          return "/in";
-      }
-    },
-
-    heartIconHalf() {
-      var f = this.friended;
-      if (f.in && !f.me) return "only-left-half";
-      else if (!f.in && f.me) return "only-right-half";
-      else return "";
-    },
-
-    viewingThisUser() {
-      return this.viewedUser.uid == this.$store.getters["auth/user"].uid;
-    },
-
-    commonFriends() {
-      var myFriends = this.$store.getters["auth/user"].friends.filter(
-          e => e.friended.in && e.friended.me // just to be sure, as error still exists in backend query
-        ),
-        fbIdsOfFriendsOfVisitedUser = this.viewedUser.friends
-          .filter(e => e.friended.in && e.friended.me)
-          .map(e => e.fbId);
-
-      return myFriends.filter(e =>
-        fbIdsOfFriendsOfVisitedUser.includes(e.fbId)
-      );
-      // not the best way as O(n²), but can be accepted as a single user has not hundreds of friends
-    }
-  },
-
-  watch: {},
-
-  methods: {
-    async refreshContent(res, rej) {
-      this.initLoad()
-        .catch(err => {
-          rej(err); // will be sent to MainLayout
-        })
-        .finally(res);
-    },
-
-    betterPrefColor(prefName) {
-      var color = this.viewedUser.prefs[prefName].toLowerCase();
-      if (color == "yellow") return "orange";
-      else return color;
-    },
-
-    lightenColor(color) {
-      var a = lighten(color, 80);
-      return a;
-    },
-
-    makeImageBig(e) {
-      if (e.position.top < 100) this.splitterPos.current = this.splitterPos.big;
-    },
-
-    toggleFriend() {
-      if (this.friended.me && this.friended.in) {
-        // only ask if there is an connection established
-        this.$q
-          .dialog({
-            title: "Freundschaft beenden",
-            message: `Willst du die Freundschaft mit ${
-              this.viewedUser.name.split(" ")[0]
-            } wirklich beenden?`,
-            cancel: true,
-            persistent: true
-          })
-          .onOk(() => {
-            this.sendRelationChange({
-              fbId: this.viewedUser.uid,
-              mySideOfHeart: this.friended.me // is true when interpreting this line
-            });
-          });
-      } else {
-        // when the last relation is supposed to be deleted, don't warn, because user obviously could revert directly
-        this.sendRelationChange({
-          fbId: this.viewedUser.uid,
-          mySideOfHeart: this.friended.me // is true when interpreting this line
-        });
-      }
-    },
-
-    sendRelationChange(payloadObj) {
-      this.$store.dispatch("auth/changeFriendRelation", payloadObj);
-    },
-
-    async initLoad() {
-      // loads all the data of the viewed user
-      let loc = document.location.href;
-      let otherFbId = loc.split("?userFbId=")[1];
-
-      (async _ => {
-        this.imageUrl = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
-          fbid: otherFbId
-        });
-      })();
-
-      this.splitterPos.current = this.splitterPos.normal;
-
-      return new Promise((res, rej) => {
-        sendApiRequest(
-          SQL_GET_USER_DATA,
-          {
-            fbid: otherFbId,
-            secretFbId: "/°" // I hope nobody will ever have this secretFbId, cause then our server is gonna crash
-          },
-          userData => {
-            if (userData.status == 204) this.notFound = true;
-            // profile not found
-            else this.viewedUser = userData; // actually wanted to store both imageUrl and userData in one object,
-            // but had troubles with v-if
-            res();
-          },
-          error => {
-            rej(error);
-            throw error;
-          }
-        );
-      });
-    }
-  },
-
-  mounted() {
-    this.initLoad();
-    this.$store.commit("setPage", "");
-
-    this.commonFriends.forEach(async e => {
-      this.imagePaths[e.fbId] = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
-        fbid: e.fbId
-      });
-    });
+const call = computed(() => {
+  var gender = viewedUser.gender;
+  switch (gender) {
+    case 'M':
+      return '';
+    case 'W':
+      return 'in';
+    default:
+      return '/in';
   }
+});
+
+const heartIconHalf = computed(() => {
+  var f = friended;
+  if (f.in && !f.me) return 'only-left-half';
+  else if (!f.in && f.me) return 'only-right-half';
+  else return '';
+});
+
+const viewingThisUser = computed(() => {
+  return viewedUser.uid == userStore.user.uid;
+});
+
+const commonFriends = computed(() => {
+  var myFriends = userStore.user.friends.filter(
+      (e) => e.friended.in && e.friended.me // just to be sure, as error still exists in backend query
+    ),
+    fbIdsOfFriendsOfVisitedUser = viewedUser.friends
+      .filter((e) => e.friended.in && e.friended.me)
+      .map((e) => e.fbId);
+
+  return myFriends.filter((e) => fbIdsOfFriendsOfVisitedUser.includes(e.fbId));
+  // not the best way as O(n²), but can be accepted as a single user has not hundreds of friends
+});
+
+async function refreshContent(res, rej) {
+  initLoad()
+    .catch((err) => {
+      rej(err); // will be sent to MainLayout
+    })
+    .finally(res);
+}
+
+function betterPrefColor(prefName) {
+  var color = viewedUser.prefs[prefName].toLowerCase();
+  if (color == 'yellow') return 'orange';
+  else return color;
+}
+
+function lightenColor(color) {
+  var a = lighten(color, 80);
+  return a;
+}
+
+function makeImageBig(e) {
+  if (e.position.top < 100) splitterPos.current = splitterPos.big;
+}
+
+function toggleFriend() {
+  if (friended.me && friended.in) {
+    // only ask if there is an connection established
+    $q.dialog({
+      title: 'Freundschaft beenden',
+      message: `Willst du die Freundschaft mit ${
+        viewedUser.name.split(' ')[0]
+      } wirklich beenden?`,
+      cancel: true,
+      persistent: true,
+    }).onOk(
+      () => sendRelationChange(viewedUser.uid, friended.me) // is true when interpreting this line;
+    );
+  } else {
+    // when the last relation is supposed to be deleted, don't warn, because user obviously could revert directly
+    sendRelationChange(viewedUser.uid, friended.me); // is true when interpreting this line
+  }
+}
+
+function sendRelationChange(friendId, mySideOfHeart) {
+  userStore.changeFriendRelation(friendId, mySideOfHeart);
+}
+
+async function initLoad() {
+  // loads all the data of the viewed user
+  let loc = document.location.href;
+  let otherFbId = loc.split('?userFbId=')[1];
+
+  (async (_) => {
+    imageUrl = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
+      fbid: otherFbId,
+    });
+  })();
+
+  splitterPos.current = splitterPos.normal;
+
+  return new Promise((res, rej) => {
+    sendApiRequest(
+      SQL_GET_USER_DATA,
+      {
+        fbid: otherFbId,
+        secretFbId: '/°', // I hope nobody will ever have this secretFbId, cause then our server is gonna crash
+      },
+      (userData) => {
+        if (userData.status == 204) notFound = true;
+        // profile not found
+        else viewedUser = userData; // actually wanted to store both imageUrl and userData in one object,
+        // but had troubles with v-if
+        res();
+      },
+      (error) => {
+        rej(error);
+        throw error;
+      }
+    );
+  });
+}
+
+onMounted(() => {
+  initLoad();
+  appStore.setPage('')
+
+  commonFriends.forEach(async (e) => {
+    imagePaths[e.fbId] = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
+      fbid: e.fbId,
+    });
+  });
 });
 </script>
 

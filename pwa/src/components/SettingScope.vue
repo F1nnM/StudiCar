@@ -73,7 +73,7 @@
           track-color="white"
         />
         <q-slide-transition>
-          <div class="bg-white row " v-if="help && !uploading">
+          <div class="bg-white row" v-if="help && !uploading">
             <div class="q-px-lg col-2">
               <div class="text-primary text-h5 q-mt-md">›</div>
             </div>
@@ -99,63 +99,47 @@
   </q-dialog>
 </template>
 
-<script>
-import Tooltip from "components/Tooltip";
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "SettingScope",
-  components: {
-    Tooltip
+<script setup>
+defineProps({
+  value: {
+    type: Boolean,
+    required: true,
   },
-  props: {
-    value: {
-      type: Boolean,
-      required: true
-    },
-    disableSave: Boolean,
-    uploading: Boolean,
-    property: {
-      type: String,
-      required: true
-    },
-    descriptionLabel: String
+  disableSave: Boolean,
+  uploading: Boolean,
+  property: {
+    type: String,
+    required: true,
   },
-  data() {
-    return {
-      help: false,
-      hasBeenSaved: false
-    };
-  },
-  watch: {
-    value: function(val) {
-      if (val == true) this.hasBeenSaved = false; // reset when re-opening
-    }
-  },
-  computed: {
-    hasDescriptionSlot() {
-      return !!this.$slots.description;
-    }
-  },
-  methods: {
-    emit(val) {
-      this.$emit("input", val);
-    },
-
-    emitShow() {
-      this.$emit("show");
-    },
-
-    emitHide() {
-      this.$emit("hide");
-    },
-
-    save() {
-      this.hasBeenSaved = true;
-      this.$emit("save");
-    }
-  }
+  descriptionLabel: String,
 });
+
+let help = false;
+let hasBeenSaved = false;
+
+watch(value, (val) => {
+  if (val == true) hasBeenSaved = false; // reset when re-opening
+});
+
+const hasDescriptionSlot = computed(() => {
+  return !!$slots.description;
+});
+function emit(val) {
+  $emit('input', val);
+}
+
+function emitShow() {
+  $emit('show');
+}
+
+function emitHide() {
+  $emit('hide');
+}
+
+function save() {
+  hasBeenSaved = true;
+  $emit('save');
+}
 </script>
 
 <style lang="scss" scoped>

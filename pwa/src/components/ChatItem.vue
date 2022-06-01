@@ -53,7 +53,7 @@
           </q-item-label>
         </q-item-section>
 
-        <q-item-section side top class="text-right" style="max-width: 30vw;">{{
+        <q-item-section side top class="text-right" style="max-width: 30vw">{{
           generateTimeString(message.timestamp)
         }}</q-item-section>
       </q-item>
@@ -61,98 +61,76 @@
   </div>
 </template>
 
-<script>
-import { date } from "quasar";
-import QrIcon from "components/QrIcon";
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "chat_item",
-  components: {
-    QrIcon
+<script setup>
+defineProps({
+  message: {
+    type: Object,
+    required: true,
   },
+  sentByName: String,
+  firstItem: Boolean,
+});
 
-  props: {
-    message: {
-      type: Object,
-      required: true
-    },
-    sentByName: String,
-    firstItem: Boolean
-  },
+function onLeft({ reset }) {
+  $emit('left', message.liftId);
+  reset();
+}
 
-  data() {
-    return {};
-  },
-  computed: {},
+function onRight({ reset }) {
+  $emit('right', message.liftId);
+  reset();
+}
 
-  methods: {
-    onLeft({ reset }) {
-      this.$emit("left", this.message.liftId);
+function generateTimeString(time) {
+  // returns a very user-friendly string to show time of last message related to now
+  var display_text;
+  time = new Date(time); // conversion to JS Date Object we can work with
+  if (diff('minutes') <= 2) {
+    display_text = 'gerade eben';
+  } else if (diff('minutes') <= 30) {
+    display_text = 'vor ' + diff('minutes') + ' Minuten';
+  } else if (wasToday()) {
+    // checks whether message was still today
+    display_text = date.formatDate(time, 'HH:mm');
+  } else if (diff('days') == 1) {
+    // else checks whether message was yesterday
+    display_text = 'gestern um ' + date.formatDate(time, 'HH:mm');
+  } else if (diff('days') == 2) {
+    // else checks whether message was the day before yesterday
+    display_text = 'vorgestern um ' + date.formatDate(time, 'HH:mm');
+  } else if (diff('days') < 7) {
+    display_text = 'vor ' + diff('days') + ' Tagen';
+  } else {
+    display_text =
+      'Vor ' + diff('weeks') + ' Woche' + (diff('weeks') != 1 ? 'n' : '');
+  }
 
-      reset();
-    },
+  return display_text;
 
-    onRight({ reset }) {
-      this.$emit("right", this.message.liftId);
+  function diff(unit) {
+    if (unit == 'weeks')
+      return Math.floor(date.getDateDiff(new Date(), time, 'days') / 7);
+    else return date.getDateDiff(new Date(), time, unit);
+  }
 
-      reset();
-    },
+  function wasToday() {
+    var day = date.isSameDate(time, new Date(), 'day');
+    var month = date.isSameDate(time, new Date(), 'month');
+    var year = date.isSameDate(time, new Date(), 'year');
+    return day && month && year;
+  }
+}
 
-    generateTimeString(time) {
-      // returns a very user-friendly string to show time of last message related to now
-      var display_text;
-      time = new Date(time); // conversion to JS Date Object we can work with
-      if (diff("minutes") <= 2) {
-        display_text = "gerade eben";
-      } else if (diff("minutes") <= 30) {
-        display_text = "vor " + diff("minutes") + " Minuten";
-      } else if (wasToday()) {
-        // checks whether message was still today
-        display_text = date.formatDate(time, "HH:mm");
-      } else if (diff("days") == 1) {
-        // else checks whether message was yesterday
-        display_text = "gestern um " + date.formatDate(time, "HH:mm");
-      } else if (diff("days") == 2) {
-        // else checks whether message was the day before yesterday
-        display_text = "vorgestern um " + date.formatDate(time, "HH:mm");
-      } else if (diff("days") < 7) {
-        display_text = "vor " + diff("days") + " Tagen";
-      } else {
-        display_text =
-          "Vor " + diff("weeks") + " Woche" + (diff("weeks") != 1 ? "n" : "");
-      }
-
-      return display_text;
-
-      function diff(unit) {
-        if (unit == "weeks")
-          return Math.floor(date.getDateDiff(new Date(), time, "days") / 7);
-        else return date.getDateDiff(new Date(), time, unit);
-      }
-
-      function wasToday() {
-        var this_day = date.isSameDate(time, new Date(), "day");
-        var this_month = date.isSameDate(time, new Date(), "month");
-        var this_year = date.isSameDate(time, new Date(), "year");
-        return this_day && this_month && this_year;
-      }
-    },
-
-    quickLiftInfo(info) {
-      // now begins a long journey: getting the liftId of the ChatItem the user has presses his finger on
-      var path = info.evt.path;
-      var el = path.find(item => {
-        return item.id != "";
-      });
-      var liftId =
-        el.id; /* at construction all chatItems got her liftId as id attribute. So we had to follow the DOM path up until we got an id.
+function quickLiftInfo(info) {
+  // now begins a long journey: getting the liftId of the ChatItem the user has presses his finger on
+  var path = info.evt.path;
+  var el = path.find((item) => {
+    return item.id != '';
+  });
+  var liftId =
+    el.id; /* at construction all chatItems got her liftId as id attribute. So we had to follow the DOM path up until we got an id.
       of course it is very buggy, but pretty easy way and not that unsafe, since all items in the path before it are generated by system,
       therefore will be generated the same way every time and are not controlled via id, so none of them will have an id. */
-      this.$emit("shortLiftInfo", liftId);
-    }
-  },
-
-  mounted() {}
-});
+  $emit('shortLiftInfo', liftId);
+}
 </script>

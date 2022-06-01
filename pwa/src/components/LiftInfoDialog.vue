@@ -66,7 +66,7 @@
             <div v-if="lift.passengers">
               Teilnehmer
               <br />
-              <small class="text-caption" style="font-size: .7em;"
+              <small class="text-caption" style="font-size: 0.7em"
                 >Tippe, um zum jeweiligen Profil zu kommen</small
               >
               <span class="text-caption float-right">
@@ -96,7 +96,7 @@
             </q-item-section>
             <q-item-section>
               <p class="q-mb-none">
-                {{ !isDriver ? lift.driver.name : "Du" }}
+                {{ !isDriver ? lift.driver.name : 'Du' }}
                 <q-badge class="q-ml-sm" transparent color="white">
                   <q-icon name="directions_car" size="xs" color="black" />
                 </q-badge>
@@ -110,20 +110,20 @@
                   v-for="pref in [
                     {
                       val: 'talk',
-                      icon: 'record_voice_over'
+                      icon: 'record_voice_over',
                     },
                     {
                       val: 'talkMorning',
-                      icon: 'alarm'
+                      icon: 'alarm',
                     },
                     {
                       val: 'smoking',
-                      icon: 'smoking_rooms'
+                      icon: 'smoking_rooms',
                     },
                     {
                       val: 'music',
-                      icon: 'music_note'
-                    }
+                      icon: 'music_note',
+                    },
                   ]"
                   :key="pref.val"
                   outline
@@ -271,279 +271,188 @@
   </q-dialog>
 </template>
 
-<script>
-import { openURL, date } from "quasar";
-import { defineComponent } from "vue";
-import LiftEditDateTime from "components/LiftEditDateTime";
-import SettingScope from "components/SettingScope";
-import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
+<script setup>
+import { useUserStore } from 'src/stores/user';
+import { onMounted } from 'vue';
 
-import CompactCarInfo from "components/CompactCarInfo";
-import ExpansionLiftTimeline from "components/ExpansionLiftTimeline";
-/* import { sendApiRequest } from "../ApiAccess"; */
+defineProps({
+  value: Boolean,
+  lift: Object,
+});
 
-export default defineComponent({
-  name: "LiftInfoDialog",
-  components: {
-    ExpansionLiftTimeline,
-    CompactCarInfo,
-    LiftEditDateTime,
-    SettingScope
-  },
-  props: {
-    value: Boolean,
-    lift: Object
-  },
-  data() {
-    return {
-      open: false,
-      user: this.$store.getters["auth/user"].id,
-      ntc: null,
-      showModelFrame: false,
-      imageUrlTable: {},
-      openEditTime: false,
-      editTimeTab: "date",
-      newTime: {
-        dateTab: "fix",
-        timeTab: "arrive",
-        date: null,
-        time: null
-      },
-      oldTime: {},
-      newTimeHelp: false,
-      uploading: false,
-      keyToRefreshImages: 0
+const userStore = useUserStore();
+
+let showModelFrame = false;
+let imageUrlTable = {};
+let openEditTime = false;
+newTime = {
+  dateTab: 'fix',
+  timeTab: 'arrive',
+  date: null,
+  time: null,
+};
+let oldTime = {};
+let uploading = false;
+let keyToRefreshImages = 0;
+
+const modelUrl = computed(() => {
+  var car = lift.car;
+  var humanColor = '';
+
+  var search = `${car.brand}+${car.model.replace(' ', '')}+${
+    car.type
+  }+${humanColor}`;
+  search = search.replaceAll('+', '%20');
+  return 'https://www.pexels.com/search/' + search;
+});
+
+const isRepeating = computed(() => {
+  return lift.repeatsOn != 0;
+});
+
+const getRepeatingDayOptions = computed(() => {
+  return [
+    'Montag',
+    'Dienstag',
+    'Mittwoch',
+    'Donnerstag',
+    'Freitag',
+    'Samstag',
+  ].map((val, index) => ({
+    label: val,
+    value: index + 1,
+  }));
+});
+
+const getRepeatingWeekday = computed(() => {
+  // getter for display in overview
+  if (!isRepeating) return null;
+  var day = getRepeatingDayOptions.find((d) => d.value == lift.repeatsOn);
+  return day ? day.label : null;
+});
+
+const isDriver = computed(() => {
+  return lift.driver.id == userStore.user.uid;
+});
+
+const myFbId = computed(() => {
+  return userStore.user.uid;
+});
+
+const formattedDate = computed(() => {
+  if (isRepeating) return 'jeden ' + getRepeatingWeekday;
+  var liftDate = new Date(lift.date + ' ' + lift.arriveBy),
+    daysLeft = date.getDateDiff(liftDate, new Date(), 'days'),
+    text = () => {
+      switch (daysLeft) {
+        case 0:
+          return 'Fahrt ist heute';
+          break;
+        case 1:
+          return 'Fahrt ist morgen';
+          break;
+        case 2:
+          return 'Fahrt ist übermorgen';
+          break;
+        case -1:
+          return 'Fahrt war gestern';
+          break;
+        case -2:
+          return 'Fahrt war vorgestern';
+          break;
+        default:
+          if (daysLeft < 0) return 'Fahrt war';
+          else if (daysLeft <= 7) return 'Fahrt ist in ' + daysLeft + ' Tagen';
+          else return 'Fahrt ist erst';
+      }
     };
-  },
-  watch: {},
-  computed: {
-    todayString() {
-      return date.formatDate(new Date(), "YYYY/MM/DD");
-    },
+  return text() + ' am ' + date.formatDate(liftDate, 'DD.MM.');
+});
 
-    modelUrl() {
-      var car = this.lift.car;
-      var humanColor = "";
-      /* if(!this.ntc) this.ntc = require('../js/ntc')
-      humanColor = this.ntc.name(car.color)[1] */
+const areTimeChanges = computed(() => {
+  return JSON.stringify(oldTime) != JSON.stringify(newTime);
+});
 
-      var search = `${car.brand}+${car.model.replace(" ", "")}+${
-        car.type
-      }+${humanColor}`;
-      search = search.replaceAll("+", "%20");
-      return "https://www.pexels.com/search/" + search;
-    },
+function emit(val) {
+  $emit('input', val);
+}
+function closeLift() {
+  $emit('closeLift');
+}
+function swipedToRight() {
+  emit(false);
+}
 
-    areRequestsOnThisLift() {
-      return !!this.$store.getters["auth/user"].liftRequests.length;
-    },
-
-    isRepeating() {
-      return this.lift.repeatsOn != 0;
-    },
-
-    getRepeatingDayOptions() {
-      return [
-        "Montag",
-        "Dienstag",
-        "Mittwoch",
-        "Donnerstag",
-        "Freitag",
-        "Samstag"
-      ].map((val, index) => ({
-        label: val,
-        value: index + 1
-      }));
-    },
-
-    getRepeatingWeekday() {
-      // getter for display in overview
-      if (!this.isRepeating) return null;
-      var day = this.getRepeatingDayOptions.find(
-        d => d.value == this.lift.repeatsOn
-      );
-      return day ? day.label : null;
-    },
-
-    getWeekDayFromIndex() {
-      // getter for display while editing
-      var day = this.getRepeatingDayOptions.find(
-        d => d.value == this.newTime.date
-      );
-      return day ? day.label : null;
-    },
-
-    isDriver() {
-      return this.lift.driver.id == this.$store.getters["auth/user"].uid;
-    },
-
-    myFbId() {
-      return this.$store.getters["auth/user"].uid;
-    },
-
-    formattedDate() {
-      if (this.isRepeating) return "jeden " + this.getRepeatingWeekday;
-      var liftDate = new Date(this.lift.date + " " + this.lift.arriveBy),
-        daysLeft = date.getDateDiff(liftDate, new Date(), "days"),
-        text = _ => {
-          switch (daysLeft) {
-            case 0:
-              return "Fahrt ist heute";
-              break;
-            case 1:
-              return "Fahrt ist morgen";
-              break;
-            case 2:
-              return "Fahrt ist übermorgen";
-              break;
-            case -1:
-              return "Fahrt war gestern";
-              break;
-            case -2:
-              return "Fahrt war vorgestern";
-              break;
-            default:
-              if (daysLeft < 0) return "Fahrt war";
-              else if (daysLeft <= 7)
-                return "Fahrt ist in " + daysLeft + " Tagen";
-              else return "Fahrt ist erst";
-          }
-        };
-      return text() + " am " + date.formatDate(liftDate, "DD.MM.");
-    },
-
-    areTimeChanges() {
-      return JSON.stringify(this.oldTime) != JSON.stringify(this.newTime);
-    }
-  },
-  methods: {
-    emit(val) {
-      this.$emit("input", val);
-    },
-    closeLift() {
-      this.$emit("closeLift");
-    },
-    swipedToRight() {
-      this.emit(false);
-    },
-
-    dateOptions(d) {
-      const limit = 30;
-
-      var a = date.getDateDiff(d, new Date(), "days");
-      a = a < limit && a >= 0;
-      return a;
-    },
-
-    loadCurrentTime() {
-      if (this.isRepeating) {
-        this.newTime.dateTab = "weekly";
-        this.newTime.date = this.lift.repeatsOn;
-      } else {
-        this.newTime.dateTab = "fix";
-        this.newTime.date = date.formatDate(
-          new Date(this.lift.date),
-          "YYYY-MM-DD"
-        );
-      }
-
-      if (this.lift.arriveBy != "00:00:00") {
-        this.newTime.timeTab = "arrive";
-        this.newTime.time = this.lift.arriveBy.substr(0, 5);
-      } else {
-        this.newTime.timeTab = "depart";
-        this.newTime.time = this.lift.departAt.substr(0, 5);
-      }
-
-      this.oldTime = JSON.parse(JSON.stringify(this.newTime)); // so that user can see whether he has made changes
-    },
-
-    setDateTab() {
-      var tab = this.newTime.dateTab;
-      if (tab == "weekly") this.newTime.date = 1;
-      // default on monday
-      else this.newTime.date = date.formatDate(new Date(), "YYYY-MM-DD");
-    },
-
-    async saveNewTime() {
-      var liftId = this.lift.id,
-        t = this.newTime,
-        objToBeSent = {
-          liftId: liftId,
-          time: t.time,
-          isArriveBy: t.timeTab == "arrive",
-          date: t.date,
-          isFixDate: t.dateTab == "fix"
-        };
-
-      this.uploading = true;
-      await this.$store.dispatch("auth/updateLiftTime", objToBeSent);
-      this.uploading = false;
-      this.openEditTime = false;
-    },
-
-    async getImageOfUser(id) {
-      this.imageUrlTable[id] = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
-        fbid: id
-      });
-    },
-
-    viewCar() {
-      openURL(this.modelUrl); // easiest way, otherwise we would have to store a image of each(!) model
-    },
-
-    formatAsTime(timeObj) {
-      return date.formatDate(timeObj, "H:mm");
-    },
-
-    betterPrefColor(prefName) {
-      var color = this.lift.driver.prefs[prefName].toLowerCase();
-      if (color == "yellow") return "orange";
-      else return color;
-    },
-
-    viewUserFromFbId(id) {
-      window.location.href = "/#/benutzerinfo?userFbId=" + id;
-    },
-
-    leave() {
-      this.$q
-        .dialog({
-          title: "Verlassen",
-          message: `Willst du diese Mitfahrgelegenheit wirklich ${
-            this.isDriver
-              ? "auflösen?"
-              : "verlassen? Deine Nachrichten bleiben ohne Namensanzeige erhalten."
-          }`,
-          ok: {
-            color: "negative"
-          },
-          cancel: {
-            color: "white"
-          },
-          cancel: true,
-          persistent: true
-        })
-        .onOk(data => {
-          this.$emit("closeAndLeave", {
-            liftId: this.lift.id,
-            wasDriver: this.isDriver
-          });
-        })
-        .onCancel();
-    }
-  },
-
-  mounted() {
-    (async _ => {
-      await this.getImageOfUser(this.lift.driver.id);
-      for (const p of this.lift.passengers) {
-        await this.getImageOfUser(p.id);
-      }
-      const lift = this.imageUrlTable;
-      this.keyToRefreshImages++;
-    })();
+function loadCurrentTime() {
+  if (isRepeating) {
+    newTime.dateTab = 'weekly';
+    newTime.date = lift.repeatsOn;
+  } else {
+    newTime.dateTab = 'fix';
+    newTime.date = date.formatDate(new Date(lift.date), 'YYYY-MM-DD');
   }
+
+  if (lift.arriveBy != '00:00:00') {
+    newTime.timeTab = 'arrive';
+    newTime.time = lift.arriveBy.substr(0, 5);
+  } else {
+    newTime.timeTab = 'depart';
+    newTime.time = lift.departAt.substr(0, 5);
+  }
+
+  oldTime = JSON.parse(JSON.stringify(newTime)); // so that user can see whether he has made changes
+}
+
+
+async function getImageOfUser(id) {
+  imageUrlTable[id] = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
+    fbid: id,
+  });
+}
+
+function betterPrefColor(prefName) {
+  var color = lift.driver.prefs[prefName].toLowerCase();
+  if (color == 'yellow') return 'orange';
+  else return color;
+}
+
+function viewUserFromFbId(id) {
+  window.location.href = '/#/benutzerinfo?userFbId=' + id;
+}
+
+function leave() {
+  $q.dialog({
+    title: 'Verlassen',
+    message: `Willst du diese Mitfahrgelegenheit wirklich ${
+      isDriver
+        ? 'auflösen?'
+        : 'verlassen? Deine Nachrichten bleiben ohne Namensanzeige erhalten.'
+    }`,
+    ok: {
+      color: 'negative',
+    },
+    cancel: {
+      color: 'white',
+    },
+    cancel: true,
+    persistent: true,
+  })
+    .onOk(() => {
+      $emit('closeAndLeave', {
+        liftId: lift.id,
+        wasDriver: isDriver,
+      });
+    })
+    .onCancel();
+}
+
+onMounted(async () => {
+  await getImageOfUser(lift.driver.id);
+  for (const p of lift.passengers) {
+    await getImageOfUser(p.id);
+  }
+  const lift = imageUrlTable;
+  keyToRefreshImages++;
 });
 </script>
 

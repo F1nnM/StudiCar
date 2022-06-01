@@ -1,9 +1,10 @@
 <template>
   <div>
-    <q-badge
-      v-if="(courseStations.length > 2)"
-      class="q-ml-md"
-    >noch {{ courseStations.length - 2 }} Zwischenstopp{{ courseStations.length > 3 ? 's' : '' }}</q-badge>
+    <q-badge v-if="courseStations.length > 2" class="q-ml-md"
+      >noch {{ courseStations.length - 2 }} Zwischenstopp{{
+        courseStations.length > 3 ? 's' : ''
+      }}</q-badge
+    >
 
     <q-list>
       <q-item class="q-mb-sm">
@@ -14,7 +15,12 @@
           <q-item-label caption>
             <span v-if="firstEntry.id == -1">bei</span>
             {{ firstEntry.details }}
-            <q-icon class="q-ml-sm" v-if="firstEntry.id != -1" name="school" size="1em" />
+            <q-icon
+              class="q-ml-sm"
+              v-if="firstEntry.id != -1"
+              name="school"
+              size="1em"
+            />
           </q-item-label>
         </q-item-section>
         <q-item-section class="text-center">
@@ -38,7 +44,12 @@
           <q-item-label caption>
             <span v-if="lastEntry.id == -1">bei</span>
             {{ lastEntry.details }}
-            <q-icon class="q-ml-md" v-if="lastEntry.id != -1" name="school" size="xs" />
+            <q-icon
+              class="q-ml-md"
+              v-if="lastEntry.id != -1"
+              name="school"
+              size="xs"
+            />
           </q-item-label>
         </q-item-section>
       </q-item>
@@ -61,109 +72,97 @@
   </div>
 </template>
 
-<script>
-import { date } from "quasar";
-import { defineComponent } from "vue";
+<script setup>import { useUserStore } from 'src/stores/user';
 
-export default defineComponent({
-  name: "ExpansionTimeline",
-  props: {
-    lift: Object
-  },
-  data() {
-    return {
-      showStations: false
-    };
-  },
-  computed: {
-    isDeparting() {
-      return this.lift.departAt != "00:00:00";
-    },
+defineProps({
+  lift: Object,
+});
+const isDeparting = computed(() => {
+  return lift.departAt != '00:00:00';
+});
 
-    timeToDepartOrArrive() {
-      return (this.isDeparting
-        ? this.lift.departAt
-        : this.lift.arriveBy
-      ).substr(0, 5);
-    },
+const timeToDepartOrArrive = computed(() => {
+  return (isDeparting ? lift.departAt : lift.arriveBy).substr(
+    0,
+    5
+  );
+});
 
-    courseStations() {
-      var arr = [],
-        start = this.lift.start,
-        dest = this.lift.destination,
-        startsAtSchool = this.lift.start.id != -1,
-        username = this.$store.getters["auth/user"].name;
+const userStore = useUserStore();
+
+const courseStations = computed(() => {
+  var arr = [],
+    start = lift.start,
+    dest = lift.destination,
+    startsAtSchool = lift.start.id != -1,
+    username = userStore.user.name;
+  arr.push({
+    id: start.id,
+    city: start.name,
+    details: startsAtSchool
+      ? getStationLabel(start.id, start.name)
+      : username, // when starts not at school, it starts at home adress of this user
+  });
+
+  if (lift.stations)
+    lift.stations.forEach((station) => {
       arr.push({
-        id: start.id,
-        city: start.name,
-        details: startsAtSchool
-          ? this.getStationLabel(start.id, start.name)
-          : username // when starts not at school, it starts at home adress of this user
+        id: -1, // cannot be a school
+        city: station.city,
+        passengerName: station.passengerName,
       });
+    });
+  arr.push({
+    city: dest.name,
+    id: dest.id,
+    details: startsAtSchool
+      ? username
+      : getStationLabel(dest.id, dest.name), // when starts at school, it ends at home adress of this user
+  });
 
-      if (this.lift.stations)
-        this.lift.stations.forEach(station => {
-          arr.push({
-            id: -1, // cannot be a school
-            city: station.city,
-            passengerName: station.passengerName
-          });
-        });
-      arr.push({
-        city: dest.name,
-        id: dest.id,
-        details: startsAtSchool
-          ? username
-          : this.getStationLabel(dest.id, dest.name) // when starts at school, it ends at home adress of this user
-      });
+  return arr;
+});
 
-      return arr;
-    },
+const firstEntry = computed(() => {
+  return courseStations[0];
+});
 
-    firstEntry() {
-      return this.courseStations[0];
-    },
-
-    lastEntry() {
-      var l = this.courseStations.length;
-      if (!l) return null;
-      else {
-        return this.courseStations[l - 1];
-      }
-    },
-
-    middleEntries() {
-      var l = this.courseStations.length;
-      if (l < 3) return [];
-      else {
-        var newEns = JSON.parse(JSON.stringify(this.courseStations));
-        newEns.pop();
-        newEns.shift();
-        return newEns;
-      }
-    }
-  },
-  methods: {
-    emit() {
-      this.$emit("input", this.showStations);
-    },
-
-    getStationLabel(adressId, locationName) {
-      // locationName can be a city name or the username
-      switch (adressId) {
-        case 1:
-          return "Würfel";
-        case 2:
-          return "Alte DH";
-        case 3:
-          return "Kloster";
-        default:
-          return locationName;
-      }
-    }
+const lastEntry = computed(() => {
+  var l = courseStations.length;
+  if (!l) return null;
+  else {
+    return courseStations[l - 1];
   }
 });
+
+const middleEntries = computed(() => {
+  var l = courseStations.length;
+  if (l < 3) return [];
+  else {
+    var newEns = JSON.parse(JSON.stringify(courseStations));
+    newEns.pop();
+    newEns.shift();
+    return newEns;
+  }
+});
+
+function emit() {
+  $emit('input', showStations);
+}
+
+function getStationLabel(adressId, locationName) {
+  // locationName can be a city name or the username
+  switch (adressId) {
+    case 1:
+      return 'Würfel';
+    case 2:
+      return 'Alte DH';
+    case 3:
+      return 'Kloster';
+    default:
+      return locationName;
+  }
+}
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

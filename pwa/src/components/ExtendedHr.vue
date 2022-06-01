@@ -5,30 +5,24 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
+<script setup>
+defineProps({
+  color: String,
+  size: String,
+  borderRadius: String,
+  hex: Boolean,
+});
 
-export default defineComponent({
-  name: "ExtendedHr",
-  computed: {
-    classAttr() {
-      var text = "to-hr to-hr-" + (this.size || "xs");
-      if (!this.hex) text += " bg-" + (this.color || "primary");
-      return text;
-    },
-    style() {
-      var style = "";
-      if (this.borderRadius) style += "; border-radius: " + this.borderRadius;
-      if (this.hex) style += "; background-color: " + (this.color || "green");
-      return style;
-    }
-  },
-  props: {
-    color: String,
-    size: String,
-    borderRadius: String,
-    hex: Boolean
-  }
+const classAttr = computed(() => {
+  var text = 'to-hr to-hr-' + (size || 'xs');
+  if (!hex) text += ' bg-' + (color || 'primary');
+  return text;
+});
+const style = computed(() => {
+  var style = '';
+  if (borderRadius) style += '; border-radius: ' + borderRadius;
+  if (hex) style += '; background-color: ' + (color || 'green');
+  return style;
 });
 </script>
 
@@ -71,7 +65,7 @@ export default defineComponent({
 
   &:after {
     top: 1px;
-    content: "";
+    content: '';
     position: absolute;
     left: 0;
     width: 100%;

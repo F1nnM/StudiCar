@@ -3,25 +3,18 @@
   <q-img :contain="!headFocused" :class="comClass" :src="imageData" />
 </template>
 
-<script>
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "TeamPicture",
-  props: {
-    headFocused: Boolean,
-    imageData: String,
-    cutBackground: Boolean
-  },
-  computed: {
-    comClass() {
-      var c = "";
-      if (this.headFocused) c += " head-focused";
-      else c += " body-focused";
-      if (this.cutBackground) c += " cut";
-      return c;
-    }
-  }
+<script setup>
+defineProps({
+  headFocused: Boolean,
+  imageData: String,
+  cutBackground: Boolean,
+});
+const comClass = computed(() => {
+  var c = '';
+  if (headFocused) c += ' head-focused';
+  else c += ' body-focused';
+  if (cutBackground) c += ' cut';
+  return c;
 });
 </script>
 
