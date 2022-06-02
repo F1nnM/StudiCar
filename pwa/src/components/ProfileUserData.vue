@@ -380,7 +380,7 @@
           @click="toggleOpenEditPrefs(true)"
         />
         <q-splitter :value="20">
-          <template v-slot:before class="full-height">
+          <template v-slot:before>
             <q-tabs v-model="openEditPrefsTab" vertical class="text-primary">
               <q-tab name="talk" icon="record_voice_over" />
               <q-tab name="talkMorning" icon="alarm" />
@@ -388,7 +388,7 @@
               <q-tab name="music" icon="music_note" />
             </q-tabs>
           </template>
-          <template v-slot:after style="height: 300px">
+          <template v-slot:after>
             <q-tab-panels
               v-model="openEditPrefsTab"
               swipeable
@@ -462,10 +462,12 @@
 <script setup>
 import { useAppStore } from 'src/stores/app';
 import { useUserStore } from 'src/stores/user';
+import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from 'src/utils/ApiAccess';
 
-defineProps({
+const props = defineProps({
   username: String,
 });
+const { username } = toRefs(props);
 
 const userStore = useUserStore();
 const appStore = useAppStore();
@@ -543,14 +545,14 @@ function uploadProfilePicture() {
       {
         imageData: newPPictureBase64,
       },
-      (_) => {
+      () => {
         ppPath += '&timestamp=' + Date.now();
         openUpload = false;
         file = null;
         newPPictureBase64 = '';
         uploadingProfilePicture = false;
       },
-      (err) => {
+      () => {
         uploadingProfilePicture = false;
       }
     );
@@ -564,23 +566,21 @@ function resetPP() {
       'Willst du dein Bild wirklich zurücksetzen? StudiCar speichert dann ein anonymes Ersatzbild.',
     cancel: true,
     persistent: true,
-  })
-    .onOk(() => {
-      uploadingProfilePicture = true;
-      sendApiRequest(
-        SQL_RESET_PROFILE_PICTURE,
-        {},
-        (_) => {
-          ppPath += '&timestamp=' + Date.now();
-          openUpload = false;
-          uploadingProfilePicture = false;
-        },
-        (err) => {
-          uploadingProfilePicture = false;
-        }
-      );
-    })
-    .onCancel(() => {});
+  }).onOk(() => {
+    uploadingProfilePicture = true;
+    sendApiRequest(
+      SQL_RESET_PROFILE_PICTURE,
+      {},
+      () => {
+        ppPath += '&timestamp=' + Date.now();
+        openUpload = false;
+        uploadingProfilePicture = false;
+      },
+      () => {
+        uploadingProfilePicture = false;
+      }
+    );
+  });
 }
 
 function betterPrefColor(color) {

@@ -8,10 +8,11 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   value: {
-      type: Number,
-      required: true
-    }
-})
+    type: Number,
+    required: true,
+  },
+});
+const { value } = toRefs(props);
 </script>

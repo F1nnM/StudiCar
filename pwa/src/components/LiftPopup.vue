@@ -556,6 +556,7 @@ const props = defineProps({
   detailsOpen: Boolean,
   lift: Object,
 });
+const { open, detailsOpen, lift } = toRefs(props);
 
 const userStore = useUserStore();
 const appStore = useAppStore();

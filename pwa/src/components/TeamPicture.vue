@@ -4,11 +4,12 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   headFocused: Boolean,
   imageData: String,
   cutBackground: Boolean,
 });
+const { headFocused, imageData, cutBackground } = toRefs(props);
 const comClass = computed(() => {
   var c = '';
   if (headFocused) c += ' head-focused';

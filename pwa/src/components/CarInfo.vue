@@ -54,9 +54,10 @@
 </template>
 
 <script setup>
-defineProps({
-  car: Object
-})
+const props = defineProps({
+  car: Object,
+});
+const { car } = toRefs(props);
 </script>
 
 <style scoped></style>

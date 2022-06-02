@@ -18,11 +18,12 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   transparent: Boolean,
   rgba: Boolean,
   dark: Boolean,
 });
+const { transparent, rgba, dark } = toRefs(props);
 </script>
 
 <style lang="scss" scoped>

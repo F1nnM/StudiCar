@@ -105,6 +105,8 @@ let help = false;
 
 const userStore = useUserStore();
 
+const $router = useRouter();
+
 function onSubmit() {
   userStore
     .signInWithEmail(mail, password)

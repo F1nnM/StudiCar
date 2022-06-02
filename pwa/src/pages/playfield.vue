@@ -60,7 +60,7 @@ function notifyTest() {
 }
 
 onMounted(() => {
-  appStore.setPage('Spielwiese');
+  appStore.setPage({ name: 'Spielwiese'});
 });
 </script>
 

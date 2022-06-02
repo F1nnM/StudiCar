@@ -215,7 +215,7 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   input: {
     type: Object,
     required: true,
@@ -228,6 +228,16 @@ defineProps({
   linearProgress: Boolean,
   position: String,
 });
+const {
+  input,
+  isOpen,
+  primColor,
+  text,
+  label,
+  fakeRefresh,
+  linearProgress,
+  position,
+} = toRefs(props);
 
 let color = {
   dark: primColor ? colors.getBrand('primary') : '#000000FF',

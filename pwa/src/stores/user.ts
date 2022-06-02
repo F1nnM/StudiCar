@@ -38,7 +38,7 @@ import {
 } from 'src/utils/ApiAccess';
 import { BasicUser, Car, DatabaseAnswer, Prefs } from './model';
 
-export const useUserStore = defineStore('global', {
+export const useUserStore = defineStore('user', {
   state: () => {
     const state: {
       user: DatabaseAnswer;

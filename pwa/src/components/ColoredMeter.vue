@@ -4,9 +4,7 @@
     class="tester overflow-hidden"
     :style="`width: ${width}; height: calc(${width} / 2)`"
   >
-    <div
-      class="colored-scale overflow-hidden full-width"
-    >
+    <div class="colored-scale overflow-hidden full-width">
       <div v-if="showLine" class="display-line" :style="lineTransform"></div>
       <div class="circle-shaper full-width full-height text-center q-pb-md">
         <div class="text-anchor flex flex-center q-ma-md vertical-bottom">
@@ -21,7 +19,7 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   value: {
     type: Number,
     required: true,
@@ -39,23 +37,20 @@ defineProps({
     default: 50,
   },
 });
+const { value, width, minInput, maxInput } = toRefs(props);
 
 let angleMin = 1; // smalled rotation value, should be bit outer the left red area
 let angleMax = 178; // should be bit outer the righ red area
 
 const lineTransform = computed(() => {
-  let partOfInputRange =
-      (value - minInput) / (maxInput - minInput), // value smaller or equal 1
+  let partOfInputRange = (value - minInput) / (maxInput - minInput), // value smaller or equal 1
     angleDiff = angleMax - angleMin;
   let angleForCss = partOfInputRange * angleDiff + angleMin;
   return `transform: translate(-50%, -50%) rotate(${angleForCss}deg);`;
 });
 
-
 const showLine = computed(() => {
-  return (
-    value >= minInput && value <= maxInput && value
-  );
+  return value >= minInput && value <= maxInput && value;
 });
 
 function emit() {
@@ -76,8 +71,15 @@ function emit() {
   height: 200%;
   border-top-left-radius: 50%;
   border-top-right-radius: 50%;
-  background: linear-gradient(90deg, rgba(255,0,0,1) 0%, rgba(236,255,0,1) 8%, 
-    rgba(0,255,0,1) 21%, rgba(81,255,0,1) 41%, rgba(236,255,0,1) 66%, rgba(255,0,0,1) 100%) !important
+  background: linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 1) 0%,
+    rgba(236, 255, 0, 1) 8%,
+    rgba(0, 255, 0, 1) 21%,
+    rgba(81, 255, 0, 1) 41%,
+    rgba(236, 255, 0, 1) 66%,
+    rgba(255, 0, 0, 1) 100%
+  ) !important;
 }
 
 .display-line {

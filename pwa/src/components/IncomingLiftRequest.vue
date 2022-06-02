@@ -86,8 +86,7 @@ const props = defineProps({
   liftId: Number,
   acceptDisabled: Boolean,
 });
-
-const requestingUser = toRef(props, 'requestingUser');
+const { requestingUser, liftId, acceptDisabled } = toRefs(props);
 
 const appStore = useAppStore();
 

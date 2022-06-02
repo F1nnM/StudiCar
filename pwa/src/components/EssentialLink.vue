@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   title: {
     type: String,
     required: true,
@@ -36,6 +36,7 @@ defineProps({
     default: '',
   },
 });
+const { title, onlyDev, caption, link, icon } = toRefs(props);
 
 const isDisabled = computed(() => {
   if (!process.env.DEV) return onlyDev;

@@ -27,7 +27,7 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   left: {
     type: Boolean,
     required: true,
@@ -39,6 +39,8 @@ defineProps({
   size: String,
   backColor: String,
 });
+const { left, right, backColor, size } = toRefs(props);
+
 const heartIconHalf = () => {
   var l = left,
     r = right;

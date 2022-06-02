@@ -34,6 +34,8 @@ let content = '';
 let loaded = false;
 let view = null;
 
+const $route = useRoute();
+
 watch($route, (to) => {
   recomputeView();
 });

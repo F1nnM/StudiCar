@@ -483,10 +483,13 @@
 <script setup>
 import { useAppStore } from 'src/stores/app';
 import { useUserStore } from 'src/stores/user';
+import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from 'src/utils/ApiAccess';
 import { onMounted } from 'vue';
 
 const userStore = useUserStore();
 const appStore = useAppStore();
+
+const $router = useRouter();
 
 let prefInfo = false;
 let bigImage = false;
@@ -666,7 +669,7 @@ async function initLoad() {
 
 onMounted(() => {
   initLoad();
-  appStore.setPage('')
+  appStore.setPage({ name: ''})
 
   commonFriends.forEach(async (e) => {
     imagePaths[e.fbId] = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {

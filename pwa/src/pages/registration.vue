@@ -177,6 +177,8 @@ let step = 1;
 
 const userStore = useUserStore();
 
+const $router = useRouter();
+
 watch(agbTab, (newv) => {
   setTimeout(() => {
     var a = $refs[newv + '_anchor'];

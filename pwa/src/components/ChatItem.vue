@@ -62,7 +62,7 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   message: {
     type: Object,
     required: true,
@@ -70,6 +70,7 @@ defineProps({
   sentByName: String,
   firstItem: Boolean,
 });
+const { message, sentByName, firstItem } = toRefs(props);
 
 function onLeft({ reset }) {
   $emit('left', message.liftId);

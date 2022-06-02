@@ -62,12 +62,13 @@ Is not really a module/component by nature as it is that hard connected to MainL
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   open: {
     type: Boolean,
     required: true,
   },
 });
+const { open } = toRefs(props);
 
 let result = '';
 let otherQR = false;

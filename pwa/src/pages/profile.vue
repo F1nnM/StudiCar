@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="q-mr-md q-mt-md">
-      <TitleButtonAnchor>
+      <TitleButton>
         <!-- <q-btn label="Freunde" to="/friends" outline color="primary" /> -->
         <q-tabs
           v-model="tab"
@@ -15,7 +15,7 @@
           <q-tab name="data" icon="person_outline" />
           <q-tab name="reservoir" icon="emoji_transportation" />
         </q-tabs>
-      </TitleButtonAnchor>
+      </TitleButton>
     </div>
 
     <q-tab-panels
@@ -111,6 +111,7 @@
 <script setup>
 import { useAppStore } from 'src/stores/app';
 import { useUserStore } from 'src/stores/user';
+import { mdiAccountGroupOutline } from '@quasar/extras/mdi-v5';
 
 const userStore = useUserStore();
 const appStore = useAppStore();

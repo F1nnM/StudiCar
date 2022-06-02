@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-md">
-    <TitleButtonAnchor>
+    <TitleButton>
       <div class="row justify-end">
         <q-tab-panels
           animated
@@ -49,7 +49,7 @@
 
         -->
       </div>
-    </TitleButtonAnchor>
+    </TitleButton>
 
     <q-tab-panels
       animated

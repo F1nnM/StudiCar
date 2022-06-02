@@ -10,6 +10,6 @@
 <script setup>
 const appStore = useAppStore();
 onMounted(() => {
-  appStore.setPage('Kontakt');
+  appStore.setPage({ name: 'Kontakt'});
 });
 </script>

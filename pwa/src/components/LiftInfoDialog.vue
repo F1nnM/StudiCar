@@ -273,12 +273,14 @@
 
 <script setup>
 import { useUserStore } from 'src/stores/user';
+import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from 'src/utils/ApiAccess';
 import { onMounted } from 'vue';
 
-defineProps({
+const props = defineProps({
   value: Boolean,
   lift: Object,
 });
+const { value, lift } = toRefs(props);
 
 const userStore = useUserStore();
 
@@ -402,7 +404,6 @@ function loadCurrentTime() {
 
   oldTime = JSON.parse(JSON.stringify(newTime)); // so that user can see whether he has made changes
 }
-
 
 async function getImageOfUser(id) {
   imageUrlTable[id] = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {

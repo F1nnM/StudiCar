@@ -47,10 +47,10 @@
 </template>
 
 <script setup>
-
 const props = defineProps({
   open: Boolean,
 });
+const { open } = toRefs(props);
 
 let loadingTexts = [
   'Bitte hab noch einen Moment Geduld',
@@ -65,7 +65,6 @@ const loadingText = computed(() => {
   return loadingTexts[pos];
 });
 
-const open = ref(props.open);
 watch(open, (isOpen) => {
   if (isOpen) {
     setTimeout((_) => {

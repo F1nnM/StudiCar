@@ -313,7 +313,7 @@ m2286 -999 c182 -34 340 -187 384 -371 22 -96 22 -2142 0 -2238 -42 -178 -188
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   type: {
     type: Number,
     default: 0,
@@ -321,6 +321,7 @@ defineProps({
   size: String,
   showLogo: Boolean,
 });
+const { type, size, showLogo } = toRefs(props);
 </script>
 
 <style lang="scss" scoped>

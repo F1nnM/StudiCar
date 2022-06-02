@@ -106,10 +106,12 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   lift: Object,
   numberOfRequests: Number,
 });
+const { lift, numberOfRequests } = toRefs(props);
+
 let showLiftDetails = false;
 const enoughSeatsLeft = computed(() => {
   return numberOfRequests <= seatsLeft && seatsLeft > 0;
@@ -156,10 +158,7 @@ const daysLeft = computed(() => {
 });
 
 const liftSoonLabel = computed(() => {
-  const diff = date.getDateDiff(
-    lift.arriveBy || lift.departAt,
-    new Date()
-  );
+  const diff = date.getDateDiff(lift.arriveBy || lift.departAt, new Date());
   switch (diff) {
     case 0:
       return 'Heute';

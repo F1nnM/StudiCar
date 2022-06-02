@@ -120,6 +120,10 @@ module.exports = configure(function (/* ctx */) {
             resolvers: [
               unpluginResolvers.QuasarResolver(),
               unpluginResolvers.VueUseComponentsResolver(),
+              (componentName) => {
+                if (componentName.startsWith('Qrcode'))
+                  return { name: componentName, from: 'vue-qrcode-reader' }
+              }
             ],
           },
         ],

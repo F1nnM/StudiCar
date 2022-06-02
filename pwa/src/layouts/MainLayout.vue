@@ -10,7 +10,7 @@
             round
             icon="menu"
             aria-label="Menu"
-            @click="leftDrawerOpen = !leftDrawerOpen"
+            @click="toggleDrawer"
           />
 
           <q-toolbar-title class="row">
@@ -43,7 +43,7 @@
                       <!-- <q-btn label="reg" to="/auth/registrierung" /> -->
                       <q-chip
                         clickable
-                        @click="hideUpdateField = false"
+                        @click="hideUpdate"
                         dense
                         v-if="appStore.oldVersionRunning && hideUpdateField"
                         color="deep-orange"
@@ -51,7 +51,7 @@
                         icon="new_releases"
                         >ältere Version</q-chip
                       >
-                      <!-- {{ pageTrans }} -->
+                      <!-- {{ appStore.pageTrans }} -->
                     </q-tab-panel>
                     <q-tab-panel
                       class="bg-primary q-pa-none text-white"
@@ -63,7 +63,7 @@
                 <q-tab-panel
                   class="q-pa-none bg-primary text-white"
                   :name="true"
-                  >{{ navTitle || pageName }}</q-tab-panel
+                  >{{ appStore.navTitle || appStore.pageName }}</q-tab-panel
                 >
               </q-tab-panels>
             </div>
@@ -122,10 +122,7 @@
       content-class="bg-grey-1"
       class="drawer-no-border"
     >
-      <DrawerWelcomeImage
-        :timeText="greeting"
-        :caption="newsticker || 'Ticker wird geladen...'"
-      />
+      <DrawerWelcomeImage :caption="newsticker || 'Ticker wird geladen...'" />
       <q-list class="q-pb-sm">
         <div v-for="group in navigationLinks" :key="group.title">
           <q-item-label header class="text-grey-8">{{
@@ -142,12 +139,7 @@
       <div class="q-pa-md text-grey-7 row justify-between">
         <span>
           StudiCar
-          <q-chip
-            v-if="process.env.DEV"
-            label="LOCAL"
-            size="sm"
-            color="primary"
-          ></q-chip>
+          <q-chip v-if="isDev" label="LOCAL" size="sm" color="primary"></q-chip>
         </span>
         <span>Quasar v{{ $q.version }}</span>
       </div>
@@ -155,10 +147,10 @@
     <q-pull-to-refresh ref="refresher" @refresh="refresh">
       <div>
         <q-page-container>
-          <div v-if="pageName">
+          <div v-if="appStore.pageName">
             <q-scroll-observer @scroll="scrollHandler" />
 
-            <div class="q-py-md" v-if="!titleOnlyInNav">
+            <div class="q-py-md" v-if="!appStore.titleOnlyInNav">
               <!-- <q-btn
                 flat
                 color="dark"
@@ -171,12 +163,12 @@
               </q-btn> -->
               <span
                 class="text-h5 custom-underline q-ml-md c-u-l c-u-2 c-u-md"
-                >{{ pageName }}</span
+                >{{ appStore.pageName }}</span
               >
             </div>
           </div>
           <router-view v-slot="{ Component }" ref="pageContent">
-            <transition :name="pageTrans" mode="out-in">
+            <transition :name="appStore.pageTrans" mode="out-in">
               <component :is="Component" />
             </transition>
           </router-view>
@@ -205,7 +197,6 @@
           werden kann.</q-card-section
         >
         <q-card-actions align="around" class="q-mt-sm">
-          <!-- <q-btn flat color="white" label="Später" @click="hideUpdateField = true" /> -->
           <q-btn color="primary" label="Ok, neu laden" @click="reloadPage" />
         </q-card-actions>
       </q-card>
@@ -218,7 +209,7 @@
             Fehler: {{ refreshErr }}
             <template v-slot:action>
               <q-btn flat color="white" label="Nochmal" @click="refreshAgain" />
-              <q-btn flat color="white" label="Ok" @click="refreshErr = null" />
+              <q-btn flat color="white" label="Ok" @click="clearError" />
             </template>
           </q-banner>
         </div>
@@ -231,7 +222,6 @@
         shrink
         active-color="primary"
         indicator-color="primary"
-        v-model="tab"
         class="text-grey-10 bg-white text-weight-light"
         align="center"
       >
@@ -246,9 +236,6 @@
         </q-route-tab>
         <q-route-tab to="/profil">
           <q-icon name="account_box" size="sm" />
-          <!-- <q-avatar v-else size="sm">
-            <q-img class="rounded-borders" :src="profilePictureUrl" />
-          </q-avatar>-->
           Profil
         </q-route-tab>
       </q-tabs>
@@ -263,29 +250,33 @@ import { useUserStore } from 'src/stores/user';
 import {
   sendApiRequest,
   GET_NEWSTICKER,
-  buildGetRequestUrl,
-  GET_USER_PROFILE_PIC,
 } from '../utils/ApiAccess';
 
 const userStore = useUserStore();
 const appStore = useAppStore();
 
-const $q = useQuasar()
+const $q = useQuasar();
 
-let greeting = appStore.greeting;
-let newsticker = null;
-let leftDrawerOpen = false;
-let scannerOpen = false;
-let scrolled = false;
-let tab = 'home';
-let refreshErr = null;
-let hideUpdateField = false;
-let profilePictureUrl = null;
+const $router = useRouter();
 
-let navTitle = computed(() => appStore.navTitle);
-let pageName = computed(() => appStore.pageName);
-let pageTrans = computed(() => appStore.pageTrans);
-let titleOnlyInNav = computed(() => appStore.onlyInNav);
+let isDev = process.env.DEV;
+
+const scannerOpen = ref(false);
+const scrolled = ref(false);
+const refreshErr = ref(null);
+const hideUpdateField = ref(false);
+const leftDrawerOpen = ref(false);
+const newsticker = ref(null);
+
+function clearError() {
+  refreshErr.value = null
+}
+function toggleDrawer() {
+  leftDrawerOpen.value = !leftDrawerOpen.value
+}
+function hideUpdate() {
+  hideUpdateField.value = false
+}
 
 const navigationLinks = [
   {
@@ -368,18 +359,18 @@ let refresh = async (done) => {
   })
     .then()
     .catch((response) => {
-      refreshErr = response;
+      refreshErr.value = response;
     })
     .finally(done); // stop showing the refresh icon
 };
 
 let refreshAgain = () => {
-  refreshErr = null;
+  refreshErr.value = null;
   refresh();
 };
 
 let scrollHandler = (info) => {
-  scrolled = !scannerOpen ? info.position > 30 : false;
+  scrolled.value = !scannerOpen.value ? info.position > 30 : false;
 };
 
 let askAndReadClipboard = () => {
@@ -437,7 +428,7 @@ let isClipboardValid = (text) => {
 };
 
 let gotScanResult = (e) => {
-  scannerOpen = false;
+  scannerOpen.value = false;
   switch (e.type) {
     case 'u':
       window.location.href = '#/benutzerinfo?userFbId=' + e.res;
@@ -454,7 +445,7 @@ let gotScanResult = (e) => {
 
 let closeScanner = (e) => {
   if (e.direction == 'up') {
-    scannerOpen = false;
+    scannerOpen.value = false;
     setTimeout(() => window.scrollTo(0, 0), 300);
   }
 };
@@ -462,7 +453,7 @@ let closeScanner = (e) => {
 let toggleScannerOpen = async () => {
   // first check whether clipboard contains data to be processed
   var clipboardContent;
-  if (!scannerOpen)
+  if (!scannerOpen.value)
     clipboardContent = await askAndReadClipboard().catch((err) => {
       var isDomException = (err + '').includes('NotAllowedError');
 
@@ -475,7 +466,7 @@ let toggleScannerOpen = async () => {
             err,
       });
       setTimeout(() => {
-        scannerOpen = false;
+        scannerOpen.value = false;
         $q.notify({
           type: 'info',
           message: 'Kamera geschlossen',
@@ -495,25 +486,25 @@ let toggleScannerOpen = async () => {
     });
     $router.replace(clipboardContent);
   } else {
-    scannerOpen = !scannerOpen;
-    if (scannerOpen) {
-      leftDrawerOpen = false;
+    scannerOpen.value = !scannerOpen.value;
+    if (scannerOpen.value) {
+      leftDrawerOpen.value = false;
     }
   }
 };
 
 let scannerHelpNeeded = () => {
-  scannerOpen = false;
+  scannerOpen.value = false;
 };
 
 let reloadNews = () => {
   sendApiRequest(GET_NEWSTICKER, {})
     .then((data) => {
-      newsticker = data.ticker;
+      newsticker.value = data.ticker;
     })
     .catch((err) => {
       console.warn(err);
-      newsticker = 'Fehler aufgetreten';
+      newsticker.value = 'Fehler aufgetreten';
     });
 };
 
@@ -521,10 +512,6 @@ onMounted(() => {
   setTimeout(reloadNews, 50); // simple call was buggy, no idea why
   if (!userStore.user) location.reload();
   // bug: when other user first signs in, no data are displayed. Reloading is then the second sign-in and everything is working properly
-  else
-    buildGetRequestUrl(GET_USER_PROFILE_PIC, {
-      fbid: userStore.user.uid,
-    }).then((url) => (profilePictureUrl = url));
 });
 
 $q.addressbarColor.set();

@@ -72,7 +72,7 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   cancelLabel: String,
   okLabel: String,
   message: {
@@ -85,6 +85,16 @@ defineProps({
   animation: String,
   details: String,
 });
+const {
+  cancelLabel,
+  okLabel,
+  message,
+  persistent,
+  title,
+  icon,
+  animation,
+  details,
+} = toRefs(props);
 
 let viewTab = 'info';
 

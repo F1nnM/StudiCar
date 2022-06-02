@@ -7,9 +7,10 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   value: Boolean,
 });
+const { value } = toRefs(props);
 
 function emit(val) {
   $emit('input', val);

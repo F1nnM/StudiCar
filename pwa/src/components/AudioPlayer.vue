@@ -29,6 +29,13 @@
 </template>
 
 <script setup>
+const props = defineProps({
+  src: {
+    type: String,
+    required: true,
+  },
+});
+const { src } = toRefs(props);
 
 let paused = true;
 let loadingError = false;
@@ -36,13 +43,6 @@ let audio = null;
 let metaLoaded = false;
 let current = 0;
 let duration = 0.1;
-
-defineProps({
-  src: {
-    type: String,
-    required: true,
-  },
-});
 
 const audioRef = ref(null);
 

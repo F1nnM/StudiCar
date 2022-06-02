@@ -72,20 +72,20 @@
   </div>
 </template>
 
-<script setup>import { useUserStore } from 'src/stores/user';
+<script setup>
+import { useUserStore } from 'src/stores/user';
 
-defineProps({
+const props = defineProps({
   lift: Object,
 });
+const { lift } = toRefs(props);
+
 const isDeparting = computed(() => {
   return lift.departAt != '00:00:00';
 });
 
 const timeToDepartOrArrive = computed(() => {
-  return (isDeparting ? lift.departAt : lift.arriveBy).substr(
-    0,
-    5
-  );
+  return (isDeparting ? lift.departAt : lift.arriveBy).substr(0, 5);
 });
 
 const userStore = useUserStore();
@@ -99,9 +99,7 @@ const courseStations = computed(() => {
   arr.push({
     id: start.id,
     city: start.name,
-    details: startsAtSchool
-      ? getStationLabel(start.id, start.name)
-      : username, // when starts not at school, it starts at home adress of this user
+    details: startsAtSchool ? getStationLabel(start.id, start.name) : username, // when starts not at school, it starts at home adress of this user
   });
 
   if (lift.stations)
@@ -115,9 +113,7 @@ const courseStations = computed(() => {
   arr.push({
     city: dest.name,
     id: dest.id,
-    details: startsAtSchool
-      ? username
-      : getStationLabel(dest.id, dest.name), // when starts at school, it ends at home adress of this user
+    details: startsAtSchool ? username : getStationLabel(dest.id, dest.name), // when starts at school, it ends at home adress of this user
   });
 
   return arr;

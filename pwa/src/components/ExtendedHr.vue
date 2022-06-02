@@ -6,12 +6,13 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   color: String,
   size: String,
   borderRadius: String,
   hex: Boolean,
 });
+const { hex, borderRadius, color, size } = toRefs(props);
 
 const classAttr = computed(() => {
   var text = 'to-hr to-hr-' + (size || 'xs');

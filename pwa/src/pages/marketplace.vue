@@ -487,12 +487,12 @@ const getSortedOffers = computed(() => {
   if (sort != {}) {
     switch (sort.val) {
       case 'distance':
-        offers.sort((a, b) => {
+        offers.value.sort((a, b) => {
           return a.distance - b.distance;
         });
         break;
       case 'seats':
-        offers.sort((a, b) => {
+        offers.value.sort((a, b) => {
           if (a.seatsOccupied == b.seatsOccupied)
             return b.seatsOffered - a.seatsOffered;
           // when same seats, then descending to avaiable seats
@@ -523,7 +523,7 @@ const getSortedOffers = computed(() => {
         });
         // now we have an array containing our stores, and have to sort our offers depending on the score they got
 
-        offers.sort((a, b) => {
+        offers.value.sort((a, b) => {
           // here we get a and b as lift to be compared. The ids are the indices of prefArray
 
           return prefScores[a.id - 1] - prefScores[b.id - 1];
@@ -535,7 +535,7 @@ const getSortedOffers = computed(() => {
         // API not implemented yet
         break;
       case 'timeDiff':
-        offers.sort((a, b) => {
+        offers.value.sort((a, b) => {
           var aTime =
               a.date +
               ' ' +
@@ -554,16 +554,15 @@ const getSortedOffers = computed(() => {
 });
 
 const getFilteredOffers = computed(() => {
-  var allOffers = JSON.parse(JSON.stringify(allOffers)),
-    userPrefs = userStore.user.prefs,
-    filter = filter;
+  let allOffers_ = JSON.parse(JSON.stringify(allOffers.value));
+  let userPrefs = userStore.user.prefs;
 
   if (filter.defaultHome) {
     var city = defaultHomeCity,
       postcode = userStore.user.addresses.find((a) => a.isDefault);
   }
 
-  allOffers = allOffers.filter((offer) => {
+  allOffers_ = allOffers_.filter((offer) => {
     // prefs matching?
     if (filter.prefs) {
       if (!arePrefsMatching(offer.driver.prefs)) return false;
@@ -595,7 +594,7 @@ const getFilteredOffers = computed(() => {
 
     return true; // stay in results otherwise
   });
-  return allOffers;
+  return allOffers_;
 });
 
 const filteredOffersLength = computed(() => {
@@ -677,7 +676,7 @@ function arePrefsMatching(driverPrefsObj) {
 
 onMounted(() => {
   appStore.setPage({
-    name: title,
+    name: title.value,
     navTitle: 'Marktplatz',
   });
   /*  recomputeView(); */

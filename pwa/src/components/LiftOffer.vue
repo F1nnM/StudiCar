@@ -197,14 +197,17 @@
   </div>
 </template>
 
-<script setup>import { useUserStore } from 'src/stores/user';
+<script setup>
+import { useUserStore } from 'src/stores/user';
+import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from 'src/utils/ApiAccess';
 import { toRef } from 'vue';
 
-defineProps({
+const props = defineProps({
   lift: Object,
   noShadow: Boolean,
   isAlreadyRequested: Boolean,
 });
+const { lift, noShadow, isAlreadyRequested } = toRefs(props);
 let imageUrl = '';
 
 const timeText = computed(() => {
@@ -235,8 +238,7 @@ const objWithAllWeekDays = computed(() => {
 });
 
 const dateText = computed(() => {
-  if (isRepeating)
-    return 'jeden ' + objWithAllWeekDays[lift.repeatsOn];
+  if (isRepeating) return 'jeden ' + objWithAllWeekDays[lift.repeatsOn];
   var dateObj = new Date(lift.date),
     dateFormatted = date.formatDate(dateObj, 'dddd, DD.MM.', {
       days: [
@@ -269,8 +271,8 @@ const dateText = computed(() => {
   return nextWeekText + ' ' + dateFormatted;
 });
 
-const userStore = useUserStore()
-const prefsDocu = toRef(userStore.user.prefs)
+const userStore = useUserStore();
+const prefsDocu = toRef(userStore.user.prefs);
 
 function betterPrefColor(prefName) {
   var color = lift.driver.prefs[prefName].toLowerCase();
@@ -279,41 +281,37 @@ function betterPrefColor(prefName) {
 }
 
 function requestLift() {
-  $q
-    .dialog({
-      title: 'Anfragen',
-      message: `${lift.driver.name} fragen, ob du mitfahren kannst?`,
-      ok: {
-        color: 'positive',
-      },
-      cancel: {
-        color: 'white',
-      },
-      cancel: true,
-      persistent: true,
-    })
-    .onOk(() => {
-      $emit('request', lift.id);
-    });
+  $q.dialog({
+    title: 'Anfragen',
+    message: `${lift.driver.name} fragen, ob du mitfahren kannst?`,
+    ok: {
+      color: 'positive',
+    },
+    cancel: {
+      color: 'white',
+    },
+    cancel: true,
+    persistent: true,
+  }).onOk(() => {
+    $emit('request', lift.id);
+  });
 }
 
 function cancelRequest() {
-  $q
-    .dialog({
-      title: 'Zurückziehen',
-      message: 'Deine Anfrage zur Fahrt zurückziehen?',
-      ok: {
-        color: 'positive',
-      },
-      cancel: {
-        color: 'white',
-      },
-      cancel: true,
-      persistent: true,
-    })
-    .onOk(() => {
-      $emit('cancelRequest', lift.id);
-    });
+  $q.dialog({
+    title: 'Zurückziehen',
+    message: 'Deine Anfrage zur Fahrt zurückziehen?',
+    ok: {
+      color: 'positive',
+    },
+    cancel: {
+      color: 'white',
+    },
+    cancel: true,
+    persistent: true,
+  }).onOk(() => {
+    $emit('cancelRequest', lift.id);
+  });
 }
 
 async function refreshImage() {

@@ -55,6 +55,6 @@ function call() {
 
 const appStore = useAppStore();
 onMounted(() => {
-  appStore.setPage('Spielhölle');
+  appStore.setPage({ name: 'Spielhölle' });
 });
 </script>

@@ -166,6 +166,7 @@
 
 <script setup>
 import { useUserStore } from 'src/stores/user';
+import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from 'src/utils/ApiAccess';
 import { onMounted } from 'vue';
 
 const userStore = useUserStore();

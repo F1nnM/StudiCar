@@ -153,10 +153,10 @@
 </template>
 
 <script setup>
-
 const props = defineProps({
   value: Object,
 });
+const { value } = toRefs(props);
 
 let localValue = toRef(props.value);
 

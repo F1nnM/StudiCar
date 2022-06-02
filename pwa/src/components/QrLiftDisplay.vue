@@ -101,7 +101,9 @@ let invitingUserName = null;
 let denied = false;
 let liftData = ''; // computed property makes no sence because url as depending value is not reactive as well
 
-const userStore = useUserStore()
+const userStore = useUserStore();
+
+const $route = useRoute();
 
 const liftId = computed(() => {
   if (liftData) return parseInt(liftData.split('#i')[0]);
@@ -194,7 +196,7 @@ function callServer() {
 
 onMounted(() => {
   refresh();
-})
+});
 </script>
 
 <style lang="scss" scoped></style>

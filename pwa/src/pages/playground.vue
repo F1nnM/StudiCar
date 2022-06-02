@@ -28,6 +28,6 @@ const appStore = useAppStore();
 let test = true;
 
 onMounted(() => {
-  appStore.setPage('Spielplatz');
+  appStore.setPage({ name: 'Spielplatz'});
 });
 </script>

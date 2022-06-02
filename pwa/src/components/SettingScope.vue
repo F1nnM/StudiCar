@@ -100,7 +100,7 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   value: {
     type: Boolean,
     required: true,
@@ -113,6 +113,8 @@ defineProps({
   },
   descriptionLabel: String,
 });
+const { value, disableSave, uploading, property, descriptionLabel } =
+  toRefs(props);
 
 let help = false;
 let hasBeenSaved = false;

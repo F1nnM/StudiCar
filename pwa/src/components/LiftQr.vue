@@ -45,10 +45,12 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   value: Boolean,
   input: String,
 });
+const { value, input } = toRefs(props);
+
 function emit(val) {
   $emit('input', val);
 }

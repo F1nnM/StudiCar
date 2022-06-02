@@ -10,7 +10,7 @@
               round
               icon="menu"
               aria-label="Menu"
-              @click="leftDrawerOpen = !leftDrawerOpen"
+              @click="toggleDrawer"
             />
 
             <q-toolbar-title class="row">
@@ -22,7 +22,7 @@
                 </q-slide-transition>
                 <q-slide-transition>
                   <div v-show="scrolled" class="text-weight-thin">
-                    {{ pageName }}
+                    {{ store.pageName }}
                   </div>
                 </q-slide-transition>
               </div>
@@ -47,7 +47,7 @@
     <q-page-container>
       <q-scroll-observer @scroll="scrollHandler" />
       <router-view v-slot="{ Component }">
-        <transition :name="pageTrans" mode="out-in">
+        <transition :name="store.pageTrans" mode="out-in">
           <component :is="Component" />
         </transition>
       </router-view>
@@ -81,15 +81,15 @@ import { useAppStore } from 'src/stores/app';
 
 const store = useAppStore();
 
-let pageName = store.pageName;
-let pageTrans = store.pageTrans;
-
-let fullscreen = false;
-let scrolled = false;
-let leftDrawerOpen = false;
+const fullscreen = ref(false);
+const scrolled = ref(false);
+const leftDrawerOpen = ref(false);
 
 const scrollHandler = (event) => {
-  scrolled = event.position > 30;
+  scrolled.value = event.position > 30;
 };
 
+const toggleDrawer = () => {
+  leftDrawerOpen.value = !leftDrawerOpen.value;
+};
 </script>

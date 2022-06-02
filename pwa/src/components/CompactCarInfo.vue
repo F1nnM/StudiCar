@@ -103,8 +103,7 @@
 </template>
 
 <script setup>
-
-defineProps({
+const props = defineProps({
   car: {
     type: Object,
     required: true,
@@ -112,6 +111,8 @@ defineProps({
   expandable: Boolean,
   compactView: Boolean,
 });
+const { car, expandable, compactView } = toRefs(props);
+
 let showDetails = false;
 const carColor = computed(() => {
   // at the time of writing this the component was used both with and without #-prefix in color

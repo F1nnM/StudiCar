@@ -15,13 +15,14 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   value: String,
   options: Array,
   color: String,
   labelCapitalized: Boolean,
   specialLabel: Boolean,
 });
+const { value, options, color, labelCapitalized, specialLabel } = toRefs(props);
 
 function emit(val) {
   $emit('input', val);

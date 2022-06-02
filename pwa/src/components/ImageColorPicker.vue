@@ -53,9 +53,11 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   imageSrc: String,
 });
+const { imageSrc } = toRefs(props);
+
 let colorPicker = {
   tab: 'field',
   color: '#FFFFF',
@@ -66,7 +68,7 @@ function emit() {
 }
 
 const imageSrcFromJS = computed(() => {
-  return require('../assets/' + imageSrc);
+  return import('../assets/' + imageSrc);
 });
 </script>
 

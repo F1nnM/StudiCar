@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   state: {
     required: true,
   },
@@ -55,4 +55,6 @@ defineProps({
     type: Boolean,
   },
 });
+const { state, successText, loadingText, errorText, showSuccess } =
+  toRefs(props);
 </script>

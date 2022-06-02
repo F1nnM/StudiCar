@@ -739,11 +739,11 @@ function getImagePath(id) {
   /* let pathBegin = "../assets/school_images/"; */
   switch (id) {
     case 1:
-      return require('../assets/school_images/HDH_cube_resized.jpg');
+      return import('../assets/school_images/HDH_cube_resized.jpg');
     case 2:
-      return require('../assets/school_images/HDH_old_resized.jpg');
+      return import('../assets/school_images/HDH_old_resized.jpg');
     case 3:
-      return require('../assets/school_images/WIB_ext_resized.jpg');
+      return import('../assets/school_images/WIB_ext_resized.jpg');
     default:
       return false; // When returning false, no image is shown as fallback.
   }
