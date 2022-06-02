@@ -183,13 +183,13 @@
                   <q-stepper-navigation>
                     <q-btn
                       flat
-                      @click="step--"
+                      @click="stepDec"
                       color="primary"
                       label="Eins zurück"
                       class="q-ml-sm"
                     />
                     <q-btn
-                      @click="step++"
+                      @click="stepInc"
                       color="primary"
                       :disable="!lift.destinationAddressId"
                       label="Weiter"
@@ -245,13 +245,13 @@
                   <q-stepper-navigation>
                     <q-btn
                       flat
-                      @click="step--"
+                      @click="stepDec"
                       color="primary"
                       label="Eins zurück"
                       class="q-ml-sm"
                     />
                     <q-btn
-                      @click="step++"
+                      @click="stepInc"
                       :disable="!lift.startAddressId"
                       color="primary"
                       label="Weiter"
@@ -296,13 +296,13 @@
                   <q-stepper-navigation>
                     <q-btn
                       flat
-                      @click="step--"
+                      @click="stepDec"
                       color="primary"
                       label="Eins Zurück"
                       class="q-ml-sm"
                     />
                     <q-btn
-                      @click="step++"
+                      @click="stepInc"
                       color="primary"
                       :disable="!lift.carId"
                       label="Weiter"
@@ -348,12 +348,12 @@
                   <q-stepper-navigation>
                     <q-btn
                       flat
-                      @click="step--"
+                      @click="stepDec"
                       color="primary"
                       label="Eins Zurück"
                       class="q-ml-sm"
                     />
-                    <q-btn @click="step++" color="primary" label="Weiter" />
+                    <q-btn @click="stepInc" color="primary" label="Weiter" />
                   </q-stepper-navigation>
                 </q-step>
                 <q-step
@@ -372,12 +372,12 @@
                   <q-stepper-navigation>
                     <q-btn
                       color="primary"
-                      @click="step--"
+                      @click="stepDec"
                       label="Zurück"
                       flat
                     />
                     <q-btn
-                      @click="step++"
+                      @click="stepInc"
                       color="primary"
                       :disable="lift.time == null || lift.date == 0"
                       label="Abschließen"
@@ -477,7 +477,7 @@
                   <q-stepper-navigation>
                     <q-btn
                       color="primary"
-                      @click="step--"
+                      @click="stepDec"
                       label="Zurück"
                       flat
                     />
@@ -543,8 +543,8 @@
 <script setup>
 import { useUserStore } from 'src/stores/user';
 
-let maxDaysAhead = 30;
-let lift = {
+const maxDaysAhead = 30;
+const lift = ref({
   destination: 'school', // default set to school, user selects first home/school, then exact address
   destinationAddressId: 0,
   startAddressId: 0,
@@ -564,14 +564,18 @@ let lift = {
       time: 1593684175000,
     },
   ],
-};
-let step = 1;
-let showTimePicker = false;
-let openAddLiftConfirm = false;
-let overviewExpanded = false;
-let uploadingDoneValue = 0;
-let uploading = 0; // 0 means not uploading, 1 means upload in progress, 2 means upload successful and -1 means error
-let overviewTab = 'route';
+});
+const step = ref(1);
+const uploading = ref(0); // 0 means not uploading, 1 means upload in progress, 2 means upload successful and -1 means error
+const overviewTab = ref('route');
+
+function stepInc() {
+  step.value = step.value + 1;
+}
+
+function stepDec() {
+  step.value = step.value - 1;
+}
 
 const appStore = useAppStore();
 const userStore = useUserStore();
@@ -638,16 +642,6 @@ const destCity = computed(() => {
   return address.city;
 });
 
-const liftValue = computed({
-  get() {
-    return lift;
-  },
-  set(value) {
-    lift = value;
-    step += 1;
-  },
-});
-
 const getExactAddresses = computed(() => {
   if (lift.destination == 'school') {
     return allAddresses.filter((item) => item.id < 4); // filter only the schools, which have IDs 1 to 3
@@ -677,38 +671,13 @@ const departing = computed(() => {
   else return null;
 });
 
-function fillAndJump() {
-  lift = {
-    destination: 'school', // default set to school, user selects first home/school, then exact address
-    destinationAddressId: 2,
-    startAddressId: -1,
-    carId: 47,
-    timestamp: '18:30',
-    datestamp: '2021-01-31',
-    seats: 0, // just to avoid error when rendering slider
-    stops: [
-      {
-        addressId: 31,
-        time: 1593684157000,
-      },
-      {
-        addressId: 34,
-        time: 1593684175000,
-      },
-    ],
-  };
-  step = 7;
-}
-
 function goHome() {
   window.location.href = '/#/';
 }
 
 function dateOptions(d) {
-  const limit = maxDaysAhead;
-
   var a = date.getDateDiff(d, new Date(), 'days');
-  a = a < limit && a >= 0;
+  a = a < maxDaysAhead && a >= 0;
   return a;
 }
 
@@ -717,19 +686,19 @@ async function addLift() {
     // case when user didn't want to change number of seats at this lift
     lift.seats = getCarData.seats;
   }
-  uploading = 1;
+  uploading.value = 1;
   lift.departAt = departing;
   lift.timeTab = departing ? 'depart' : 'arrive';
   await userStore.addLift(lift);
-  lift = {
+  lift.value = {
     destination: 'school', // default set to school, user selects first home/school, then exact address
     destinationAddressId: 0,
     startingPoint: 0,
     car: null,
     seats: 0, // just to avoid error when rendering slider
   };
-  uploading = 2;
-  step = 1;
+  uploading.value = 2;
+  step.value = 1;
 
   await new Promise((res) => setTimeout(res, 1500)); // wait so that user can see success message
   goHome();
