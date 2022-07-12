@@ -39,7 +39,7 @@ admin.initializeApp({
 var api = require('./api');
 server.on('request', async (req, res) => {
 
-  console.log(`${new Date().toLocaleDateString('en-US')} ${req.method} ${req.url}`);
+  console.log(`${new Date().toLocaleDateString('en-US')} ${req.method} ${req.url.split("?")[0]}`);
 
   // CORS -Stuff
   res.setHeader('Access-Control-Allow-Origin', '*');
