@@ -1,4 +1,8 @@
 StudiCar.code-workspace
 studicar.sql
 /api/mariadb
-.vscode
+.vscode/settings.json
+referencepwa
+pwa_old
+**/*.key
+**/*.pem

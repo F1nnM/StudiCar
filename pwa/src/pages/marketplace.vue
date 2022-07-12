@@ -53,11 +53,11 @@
           <q-card>
             <div class="row justify-between">
               <q-item-label header>
-                {{ sortFilterDialog.tab == "sort" ? "Sortieren" : "Filtern" }}
+                {{ sortFilterDialog.tab == 'sort' ? 'Sortieren' : 'Filtern' }}
                 <small class="q-ml-sm" v-if="sortFilterDialog.tab == 'filter'"
                   >-
-                  {{ filteredOffersLength + "/" + allOffers.length }} Angebot{{
-                    allOffers.length != 1 ? "en" : ""
+                  {{ filteredOffersLength + '/' + allOffers.length }} Angebot{{
+                    allOffers.length != 1 ? 'en' : ''
                   }}
                   übrig -</small
                 >
@@ -152,7 +152,7 @@
                         :options="[
                           { icon: 'sentiment_satisfied_alt', value: 0 },
                           { value: 1, slot: 'groups' },
-                          { icon: 'group', value: 2 }
+                          { icon: 'group', value: 2 },
                         ]"
                       >
                         <template v-slot:groups>
@@ -207,7 +207,7 @@
                         :options="[
                           { icon: 'home', value: 'home' },
                           { icon: 'sync_alt', value: 0 },
-                          { icon: 'school', value: 'school' }
+                          { icon: 'school', value: 'school' },
                         ]"
                       />
                     </q-item-section>
@@ -343,362 +343,342 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import { sendApiRequest } from "../ApiAccess";
-import LiftOffer from "../components/LiftOffer";
-import QrLiftDisplay from "components/QrLiftDisplay";
-import TitleButton from "components/TitleButtonAnchor";
+<script setup>
+import { useAppStore } from 'src/stores/app';
+import { useUserStore } from 'src/stores/user';
+import { onMounted } from 'vue';
 
-export default defineComponent({
-  components: { LiftOffer, QrLiftDisplay, TitleButton },
-  data() {
-    return {
-      openEditSort: false,
-      sort: {
-        label: "nach Sitzen (Standard)",
-        icon: "person",
-        val: "seats"
+const userStore = useUserStore();
+const appStore = useAppStore();
+
+let openEditSort = false;
+let sort = {
+  label: 'nach Sitzen (Standard)',
+  icon: 'person',
+  val: 'seats',
+};
+let offerIndexToRefresh = 1;
+let filter = {
+  friends: 0,
+  prefs: true,
+  dest: 0,
+  defaultHome: false,
+};
+let sortFilterDialog = {
+  open: false,
+  tab: 'sort',
+};
+
+const allOffers = computed(() => {
+  return userStore.user.marketplaceOffers;
+});
+
+const title = computed(() => {
+  var greeting = appStore.greeting;
+  var name = userStore.user.name.split(' ')[0];
+  return 'Hi, ' + name; // first had greeting like in DrawerWelcomeImage, but took up too much space
+});
+
+const filterDefaultHomePreposition = computed(() => {
+  if (!filter.dest) return 'ab/nach';
+  else {
+    if (filter.dest == 'home') return 'nach';
+    else return 'ab';
+  }
+});
+
+const defaultHomeCity = computed(() => {
+  var defaultAddress = userStore.user.addresses.find(
+    (a) => a.isDefault && a.id > 3
+  );
+  if (defaultAddress) return defaultAddress.city;
+  else return null;
+});
+
+const hasUserAddresses = computed(() => {
+  var all = userStore.user.addresses.filter((ad) => ad.id > 3);
+  return all.length > 0;
+});
+
+const userPrefs = computed(() => {
+  return userStore.user.prefs;
+});
+
+const sortOptions = computed(() => {
+  return [
+    {
+      label: 'niedrigste Entfernung',
+      caption: 'Sortiert aufsteigend nach Luftlinie',
+      icon: 'location_on',
+      val: 'distance',
+      disabled: true,
+    },
+    {
+      label: 'wenigste Sitze belegt',
+      caption: 'Sortiert nach freien Plätzen',
+      val: 'seats',
+      icon: 'person',
+    },
+    {
+      label: 'Toleranz',
+      caption: 'Sortiert nach der Toleranz bzw. den Präferenzen des Fahrers',
+      val: 'prefs',
+      icon: 'insert_emoticon',
+    },
+    {
+      label: 'Zeit',
+      caption: 'Sortiert nach Zeit der Fahrt',
+      val: 'timeDiff',
+      icon: 'departure_board',
+      disabled: true,
+    },
+    {
+      label: 'Geringste Zeit zum Unterricht',
+      caption: 'Möglichst geringe Wartezeit bis Beginn der Veranstaltung',
+      val: 'time',
+      icon: 'timer',
+      disabled: true,
+    },
+  ];
+});
+
+const loremOffers = computed(() => {
+  var arr = [],
+    loremOffer = {
+      id: 99018780353225,
+      liftId: 31,
+      driver: {
+        id: 'oRdhQyF8j5Mx9uwKNNMhICdkmy42',
+        name: 'Julian',
+        surname: 'Essl',
+        prefs: {
+          talk: 'RED',
+          talkMorning: 'RED',
+          smoking: 'RED',
+          music: 'RED',
+        },
       },
-      offerIndexToRefresh: 1,
-      filter: {
-        friends: 0,
-        prefs: true,
-        dest: 0,
-        defaultHome: false
-      },
-      sortFilterDialog: {
-        open: false,
-        tab: "sort"
-      }
+      departAt: '18:00:00',
+      arriveBy: '00:00:00',
+      destination: { name: 'Würfel', id: 1 },
+      start: { name: 'Offingen', id: -1 },
+      seatsOffered: 3,
+      seatsOccupied: 0,
+      repeatsOn: 0,
+      date: '2021-02-24',
     };
-  },
+  arr = [loremOffer, loremOffer, loremOffer, loremOffer, loremOffer]; // 5 should be enough
+  return arr;
+});
 
-  computed: {
-    allOffers() {
-      return this.$store.getters["auth/user"].marketplaceOffers;
-    },
-    title() {
-      var greeting = this.$store.state.greeting;
-      var name = this.$store.getters["auth/user"].name.split(" ")[0];
-      return "Hi, " + name; // first had greeting like in DrawerWelcomeImage, but took up too much space
-    },
+const filtersActive = computed(() => {
+  var active = 0;
+  Object.values(filter).forEach((val) => {
+    if (val) active++;
+  });
+  return active;
+});
 
-    filterDefaultHomePreposition() {
-      if (!this.filter.dest) return "ab/nach";
-      else {
-        if (this.filter.dest == "home") return "nach";
-        else return "ab";
+const getSortedOffers = computed(() => {
+  var offers = getFilteredOffers;
+
+  // here comes the sorting code
+
+  if (sort != {}) {
+    switch (sort.val) {
+      case 'distance':
+        offers.value.sort((a, b) => {
+          return a.distance - b.distance;
+        });
+        break;
+      case 'seats':
+        offers.value.sort((a, b) => {
+          if (a.seatsOccupied == b.seatsOccupied)
+            return b.seatsOffered - a.seatsOffered;
+          // when same seats, then descending to avaiable seats
+          else return a.seatsOccupied - b.seatsOccupied;
+        });
+        break;
+      case 'prefs':
+        var prefScores = [];
+        var userPrefs = userStore.user.prefs;
+        offers.forEach((lift) => {
+          let offerscore = 0;
+          Object.keys(lift.driver.prefs).forEach((prefName) => {
+            // get the prefs by themself
+            let liftPref = lift.driver.prefs[prefName];
+            let userPref = userPrefs[prefName];
+
+            // convert it to calculatable value
+            liftPref = liftPref == 'GREEN' ? 3 : liftPref == 'YELLOW' ? 2 : 1;
+
+            //userPref = userPref == 'GREEN' ? 3 : userPref == 'YELLOW' ? 2 : 1
+
+            offerscore += liftPref; // - userPref) // the better pref of the lift related to pref of user, the better the score
+
+            // AT MOMENT NOT USED: when user's Pref higher than liftPref, it is negative and so the average result of all pref comparisons in this lift is worse
+          });
+
+          prefScores.push(offerscore); // when saving like this, the index of the value is the same as the lift id, because outer loop goes through offers
+        });
+        // now we have an array containing our stores, and have to sort our offers depending on the score they got
+
+        offers.value.sort((a, b) => {
+          // here we get a and b as lift to be compared. The ids are the indices of prefArray
+
+          return prefScores[a.id - 1] - prefScores[b.id - 1];
+        });
+        offers.reverse();
+
+        break;
+      case 'time':
+        // API not implemented yet
+        break;
+      case 'timeDiff':
+        offers.value.sort((a, b) => {
+          var aTime =
+              a.date +
+              ' ' +
+              (a.departAt != '00:00:00' ? a.departAt : a.arriveBy),
+            bTime =
+              b.date +
+              ' ' +
+              (b.departAt != '00:00:00' ? b.departAt : b.arriveBy);
+
+          return new Date(aTime).getTime() - new Date(bTime).getTime();
+        });
+    }
+  }
+
+  return offers;
+});
+
+const getFilteredOffers = computed(() => {
+  let allOffers_ = JSON.parse(JSON.stringify(allOffers.value));
+  let userPrefs = userStore.user.prefs;
+
+  if (filter.defaultHome) {
+    var city = defaultHomeCity,
+      postcode = userStore.user.addresses.find((a) => a.isDefault);
+  }
+
+  allOffers_ = allOffers_.filter((offer) => {
+    // prefs matching?
+    if (filter.prefs) {
+      if (!arePrefsMatching(offer.driver.prefs)) return false;
+    }
+    if (filter.dest) {
+      var endsAtHome = offer.destination.id == -1;
+      if (filter.dest == 'home') {
+        if (!endsAtHome) return false;
+      } else {
+        // filter.dest is 'school'
+        if (endsAtHome) return false;
       }
-    },
+    }
 
-    defaultHomeCity() {
-      var defaultAddress = this.$store.getters["auth/user"].addresses.find(
-        a => a.isDefault && a.id > 3
-      );
-      if (defaultAddress) return defaultAddress.city;
-      else return null;
-    },
-
-    hasUserAddresses() {
-      var all = this.$store.getters["auth/user"].addresses.filter(
-        ad => ad.id > 3
-      );
-      return all.length > 0;
-    },
-
-    userPrefs() {
-      return this.$store.getters["auth/user"].prefs;
-    },
-
-    sortOptions() {
-      return [
-        {
-          label: "niedrigste Entfernung",
-          caption: "Sortiert aufsteigend nach Luftlinie",
-          icon: "location_on",
-          val: "distance",
-          disabled: true
-        },
-        {
-          label: "wenigste Sitze belegt",
-          caption: "Sortiert nach freien Plätzen",
-          val: "seats",
-          icon: "person"
-        },
-        {
-          label: "Toleranz",
-          caption:
-            "Sortiert nach der Toleranz bzw. den Präferenzen des Fahrers",
-          val: "prefs",
-          icon: "insert_emoticon"
-        },
-        {
-          label: "Zeit",
-          caption: "Sortiert nach Zeit der Fahrt",
-          val: "timeDiff",
-          icon: "departure_board",
-          disabled: true
-        },
-        {
-          label: "Geringste Zeit zum Unterricht",
-          caption: "Möglichst geringe Wartezeit bis Beginn der Veranstaltung",
-          val: "time",
-          icon: "timer",
-          disabled: true
-        }
-      ];
-    },
-
-    loremOffers() {
-      var arr = [],
-        loremOffer = {
-          id: 99018780353225,
-          liftId: 31,
-          driver: {
-            id: "oRdhQyF8j5Mx9uwKNNMhICdkmy42",
-            name: "Julian",
-            surname: "Essl",
-            prefs: {
-              talk: "RED",
-              talkMorning: "RED",
-              smoking: "RED",
-              music: "RED"
-            }
-          },
-          departAt: "18:00:00",
-          arriveBy: "00:00:00",
-          destination: { name: "Würfel", id: 1 },
-          start: { name: "Offingen", id: -1 },
-          seatsOffered: 3,
-          seatsOccupied: 0,
-          repeatsOn: 0,
-          date: "2021-02-24"
-        };
-      arr = [loremOffer, loremOffer, loremOffer, loremOffer, loremOffer]; // 5 should be enough
-      return arr;
-    },
-
-    filtersActive() {
-      var active = 0;
-      Object.values(this.filter).forEach(val => {
-        if (val) active++;
-      });
-      return active;
-    },
-
-    getSortedOffers() {
-      var offers = this.getFilteredOffers;
-
-      // here comes the sorting code
-
-      if (this.sort != {}) {
-        switch (this.sort.val) {
-          case "distance":
-            offers.sort((a, b) => {
-              return a.distance - b.distance;
-            });
-            break;
-          case "seats":
-            offers.sort((a, b) => {
-              if (a.seatsOccupied == b.seatsOccupied)
-                return b.seatsOffered - a.seatsOffered;
-              // when same seats, then descending to avaiable seats
-              else return a.seatsOccupied - b.seatsOccupied;
-            });
-            break;
-          case "prefs":
-            var prefScores = [];
-            var userPrefs = this.$store.getters["auth/user"].prefs;
-            offers.forEach(lift => {
-              let offerscore = 0;
-              Object.keys(lift.driver.prefs).forEach(prefName => {
-                // get the prefs by themself
-                let liftPref = lift.driver.prefs[prefName];
-                let userPref = userPrefs[prefName];
-
-                // convert it to calculatable value
-                liftPref =
-                  liftPref == "GREEN" ? 3 : liftPref == "YELLOW" ? 2 : 1;
-
-                //userPref = userPref == 'GREEN' ? 3 : userPref == 'YELLOW' ? 2 : 1
-
-                offerscore += liftPref; // - userPref) // the better pref of the lift related to pref of user, the better the score
-
-                // AT MOMENT NOT USED: when user's Pref higher than liftPref, it is negative and so the average result of all pref comparisons in this lift is worse
-              });
-
-              prefScores.push(offerscore); // when saving like this, the index of the value is the same as the lift id, because outer loop goes through offers
-            });
-            // now we have an array containing our stores, and have to sort our offers depending on the score they got
-
-            offers.sort((a, b) => {
-              // here we get a and b as lift to be compared. The ids are the indices of prefArray
-
-              return prefScores[a.id - 1] - prefScores[b.id - 1];
-            });
-            offers.reverse();
-
-            break;
-          case "time":
-            // API not implemented yet
-            break;
-          case "timeDiff":
-            offers.sort((a, b) => {
-              var aTime =
-                  a.date +
-                  " " +
-                  (a.departAt != "00:00:00" ? a.departAt : a.arriveBy),
-                bTime =
-                  b.date +
-                  " " +
-                  (b.departAt != "00:00:00" ? b.departAt : b.arriveBy);
-
-              return new Date(aTime).getTime() - new Date(bTime).getTime();
-            });
-        }
-      }
-
-      return offers;
-    },
-
-    getFilteredOffers() {
-      var allOffers = JSON.parse(JSON.stringify(this.allOffers)),
-        userPrefs = this.$store.getters["auth/user"].prefs,
-        filter = this.filter;
-
-      if (filter.defaultHome) {
-        var city = this.defaultHomeCity,
-          postcode = this.$store.getters["auth/user"].addresses.find(
-            a => a.isDefault
-          );
-      }
-
-      allOffers = allOffers.filter(offer => {
-        // prefs matching?
-        if (filter.prefs) {
-          if (!this.arePrefsMatching(offer.driver.prefs)) return false;
-        }
-        if (filter.dest) {
-          var endsAtHome = offer.destination.id == -1;
-          if (filter.dest == "home") {
-            if (!endsAtHome) return false;
-          } else {
-            // filter.dest is 'school'
-            if (endsAtHome) return false;
-          }
-        }
-
-        if (filter.defaultHome) {
-          var focusedPoint = "";
-          switch (filter.dest) {
-            case "home":
-              focusedPoint = offer.destination.name; // when lift goes home, filtered can only by destination (city)
-              break;
-            case "school":
-              focusedPoint = offer.start.name;
-              break;
-            default:
-              focusedPoint = offer.start.name + "|" + offer.destination.name;
-          }
-          return focusedPoint.includes(this.defaultHomeCity);
-        }
-
-        return true; // stay in results otherwise
-      });
-      return allOffers;
-    },
-
-    filteredOffersLength() {
-      return this.getFilteredOffers.length;
-    },
-
-    genderName() {
-      switch (this.$store.getters["auth/user"].gender) {
-        case "M":
-          return "Jungs";
+    if (filter.defaultHome) {
+      var focusedPoint = '';
+      switch (filter.dest) {
+        case 'home':
+          focusedPoint = offer.destination.name; // when lift goes home, filtered can only by destination (city)
           break;
-        case "W":
-          return "Mädels";
-          break;
-        case "D":
-          return "Diversen";
-        case "X":
-          return "noch nicht eingestellt";
+        case 'school':
+          focusedPoint = offer.start.name;
           break;
         default:
-          return "Fehlermenschen";
+          focusedPoint = offer.start.name + '|' + offer.destination.name;
       }
+      return focusedPoint.includes(defaultHomeCity);
     }
-  },
 
-  methods: {
-    async refreshContent(res, rej) {
-      // check whether new LiftOffers can be loaded
-      if (this.hasUserAddresses)
-        this.$store.dispatch("auth/reloadMarketplaceOffers", {
-          res: res,
-          rej: rej
-        });
-      else res(); // when no addresses there, just resolve the promise
-    },
+    return true; // stay in results otherwise
+  });
+  return allOffers_;
+});
 
-    hide() {
-      this.qrLiftData = "";
-    },
+const filteredOffersLength = computed(() => {
+  return getFilteredOffers.length;
+});
 
-    openSortFilterDialog(prop) {
-      this.sortFilterDialog.open = true;
-      this.sortFilterDialog.tab = prop;
-    },
-
-    keepDialogOpen(prop, val) {
-      this.sortFilterDialog.open = true; // just to be sure
-      this[prop] = val;
-    },
-
-    recomputeView() {
-      var locArr = window.location.href.split("?qrLiftData=");
-      if (locArr.length > 1 && this.qrLiftData != "") {
-        this.qrLiftData = locArr[1];
-        console.warn("changed to " + locArr[1]);
-      }
-    },
-
-    triggerLiftRequest(liftId) {
-      this.$store.dispatch("auth/requestToLift", liftId);
-      this.offerIndexToRefresh++; // to re-render component, wasn't working otherwise
-    },
-
-    arePrefsMatching(driverPrefsObj) {
-      var liftPrefs = driverPrefsObj,
-        matching = Object.keys(liftPrefs).every(pref => {
-          var liftPrefValue = prefToInt(liftPrefs[pref]),
-            userPrefValue = prefToInt(this.userPrefs[pref]);
-
-          return liftPrefValue >= userPrefValue;
-          function prefToInt(val) {
-            switch (val) {
-              case "GREEN":
-                return 0;
-              case "YELLOW":
-                return 1;
-              case "RED":
-                return 2;
-            }
-          }
-        });
-
-      return matching;
-    }
-  },
-
-  mounted() {
-    this.$store.commit("setPage", {
-      name: this.title,
-      navTitle: "Marktplatz"
-    });
-    /*  this.recomputeView(); */
+const genderName = computed(() => {
+  switch (userStore.user.gender) {
+    case 'M':
+      return 'Jungs';
+      break;
+    case 'W':
+      return 'Mädels';
+      break;
+    case 'D':
+      return 'Diversen';
+    case 'X':
+      return 'noch nicht eingestellt';
+      break;
+    default:
+      return 'Fehler!';
   }
+});
+
+async function refreshContent(res, rej) {
+  // check whether new LiftOffers can be loaded
+  if (hasUserAddresses) userStore.reloadMarketplaceOffers.then(res).catch(rej);
+  else res(); // when no addresses there, just resolve the promise
+}
+
+function hide() {
+  qrLiftData = '';
+}
+
+function openSortFilterDialog(prop) {
+  sortFilterDialog.open = true;
+  sortFilterDialog.tab = prop;
+}
+
+function keepDialogOpen(prop, val) {
+  sortFilterDialog.open = true; // just to be sure
+  this[prop] = val;
+}
+
+function recomputeView() {
+  var locArr = window.location.href.split('?qrLiftData=');
+  if (locArr.length > 1 && qrLiftData != '') {
+    qrLiftData = locArr[1];
+    console.warn('changed to ' + locArr[1]);
+  }
+}
+
+function triggerLiftRequest(liftId) {
+  userStore.requestToLift(liftId);
+  offerIndexToRefresh++; // to re-render component, wasn't working otherwise
+}
+
+function arePrefsMatching(driverPrefsObj) {
+  var liftPrefs = driverPrefsObj,
+    matching = Object.keys(liftPrefs).every((pref) => {
+      var liftPrefValue = prefToInt(liftPrefs[pref]),
+        userPrefValue = prefToInt(userPrefs[pref]);
+
+      return liftPrefValue >= userPrefValue;
+      function prefToInt(val) {
+        switch (val) {
+          case 'GREEN':
+            return 0;
+          case 'YELLOW':
+            return 1;
+          case 'RED':
+            return 2;
+        }
+      }
+    });
+
+  return matching;
+}
+
+onMounted(() => {
+  appStore.setPage({
+    name: title.value,
+    navTitle: 'Marktplatz',
+  });
+  /*  recomputeView(); */
 });
 </script>

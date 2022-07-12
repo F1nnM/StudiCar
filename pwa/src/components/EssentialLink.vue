@@ -12,39 +12,34 @@
   </q-item>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "EssentialLink",
-  props: {
-    title: {
-      type: String,
-      required: true
-    },
-
-    onlyDev: Boolean,
-
-    caption: {
-      type: String,
-      default: ""
-    },
-
-    link: {
-      type: String,
-      default: "#"
-    },
-
-    icon: {
-      type: String,
-      default: ""
-    }
+<script setup>
+const props = defineProps({
+  title: {
+    type: String,
+    required: true,
   },
-  computed: {
-    isDisabled() {
-      if (!process.env.DEV) return this.onlyDev;
-      else return false;
-    }
-  }
+
+  onlyDev: Boolean,
+
+  caption: {
+    type: String,
+    default: '',
+  },
+
+  link: {
+    type: String,
+    default: '#',
+  },
+
+  icon: {
+    type: String,
+    default: '',
+  },
+});
+const { title, onlyDev, caption, link, icon } = toRefs(props);
+
+const isDisabled = computed(() => {
+  if (!process.env.DEV) return onlyDev;
+  else return false;
 });
 </script>

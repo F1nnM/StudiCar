@@ -1,7 +1,14 @@
 <template>
   <div class="q-pa-sm full-height bg-white">
     <TitleButton class="q-pt-md">
-      <q-tabs v-if="!!info" v-model="viewTab" dense no-caps inline-label class="text-dark">
+      <q-tabs
+        v-if="!!info"
+        v-model="viewTab"
+        dense
+        no-caps
+        inline-label
+        class="text-dark"
+      >
         <q-tab name="altogether" label="Wir als Team" />
         <q-tab name="matrix" label="Bereiche" />
       </q-tabs>
@@ -33,7 +40,9 @@
         class="q-px-none"
       >
         <q-tab-panel name="matrix" class="q-pa-none">
-          <div class="col-12 text-right text-caption">Tippe jeweils für mehr Info</div>
+          <div class="col-12 text-right text-caption">
+            Tippe jeweils für mehr Info
+          </div>
           <div class="row q-px-sm q-mt-sm q-pt-xs shadow-up-5">
             <q-list class="col-6 q-mb-xl" v-for="m in info.team" :key="m.id">
               <q-item dense clickable @click="showMember = m" class="q-pl-sm">
@@ -56,7 +65,11 @@
 
                 <q-item-section>
                   <p class="text-h6 q-mb-none">{{ m.name }}</p>
-                  <p class="text-subtitle1 q-pl-xs text-weight-light text-grey-9">{{ m.surname }}</p>
+                  <p
+                    class="text-subtitle1 q-pl-xs text-weight-light text-grey-9"
+                  >
+                    {{ m.surname }}
+                  </p>
                 </q-item-section>
                 <!-- <q-item-section side>
                  
@@ -67,7 +80,8 @@
                 <q-item-section class="q-ml-lg">
                   <q-item-label
                     class="text-overline q-pt-sm text-uppercase text-center"
-                  >{{ m.funcShort ? m.funcShort : m.function }}</q-item-label>
+                    >{{ m.funcShort ? m.funcShort : m.function }}</q-item-label
+                  >
                 </q-item-section>
               </q-item>
             </q-list>
@@ -84,7 +98,7 @@
       </q-tab-panels>
     </div>
     <q-dialog
-      style="width: 60vw;"
+      style="width: 60vw"
       v-model="dialogOpen"
       :transition-show="dialogShowTransition"
       :transition-hide="dialogHideTransition"
@@ -92,7 +106,9 @@
       <q-card flat bordered v-if="dialogOpen">
         <q-card-section class="q-pt-xs">
           <q-toolbar class="q-px-none">
-            <q-toolbar-title class="text-subtitle1">{{ showMember.function }}</q-toolbar-title>
+            <q-toolbar-title class="text-subtitle1">{{
+              showMember.function
+            }}</q-toolbar-title>
             <q-btn icon="close" flat round dense v-close-popup />
           </q-toolbar>
           <q-separator />
@@ -117,7 +133,9 @@
 
         <q-card-section>
           <p>Über mich</p>
-          <p class="text-caption">{{ showMember.bio || '- noch keine Beschreibung hinterlegt -' }}</p>
+          <p class="text-caption">
+            {{ showMember.bio || '- noch keine Beschreibung hinterlegt -' }}
+          </p>
         </q-card-section>
 
         <!-- <q-card-actions>
@@ -130,105 +148,91 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import ExtHr from "components/ExtendedHr";
-import TitleButton from "components/TitleButtonAnchor";
-import TeamPicture from "components/TeamPicture";
-import { sendApiRequest, SQL_GET_TEAM } from "../ApiAccess";
+<script setup>
+import { useAppStore } from 'src/stores/app';
+import { onMounted } from 'vue';
 
-export default defineComponent({
-  name: "team",
-  components: { ExtHr, TitleButton, TeamPicture },
-  data() {
-    return {
-      info: this.$store.getters["getStudiCarInfo"],
-      htmlText: "",
-      viewTab: "matrix",
-      showMember: null
-    };
+const appStore = useAppStore();
+
+let info = appStore.info;
+let htmlText = '';
+let viewTab = 'matrix';
+let showMember = null;
+
+watch(viewTab, (newv) => {
+  if (newv == 'altogether') {
+    setTimeout((_) => {
+      $refs.anchor.innerHTML = htmlText;
+    }, 50);
+  }
+});
+
+const dialogShowTransition = computed(() => {
+  if (true) return 'jump-up';
+  if (showMember) {
+    if (info.team.indexOf(showMember) % 2 == 0) return 'jump-right';
+    // even index, so left side
+    else return 'jump-left';
+  } else return 'fade'; // actually wanted even the show transition to be dynamic, but didn't work. Left it anyway in code.
+});
+
+const dialogHideTransition = computed(() => {
+  if (showMember) {
+    if (info.team.indexOf(showMember) % 2 == 0) return 'jump-left';
+    // even index, so left side
+    else return 'jump-right';
+  } else return 'fade';
+});
+
+const dialogOpen = computed({
+  get() {
+    return !!showMember;
   },
-  watch: {
-    viewTab: function(newv) {
-      if (newv == "altogether") {
-        setTimeout(_ => {
-          this.$refs.anchor.innerHTML = this.htmlText;
-        }, 50);
-      }
-    }
+  set() {
+    showMember = null;
   },
-  computed: {
-    dialogShowTransition() {
-      if (true) return "jump-up";
-      if (this.showMember) {
-        if (this.info.team.indexOf(this.showMember) % 2 == 0)
-          return "jump-right";
-        // even index, so left side
-        else return "jump-left";
-      } else return "fade"; // actually wanted even the show transition to be dynamic, but didn't work. Left it anyway in code.
-    },
+});
 
-    dialogHideTransition() {
-      if (this.showMember) {
-        if (this.info.team.indexOf(this.showMember) % 2 == 0)
-          return "jump-left";
-        // even index, so left side
-        else return "jump-right";
-      } else return "fade";
-    },
+async function refreshContent(res, rej) {
+  sendApiRequest(SQL_GET_TEAM, {}, (data) => {
+    appStore.setInfo(data);
+    info = data;
 
-    dialogOpen: {
-      get() {
-        return !!this.showMember;
-      },
-      set() {
-        this.showMember = null;
-      }
-    }
-  },
-  methods: {
-    async refreshContent(res, rej) {
-      sendApiRequest(SQL_GET_TEAM, {}, data => {
-        this.$store.commit("setInfo", data);
-        this.info = data;
+    htmlText = data.infoText;
+    res();
+  });
+}
 
-        this.htmlText = data.infoText;
-        res();
-      });
-    }
-  },
+onMounted(() => {
+  appStore.setPage({
+    name: 'Das Team',
+  });
 
-  mounted() {
-    this.$store.commit("setPage", {
-      name: "Das Team"
-    });
+  if (!appStore.info) {
+    sendApiRequest(
+      SQL_GET_TEAM,
+      {},
+      (data) => {
+        appStore.setInfo(data);
+        info = data;
 
-    if (!this.$store.getters["getStudiCarInfo"]) {
-      sendApiRequest(
-        SQL_GET_TEAM,
-        {},
-        data => {
-          this.$store.commit("setInfo", data);
-          this.info = data;
-
-          var loc = document.location.href; // check whether specific member should be visited
-          if (loc.includes("?orgaId=")) {
-            var id = loc.split("?orgaId=")[1];
-            this.showMember = this.team.find(m => {
-              return m.id + "" == id;
-            });
-          }
-
-          this.htmlText = data.infoText;
-        },
-        error => {
-          alert("Fehler aufgetreten: " + error);
+        var loc = document.location.href; // check whether specific member should be visited
+        if (loc.includes('?orgaId=')) {
+          var id = loc.split('?orgaId=')[1];
+          showMember = team.find((m) => {
+            return m.id + '' == id;
+          });
         }
-      );
-    } else {
-      this.info = this.$store.getters["getStudiCarInfo"];
-      this.htmlText = this.info.infoText;
-    }
+
+        htmlText = data.infoText;
+      },
+      (error) => {
+        alert('Fehler aufgetreten: ' + error);
+      }
+    );
+  } else {
+    info = appStore.info;
+    htmlText = info.infoText;
   }
 });
 </script>

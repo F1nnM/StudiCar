@@ -2,9 +2,9 @@
   <!-- one of the most important components in StudiCar, shows the StudiCar Code and the public link of the content -->
   <div>
     <q-dialog
-      :model-value="modelValue"
+      :value="isOpen"
       :position="position || 'standard'"
-      @update:model-value="emit"
+      @input="emit"
       full-width
       transition-show="slide-up"
       :transition-hide="position == 'bottom' ? 'slide-down' : 'jump-down'"
@@ -32,8 +32,7 @@
               <q-tab-panel name="qr">
                 <div
                   :class="
-                    'relative-position studicar-code' +
-                    (modelValue ? ' show' : '')
+                    'relative-position studicar-code' + (isOpen ? ' show' : '')
                   "
                 >
                   <div class="pan-anchor"></div>
@@ -41,12 +40,11 @@
                     v-touch-swipe.mouse.left="setDataTabToRaw"
                     style="border: 1px solid black"
                     class="rounded-borders"
-                    :options="{ width: 200 }"
+                    :width="200"
                     :color="color"
                     errorCorrectionLevel="H"
                     :value="qrInput"
                   />
-                  <!-- <p>{{ qrInput }}</p> -->
                   <q-img
                     src="~assets/app-icon_from_web_filled.png"
                     class="absolute-center qrcode-image"
@@ -88,7 +86,7 @@
                     >
                       {{
                         publicUrl ||
-                        "- es steht aktuell keine Url zur Verfügung -"
+                        '- es steht aktuell keine Url zur Verfügung -'
                       }}
                     </div>
                   </q-card-section>
@@ -216,152 +214,137 @@
   </div>
 </template>
 
-<script>
-import VueQrcode from "@chenfengyuan/vue-qrcode";
-import ExtHr from "components/ExtendedHr";
-import { getCssVar, copyToClipboard, dom } from "quasar";
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "QrGenerator",
-  components: {
-    VueQrcode,
-    ExtHr,
+<script setup>
+const props = defineProps({
+  input: {
+    type: Object,
+    required: true,
   },
-  props: {
-    input: {
-      type: Object,
-      required: true,
-    },
-    modelValue: Boolean,
-    primColor: Boolean,
-    text: String,
-    label: String,
-    fakeRefresh: Boolean,
-    linearProgress: Boolean,
-    position: String,
-  },
-
-  data() {
-    return {
-      color: {
-        dark: this.primColor ? getCssVar("primary") : "#000000FF",
-        light: "#FFFFFFFF",
-      },
-      showInfo: false,
-      qrProgress: 1,
-      interval: null,
-      progressColorWhite: false,
-      random: "01",
-      dataTab: "qr",
-    };
-  },
-  watch: {
-    modelValue: function (isOpen) {
-      if (this.fakeRefresh) {
-        const step = 5, // in hundreths, e.g. 100 means just one step to complete
-          duration = 5000;
-
-        var computedStep = step / 100,
-          numberOfSteps = 1 / computedStep;
-        /* if (isOpen)
-          this.interval = setInterval(_ => {
-            if (this.qrProgress <= computedStep) this.progressReset();
-            else this.qrProgress -= computedStep;
-          }, duration / numberOfSteps);
-        else clearInterval(this.interval); */
-      }
-    },
-  },
-
-  computed: {
-    qrInput() {
-      /* return JSON.stringify({ // just a joke, isn't more secure, just that qr code will change every interval, but important content stays the same xD
-        q: this.input,
-        f: this.random
-      }) */
-      var prefix = "";
-      switch (this.input.type) {
-        case "user":
-          prefix = "u";
-          break;
-        case "lift":
-          prefix = "l";
-          break;
-      }
-      return prefix + this.input.data;
-    },
-
-    publicUrl() {
-      var domainEtc =
-          "https://" +
-          (process.env.DEV
-            ? window.location.hostname
-            : "dev.pwa.studicar.mfinn.de"),
-        path = "",
-        data = this.input.data;
-      data = data.replaceAll("#", "$");
-      if (process.env.DEV) domainEtc += ":3000";
-      domainEtc += "/$/"; // '/#/' didn't work on mobile phones, will be replaced when decoding
-      switch (this.input.type) {
-        case "user":
-          path = "benutzerinfo?userFbId=";
-          break;
-        case "lift":
-          path = "?qrLiftData=";
-          break;
-      }
-      return domainEtc + path + data;
-    },
-  },
-
-  methods: {
-    emit(val) {
-      this.$emit("update:model-value", val);
-    },
-
-    async progressReset() {
-      this.qrProgress = 1.15;
-      this.random = Math.round(Math.random() * 100) + "";
-      /* this.progressColorWhite = !this.progressColorWhite */
-    },
-
-    setDataTabToRaw() {
-      this.dataTab = "raw";
-    },
-
-    shareViaWhatsApp() {
-      var type = "";
-      switch (this.input.type) {
-        case "user":
-          type = "Nutzerprofil";
-          break;
-        case "lift":
-          type = "Mitfahrangebot";
-          break;
-      }
-      var textToWhatsApp =
-        "whatsapp://send?text=" +
-        "Kopiere diesen Link für ein " +
-        type +
-        " in deine Zwischenablage öffne dann deinen StudiCar Scanner: " +
-        this.publicUrl;
-      textToWhatsApp = textToWhatsApp.replaceAll(" ", "%20");
-      window.location.href = textToWhatsApp;
-    },
-
-    copy() {
-      copyToClipboard(this.publicUrl)
-        .then((_) => {
-          this.$q.notify({
-            message: "Inhalt wurde kopiert",
-            color: "positive",
-          });
-        })
-        .catch((e) => alert("Fehler beim Kopieren: " + e));
-    },
-  },
+  isOpen: Boolean,
+  primColor: Boolean,
+  text: String,
+  label: String,
+  fakeRefresh: Boolean,
+  linearProgress: Boolean,
+  position: String,
 });
+const {
+  input,
+  isOpen,
+  primColor,
+  text,
+  label,
+  fakeRefresh,
+  linearProgress,
+  position,
+} = toRefs(props);
+
+let color = {
+  dark: primColor ? colors.getBrand('primary') : '#000000FF',
+  light: '#FFFFFFFF',
+};
+let showInfo = false;
+let qrProgress = 1;
+let interval = null;
+let progressColorWhite = false;
+let random = '01';
+let dataTab = 'qr';
+
+watch(isOpen, (isOpen) => {
+  if (fakeRefresh) {
+    const step = 5, // in hundreths, e.g. 100 means just one step to complete
+      duration = 5000;
+
+    var computedStep = step / 100,
+      numberOfSteps = 1 / computedStep;
+    /* if (isOpen)
+          interval = setInterval(_ => {
+            if (qrProgress <= computedStep) progressReset();
+            else qrProgress -= computedStep;
+          }, duration / numberOfSteps);
+        else clearInterval(interval); */
+  }
+});
+
+const qrInput = computed(() => {
+  var prefix = '';
+  switch (input.type) {
+    case 'user':
+      prefix = 'u';
+      break;
+    case 'lift':
+      prefix = 'l';
+      break;
+  }
+  return prefix + input.data;
+});
+
+const publicUrl = computed(() => {
+  var domainEtc =
+      'https://' +
+      (process.env.DEV
+        ? window.location.hostname
+        : 'dev.pwa.studicar.mfinn.de'),
+    path = '',
+    data = input.data;
+  data = data.replaceAll('#', '$');
+  if (process.env.DEV) domainEtc += ':3000';
+  domainEtc += '/$/'; // '/#/' didn't work on mobile phones, will be replaced when decoding
+  switch (input.type) {
+    case 'user':
+      path = 'benutzerinfo?userFbId=';
+      break;
+    case 'lift':
+      path = '?qrLiftData=';
+      break;
+  }
+  return domainEtc + path + data;
+});
+
+function emit(val) {
+  $emit('input', val);
+}
+
+async function progressReset() {
+  qrProgress = 1.15;
+  random = Math.round(Math.random() * 100) + '';
+  /* progressColorWhite = !progressColorWhite */
+}
+
+function setDataTabToRaw() {
+  dataTab = 'raw';
+}
+
+function shareViaWhatsApp() {
+  var type = '';
+  switch (input.type) {
+    case 'user':
+      type = 'Nutzerprofil';
+      break;
+    case 'lift':
+      type = 'Mitfahrangebot';
+      break;
+  }
+  var textToWhatsApp =
+    'whatsapp://send?text=' +
+    'Kopiere diesen Link für ein ' +
+    type +
+    ' in deine Zwischenablage öffne dann deinen StudiCar Scanner: ' +
+    publicUrl;
+  textToWhatsApp = textToWhatsApp.replaceAll(' ', '%20');
+  window.location.href = textToWhatsApp;
+}
+
+function copy() {
+  copyToClipboard(publicUrl)
+    .then((_) => {
+      $q.notify({
+        message: 'Inhalt wurde kopiert',
+        color: 'positive',
+      });
+    })
+    .catch((e) => alert('Fehler beim Kopieren: ' + e));
+}
 </script>
 
 <style lang="scss">
@@ -401,7 +384,7 @@ export default defineComponent({
     left: 50%;
     transform: translateX(-50%);
     bottom: -50%;
-    content: "";
+    content: '';
     position: absolute;
     border: 1px solid $primary;
     border-top: none;

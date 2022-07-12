@@ -1,18 +1,18 @@
 <template>
-  <!-- this is a fun component to make the left drawer prettier -->
+  <!-- is a fun component to make the left drawer prettier -->
   <div>
     <q-img
       v-if="true"
-      :src="randomImage"
-      style="height: 35vh;"
+      :src="randomImage.value"
+      style="height: 35vh"
       class="text-white"
     >
       <div class="row full-width q-pa-md">
         <div class="text-h6 col-10 text-weight-light">{{ greetingFull }}</div>
-        <q-icon size="sm" class="col-2" :name="greetingIcon" />
+        <q-icon size="sm" class="col-2" :name="greetingIcon.value" />
       </div>
       <div
-        v-if="caption && showTicker"
+        v-if="caption && appStore.settings.enablePostillonNewsFeed"
         class="full-width absolute-bottom-left text-caption"
       >
         {{ caption }}
@@ -27,100 +27,61 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
+<script setup>
+import { useAppStore } from 'src/stores/app';
+import { useUserStore } from 'src/stores/user';
 
-export default defineComponent({
-  name: "DrawerWelcomeImage",
-  props: {
-    timeText: {
-      type: String,
-      required: true
-    },
-    caption: String
-  },
-  data() {
-    return {};
-  },
-
-  computed: {
-    showTicker() {
-      return this.$store.state.settings.enablePostillonNewsFeed;
-    },
-
-    randomImage() {
-      /* if (this.$store.getters["auth/user"].dataSaver) {
-        switch (this.timeText) {
-          case "Guten Morgen":
-            img = "morning/sunrise";
-            break;
-          case "Willkommen":
-            img = "day/sun";
-            break;
-          case "Guten Abend":
-            img = "day/moon";
-            break;
-          default:
-            error = true;
-        }
-        if (error) {
-          return require("../assets/sad.svg");
-        }
-        return require("../assets/drawer_images/" + img + ".svg");
-      } */
-
-      var morningMax = 8;
-      var dayMax = 14;
-      var eveningMax = 13; // currently hard coded, could be optimized by automatically reading all files from dir
-      var error = false;
-
-      var imgPath;
-
-      switch (this.timeText) {
-        case "Guten Morgen":
-          imgPath = "morning/m" + Math.floor(Math.random() * morningMax);
-          break;
-        case "Willkommen":
-          imgPath = "day/d" + Math.floor(Math.random() * dayMax);
-          break;
-        case "Guten Abend":
-          imgPath = "evening/e" + Math.floor(Math.random() * eveningMax);
-          break;
-        default:
-          error = true;
-      }
-      if (error) return require("../assets/sad.svg");
-      else return require("../assets/drawer_images/" + imgPath + ".jpg");
-    },
-
-    greetingFull() {
-      return (
-        this.timeText +
-        ", " +
-        this.$store.getters["auth/user"].name.split(" ")[0]
-      );
-    },
-
-    greetingIcon() {
-      switch (this.timeText) {
-        case "Guten Abend":
-          return "nights_stay";
-          break;
-        case "Willkommen":
-          return "brightness_7";
-          break;
-        case "Guten Morgen":
-          return "wb_sunny";
-          break;
-        default:
-          return "report_problem";
-      }
-    }
-  },
-  methods: {
-    randomArrayItem(array) {
-      return array[Math.floor(Math.random() * array.length)];
-    }
-  }
+const props = defineProps({
+  caption: String,
 });
+const { caption } = toRefs(props);
+
+const appStore = useAppStore();
+
+const randomImage = computed(async () => {
+  var morningMax = 8;
+  var dayMax = 14;
+  var eveningMax = 13; // currently hard coded, could be optimized by automatically reading all files from dir
+  var error = false;
+
+  var imgPath;
+
+  switch (appStore.greeting) {
+    case 'Guten Morgen':
+      imgPath = 'morning/m' + Math.floor(Math.random() * morningMax);
+      break;
+    case 'Willkommen':
+      imgPath = 'day/d' + Math.floor(Math.random() * dayMax);
+      break;
+    case 'Guten Abend':
+      imgPath = 'evening/e' + Math.floor(Math.random() * eveningMax);
+      break;
+    default:
+      error = true;
+  }
+  if (error) return import('../assets/sad.svg');
+  else return import('../assets/drawer_images/' + imgPath + '.jpg');
+});
+
+const userStore = useUserStore();
+
+const greetingFull = computed(() => {
+  return appStore.greeting + ', ' + userStore.user.name.split(' ')[0];
+});
+
+const greetingIcon = () => {
+  switch (appStore.greeting) {
+    case 'Guten Abend':
+      return 'nights_stay';
+      break;
+    case 'Willkommen':
+      return 'brightness_7';
+      break;
+    case 'Guten Morgen':
+      return 'wb_sunny';
+      break;
+    default:
+      return 'report_problem';
+  }
+};
 </script>

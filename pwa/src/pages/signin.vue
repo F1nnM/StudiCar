@@ -15,8 +15,15 @@
       </div>
       <!-- <span class="text-caption">Bitte melde dich an, um auf die Funktionen zugreifen zu können</span> -->
       <div class="row justify-evenly">
-        <GoogleSignInButton class="col-5" />
-        <q-btn dense no-caps class="col-5" to="/auth/registrierung" outline color="primary">
+        <GoogleButton class="col-5" />
+        <q-btn
+          dense
+          no-caps
+          class="col-5"
+          to="/auth/registrierung"
+          outline
+          color="primary"
+        >
           <q-avatar size="sm" class="q-mr-xs">
             <img src="~assets/app-icon.svg" />
           </q-avatar>
@@ -28,11 +35,15 @@
       <div>
         <q-form @submit="onSubmit" class="q-gutter-md">
           <q-input
-            v-model="email"
+            v-model="mail"
             label="Mail"
             hint="Bitte gib deine Mail-Adresse ein"
             lazy-rules
-            :rules="[ val => val && val.length > 0 || 'Ohne Mail-Adresse wird die Anmeldung schwierig...']"
+            :rules="[
+              (val) =>
+                (val && val.length > 0) ||
+                'Ohne Mail-Adresse wird die Anmeldung schwierig...',
+            ]"
           />
 
           <q-input
@@ -42,8 +53,9 @@
             hint="Bitte gib auch dein Passwort ein"
             lazy-rules
             :rules="[
-          val => val !== null && val !== '' || 'Bitte gib dein Passwort ein.'
-        ]"
+              (val) =>
+                (val !== null && val !== '') || 'Bitte gib dein Passwort ein.',
+            ]"
           />
           <br />
 
@@ -63,13 +75,16 @@
           Bei StudiCar gibt es zwei Möglichkeiten, sich anzumelden:
           <ul>
             <li>
-              Mit einem ganz normalen StudiCar Account. Dafür musst du dir zuerst über "Registrierung" einen
-              StudiCar Account erstellen. Du brauchst dazu nur eine Mail, ein Passwort und deinen Namen.
-              Wenn du registriert bist, kannst du loslegen.
+              Mit einem ganz normalen StudiCar Account. Dafür musst du dir
+              zuerst über "Registrierung" einen StudiCar Account erstellen. Du
+              brauchst dazu nur eine Mail, ein Passwort und deinen Namen. Wenn
+              du registriert bist, kannst du loslegen.
             </li>
             <li>
-              Mit einem Google-Account. Du gehst auf "über Google" und wählst im aufgehenden Fenster dann den
-              Account aus, mit dem du dich anmelden willst. Deinen Namen und deine Mail frägt StudiCar dann bei Google ab.
+              Mit einem Google-Account. Du gehst auf "über Google" und wählst im
+              aufgehenden Fenster dann den Account aus, mit dem du dich anmelden
+              willst. Deinen Namen und deine Mail frägt StudiCar dann bei Google
+              ab.
             </li>
           </ul>
         </q-card-section>
@@ -81,36 +96,26 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import GoogleSignInButton from "../components/GoogleButton";
-export default defineComponent({
-  components: {
-    GoogleSignInButton
-  },
-  data() {
-    return {
-      email: "",
-      password: "",
-      help: false
-    };
-  },
-  methods: {
-    onSubmit() {
-      let credentials = {
-        email: this.email,
-        password: this.password
-      };
-      this.$store
-        .dispatch("auth/signIn", credentials)
-        .then(user => {
-          this.$router.replace({ name: "marketplace" }).catch(() => {});
-        })
-        .catch(error => {
-          this.$q.notify("Invalid Login!");
-          console.error(`Not signed in: ${error.message}`);
-        });
-    }
-  }
-});
+<script setup>
+import { useUserStore } from 'src/stores/user';
+
+let mail = '';
+let password = '';
+let help = false;
+
+const userStore = useUserStore();
+
+const $router = useRouter();
+
+function onSubmit() {
+  userStore
+    .signInWithEmail(mail, password)
+    .then(() => {
+      $router.replace({ name: 'marketplace' });
+    })
+    .catch((error) => {
+      $q.notify('Invalid Login!');
+      console.error(`Not signed in: ${error.message}`);
+    });
+}
 </script>

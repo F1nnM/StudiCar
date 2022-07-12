@@ -3,7 +3,7 @@
   <div>
     <div class="q-pa-md">
       <q-dialog
-        :model-value="open"
+        :value="open"
         persistent
         maximized
         transition-show="jump-up"
@@ -31,7 +31,7 @@
 
           <div class="fixed-bottom overflow-hidden-y text-center">
             <q-tab-panels
-              :model-value="open || showBranding"
+              :value="open || showBranding"
               animated
               transition-show="jump-up"
             >
@@ -46,58 +46,31 @@
   </div>
 </template>
 
-<script>
-import ExtendedHr from "components/ExtendedHr";
-import { defineComponent } from "vue";
-import { sendApiRequest } from "../ApiAccess";
+<script setup>
+const props = defineProps({
+  open: Boolean,
+});
+const { open } = toRefs(props);
 
-export default defineComponent({
-  name: "GetUserDataLoading.vue",
-  components: {},
-  data() {
-    return {
-      loadingTexts: [
-        "Bitte hab noch einen Moment Geduld",
-        "Daten werden geladen",
-      ],
-      showBranding: false,
-      reverse: false,
-    };
-  },
-  model: {
-    prop: "open",
-    event: "input",
-  },
-  watch: {
-    open: function (isOpen) {
-      if (isOpen) {
-        setTimeout((_) => {
-          this.showBranding = true;
-        }, 500);
-      }
-    },
-  },
-  props: {
-    open: Boolean,
-  },
-  computed: {
-    loadingText() {
-      const pos = 1;
+let loadingTexts = [
+  'Bitte hab noch einen Moment Geduld',
+  'Daten werden geladen',
+];
+let showBranding = false;
+let reverse = false;
 
-      return this.loadingTexts[pos];
-    },
-  },
-  methods: {
-    async adac() {
-      return new Promise((res) => setTimeout(res, 1000));
-    },
-  },
+const loadingText = computed(() => {
+  const pos = 1;
 
-  mounted() {
-    /* setInterval(_ => {
-      this.reverse = !this.reverse;
-    }, 1800); */
-  },
+  return loadingTexts[pos];
+});
+
+watch(open, (isOpen) => {
+  if (isOpen) {
+    setTimeout((_) => {
+      showBranding = true;
+    }, 500);
+  }
 });
 </script>
 

@@ -3,7 +3,7 @@
     <q-slide-transition>
       <div v-if="state == 1">
         <q-card-section>
-          <p>{{loadingText}}</p>
+          <p>{{ loadingText }}</p>
 
           <q-linear-progress indeterminate color="primary" class="q-mt-sm" />
         </q-card-section>
@@ -12,7 +12,7 @@
         <q-card-section>
           <p>
             <q-icon name="check" size="md" color="primary" />
-            {{successText}}
+            {{ successText }}
           </p>
         </q-card-section>
       </q-card>
@@ -22,12 +22,11 @@
             <q-icon name="error_outline" size="md" color="negative" />
             <span class="q-pl-sm">
               <span v-if="!errorText">
-                Beim Download ist ein Fehler aufgetreten. Wenn das Problem öfter auftritt, dann
-                <a
-                  href="#/support"
-                >schreib uns</a> bitte.
+                Beim Download ist ein Fehler aufgetreten. Wenn das Problem öfter
+                auftritt, dann
+                <a href="#/support">schreib uns</a> bitte.
               </span>
-              <span v-else>{{errorText}}</span>
+              <span v-else>{{ errorText }}</span>
             </span>
           </p>
         </q-card-section>
@@ -36,38 +35,26 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "LoadingDisplay",
-  model: {
-    prop: "state",
-    event: "input",
+<script setup>
+const props = defineProps({
+  state: {
+    required: true,
   },
-  props: {
-    state: {
-      required: true,
-    },
-    successText: {
-      type: String,
-    },
-    loadingText: {
-      type: String,
-      required: true,
-    },
-    errorText: {
-      type: String,
-      required: true,
-    },
-    showSuccess: {
-      type: Boolean,
-    },
+  successText: {
+    type: String,
   },
-  methods: {
-    emit() {
-      this.$emit("input", this.state);
-    },
+  loadingText: {
+    type: String,
+    required: true,
+  },
+  errorText: {
+    type: String,
+    required: true,
+  },
+  showSuccess: {
+    type: Boolean,
   },
 });
+const { state, successText, loadingText, errorText, showSuccess } =
+  toRefs(props);
 </script>

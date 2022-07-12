@@ -24,98 +24,90 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import { sendApiRequest, GET_LEGAL } from "../ApiAccess";
+<script setup>
+import { useAppStore } from 'src/stores/app';
+import { onMounted } from 'vue';
 
-export default defineComponent({
-  name: "legal",
-  components: {},
-  data() {
-    return {
-      content: "",
-      loaded: false,
-      view: null
-    };
-  },
-  watch: {
-    $route(to) {
-      this.recomputeView();
-    },
-    view: function(newValue, old) {
-      if (old != newValue) this.setMode(newValue);
-    }
-  },
-  methods: {
-    recomputeView() {
-      var locArr = window.location.href.split("?view=");
-      if (locArr.length > 1) this.view = locArr[1];
-      // you can control the view via url
-    },
+const appStore = useAppStore();
 
-    getContent(force) {
-      const isViewContentStored = this.$store.getters["getLegalViews"].includes(
-        this.view
-      );
-      if (isViewContentStored && !force) {
-        // already some content
-        this.$refs.text_anchor.innerHTML = this.$store.state.legal[this.view];
-        this.loaded = true;
-      } else {
-        this.loaded = false;
-        this.$refs.text_anchor.innerHTML = "";
-        sendApiRequest(
-          GET_LEGAL,
-          {
-            view: this.view
-          },
-          data => {
-            this.loaded = true;
-            this.$refs.text_anchor.innerHTML = data.text;
-            var obj = {};
-            obj[this.view] = data.text;
-            this.$store.commit("addToLegal", obj);
-          },
-          err => {
-            alert("Fehler: " + err);
-          }
-        );
+let content = '';
+let loaded = false;
+let view = null;
+
+const $route = useRoute();
+
+watch($route, (to) => {
+  recomputeView();
+});
+watch(view, (newValue, old) => {
+  if (old != newValue) setMode(newValue);
+});
+
+function recomputeView() {
+  var locArr = window.location.href.split('?view=');
+  if (locArr.length > 1) view = locArr[1];
+  // you can control the view via url
+}
+
+function getContent(force) {
+  const isViewContentStored = appStore.getLegalViews().includes(view);
+  if (isViewContentStored && !force) {
+    // already some content
+    $refs.text_anchor.innerHTML = appStore.legal[view];
+    loaded = true;
+  } else {
+    loaded = false;
+    $refs.text_anchor.innerHTML = '';
+    sendApiRequest(
+      GET_LEGAL,
+      {
+        view: view,
+      },
+      (data) => {
+        loaded = true;
+        $refs.text_anchor.innerHTML = data.text;
+        var obj = {};
+        obj[view] = data.text;
+        appStore.addToLegal(obj);
+      },
+      (err) => {
+        alert('Fehler: ' + err);
       }
-    },
-
-    setMode(value) {
-      var pageName = null,
-        view;
-      switch (value) {
-        case "agb":
-          pageName = "Nutzungsbedingungen";
-          view = "agb";
-          break;
-        case "datenschutz":
-          pageName = "Datenschutz";
-          view = "dataSec";
-          break;
-      }
-      if (pageName) {
-        this.$store.commit("setPage", {
-          name: pageName
-        });
-        this.view = view;
-        this.getContent();
-      }
-    },
-
-    refreshContent(res) {
-      this.getContent(true);
-      res();
-    }
-  },
-  mounted() {
-    this.$store.commit("setPage", {
-      name: ""
-    });
-    this.recomputeView();
+    );
   }
+}
+
+function setMode(value) {
+  var pageName = null,
+    view;
+  switch (value) {
+    case 'agb':
+      pageName = 'Nutzungsbedingungen';
+      view = 'agb';
+      break;
+    case 'datenschutz':
+      pageName = 'Datenschutz';
+      view = 'dataSec';
+      break;
+  }
+  if (pageName) {
+    appStore.setPage({
+      name: pageName,
+    });
+    getContent();
+  }
+}
+
+function refreshContent(res) {
+  getContent(true);
+  res();
+}
+
+onMounted(() => {
+  appStore.setPage({
+    name: '',
+  });
+  recomputeView();
 });
 </script>
 

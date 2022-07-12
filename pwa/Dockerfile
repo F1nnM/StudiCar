@@ -1,11 +1,9 @@
 FROM node:16-alpine as builder
+WORKDIR /app
 
 RUN apk add --no-cache python2 make g++
 
 RUN mkdir /app
-WORKDIR /app
-
-RUN npm i -g @quasar/cli
 
 COPY ./package.json ./
 COPY ./package-lock.json ./
@@ -14,6 +12,8 @@ RUN npm install
 
 COPY . /app/
 
-EXPOSE 80
+RUN npm run build
 
-ENTRYPOINT ["sh", "entrypoint.sh"]
+FROM httpd:2.4
+
+COPY --from=builder /app/dist/pwa /usr/local/apache2/htdocs/

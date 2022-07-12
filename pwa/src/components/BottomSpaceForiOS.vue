@@ -10,21 +10,9 @@ otherwise that would overlay important nav elements -->
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "BottomSpaceForiOS",
-  data() {
-    return {
-      forceHideBottomSpace: false
-    };
-  },
-
-  methods: {
-    hideBottomSpace() {
-      this.forceHideBottomSpace = true;
-    }
-  }
-});
+<script setup>
+let forceHideBottomSpace = false;
+function hideBottomSpace() {
+  forceHideBottomSpace = true;
+}
 </script>

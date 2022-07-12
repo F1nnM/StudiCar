@@ -6,7 +6,7 @@ I hope you appreciate my work xD -->
       clickable
       v-ripple
       @click="doSignIn"
-      class="box q-pa-xs row justify-around"
+      class="box q-pa-xs row justify-around position-relative"
     >
       <q-avatar size="sm" class="self-center q-ml-xs">
         <img
@@ -30,33 +30,26 @@ I hope you appreciate my work xD -->
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import firebase from "firebase/compat/app";
-import "firebase/compat/auth";
+<script setup>
 
-export default defineComponent({
-  name: "GoogleSignInButton",
-  methods: {
-    doSignIn() {
-      var provider = new firebase.auth.GoogleAuthProvider();
+import { useUserStore } from 'src/stores/user';
 
-      firebase
-        .auth()
-        .signInWithPopup(provider)
-        .then(_ => _)
-        .catch(function(error) {
-          // Handle Errors here.
-          var errorCode = error.code;
-          var errorMessage = error.message;
-          // The email of the user's account used.
-          var email = error.email;
-          // The firebase.auth.AuthCredential type that was used.
-          var credential = error.credential;
-        });
-    }
-  }
-});
+const $q = useQuasar()
+defineExpose({
+    $q,
+})
+
+const userStore = useUserStore();
+function doSignIn() {
+  userStore
+    .signInWithGoogle()
+    .then(() => {
+      console.log('signed in');
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
 </script>
 
 <style lang="scss" scoped>
@@ -109,7 +102,7 @@ $button-active-blue: #1669f2;
     font-size: 14px;
     font-weight: 100;
     letter-spacing: 0.2px;
-    font-family: "Roboto";
+    font-family: 'Roboto';
   }
   &:hover {
     box-shadow: 0 0 6px $google-blue;

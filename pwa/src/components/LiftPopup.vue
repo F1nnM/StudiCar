@@ -3,12 +3,12 @@
     <div class="q-ma-none q-pa-none">
       <!-- <span v-if="isLayoutOpen"></span> -->
       <q-dialog
-        :model-value="open"
+        :value="open"
         persistent
         maximized
         transition-show="slide-up"
         transition-hide="slide-down"
-        @update:model-value="emit"
+        @input="emit"
       >
         <q-layout v-if="lift" view="hHh lpR fFr" class="bg-white q-pa-none">
           <q-header reveal elevated class="bg-primary text-white">
@@ -74,7 +74,7 @@
                                         :key="p.fbId"
                                       >
                                         <span v-if="p.id != myFbId"
-                                          >{{ ", " }}{{ p.name }}</span
+                                          >{{ ', ' }}{{ p.name }}</span
                                         >
                                       </span>
                                     </span>
@@ -230,6 +230,7 @@
                         :name="m.sentBy == user ? '' : getNameFromId(m.sentBy)"
                         :sent="m.sentBy == user"
                         size="8"
+                        text-sanitize
                         :text="m.type == 2 ? [] : [m.content]"
                         :stamp="formatAsTime(m.timestamp)"
                         :bg-color="getColor(m.sentBy)"
@@ -360,7 +361,7 @@
                 v-if="showQuickMessages"
               >
                 <div class="q-pl-sm q-pt-md">
-                  <q-splitter :model-value="10">
+                  <q-splitter :value="10">
                     <template v-slot:before>
                       <q-tabs
                         v-model="quickMessagesTab"
@@ -546,469 +547,418 @@
   </div>
 </template>
 
-<script>
-/* import VueRecord from "@codekraft-studio/vue-record";
-import Vue from "vue";
-Vue.use(VueRecord); */
+<script setup>
+import { useAppStore } from 'src/stores/app';
+import { useUserStore } from 'src/stores/user';
 
-import { openURL, date, copyToClipboard, Notify } from "quasar";
-import LiftInfoDialog from "components/LiftInfoDialog";
-import BottomSpaceForiOS from "components/BottomSpaceForiOS";
-
-import ExtHr from "components/ExtendedHr";
-
-import { sendApiRequest, SQL_LOAD_MESSAGE_MEDIA } from "../ApiAccess";
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "LiftPopup",
-  components: {
-    LiftInfoDialog,
-    ExtHr,
-    BottomSpaceForiOS,
-  },
-  data() {
-    return {
-      alreadyScrolledDown: false,
-      showQR: false,
-      coloredIds: {},
-      recording: false,
-      infoDrawerOpen: false,
-      messageText: "",
-      showQuickMessages: false,
-      showPassengersToBeMentioned: false,
-      showMoreMessageOptions: {
-        open: false,
-        message: null,
-      },
-      showMembersInTitle: false,
-      quickMessagesTab: "text",
-      footerBgColor: "white",
-      user: this.$store.getters["auth/user"].uid,
-      loading: 0, // as always: 0 means not loading, 1 means in progress, 2 means success and -1 error.
-      bottomReached: false,
-      medias: {},
-      detailsOpenLocal: this.detailsOpen,
-    };
-  },
-  model: {
-    prop: "open",
-    event: "input",
-  },
-  emits: ["detailsOpenUpdate", "closeLift", "closeAndLeave", "shortLiftInfo"],
-  props: {
-    open: Boolean,
-    detailsOpen: Boolean,
-    lift: Object,
-  },
-  watch: {
-    open: function (newValue) {
-      if (newValue) {
-        this.showMembersInTitle = false; // so that each time you open tap-for-info is displayed again
-        setTimeout((_) => {
-          this.showMembersInTitle = true;
-        }, 2000); // after that time, hide tap-for-info-hint and show members instead
-        setTimeout((_) => {
-          this.scrollToEnd();
-        }, 50); // has to have short delay to get wanted effect
-      } else {
-        this.infoDrawerOpen = false;
-        this.detailsOpenLocal = false;
-        this.$emit("detailsOpenUpdate", this.detailsOpenLocal);
-      }
-    },
-
-    messageText: function (val) {
-      if (val.slice(-1) == "@") {
-        this.showPassengersToBeMentioned = true;
-      } else {
-        this.showPassengersToBeMentioned = false;
-      }
-    },
-
-    detailsOpen: function (val) {
-      if (val) this.infoDrawerOpen = true;
-    },
-  },
-  computed: {
-    showRecorder() {
-      return !this.messageText || this.messageText.slice(-1) == "@";
-    },
-
-    myFbId() {
-      return this.$store.getters["auth/user"].uid;
-    },
-
-    isDriver() {
-      return this.lift.driver.id == this.myFbId;
-    },
-
-    allMembersOfLift() {
-      return this.lift.passengers.concat(this.lift.driver);
-    },
-
-    emojis() {
-      var stringArray = this.$store.state.emojis;
-      return stringArray;
-    },
-
-    recentMessages() {
-      return this.$store.state.recentMessages;
-    },
-
-    passengersThatCanBeMentioned() {
-      var all = [];
-      this.lift.passengers.forEach((p) => {
-        if (p.id != this.myFbId) all.push(p.name);
-      });
-      if (!this.isDriver) all.push(this.lift.driver.name);
-
-      return all;
-    },
-
-    messageColors() {
-      return {
-        user: {
-          light: "green-3",
-          dark: "dark",
-        },
-        light: [
-          "blue-1",
-          "grey-5",
-          "indigo-3",
-          "brown-12",
-          "grey-13",
-          "blue-grey-11",
-          "brown-4",
-          "grey-6",
-          "blue-grey-4",
-        ],
-        dark: [
-          /* just some standard colors from the quasar palette, a lift hasn't more people */
-          "deep-purple-10",
-          "indigo-10",
-          "teal-10",
-          "lime-10",
-          "brown",
-          "grey-10",
-          "red-14",
-          "blue-grey-10",
-        ], // dark/colored selection
-      };
-    },
-
-    passengersAndDriverNames() {
-      // returns an object like that: {'weu43ef34f': 'John Doe', 'je374ffu494': 'Sarah Smith'}
-      var people = {},
-        firstNamesAlreadyFound = [],
-        firstNamesNotUnique = [];
-      this.lift.passengers.forEach((p) => {
-        // we first have to get an overview and do a pre-sorting
-        if (firstNamesAlreadyFound.includes(p.name)) {
-          firstNamesNotUnique.push(p.name);
-        } else firstNamesAlreadyFound.push(p.name);
-      });
-
-      var driverName = this.lift.driver.name; // have coded it separately to make special handling on driver easier
-      if (firstNamesAlreadyFound.includes(driverName)) {
-        firstNamesNotUnique.push(driverName);
-      } else firstNamesAlreadyFound.push(driverName);
-
-      // now we know which names are not unique
-
-      var allPeopleToBeHandled = JSON.parse(
-        JSON.stringify(this.lift.passengers)
-      );
-      allPeopleToBeHandled.unshift(
-        JSON.parse(JSON.stringify(this.lift.driver))
-      );
-
-      allPeopleToBeHandled.forEach((p) => {
-        var nameToBeShown = p.name;
-        if (firstNamesNotUnique.includes(p.name))
-          nameToBeShown += " " + p.surname;
-        people[p.id] = nameToBeShown;
-      });
-      return people;
-    },
-  },
-
-  methods: {
-    async scrollToEnd(delay) {
-      if (delay)
-        await new Promise((res) => {
-          setTimeout(res, delay);
-        });
-      try {
-        var endOfPage =
-          this.$refs.endOfPage.$el || document.getElementById("endOfPage"); // just to be sure, sometimes Vue Element isn't be found
-
-        endOfPage.scrollIntoView(
-          delay
-            ? {
-                behavior: "smooth", // delay is used when user is expected to see scrolling, a hard jump when not (e.g. on opening)
-                block: "start",
-              }
-            : null
-        );
-      } catch (e) {}
-    },
-
-    informUserAboutAudios() {
-      this.$q.dialog({
-        title: "Audios in StudiCar",
-        message: `Sprachnachrichten gestalten sich zwar für den Sender als äußerst komfortabel, allerdings ist der Empfänger
-        oftmals gezwungen, eine Minute lang zuzuhören für den Inhalt von zwei Zeilen Text. StudiCar verweist daher 
-        auf die in den meisten Tastaturen eingebaute Speech-To-Text Funktion, die Gesprochenes
-        direkt in Text umwandelt. Schau in deinen Einstellungen nach, nutze die Funktion und ermögliche so auch den anderen Mitfahrern 
-        deine Nachrichten datenschonend, von den Umgebungsgeräuschen unabhängig und vor allem schnell zu lesen.`,
-      });
-    },
-
-    getNameFromId(userId) {
-      if (userId == "Go6vlU74gFgz5GgM5eRnWPPt2Cf1") return "StudiCar";
-      // StudiCar is registered as user, id has to be checked this way
-      else {
-        var name = this.passengersAndDriverNames[userId];
-        if (!name) return "[Ehemalig]";
-        else return name;
-      }
-    },
-
-    getCampusLabel(campusId, name) {
-      switch (campusId) {
-        case 1:
-          return "Würfel";
-        case 2:
-          return "Alte DH";
-        case 3:
-          return "Kloster";
-        default:
-          return name;
-      }
-    },
-
-    emit(val) {
-      this.$emit("update:model-value", val);
-    },
-
-    closeLift() {
-      this.$emit("closeLift");
-    },
-
-    closeAndLeave(event) {
-      this.infoDrawerOpen = false;
-      this.$emit("closeAndLeave", event);
-    },
-
-    emitShortLiftInfo() {
-      this.$emit("shortLiftInfo");
-    },
-
-    getColor(userId) {
-      const colorCollection = "light"; // configure here which colors shall be taken
-
-      if (userId == this.user) return this.messageColors.user[colorCollection];
-      // Sent messages have special color
-      else {
-        if (!this.coloredIds[userId]) {
-          // userId hasn't been colored so far, we have to assign new color
-          var next = Object.keys(this.coloredIds).length;
-          this.coloredIds[userId] = this.messageColors[colorCollection][next];
-        }
-        return this.coloredIds[userId];
-      }
-    },
-
-    checkDayBreak(messageItem) {
-      // when a parameter is given, return true or false. When no parameter is given, returns the text of the label
-      // currently function is always called with a parameter given
-      var messages = this.lift.messages;
-      if (!messages[0]) return false;
-      else {
-        var pos = this.lift.messages.indexOf(messageItem),
-          label = false;
-
-        if (!this.open) return;
-
-        var messageDate = new Date(messageItem.timestamp);
-
-        if (pos > 0) {
-          var preceder = messages[pos - 1], // preceder is the older message
-            precederDate = new Date(preceder.timestamp);
-
-          var sameDay = date.isSameDate(messageDate, precederDate, "day"); // always newest time first at this function
-          var sameMonth = date.isSameDate(messageDate, precederDate, "month");
-        } else if (pos == 0) {
-          // though check timestamp of message
-          var sameDay = date.isSameDate(messageDate, new Date(), "day");
-          var sameMonth = date.isSameDate(messageDate, new Date(), "month");
-        }
-
-        var diff = date.getDateDiff(new Date(), messageDate, "days");
-
-        // if you have the order the other way round (newest on top of list and oldest on bottom), then just swap the two params
-
-        if (!sameDay) {
-          // checks whether the item and its preceder are not the same day (and not the same month)
-          switch (diff) {
-            case 0:
-              label = "Heute";
-              break;
-            case 1:
-              label = "Gestern";
-              break;
-            case 3:
-              label = "Vorgestern";
-              break;
-            default:
-              label = date.formatDate(messageDate, "DD.MM.YYYY");
-          }
-        }
-        return label;
-      }
-    },
-
-    formatAsTime(dateString) {
-      return date.formatDate(new Date(dateString), "H:mm");
-    },
-
-    formatAsLongTime(dateString) {
-      return date.formatDate(new Date(dateString), "H:mm:ss");
-    },
-
-    formatAsDate(dateObj) {
-      return date.formatDate(dateObj, "DD. MMMM YYYY", {
-        months: [
-          "Januar",
-          "Februar",
-          "März",
-          "April",
-          "Mai",
-          "Juni",
-          "Juli",
-          "August",
-          "September",
-          "Oktober",
-          "November",
-          "Dezember",
-        ],
-      });
-    },
-
-    preventDefault(e) {
-      e.preventDefault();
-    },
-
-    focusTextInput() {
-      setTimeout((_) => {
-        this.$refs.messageInput.$el.focus();
-      });
-    },
-
-    mentionPassenger(p) {
-      this.messageText += p + " ";
-      this.showPassengersToBeMentioned = false;
-      this.focusTextInput();
-      var a = this.messageText;
-      this.messageText = "";
-      setTimeout((_) => (this.messageText = a), 10);
-      this.scrollToEnd(50);
-    },
-
-    sendAudio(blob) {
-      this.sendMessage(2, blob);
-    },
-
-    async sendMessage(type, blob) {
-      this.recording = false;
-      this.showQuickMessages = false;
-      var msgObj = {
-        type: 0, // 1 means raw text, 2 means audio, 3 will mean image when implemented in future
-        liftId: this.lift.id,
-      };
-      switch (type) {
-        case 1: // only text
-          msgObj.content = this.messageText;
-          msgObj.type = 1;
-          break;
-        case 2: // audio
-          msgObj.type = 2;
-          await new Promise((res, rej) => {
-            var reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = (_) => {
-              msgObj.content = reader.result;
-
-              res();
-            };
-          });
-          break;
-      }
-
-      this.$store.dispatch("auth/sendMessage", msgObj);
-      this.scrollToEnd(100); // smooth scrolling to end, so that user can see newly generated message as well
-
-      this.messageText = "";
-    },
-
-    async loadMedia(uuid) {
-      sendApiRequest(
-        SQL_LOAD_MESSAGE_MEDIA,
-        {
-          uuid: uuid,
-        },
-        (media) => {
-          this.medias[uuid] = media;
-        },
-        (err) => {
-          alert("Error at fetching media: " + err);
-        }
-      );
-    },
-
-    viewUserFromFbId(fbId) {
-      window.location.href = "/#/benutzerinfo?userFbId=" + fbId;
-    },
-
-    customCopyToClipboard(obj) {
-      // copied from 30secondsofcode
-      var toBeCopied;
-
-      if (typeof obj == "string") toBeCopied = obj;
-      else {
-        toBeCopied = JSON.stringify({
-          text: obj.content,
-          timestamp: obj.timestamp,
-          sentByName: this.getNameFromId(obj.sentBy),
-        });
-      }
-      copyToClipboard(toBeCopied)
-        .then((_) => {
-          /*  this.$q.notify({
-            message: "Inhalt wurde kopiert",
-            color: "white",
-          }); */
-        })
-        .catch((e) => alert("Fehler beim Kopieren: " + e));
-    },
-    async reloadMessages(done) {
-      await this.$store.dispatch("auth/reloadChatLifts", {
-        res: done,
-        rej: (_) => {
-          alert("Fehler");
-        },
-      });
-    },
-  },
+const props = defineProps({
+  open: Boolean,
+  detailsOpen: Boolean,
+  lift: Object,
 });
+const { open, detailsOpen, lift } = toRefs(props);
+
+const userStore = useUserStore();
+const appStore = useAppStore();
+
+let coloredIds = {};
+let recording = false;
+let infoDrawerOpen = false;
+let messageText = '';
+let showQuickMessages = false;
+let showPassengersToBeMentioned = false;
+let showMoreMessageOptions = {
+  open: false,
+  message: null,
+};
+let showMembersInTitle = false;
+let quickMessagesTab = 'text';
+let footerBgColor = 'white';
+let user = userStore.user.uid;
+let medias = {};
+let detailsOpenLocal = detailsOpen;
+
+watch(props.open, (newValue) => {
+  if (newValue) {
+    showMembersInTitle = false; // so that each time you open tap-for-info is displayed again
+    setTimeout(() => {
+      showMembersInTitle = true;
+    }, 2000); // after that time, hide tap-for-info-hint and show members instead
+    setTimeout(() => {
+      scrollToEnd();
+    }, 50); // has to have short delay to get wanted effect
+  } else {
+    infoDrawerOpen = false;
+    detailsOpenLocal = false;
+    $emit('detailsOpenUpdate', detailsOpenLocal);
+  }
+});
+watch(messageText, (val) => {
+  if (val.slice(-1) == '@') {
+    showPassengersToBeMentioned = true;
+  } else {
+    showPassengersToBeMentioned = false;
+  }
+});
+watch(props.detailsOpen, (val) => {
+  if (val) infoDrawerOpen = true;
+});
+
+const showRecorder = computed(() => {
+  return !messageText || messageText.slice(-1) == '@';
+});
+
+const myFbId = computed(() => {
+  return userStore.user.uid;
+});
+
+const isDriver = computed(() => {
+  return lift.driver.id == myFbId;
+});
+
+const allMembersOfLift = computed(() => {
+  return lift.passengers.concat(lift.driver);
+});
+
+const emojis = computed(() => {
+  var stringArray = appStore.emojis;
+  return stringArray;
+});
+
+const recentMessages = computed(() => {
+  return appStore.recentMessages;
+});
+
+const passengersThatCanBeMentioned = computed(() => {
+  var all = [];
+  lift.passengers.forEach((p) => {
+    if (p.id != myFbId) all.push(p.name);
+  });
+  if (!isDriver) all.push(lift.driver.name);
+
+  return all;
+});
+
+const messageColors = computed(() => {
+  return {
+    user: {
+      light: 'green-3',
+      dark: 'dark',
+    },
+    light: [
+      'blue-1',
+      'grey-5',
+      'indigo-3',
+      'brown-12',
+      'grey-13',
+      'blue-grey-11',
+      'brown-4',
+      'grey-6',
+      'blue-grey-4',
+    ],
+    dark: [
+      /* just some standard colors from the quasar palette, a lift hasn't more people */
+      'deep-purple-10',
+      'indigo-10',
+      'teal-10',
+      'lime-10',
+      'brown',
+      'grey-10',
+      'red-14',
+      'blue-grey-10',
+    ], // dark/colored selection
+  };
+});
+
+const passengersAndDriverNames = computed(() => {
+  // returns an object like that: {'weu43ef34f': 'John Doe', 'je374ffu494': 'Sarah Smith'}
+  var people = {},
+    firstNamesAlreadyFound = [],
+    firstNamesNotUnique = [];
+  lift.passengers.forEach((p) => {
+    // we first have to get an overview and do a pre-sorting
+    if (firstNamesAlreadyFound.includes(p.name)) {
+      firstNamesNotUnique.push(p.name);
+    } else firstNamesAlreadyFound.push(p.name);
+  });
+
+  var driverName = lift.driver.name; // have coded it separately to make special handling on driver easier
+  if (firstNamesAlreadyFound.includes(driverName)) {
+    firstNamesNotUnique.push(driverName);
+  } else firstNamesAlreadyFound.push(driverName);
+
+  // now we know which names are not unique
+
+  var allPeopleToBeHandled = JSON.parse(JSON.stringify(lift.passengers));
+  allPeopleToBeHandled.unshift(JSON.parse(JSON.stringify(lift.driver)));
+
+  allPeopleToBeHandled.forEach((p) => {
+    var nameToBeShown = p.name;
+    if (firstNamesNotUnique.includes(p.name)) nameToBeShown += ' ' + p.surname;
+    people[p.id] = nameToBeShown;
+  });
+  return people;
+});
+
+async function scrollToEnd(delay) {
+  if (delay)
+    await new Promise((res) => {
+      setTimeout(res, delay);
+    });
+  try {
+    var endOfPage = $refs.endOfPage.$el || document.getElementById('endOfPage'); // just to be sure, sometimes Vue Element isn't be found
+
+    endOfPage.scrollIntoView(
+      delay
+        ? {
+            behavior: 'smooth', // delay is used when user is expected to see scrolling, a hard jump when not (e.g. on opening)
+            block: 'start',
+          }
+        : null
+    );
+  } catch (e) {}
+}
+
+function informUserAboutAudios() {
+  $q.dialog({
+    title: 'Audios in StudiCar',
+    message: `Sprachnachrichten gestalten sich zwar für den Sender als äußerst komfortabel, allerdings ist der Empfänger
+        oftmals gezwungen, eine Minute lang zuzuhören für den Inhalt von zwei Zeilen Text. StudiCar verweist daher
+        auf die in den meisten Tastaturen eingebaute Speech-To-Text Funktion, die Gesprochenes
+        direkt in Text umwandelt. Schau in deinen Einstellungen nach, nutze die Funktion und ermögliche so auch den anderen Mitfahrern
+        deine Nachrichten datenschonend, von den Umgebungsgeräuschen unabhängig und vor allem schnell zu lesen.`,
+  });
+}
+
+function getNameFromId(userId) {
+  if (userId == 'Go6vlU74gFgz5GgM5eRnWPPt2Cf1') return 'StudiCar';
+  // StudiCar is registered as user, id has to be checked this way
+  else {
+    var name = passengersAndDriverNames[userId];
+    if (!name) return '[Ehemalig]';
+    else return name;
+  }
+}
+
+function getCampusLabel(campusId, name) {
+  switch (campusId) {
+    case 1:
+      return 'Würfel';
+    case 2:
+      return 'Alte DH';
+    case 3:
+      return 'Kloster';
+    default:
+      return name;
+  }
+}
+
+function emit(val) {
+  $emit('input', val);
+}
+
+function closeLift() {
+  $emit('closeLift');
+}
+
+function closeAndLeave(event) {
+  infoDrawerOpen = false;
+  $emit('closeAndLeave', event);
+}
+
+function getColor(userId) {
+  const colorCollection = 'light'; // configure here which colors shall be taken
+
+  if (userId == user) return messageColors.user[colorCollection];
+  // Sent messages have special color
+  else {
+    if (!coloredIds[userId]) {
+      // userId hasn't been colored so far, we have to assign new color
+      var next = Object.keys(coloredIds).length;
+      coloredIds[userId] = messageColors[colorCollection][next];
+    }
+    return coloredIds[userId];
+  }
+}
+
+function checkDayBreak(messageItem) {
+  // when a parameter is given, return true or false. When no parameter is given, returns the text of the label
+  // currently function is always called with a parameter given
+  var messages = lift.messages;
+  if (!messages[0]) return false;
+  else {
+    var pos = lift.messages.indexOf(messageItem),
+      label = false;
+
+    if (!open) return;
+
+    var messageDate = new Date(messageItem.timestamp);
+
+    if (pos > 0) {
+      var preceder = messages[pos - 1], // preceder is the older message
+        precederDate = new Date(preceder.timestamp);
+
+      var sameDay = date.isSameDate(messageDate, precederDate, 'day'); // always newest time first at this function
+      //var sameMonth = date.isSameDate(messageDate, precederDate, 'month');
+    } else if (pos == 0) {
+      // though check timestamp of message
+      var sameDay = date.isSameDate(messageDate, new Date(), 'day');
+      //var sameMonth = date.isSameDate(messageDate, new Date(), 'month');
+    }
+
+    var diff = date.getDateDiff(new Date(), messageDate, 'days');
+
+    // if you have the order the other way round (newest on top of list and oldest on bottom), then just swap the two params
+
+    if (!sameDay) {
+      // checks whether the item and its preceder are not the same day (and not the same month)
+      switch (diff) {
+        case 0:
+          label = 'Heute';
+          break;
+        case 1:
+          label = 'Gestern';
+          break;
+        case 3:
+          label = 'Vorgestern';
+          break;
+        default:
+          label = date.formatDate(messageDate, 'DD.MM.YYYY');
+      }
+    }
+    return label;
+  }
+}
+
+function formatAsTime(dateString) {
+  return date.formatDate(new Date(dateString), 'H:mm');
+}
+
+function formatAsLongTime(dateString) {
+  return date.formatDate(new Date(dateString), 'H:mm:ss');
+}
+
+function formatAsDate(dateObj) {
+  return date.formatDate(dateObj, 'DD. MMMM YYYY', {
+    months: [
+      'Januar',
+      'Februar',
+      'März',
+      'April',
+      'Mai',
+      'Juni',
+      'Juli',
+      'August',
+      'September',
+      'Oktober',
+      'November',
+      'Dezember',
+    ],
+  });
+}
+
+function focusTextInput() {
+  setTimeout(() => {
+    $refs.messageInput.$el.focus();
+  });
+}
+
+function mentionPassenger(p) {
+  messageText += p + ' ';
+  showPassengersToBeMentioned = false;
+  focusTextInput();
+  var a = messageText;
+  messageText = '';
+  setTimeout(() => (messageText = a), 10);
+  scrollToEnd(50);
+}
+
+function sendAudio(blob) {
+  sendMessage(2, blob);
+}
+async function sendMessage(type, blob) {
+  recording = false;
+  showQuickMessages = false;
+  var msgObj = {
+    type: 0, // 1 means raw text, 2 means audio, 3 will mean image when implemented in future
+    liftId: lift.id,
+  };
+  switch (type) {
+    case 1: // only text
+      msgObj.content = messageText;
+      msgObj.type = 1;
+      break;
+    case 2: // audio
+      msgObj.type = 2;
+      var reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = () => {
+        msgObj.content = reader.result;
+      };
+      break;
+  }
+
+  userStore.sendMessage(msgObj);
+  scrollToEnd(100); // smooth scrolling to end, so that user can see newly generated message as well
+
+  messageText = '';
+}
+
+async function loadMedia(uuid) {
+  sendApiRequest(
+    SQL_LOAD_MESSAGE_MEDIA,
+    {
+      uuid: uuid,
+    },
+    (media) => {
+      medias[uuid] = media;
+    },
+    (err) => {
+      alert('Error at fetching media: ' + err);
+    }
+  );
+}
+
+function viewUserFromFbId(fbId) {
+  window.location.href = '/#/benutzerinfo?userFbId=' + fbId;
+}
+
+function customCopyToClipboard(obj) {
+  // copied from 30secondsofcode
+  var toBeCopied;
+
+  if (typeof obj == 'string') toBeCopied = obj;
+  else {
+    toBeCopied = JSON.stringify({
+      text: obj.content,
+      timestamp: obj.timestamp,
+      sentByName: getNameFromId(obj.sentBy),
+    });
+  }
+  copyToClipboard(toBeCopied)
+    .then(() => {
+      $q.notify({
+        message: 'Inhalt wurde kopiert',
+        color: 'white',
+      });
+    })
+    .catch((e) => alert('Fehler beim Kopieren: ' + e));
+}
+function reloadMessages(done) {
+  userStore
+    .reloadChatLifts()
+    .then(done)
+    .catch(() => {
+      alert('Fehler');
+    });
+}
 </script>
 
 <style scoped lang="scss">
 .custom-chat-label {
   position: relative;
   &:after {
-    content: "";
+    content: '';
     position: absolute;
     top: -5px;
     left: 50%;

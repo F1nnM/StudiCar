@@ -52,33 +52,23 @@
   </div>
 </template>
 
-<script>
-import { date } from "quasar";
-import { defineComponent } from "vue";
+<script setup>
+const props = defineProps({
+  imageSrc: String,
+});
+const { imageSrc } = toRefs(props);
 
-export default defineComponent({
-  name: "ImageColorPicker",
-  props: {
-    imageSrc: String
-  },
-  methods: {
-    emit() {
-      this.$emit("input", this.colorPicker.color);
-    }
-  },
-  computed: {
-    imageSrcFromJS() {
-      return require("../assets/" + this.imageSrc);
-    }
-  },
-  data() {
-    return {
-      colorPicker: {
-        tab: "field",
-        color: "#FFFFF"
-      }
-    };
-  }
+let colorPicker = {
+  tab: 'field',
+  color: '#FFFFF',
+};
+
+function emit() {
+  $emit('input', colorPicker.color);
+}
+
+const imageSrcFromJS = computed(() => {
+  return import('../assets/' + imageSrc);
 });
 </script>
 

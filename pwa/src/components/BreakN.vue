@@ -7,16 +7,12 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "BreakN",
-  props: {
-    value: {
-      type: Number,
-      required: true
-    }
-  }
+<script setup>
+const props = defineProps({
+  value: {
+    type: Number,
+    required: true,
+  },
 });
+const { value } = toRefs(props);
 </script>

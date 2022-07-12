@@ -81,7 +81,7 @@
         <q-item-section side>
           <div class="text-grey-7 text-right">
             noch {{ lift.seatsOffered - lift.seatsOccupied }} Pl{{
-              lift.seatsOffered - (lift.seatsOccupied % 1) != 0 ? "ätze" : "atz"
+              lift.seatsOffered - (lift.seatsOccupied % 1) != 0 ? 'ätze' : 'atz'
             }}
             frei
           </div>
@@ -197,171 +197,134 @@
   </div>
 </template>
 
-<script>
-import { date } from "quasar";
-import { defineComponent } from "vue";
-import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from "../ApiAccess";
+<script setup>
+import { useUserStore } from 'src/stores/user';
+import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from 'src/utils/ApiAccess';
+import { toRef } from 'vue';
 
-export default defineComponent({
-  name: "LiftOffer",
-  components: {},
-  props: {
-    lift: Object,
-    noShadow: Boolean,
-    isAlreadyRequested: Boolean,
-  },
-  data() {
-    return {
-      imageUrl: "",
-    };
-  },
-  computed: {
-    timeText() {
-      var isArriveBy = this.lift.arriveBy != "00:00:00";
-      var time = isArriveBy ? this.lift.arriveBy : this.lift.departAt,
-        text = isArriveBy ? "Ankunft" : "Abfahrt";
-      time = time.slice(0, 5); // simply cut the seconds
-      return text + " um " + time;
+const props = defineProps({
+  lift: Object,
+  noShadow: Boolean,
+  isAlreadyRequested: Boolean,
+});
+const { lift, noShadow, isAlreadyRequested } = toRefs(props);
+let imageUrl = '';
+
+const timeText = computed(() => {
+  var isArriveBy = lift.arriveBy != '00:00:00';
+  var time = isArriveBy ? lift.arriveBy : lift.departAt,
+    text = isArriveBy ? 'Ankunft' : 'Abfahrt';
+  time = time.slice(0, 5); // simply cut the seconds
+  return text + ' um ' + time;
+});
+
+const isRepeating = computed(() => {
+  return lift.repeatsOn != 0;
+});
+
+const objWithAllWeekDays = computed(() => {
+  var obj = {};
+  [
+    'Montag',
+    'Dienstag',
+    'Mittwoch',
+    'Donnerstag',
+    'Freitag',
+    'Samstag',
+  ].forEach((d, index) => {
+    obj[index + 1] = d;
+  });
+  return obj;
+});
+
+const dateText = computed(() => {
+  if (isRepeating) return 'jeden ' + objWithAllWeekDays[lift.repeatsOn];
+  var dateObj = new Date(lift.date),
+    dateFormatted = date.formatDate(dateObj, 'dddd, DD.MM.', {
+      days: [
+        'Sonntag',
+        'Montag',
+        'Dienstag',
+        'Mittwoch',
+        'Donnerstag',
+        'Freitag',
+        'Samstag',
+      ],
+    }),
+    daysLeft = date.getDateDiff(dateObj, new Date(), 'days'),
+    nextWeekText = '';
+  switch (daysLeft) {
+    case 0:
+      nextWeekText = 'Heute -';
+      break;
+    case 1:
+      nextWeekText = 'Morgen -';
+      break;
+    case 2:
+      nextWeekText = 'Übermorgen -';
+      break;
+    default:
+      if (daysLeft < 7) nextWeekText = 'Am kommenden';
+      else nextWeekText = 'Am ';
+  }
+
+  return nextWeekText + ' ' + dateFormatted;
+});
+
+const userStore = useUserStore();
+const prefsDocu = toRef(userStore.user.prefs);
+
+function betterPrefColor(prefName) {
+  var color = lift.driver.prefs[prefName].toLowerCase();
+  if (color == 'yellow') return 'orange';
+  else return color;
+}
+
+function requestLift() {
+  $q.dialog({
+    title: 'Anfragen',
+    message: `${lift.driver.name} fragen, ob du mitfahren kannst?`,
+    ok: {
+      color: 'positive',
     },
-
-    isRepeating() {
-      return this.lift.repeatsOn != 0;
+    cancel: {
+      color: 'white',
     },
+    cancel: true,
+    persistent: true,
+  }).onOk(() => {
+    $emit('request', lift.id);
+  });
+}
 
-    objWithAllWeekDays() {
-      var obj = {};
-      [
-        "Montag",
-        "Dienstag",
-        "Mittwoch",
-        "Donnerstag",
-        "Freitag",
-        "Samstag",
-      ].forEach((d, index) => {
-        obj[index + 1] = d;
-      });
-      return obj;
+function cancelRequest() {
+  $q.dialog({
+    title: 'Zurückziehen',
+    message: 'Deine Anfrage zur Fahrt zurückziehen?',
+    ok: {
+      color: 'positive',
     },
-
-    dateText() {
-      if (this.isRepeating)
-        return "jeden " + this.objWithAllWeekDays[this.lift.repeatsOn];
-      var dateObj = new Date(this.lift.date),
-        dateFormatted = date.formatDate(dateObj, "dddd, DD.MM.", {
-          days: [
-            "Sonntag",
-            "Montag",
-            "Dienstag",
-            "Mittwoch",
-            "Donnerstag",
-            "Freitag",
-            "Samstag",
-          ],
-        }),
-        daysLeft = date.getDateDiff(dateObj, new Date(), "days"),
-        nextWeekText = "";
-      switch (daysLeft) {
-        case 0:
-          nextWeekText = "Heute -";
-          break;
-        case 1:
-          nextWeekText = "Morgen -";
-          break;
-        case 2:
-          nextWeekText = "Übermorgen -";
-          break;
-        default:
-          if (daysLeft < 7) nextWeekText = "Am kommenden";
-          else nextWeekText = "Am ";
-      }
-
-      return nextWeekText + " " + dateFormatted;
+    cancel: {
+      color: 'white',
     },
+    cancel: true,
+    persistent: true,
+  }).onOk(() => {
+    $emit('cancelRequest', lift.id);
+  });
+}
 
-    prefsDocu() {
-      return this.$store.state.prefsDocu;
-    },
-  },
-  methods: {
-    betterPrefColor(prefName) {
-      var color = this.lift.driver.prefs[prefName].toLowerCase();
-      if (color == "yellow") return "orange";
-      else return color;
-    },
+async function refreshImage() {
+  imageUrl = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
+    fbid: lift.driver.id,
+  });
+}
 
-    changePrefView() {
-      if (this.prefViewTab != "legend") {
-        this.prefViewTab = "legend";
-        this.prefsExpanded = false;
-        setTimeout((_) => {
-          this.prefsExpanded = true;
-        }, 50);
-      } else {
-        this.prefViewTab = "short";
-        this.prefsExpanded = false;
-
-        setTimeout((_) => {
-          this.prefsExpanded = true;
-        }, 0); // just that we have a transition, otherwise there would be no pretty scaling effect
-      }
-    },
-
-    formatAsTime(dateString) {
-      return date.formatDate(new Date(dateString), "H:mm");
-    },
-
-    requestLift() {
-      this.$q
-        .dialog({
-          title: "Anfragen",
-          message: `${this.lift.driver.name} fragen, ob du mitfahren kannst?`,
-          ok: {
-            color: "positive",
-          },
-          cancel: {
-            color: "white",
-          },
-          cancel: true,
-          persistent: true,
-        })
-        .onOk((data) => {
-          this.$emit("request", this.lift.id);
-        });
-    },
-
-    cancelRequest() {
-      this.$q
-        .dialog({
-          title: "Zurückziehen",
-          message: `Deine Anfrage zur Fahrt zurückziehen?`,
-          ok: {
-            color: "positive",
-          },
-          cancel: {
-            color: "white",
-          },
-          cancel: true,
-          persistent: true,
-        })
-        .onOk((_) => {
-          this.$emit("cancelRequest", this.lift.id);
-        });
-    },
-
-    async refreshImage() {
-      this.imageUrl = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
-        fbid: this.lift.driver.id,
-      });
-    },
-  },
-
-  mounted() {
-    this.refreshImage();
-  },
-
-  updated() {
-    this.refreshImage();
-  },
+onMounted(() => {
+  refreshImage();
+});
+onUpdated(() => {
+  refreshImage();
 });
 </script>
 

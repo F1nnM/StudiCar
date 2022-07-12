@@ -27,20 +27,20 @@
         v-for="data in [
           {
             prop: 'type',
-            label: 'Fahrzeugtyp'
+            label: 'Fahrzeugtyp',
           },
           {
             prop: 'seats',
-            label: 'Freie Sitze'
+            label: 'Freie Sitze',
           },
           {
             prop: 'licensePlate',
-            label: 'Kennzeichen'
+            label: 'Kennzeichen',
           },
           {
             prop: 'year',
-            label: 'Baujahr'
-          }
+            label: 'Baujahr',
+          },
         ]"
         :key="data.prop"
       >
@@ -53,25 +53,11 @@
   </q-card>
 </template>
 
-<script>
-import ExtHr from "components/ExtendedHr";
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "CarInfo",
-  components: {
-    ExtHr
-  },
-  props: {
-    car: Object
-  },
-  data() {
-    return {};
-  },
-  computed: {},
-  methods: {},
-  mounted() {}
+<script setup>
+const props = defineProps({
+  car: Object,
 });
+const { car } = toRefs(props);
 </script>
 
 <style scoped></style>

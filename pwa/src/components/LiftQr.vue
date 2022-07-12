@@ -3,7 +3,7 @@
   <q-dialog
     transition-show="scale"
     transition-hide="slide-down"
-    :model-value="modelValue"
+    :value="value"
     @input="emit"
     position="bottom"
   >
@@ -44,31 +44,16 @@
   </q-dialog>
 </template>
 
-<script>
-import VueQrcode from "vue-qrcode";
-import ExtHr from "components/ExtendedHr";
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "LiftQr",
-  components: { VueQrcode, ExtHr },
-  props: {
-    modelValue: Boolean,
-    input: String,
-  },
-  data() {
-    return {};
-  },
-  watch: {
-    open: function (val) {},
-  },
-  computed: {},
-  methods: {
-    emit(val) {
-      this.$emit("input", val);
-    },
-  },
+<script setup>
+const props = defineProps({
+  value: Boolean,
+  input: String,
 });
+const { value, input } = toRefs(props);
+
+function emit(val) {
+  $emit('input', val);
+}
 </script>
 
 <style lang="scss" scoped>

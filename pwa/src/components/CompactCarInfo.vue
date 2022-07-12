@@ -102,32 +102,22 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
+<script setup>
+const props = defineProps({
+  car: {
+    type: Object,
+    required: true,
+  },
+  expandable: Boolean,
+  compactView: Boolean,
+});
+const { car, expandable, compactView } = toRefs(props);
 
-export default defineComponent({
-  components: {},
-  name: "CompactCarInfo",
-  props: {
-    car: {
-      type: Object,
-      required: true
-    },
-    expandable: Boolean,
-    compactView: Boolean
-  },
-  data() {
-    return {
-      showDetails: false
-    };
-  },
-  computed: {
-    carColor() {
-      // at the time of writing this the component was used both with and without #-prefix in color
-      var c = this.car.color;
-      if (!c.includes("#")) return "#" + c;
-      else return c;
-    }
-  }
+let showDetails = false;
+const carColor = computed(() => {
+  // at the time of writing this the component was used both with and without #-prefix in color
+  var c = car.color;
+  if (!c.includes('#')) return '#' + c;
+  else return c;
 });
 </script>

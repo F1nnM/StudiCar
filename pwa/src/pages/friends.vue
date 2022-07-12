@@ -57,19 +57,19 @@
                       readonly
                       v-if="f.rating"
                       size="1em"
-                      :model-value="f.rating"
+                      :value="f.rating"
                       :max="5"
                       icon="emoji_people"
                       color="primary"
                     /><Tooltip>
                       <!-- putting tooltip in rating didn't work: rating has no default slot -->
                       {{
-                        ["Kaum", "Wenig", "Mehrere", "Viele", "Ständige"][
+                        ['Kaum', 'Wenig', 'Mehrere', 'Viele', 'Ständige'][
                           f.rating - 1
                         ]
                       }}
 
-                      {{ f.rating == 5 ? "Mitfahrer" : "Fahrgemeinschaften" }}
+                      {{ f.rating == 5 ? 'Mitfahrer' : 'Fahrgemeinschaften' }}
                     </Tooltip>
                   </q-item-label>
                 </q-item-section>
@@ -164,193 +164,107 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import Tooltip from "components/Tooltip";
-import FriendHeart from "../components/FriendHeart.vue";
-import {
-  buildGetRequestUrl,
-  GET_USER_PROFILE_PIC,
-  sendApiRequest,
-  SQL_GET_FRIENDS,
-  SQL_CHANGE_FRIEND_RELATION,
-} from "../ApiAccess";
-export default defineComponent({
-  components: { FriendHeart, Tooltip },
-  data() {
-    return {
-      mainTab: "friends",
-      entireNetwork: [
-        {
-          id: 1,
-          name: "Alicia",
-          surname: "Müller",
-          rating: 3,
-          friended: {
-            in: true,
-            me: false,
-          },
-        },
-        {
-          id: 2,
-          name: "Herbert",
-          surname: "Kahlschneider",
-          rating: 1,
-          friended: {
-            in: true,
-            me: true,
-          },
-        },
-        {
-          id: 3,
-          name: "Gerd",
-          surname: "Gröner",
-          rating: 5,
-          friended: {
-            in: true,
-            me: true,
-          },
-        },
-        {
-          id: 4,
-          name: "Thomas",
-          surname: "Bärlauch",
-          rating: 2,
-          friended: {
-            in: false,
-            me: true,
-          },
-        },
-      ],
-      ppPath: "",
-      imagePaths: {},
-    };
-  },
+<script setup>
+import { useUserStore } from 'src/stores/user';
+import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from 'src/utils/ApiAccess';
+import { onMounted } from 'vue';
 
-  computed: {
-    friendsFromStore() {
-      return this.$store.getters["auth/user"].friends;
-    },
+const userStore = useUserStore();
+const appStore = useAppStore();
 
-    friends() {
-      return this.friendsFromStore.filter(
-        (u) => u.friended.in && u.friended.me
-      );
-    },
+let mainTab = 'friends';
+let ppPath = '';
+let imagePaths = {};
 
-    friendsFbId() {
-      return this.friends.map((e) => e.fbId);
-    },
+const friendsFromStore = computed(() => {
+  return userStore.user.friends;
+});
 
-    pending() {
-      return this.friendsFromStore
-        .filter(
-          (u) =>
-            !(u.friended.in && u.friended.me) &&
-            !this.friendsFbId.includes(u.fbId) // this line is just a workaround to fix an existing bug in the sql query
-        )
-        .sort((a, b) => +a.friended.me > +b.friended.me);
-      /* sorting using the unary operator:
+const friends = computed(() => {
+  return friendsFromStore.filter((u) => u.friended.in && u.friended.me);
+});
+
+const friendsFbId = computed(() => {
+  return friends.map((e) => e.fbId);
+});
+
+const pending = computed(() => {
+  return friendsFromStore
+    .filter(
+      (u) => !(u.friended.in && u.friended.me) && !friendsFbId.includes(u.fbId) // this line is just a workaround to fix an existing bug in the sql query
+    )
+    .sort((a, b) => +a.friended.me > +b.friended.me);
+  /* sorting using the unary operator:
       +true = 1
       +false = 0 */
-    },
+});
 
-    currentList() {
-      if (this.mainTab == "friends") return this.friends;
-      else return this.pending;
-    },
-  },
+const currentList = computed(() => {
+  if (mainTab == 'friends') return friends;
+  else return pending;
+});
 
-  watch: {},
+async function userConfirm(fbId) {
+  var otherUser = friendsFromStore.find((u) => u.fbId == fbId);
+  var friended = otherUser.friended;
+  // propably not the best way to extra find the wanted item, alternative would be to pass all as params
+  // this definitely is the cleaner way
 
-  methods: {
-    async refreshContent(res, rej) {
-      this.$store.dispatch("auth/reloadFriends", {
-        res: res,
-        rej: rej,
-      });
-    },
-
-    async userConfirm(fbId) {
-      var otherUser = this.friendsFromStore.find((u) => u.fbId == fbId);
-      var friended = otherUser.friended;
-      // propably not the best way to extra find the wanted item, alternative would be to pass all as params
-      // this definitely is the cleaner way
-
-      if (friended.in && friended.me)
-        // only ask if there is an connection established
-        this.$q
-          .dialog({
-            title: "Freundschaft beenden",
-            message: `Willst du die Freundschaft mit ${otherUser.name} wirklich beenden? Die Anfrage wird dann wieder als ausstehend
+  if (friended.in && friended.me)
+    // only ask if there is an connection established
+    $q.dialog({
+      title: 'Freundschaft beenden',
+      message: `Willst du die Freundschaft mit ${otherUser.name} wirklich beenden? Die Anfrage wird dann wieder als ausstehend
             gespeichert.`,
-            cancel: true,
-            persistent: true,
-          })
-          .onOk((_) => {
-            this.sendRelationChange({
-              fbId: fbId,
-              mySideOfHeart: friended.me,
-            });
-          })
-          .onCancel(console.warn("Friendship isn't supposed to be quit"));
-      else if (friended.me)
-        this.$q
-          .dialog({
-            title: "Anfrage zurückziehen",
-            message: `Willst du die Freundschaftsanfrage an ${otherUser.name} wirklich zurückziehen? Denk dran, dass
+      cancel: true,
+      persistent: true,
+    })
+      .onOk(() => {
+        sendRelationChange(fbId, friended.me);
+      })
+      .onCancel(console.warn("Friendship isn't supposed to be quit"));
+  else if (friended.me)
+    $q.dialog({
+      title: 'Anfrage zurückziehen',
+      message: `Willst du die Freundschaftsanfrage an ${otherUser.name} wirklich zurückziehen? Denk dran, dass
 du ${otherUser.name} dann nur über eine Fahrgemeinschaft oder einen StudiCar Code wiederfinden kannst!`,
-            cancel: true,
-            persistent: true,
-          })
-          .onOk((_) => {
-            this.sendRelationChange({
-              fbId: fbId,
-              mySideOfHeart: friended.me,
-            });
-          })
-          .onCancel(console.warn("Request isn't supposed to be deleted"));
-      else
-        this.sendRelationChange({
-          fbId: fbId,
-          mySideOfHeart: friended.me,
-        });
-    },
+      cancel: true,
+      persistent: true,
+    })
+      .onOk(() => {
+        sendRelationChange(fbId, friended.me);
+      })
+      .onCancel(console.warn("Request isn't supposed to be deleted"));
+  else sendRelationChange(fbId, friended.me);
+}
 
-    async toggleHeart(fbId) {
-      this.userConfirm(fbId)
-        .then((_) => {
-          this.sendRelationChange({
-            fbId: fbId,
-            mySideOfHeart: friended.me,
-          });
-        })
-        .catch((err) => {
-          console.warn("Changing aborted: " + err);
-        });
-    },
-
-    sendRelationChange(payloadObj) {
-      this.$store.dispatch("auth/changeFriendRelation", payloadObj);
-    },
-  },
-
-  mounted() {
-    this.$store.commit("setPage", {
-      name: "Freunde",
+async function toggleHeart(fbId) {
+  userConfirm(fbId)
+    .then(() => {
+      sendRelationChange(fbId, friended.me);
+    })
+    .catch((err) => {
+      console.warn('Changing aborted: ' + err);
     });
+}
 
-    (async (_) => {
-      this.ppPath = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
-        fbid: this.$store.getters["auth/user"].uid,
-      });
-    })();
-    this.friendsFromStore.forEach(async (e) => {
-      this.imagePaths[e.fbId] = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
-        fbid: e.fbId,
-      });
+function sendRelationChange(friendId, mySideOfHeart) {
+  userStore.changeFriendRelation(friendId, mySideOfHeart);
+}
+
+onMounted(() => {
+  appStore.setPage({
+    name: 'Freunde',
+  })(async () => {
+    ppPath = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
+      fbid: userStore.user.uid,
     });
-  },
+  })();
+  friendsFromStore.forEach(async (e) => {
+    imagePaths[e.fbId] = await buildGetRequestUrl(GET_USER_PROFILE_PIC, {
+      fbid: e.fbId,
+    });
+  });
 });
 </script>
 

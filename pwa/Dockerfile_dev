@@ -14,8 +14,12 @@ FROM node:alpine as app
 
 RUN mkdir /app
 WORKDIR /app
-COPY --from=builder /app/node_modules ./node_modules
 
-COPY . /app/
+COPY --from=builder /app/node_modules ./node_modules
+RUN ls -al
+RUN npm -g root
+RUN pwd
+RUN ls -al /root/
+COPY . .
 
 ENTRYPOINT [ "npm", "run", "dev"]

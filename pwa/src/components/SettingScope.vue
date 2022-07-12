@@ -1,7 +1,7 @@
 <template>
   <!-- just a pretty display header and scope for most of the settings -->
   <q-dialog
-    :model-value="modelValue"
+    :value="value"
     @input="emit"
     position="bottom"
     full-width
@@ -67,7 +67,7 @@
           </q-btn>
         </q-toolbar>
         <q-linear-progress
-          v-if="modelValue && uploading && !hasBeenSaved"
+          v-if="value && uploading && !hasBeenSaved"
           :indeterminate="uploading"
           :value="100"
           track-color="white"
@@ -99,63 +99,49 @@
   </q-dialog>
 </template>
 
-<script>
-import Tooltip from "components/Tooltip";
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "SettingScope",
-  components: {
-    Tooltip,
+<script setup>
+const props = defineProps({
+  value: {
+    type: Boolean,
+    required: true,
   },
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
-    disableSave: Boolean,
-    uploading: Boolean,
-    property: {
-      type: String,
-      required: true,
-    },
-    descriptionLabel: String,
+  disableSave: Boolean,
+  uploading: Boolean,
+  property: {
+    type: String,
+    required: true,
   },
-  data() {
-    return {
-      help: false,
-      hasBeenSaved: false,
-    };
-  },
-  watch: {
-    modelValue: function (val) {
-      if (val == true) this.hasBeenSaved = false; // reset when re-opening
-    },
-  },
-  computed: {
-    hasDescriptionSlot() {
-      return !!this.$slots.description;
-    },
-  },
-  methods: {
-    emit(val) {
-      this.$emit("input", val);
-    },
-
-    emitShow() {
-      this.$emit("show");
-    },
-
-    emitHide() {
-      this.$emit("hide");
-    },
-
-    save() {
-      this.hasBeenSaved = true;
-      this.$emit("save");
-    },
-  },
+  descriptionLabel: String,
 });
+const { value, disableSave, uploading, property, descriptionLabel } =
+  toRefs(props);
+
+let help = false;
+let hasBeenSaved = false;
+
+watch(value, (val) => {
+  if (val == true) hasBeenSaved = false; // reset when re-opening
+});
+
+const hasDescriptionSlot = computed(() => {
+  return !!$slots.description;
+});
+function emit(val) {
+  $emit('input', val);
+}
+
+function emitShow() {
+  $emit('show');
+}
+
+function emitHide() {
+  $emit('hide');
+}
+
+function save() {
+  hasBeenSaved = true;
+  $emit('save');
+}
 </script>
 
 <style lang="scss" scoped>

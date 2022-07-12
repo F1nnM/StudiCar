@@ -10,16 +10,20 @@
               round
               icon="menu"
               aria-label="Menu"
-              @click="leftDrawerOpen = !leftDrawerOpen"
+              @click="toggleDrawer"
             />
 
             <q-toolbar-title class="row">
               <div class="col-6 q-pt-xs">
                 <q-slide-transition>
-                  <div v-show="!scrolled" class="text-weight-thin">StudiCar</div>
+                  <div v-show="!scrolled" class="text-weight-thin">
+                    StudiCar
+                  </div>
                 </q-slide-transition>
                 <q-slide-transition>
-                  <div v-show="scrolled" class="text-weight-thin">{{pageName}}</div>
+                  <div v-show="scrolled" class="text-weight-thin">
+                    {{ store.pageName }}
+                  </div>
                 </q-slide-transition>
               </div>
 
@@ -30,7 +34,12 @@
       </q-header>
     </q-slide-transition>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered class="bg-grey-1">
+    <q-drawer
+      v-model="leftDrawerOpen"
+      show-if-above
+      bordered
+      content-class="bg-grey-1"
+    >
       <q-btn to="/">Marktplatz</q-btn>
       <q-toggle v-model="fullscreen" label="Vollbild" />
     </q-drawer>
@@ -38,14 +47,14 @@
     <q-page-container>
       <q-scroll-observer @scroll="scrollHandler" />
       <router-view v-slot="{ Component }">
-        <transition :name="pageTrans" mode="out-in">
+        <transition :name="store.pageTrans" mode="out-in">
           <component :is="Component" />
         </transition>
       </router-view>
     </q-page-container>
 
     <q-slide-transition>
-      <q-footer elevated v-show="!(fullscreen)">
+      <q-footer elevated v-show="!fullscreen">
         <q-tabs
           stretch
           full-width
@@ -67,60 +76,20 @@
   </q-layout>
 </template>
 
-<script>
-import { scroll } from "quasar";
-import { defineComponent } from "vue";
+<script setup>
+import { useAppStore } from 'src/stores/app';
 
-export default defineComponent({
-  components: {},
+const store = useAppStore();
 
-  computed: {
-    pageName() {
-      return this.$store.state.pageName;
-    },
+const fullscreen = ref(false);
+const scrolled = ref(false);
+const leftDrawerOpen = ref(false);
 
-    pageTrans() {
-      return this.$store.state.transer;
-    },
-  },
+const scrollHandler = (event) => {
+  scrolled.value = event.position > 30;
+};
 
-  data() {
-    return {
-      tab: "spielwiese",
-      code: "",
-      video: [],
-      result: "",
-      fullscreen: false,
-      scrolled: false,
-      leftDrawerOpen: false,
-      error: "",
-    };
-  },
-  methods: {
-    decoded(res) {
-      this.result = res;
-    },
-    message(error) {
-      this.$q
-        .dialog({
-          dark: true,
-          title: "Fehler",
-          message: "" + error,
-        })
-        .onOk(() => {
-          // console.log('OK')
-        })
-        .onCancel(() => {
-          // console.log('Cancel')
-        })
-        .onDismiss(() => {
-          // console.log('I am triggered on both OK and Cancel')
-        });
-    },
-
-    scrollHandler(info) {
-      this.scrolled = info.position > 30;
-    },
-  },
-});
+const toggleDrawer = () => {
+  leftDrawerOpen.value = !leftDrawerOpen.value;
+};
 </script>

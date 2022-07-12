@@ -3,7 +3,7 @@
     <div class="q-mt-sm q-pa-sm shadow-1">
       <div class="row">
         <p class="col-5 text-uppercase text-caption q-mt-none q-mb-xs">
-          Meine Adresse{{ addresses.length != 1 ? "n" : "" }}
+          Meine Adresse{{ addresses.length != 1 ? 'n' : '' }}
         </p>
         <div class="col-5">
           <q-btn
@@ -90,8 +90,8 @@
     <div class="q-mt-sm q-pa-sm shadow-1">
       <div class="row justify-between">
         <p class="text-uppercase text-caption q-mt-none q-mb-xs">
-          Mein{{ cars.length != 1 ? "e" : "" }} Fahrzeug{{
-            cars.length != 1 ? "e" : ""
+          Mein{{ cars.length != 1 ? 'e' : '' }} Fahrzeug{{
+            cars.length != 1 ? 'e' : ''
           }}
         </p>
 
@@ -255,7 +255,7 @@
     </q-dialog>
 
     <SettingScope
-      :model-value="openAddCar"
+      :value="openAddCar"
       descriptionLabel="cool"
       property="Fahrzeug hinzufügen"
     >
@@ -454,202 +454,157 @@
     </SettingScope>
   </div>
 </template>
-<script>
-import CarInfo from "../components/CarInfo";
-import ImageColorPicker from "components/ImageColorPicker";
-import CompactCarInfo from "components/CompactCarInfo";
-import SettingScope from "components/SettingScope";
 
-import { sendApiRequest, GET_CAR_MODELS } from "../ApiAccess";
-import { defineComponent } from "vue";
+<script setup>
+import { useUserStore } from 'src/stores/user';
 
-export default defineComponent({
-  name: "ProfileOtherData",
-  components: {
-    ImageColorPicker,
-    CarInfo,
-    CompactCarInfo,
-    SettingScope,
-  },
-  props: {},
-  data() {
-    return {
-      openEditAddresses: false, // addresses settings
-      openNewAddress: false,
+let openEditAddresses = false; // addresses settings
+let openNewAddress = false;
 
-      carTypeOptions: [
-        "Kompaktwagen",
-        "Kombi",
-        "Limousine",
-        "Cabrio",
-        "SUV",
-        "Sportwagen",
-        "Transporter",
-        "Pickup",
-      ],
+let carTypeOptions = [
+  'Kompaktwagen',
+  'Kombi',
+  'Limousine',
+  'Cabrio',
+  'SUV',
+  'Sportwagen',
+  'Transporter',
+  'Pickup',
+];
 
-      newAddress: {
-        nickname: "",
-        street: "",
-        number: "",
-        postcode: "",
-        city: "",
-      },
+let newAddressDefault = {
+  nickname: '',
+  street: '',
+  number: '',
+  postcode: '',
+  city: '',
+};
+let newAddress = { ...newAddressDefault };
+let carInfoDefault = {
+  // cars settings
+  brand: '',
+  model: '',
+  type: '',
+  color: '',
+  licensePlate: '',
+  seats: null,
+};
+let carInfo = { ...carInfoDefault };
+let carInfoOpen = false;
+let newCarDefault = {
+  brand: '',
+  type: '',
+  model: '',
+  color: '',
+  year: 'XXXX',
+  seats: 3,
+  licensePlate: '',
+};
+let newCar = { ...newCarDefault };
+let newCarOptions = {};
+let openNewCarTab = 1;
+let openEditCars = false;
+let openAddCar = false;
+let openAddCarConfirm = false;
 
-      carInfo: {
-        // cars settings
-        brand: "",
-        model: "",
-        type: "",
-        color: "",
-        licensePlate: "",
-        seats: null,
-      },
-      carInfoOpen: false,
-      newCar: {
-        brand: "",
-        type: "",
-        model: "",
-        color: "",
-        year: "XXXX",
-        seats: 3,
-        licensePlate: "",
-      },
-      newCarOptions: {},
-      openNewCarTab: 1,
-      openEditCars: false,
-      openAddCar: false,
-      openAddCarConfirm: false,
-    };
-  },
-  computed: {
-    addresses: {
-      get() {
-        return this.$store.getters["auth/user"].addresses.filter((item) => {
-          return item.id > 3; // filter only private adresses, IDs 1 to 3 are reserved for schools
-        });
-      },
+const userStore = useUserStore();
+
+function validNumberPlate() {
+  newCar.licensePlate = newCar.licensePlate.toUpperCase();
+  var pattern = /[A-ZÄÖÜ]{1,3} [A-ZÄÖÜ]{1,2} \d{1,4}$/gm;
+  var matches = newCar.licensePlate.match(pattern);
+  return !!matches; // returns null if no matches, otherwise array, so have to double-negate it
+}
+
+function showCarInfo(item) {
+  carInfo = item;
+  carInfoOpen = true;
+}
+
+function addAddress() {
+  userStore.addAddress(newAddress);
+  newAddress = { ...newAddressDefault };
+}
+
+function removeAddress(id) {
+  if (id) userStore.removeAddress(id);
+}
+
+function updateDefaultAddress(id) {
+  userStore.updateDefaultAddress(id);
+}
+
+async function addCar() {
+  userStore.addCar(newCar);
+  newCar = { ...newCarDefault };
+  openAddCar = false;
+  openNewCarTab = 1;
+  openAddCarConfirm = false;
+}
+
+function removeCar(id, brand, model) {
+  if (id)
+    $q.dialog({
+      title: 'Entfernen',
+      message: `Deinen ${brand} ${model} aus der Liste entfernen?`,
+      cancel: true,
+      persistent: true,
+    }).onOk(() => {
+      userStore.removeCar(id);
+    });
+}
+
+function addRandomCar() {
+  newCar.brand = randomItemFromArray(Object.keys(newCarOptions));
+  newCar.type = randomItemFromArray(carTypeOptions);
+  newCar.model = randomItemFromArray(newCarOptions[newCar.brand]);
+  newCar.color =
+    '#' + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, '0'); // just random hex color
+  newCar.seats = randomItemFromArray([1, 2, 3, 4, 5, 6, 7]);
+  newCar.year = randomItemFromArray([2020, 2019, 2018, 2017, 2016, 2015]);
+
+  let validPlate = true;
+  newCar.licensePlate = validPlate ? 'HDH DH 2020' : 'B SS 2330';
+  openAddCarConfirm = true;
+}
+
+const addresses = computed(() => {
+  return userStore.user.addresses.filter((item) => {
+    return item.id > 3; // filter only private adresses, IDs 1 to 3 are reserved for schools
+  });
+});
+
+const cars = computed(() => {
+  return userStore.user.cars;
+});
+
+const possibleBuildYears = computed(() => {
+  var reverse = true;
+  let years = [];
+  for (var i = 1940; i <= new Date().getFullYear(); i++) {
+    years.push(i);
+  }
+  return reverse ? years.reverse() : years;
+});
+
+const newAddressFilled = computed(() => {
+  for (let key in newAddress) {
+    if (!newAddress[key] && key != 'nickname') return false; // only nickname can be blank
+  }
+  return true;
+});
+
+onMounted(() => {
+  sendApiRequest(
+    GET_CAR_MODELS,
+    {},
+    (data) => {
+      newCarOptions = data;
     },
-
-    cars: {
-      get() {
-        return this.$store.getters["auth/user"].cars;
-      },
-    },
-
-    possibleBuildYears() {
-      var reverse = true;
-      let years = [];
-      for (var i = 1940; i <= new Date().getFullYear(); i++) {
-        years.push(i);
-      }
-      return reverse ? years.reverse() : years;
-    },
-
-    newAddressFilled() {
-      for (let key in this.newAddress) {
-        if (!this.newAddress[key] && key != "nickname") return false; // only nickname can be blank
-      }
-      return true;
-    },
-  },
-  methods: {
-    validNumberPlate() {
-      this.newCar.licensePlate = this.newCar.licensePlate.toUpperCase();
-      var pattern = /[A-ZÄÖÜ]{1,3} [A-ZÄÖÜ]{1,2} \d{1,4}$/gm;
-      var matches = this.newCar.licensePlate.match(pattern);
-      return !!matches; // returns null if no matches, otherwise array, so have to double-negate it
-    },
-
-    showCarInfo(item) {
-      this.carInfo = item;
-      this.carInfoOpen = true;
-    },
-
-    addAddress() {
-      this.$store.dispatch("auth/addAddress", this.newAddress);
-      this.newAddress = {
-        nickname: "",
-        street: "",
-        number: "",
-        postcode: "",
-        city: "",
-      };
-    },
-
-    removeAddress(id) {
-      if (id) this.$store.dispatch("auth/removeAddress", id);
-    },
-
-    updateDefaultAddress(id) {
-      this.$store.dispatch("auth/updateDefaultAddress", id);
-    },
-
-    async addCar() {
-      await this.$store.dispatch(
-        "auth/addCar",
-        JSON.parse(JSON.stringify(this.newCar))
-      );
-
-      for (let key in this.newCar) {
-        this.newCar[key] = key != "seats" ? "" : 3; // original state, reset to blank form to continue. 3 seats look better than 0, it's the default value when selecting the seats.
-      }
-      this.openAddCar = false;
-      this.openNewCarTab = 1;
-      this.openAddCarConfirm = false;
-    },
-
-    removeCar(id, brand, model) {
-      if (id)
-        this.$q
-          .dialog({
-            title: "Entfernen",
-            message: `Deinen ${brand} ${model} aus der Liste entfernen?`,
-            cancel: true,
-            persistent: true,
-          })
-          .onOk(() => {
-            this.$store.dispatch("auth/removeCar", id);
-          });
-    },
-
-    addRandomCar() {
-      this.newCar.brand = this.randomItemFromArray(
-        Object.keys(this.newCarOptions)
-      );
-      this.newCar.type = this.randomItemFromArray(this.carTypeOptions);
-      this.newCar.model = this.randomItemFromArray(
-        this.newCarOptions[this.newCar.brand]
-      );
-      this.newCar.color =
-        "#" + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, "0"); // just random hex color
-      this.newCar.seats = this.randomItemFromArray([1, 2, 3, 4, 5, 6, 7]);
-      this.newCar.year = this.randomItemFromArray([
-        2020, 2019, 2018, 2017, 2016, 2015,
-      ]);
-
-      let validPlate = true;
-      this.newCar.licensePlate = validPlate ? "HDH DH 2020" : "B SS 2330";
-      this.openAddCarConfirm = true;
-    },
-
-    randomItemFromArray(array) {
-      return array[Math.floor(Math.random() * array.length)];
-    },
-  },
-
-  mounted() {
-    sendApiRequest(
-      GET_CAR_MODELS,
-      {},
-      (data) => {
-        this.newCarOptions = data;
-      },
-      (error) => {
-        throw error;
-      }
-    );
-  },
+    (error) => {
+      throw error;
+    }
+  );
 });
 </script>
 

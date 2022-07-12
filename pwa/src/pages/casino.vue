@@ -14,57 +14,47 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import { scroll } from "quasar";
-import * as api from "../ApiAccess";
+<script setup>
+import * as api from '../ApiAccess';
 
-export default defineComponent({
-  components: {},
-  data() {
-    return {
-      result: [],
-      err: null,
-      columns: [
-        {
-          name: "key",
-          align: "center",
-          label: "Variable",
-          field: "key",
-          sortable: true
-        },
-        { name: "value", label: "Wert", field: "value", sortable: true }
-      ]
-    };
+const result = ref([]);
+const err = ref(null);
+const columns = [
+  {
+    name: 'key',
+    align: 'center',
+    label: 'Variable',
+    field: 'key',
+    sortable: true,
   },
-  computed: {},
-  methods: {
-    call() {
-      this.result = [];
-      this.err = false; // simple reset
-      api.sendApiRequest(
-        api.TEST_API,
-        {},
-        data => {
-          this.result = Object.entries(data).map(([key, value]) => ({
-            key,
-            value
-          }));
-          // taken from https://stackoverflow.com/questions/36411566/how-to-transpose-a-javascript-object-into-a-key-value-array
-        },
-        err => {
-          this.result = Object.entries(data).map(([key, value]) => ({
-            key,
-            value
-          }));
-          this.err = true;
-        }
-      );
+  { name: 'value', label: 'Wert', field: 'value', sortable: true },
+];
+
+function call() {
+  result.value = [];
+  err.value = false; // simple reset
+  api.sendApiRequest(
+    api.TEST_API,
+    {},
+    (data) => {
+      result.value = Object.entries(data).map(([key, value]) => ({
+        key,
+        value,
+      }));
+      // taken from https://stackoverflow.com/questions/36411566/how-to-transpose-a-javascript-object-into-a-key-value-array
+    },
+    (err_data) => {
+      result.value = Object.entries(err_data).map(([key, value]) => ({
+        key,
+        value,
+      }));
+      err.value = true;
     }
-  },
+  );
+}
 
-  mounted() {
-    this.$store.commit("setPage", "Spielhölle");
-  }
+const appStore = useAppStore();
+onMounted(() => {
+  appStore.setPage({ name: 'Spielhölle' });
 });
 </script>

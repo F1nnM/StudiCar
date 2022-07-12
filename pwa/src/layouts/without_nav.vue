@@ -5,27 +5,20 @@
         <q-toolbar-title>StudiCar Authentifizierung</q-toolbar-title>
       </q-toolbar>
     </q-header>
-    <GetUserDataLoading persistent v-model="loadingScreenVisible" />
+    <GetUserDataLoading persistent :open="loadingScreenVisible" />
     <q-page-container>
       <router-view />
     </q-page-container>
   </q-layout>
 </template>
 
-<script>
-import GetUserDataLoading from "components/GetUserDataLoading";
-import { defineComponent } from "vue";
+<script setup>
+import { useUserStore } from 'src/stores/user';
 
-export default defineComponent({
-  name: "without_nav",
-  components: { GetUserDataLoading },
-  computed: {
-    loadingScreenVisible() {
-      return !this.$store.getters["auth/signinLoaded"];
-    }
-  }
+const userStore = useUserStore();
+const loadingScreenVisible = computed(() => {
+  return !userStore.loggedIn;
 });
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

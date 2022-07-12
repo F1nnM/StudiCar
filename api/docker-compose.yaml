@@ -10,7 +10,7 @@ services:
       MYSQL_PASSWORD: "@H1xhm978zX?v67g"
     restart: on-failure
     volumes:
-      - ./mariadb:/var/lib/mysql
+      - mariadb_studicar_dev:/var/lib/mysql
   phpmyadmin:
     image: phpmyadmin
     restart: on-failure
@@ -53,6 +53,10 @@ services:
     #network_mode: "host"
     depends_on:
       - mariadb
-    command: ["npm", "run", "${NPM_SCRIPT}"]
+    command: ["npm", "run", "nodemon"]
     volumes:
       - .:/app
+
+volumes:
+  mariadb_studicar_dev:
+  

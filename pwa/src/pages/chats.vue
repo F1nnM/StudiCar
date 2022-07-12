@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-md">
-    <TitleButtonAnchor>
+    <TitleButton>
       <div class="row justify-end">
         <q-tab-panels
           animated
@@ -49,7 +49,7 @@
 
         -->
       </div>
-    </TitleButtonAnchor>
+    </TitleButton>
 
     <q-tab-panels
       animated
@@ -80,7 +80,7 @@
               class="text-caption q-pa-none"
             >
               <q-tab-panel
-                v-for="(lift, index) in liftRequests"
+                v-for="(lift, index) in userStore.user.liftRequests"
                 :key="lift.liftId"
                 class="q-pa-none"
                 :name="index"
@@ -100,7 +100,7 @@
                   <div class="self-center">
                     <div class="text-center text-overline">
                       Seite {{ pendingRequestTab + 1 }}/{{
-                        liftRequests.length
+                        userStore.user.liftRequests.length
                       }}
                     </div>
                     <div class="row justify-between">
@@ -114,7 +114,10 @@
                       />
                       <q-btn
                         @click="switchTab(true)"
-                        :disable="pendingRequestTab == liftRequests.length - 1"
+                        :disable="
+                          pendingRequestTab ==
+                          userStore.user.liftRequests.length - 1
+                        "
                         icon="keyboard_arrow_right"
                         dense
                         flat
@@ -183,9 +186,9 @@
       </q-tab-panel>
 
       <q-tab-panel name="pending_out" class="q-pa-none">
-        <div v-if="outgoingRequests.length">
+        <div v-if="userStore.user.outgoingRequests.length">
           <LiftOffer
-            v-for="r in outgoingRequests"
+            v-for="r in userStore.user.outgoingRequests"
             :key="r.liftId"
             :lift="r"
             isAlreadyRequested
@@ -232,7 +235,7 @@
           </q-list>
           <LiftPopup
             @shortLiftInfo="openShortLiftInfo"
-            v-model="chatPopup.isOpen"
+            open="chatPopup.isOpen"
             :detailsOpen="chatPopup.detailsOpen"
             @detailsOpenUpdate="chatPopup.detailsOpen = $event"
             :lift="chatPopup.data"
@@ -246,9 +249,9 @@
             :input="qrInput"
             text="Über diesen Code kannst du eine Fahrgemeinschaft direkt teilen."
           >
-            {{ liftCodePopup.data ? liftCodePopup.data.start.name : "" }}
+            {{ liftCodePopup.data ? liftCodePopup.data.start.name : '' }}
             <span class="q-mx-xs">›</span>
-            {{ liftCodePopup.data ? liftCodePopup.data.destination.name : "" }}
+            {{ liftCodePopup.data ? liftCodePopup.data.destination.name : '' }}
           </QrGen>
         </div>
         <div v-else class="text-caption">
@@ -260,380 +263,315 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import ChatItem from "components/ChatItem";
-import LiftPopup from "components/LiftPopup";
-import QrGen from "components/QrGenerator";
-import LiftOffer from "components/LiftOffer";
-import ExtHr from "components/ExtendedHr";
-import TitleButtonAnchor from "components/TitleButtonAnchor";
-import IncomingLiftRequest from "components/IncomingLiftRequest";
-import LiftOfferForRequest from "components/LiftOfferForRequest";
+<script setup>
+const userStore = useUserStore();
+const appStore = useAppStore();
 
-import { date } from "quasar";
+const liftTab = ref('current');
+const pendingRequestTab = ref(0);
+const chatPopup = ref({
+  isOpen: false,
+  detailsOpen: false,
+  data: null,
+});
+const liftCodePopup = ref({
+  isOpen: false,
+  data: null,
+});
+const keyToBeIncremented = ref(0);
 
-export default defineComponent({
-  components: {
-    ChatItem,
-    LiftPopup,
-    QrGen,
-    TitleButtonAnchor,
-    IncomingLiftRequest,
-    LiftOfferForRequest,
-    LiftOffer,
-    ExtHr
-  },
+watch(liftTab, (newTab) => {
+  if (newTab == 'current') pendingRequestTab.value = 0; // fallback, because there are edge cases that hide incoming offers when this tab != 0
+});
 
-  data() {
-    return {
-      ownId: this.$store.getters["auth/user"].uid,
-      alreadyTappedOnItem: false,
-      liftTab: "current",
-      pendingRequestTab: 0,
-      chatPopup: {
-        isOpen: false,
-        detailsOpen: false,
-        data: null
-      },
-      liftCodePopup: {
-        isOpen: false,
-        data: null
-      },
-      keyToBeIncremented: 0
-    };
-  },
+onMounted(() => {
+  appStore.setPage({
+    name: 'Fahrten',
+  });
+});
 
-  watch: {
-    liftTab: function(newTab) {
-      if (newTab == "current") this.pendingRequestTab = 0; // fallback, because there are edge cases that hide incoming offers when this tab != 0
+const lastMessages = computed(() => {
+  var returnedArray = [];
+  var lifts = JSON.parse(JSON.stringify(userStore.user.chatLifts));
+  lifts.forEach((lift) => {
+    if (
+      lift.messages.length > 0 &&
+      lift.messages[lift.messages.length - 1].content
+    ) {
+      var lastMessage = lift.messages[lift.messages.length - 1];
+      returnedArray.push({
+        liftId: lift.id,
+        start: getCampusLabel(lift.start.id, lift.start.name),
+        destination: getCampusLabel(lift.destination.id, lift.destination.name),
+        sentBy: lastMessage.sentBy,
+        type: lastMessage.type,
+        content: lastMessage.content,
+        timestamp: lastMessage.timestamp,
+      });
     }
-  },
+  });
+  returnedArray.sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  ); // sort descending, so swap compared values
 
-  computed: {
-    lifts() {
-      return this.$store.getters["auth/user"].chatLifts;
-    },
-    liftRequests() {
-      return this.$store.getters["auth/user"].liftRequests;
-    },
-    outgoingRequests() {
-      return this.$store.getters["auth/user"].outgoingRequests;
-    },
-    lastMessages() {
-      var returnedArray = [];
-      var lifts = JSON.parse(JSON.stringify(this.lifts));
-      lifts.forEach(lift => {
-        if (
-          lift.messages.length > 0 &&
-          lift.messages[lift.messages.length - 1].content
-        ) {
-          var lastMessage = lift.messages[lift.messages.length - 1];
-          returnedArray.push({
-            liftId: lift.id,
-            start: this.getCampusLabel(lift.start.id, lift.start.name),
-            destination: this.getCampusLabel(
-              lift.destination.id,
-              lift.destination.name
-            ),
-            sentBy: lastMessage.sentBy,
-            type: lastMessage.type,
-            content: lastMessage.content,
-            timestamp: lastMessage.timestamp
-          });
-        }
+  return returnedArray;
+});
+const recentChats = computed(() => {
+  const now = new Date();
+  const dayLimit = 14;
+  return lastMessages.filter((m) => {
+    return false == isOverLimit(m.timestamp, now, dayLimit);
+  });
+
+  function isOverLimit(stamp, now, dayLimit) {
+    var diff = date.getDateDiff(now, new Date(stamp), 'days');
+    return diff > dayLimit;
+  }
+});
+const olderChats = computed(() => {
+  const now = new Date();
+  const dayLimit = 14;
+  return lastMessages.filter((m) => {
+    return true == isOverLimit(m.timestamp, now, dayLimit);
+  });
+
+  function isOverLimit(stamp, now, dayLimit) {
+    var diff = date.getDateDiff(now, new Date(stamp), 'days');
+    return diff > dayLimit;
+  }
+});
+const withoutMessages = computed(() => {
+  var returnedArray = [];
+  var lifts = JSON.parse(JSON.stringify(userStore.user.chatLifts));
+  lifts.forEach((lift, index) => {
+    var hasMessageButNoContent = lift.messages.length
+      ? !lift.messages[lift.messages.length - 1].content
+      : true;
+    if (lift.messages.length == 0 || hasMessageButNoContent) {
+      returnedArray.push({
+        liftId: lift.id,
+        start: lift.start.name,
+        destination: lift.destination.name,
+        daysLeft: date.getDateDiff(new Date(lift.date), new Date(), 'days'),
+        timestamp: new Date(),
       });
-      returnedArray.sort(
-        (a, b) =>
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      ); // sort descending, so swap compared values
-
-      return returnedArray;
-    },
-
-    recentChats() {
-      const now = new Date();
-      const dayLimit = 14;
-      return this.lastMessages.filter(m => {
-        return false == isOverLimit(m.timestamp, now, dayLimit);
-      });
-
-      function isOverLimit(stamp, now, dayLimit) {
-        var diff = date.getDateDiff(now, new Date(stamp), "days");
-        return diff > dayLimit;
-      }
-    },
-
-    olderChats() {
-      const now = new Date();
-      const dayLimit = 14;
-      return this.lastMessages.filter(m => {
-        return true == isOverLimit(m.timestamp, now, dayLimit);
-      });
-
-      function isOverLimit(stamp, now, dayLimit) {
-        var diff = date.getDateDiff(now, new Date(stamp), "days");
-        return diff > dayLimit;
-      }
-    },
-
-    withoutMessages() {
-      var returnedArray = [];
-      var lifts = JSON.parse(JSON.stringify(this.lifts));
-      lifts.forEach((lift, index) => {
-        var hasMessageButNoContent = lift.messages.length
-          ? !lift.messages[lift.messages.length - 1].content
-          : true;
-        if (lift.messages.length == 0 || hasMessageButNoContent) {
-          returnedArray.push({
-            liftId: lift.id,
-            start: lift.start.name,
-            destination: lift.destination.name,
-            daysLeft: date.getDateDiff(new Date(lift.date), new Date(), "days"),
-            timestamp: new Date()
-          });
-        }
-      });
-      returnedArray.sort((a, b) => a.daysLeft - b.daysLeft);
-
-      return returnedArray;
-    },
-
-    bigTabOptions() {
-      return [
-        { value: "current", icon: "playlist_add_check", label: "Bestehend" },
-        {
-          value: "pending",
-          icon: "call_received",
-          label: "eingehende Anfrage" + (this.totalRequests != 1 ? "n" : "")
-        },
-        {
-          value: "pending_out",
-          icon: "call_missed_outgoing",
-          label: "ausstehende Anfrage" + (this.totalRequests != 1 ? "n" : "")
-        }
-      ];
-    },
-    bigTabOptionsWithoutLabel() {
-      return JSON.parse(JSON.stringify(this.bigTabOptions)).map(item => {
-        delete item.label;
-        return item;
-      });
-    },
-
-    thumbStyle() {
-      return {
-        right: "4px",
-        borderRadius: "5px",
-        backgroundColor: "#027be3",
-        width: "5px",
-        opacity: 0.75
-      };
-    },
-
-    barStyle() {
-      return {
-        right: "2px",
-        borderRadius: "9px",
-        backgroundColor: "#027be3",
-        width: "9px",
-        opacity: 0.2
-      };
-    },
-
-    qrInput() {
-      var data = this.liftCodePopup.data;
-      return {
-        type: "lift",
-        data: (data ? data.id : "") + "#i" + this.ownId
-      };
-    },
-
-    totalRequests() {
-      var n = 0;
-      Object.values(this.liftRequests).forEach(lift => {
-        n += lift.requestingUsers.length;
-      });
-      return n;
     }
-  },
+  });
+  returnedArray.sort((a, b) => a.daysLeft - b.daysLeft);
 
-  methods: {
-    async refreshContent(res, rej) {
-      var callbacks = {
-        res: res,
-        rej: rej
-      };
-      ["reloadChatLifts", "getLiftRequests", "getOutgoingRequests"].forEach(
-        method => {
-          this.$store.dispatch("auth/" + method, callbacks);
-          // reload all three of them, causes more traffic but then you have always full fresh data
-        }
-      );
+  return returnedArray;
+});
+const bigTabOptions = computed(() => {
+  return [
+    { value: 'current', icon: 'playlist_add_check', label: 'Bestehend' },
+    {
+      value: 'pending',
+      icon: 'call_received',
+      label: 'eingehende Anfrage' + (totalRequests != 1 ? 'n' : ''),
     },
-
-    switchTab(right) {
-      var a = this.pendingRequestTab,
-        max = this.liftRequests.length - 1,
-        min = 0;
-      if (right) {
-        if (a < max) this.pendingRequestTab++;
-      } else {
-        if (a > min) this.pendingRequestTab--;
-      }
+    {
+      value: 'pending_out',
+      icon: 'call_missed_outgoing',
+      label: 'ausstehende Anfrage' + (totalRequests != 1 ? 'n' : ''),
     },
+  ];
+});
+const bigTabOptionsWithoutLabel = computed(() => {
+  return JSON.parse(JSON.stringify(bigTabOptions)).map((item) => {
+    delete item.label;
+    return item;
+  });
+});
+const thumbStyle = computed(() => {
+  return {
+    right: '4px',
+    borderRadius: '5px',
+    backgroundColor: '#027be3',
+    width: '5px',
+    opacity: 0.75,
+  };
+});
+const barStyle = computed(() => {
+  return {
+    right: '2px',
+    borderRadius: '9px',
+    backgroundColor: '#027be3',
+    width: '9px',
+    opacity: 0.2,
+  };
+});
+const qrInput = computed(() => {
+  return {
+    type: 'lift',
+    data:
+      (liftCodePopup.data.value ? liftCodePopup.data.id.value : '') +
+      '#i' +
+      userStore.user.uid,
+  };
+});
+const totalRequests = computed(() => {
+  var n = 0;
+  Object.values(userStore.user.liftRequests).forEach((lift) => {
+    n += lift.requestingUsers.length;
+  });
+  return n;
+});
 
-    getNameFromId(liftId, userId) {
-      var lift = this.lifts.find(l => l.id == liftId);
-      var people = [];
-      lift.passengers.forEach(item => people.push(item));
-      people.push(JSON.parse(JSON.stringify(lift.driver)));
-      if (userId == "Go6vlU74gFgz5GgM5eRnWPPt2Cf1") return "StudiCar";
-      else {
-        var a = people.find(p => p.id == userId);
-        if (!a) return "[Ehemalig]";
-        else return a.name;
-      }
-    },
+async function refreshContent(res, rej) {
+  var callbacks = {
+    res: res,
+    rej: rej,
+  };
+  userStore.reloadChatLifts();
+  userStore.getLiftRequests();
+  userStore.getOutgoingRequests();
+  // reload all three of them, causes more traffic but then you have always full fresh data
+}
 
-    getCampusLabel(campusId, name) {
-      switch (campusId) {
-        case 1:
-          return "Würfel";
-        case 2:
-          return "Alte DH";
-        case 3:
-          return "Kloster";
-        default:
-          return name;
-      }
-    },
+function switchTab(right) {
+  const max = userStore.user.liftRequests.length - 1;
+  constmin = 0;
+  if (right) {
+    if (pendingRequestTab.value < max) pendingRequestTab.value++;
+  } else {
+    if (pendingRequestTab.value > min) pendingRequestTab.value--;
+  }
+}
 
-    canAcceptAllRequests(lift) {
-      return this.seatsLeft(lift.liftId) >= lift.requestingUsers.length;
-    },
+function getNameFromId(liftId, userId) {
+  var lift = userStore.user.chatLifts.find((l) => l.id == liftId);
+  var people = [];
+  lift.passengers.forEach((item) => people.push(item));
+  people.push(JSON.parse(JSON.stringify(lift.driver)));
+  if (userId == 'Go6vlU74gFgz5GgM5eRnWPPt2Cf1') return 'StudiCar';
+  else {
+    var a = people.find((p) => p.id == userId);
+    if (!a) return '[Ehemalig]';
+    else return a.name;
+  }
+}
 
-    getPassengerNameFromId(lift, userId) {
-      if (!lift.passengers) alert("no passengers");
+function getCampusLabel(campusId, name) {
+  switch (campusId) {
+    case 1:
+      return 'Würfel';
+    case 2:
+      return 'Alte DH';
+    case 3:
+      return 'Kloster';
+    default:
+      return name;
+  }
+}
 
-      var people = {};
-      lift.passengers.forEach(p => (people[p.id] = p.name));
-      people[lift.driver.id] = lift.driver.name;
-      var a = people[userId];
-      if (!a) return "[Ehemalig]";
-      else return a.name;
-    },
+function canAcceptAllRequests(lift) {
+  return seatsLeft(lift.liftId) >= lift.requestingUsers.length;
+}
 
-    getLiftFromId(liftId) {
-      return this.lifts.find(l => l.id == liftId);
-    },
+function getPassengerNameFromId(lift, userId) {
+  if (!lift.passengers) alert('no passengers');
 
-    seatsLeft(liftId) {
-      const lift = this.getLiftFromId(liftId);
-      var a = lift.car.seatsWithoutDriver - lift.passengers.length;
-      if (a < 0) a = 0; // negative number as left seats makes no sence
-      return a;
-    },
+  var people = {};
+  lift.passengers.forEach((p) => (people[p.id] = p.name));
+  people[lift.driver.id] = lift.driver.name;
+  var a = people[userId];
+  if (!a) return '[Ehemalig]';
+  else return a.name;
+}
 
-    openTheLift(liftId) {
-      /* var enableDoubleTap = false;
+function getLiftFromId(liftId) {
+  return userStore.user.chatLifts.find((l) => l.id == liftId);
+}
+
+function seatsLeft(liftId) {
+  const lift = getLiftFromId(liftId);
+  var a = lift.car.seatsWithoutDriver - lift.passengers.length;
+  if (a < 0) a = 0; // negative number as left seats makes no sence
+  return a;
+}
+
+function openTheLift(liftId) {
+  /* var enableDoubleTap = false;
 
       if (!process.env.DEV) enableDoubleTap = false; // just to be sure
       if (!enableDoubleTap) { */
-      this.openLiftPopup(liftId);
-      /* } else {
-        if (this.alreadyTappedOnItem) this.openShortLiftInfo(liftId);
+  openLiftPopup(liftId);
+  /* } else {
+        if (alreadyTappedOnItem) openShortLiftInfo(liftId);
         else {
-          this.alreadyTappedOnItem = true;
+          alreadyTappedOnItem = true;
           setTimeout(_ => {
-            if (!this.alreadyTappedOnItem) {
-              this.openLiftPopup(liftId);
+            if (!alreadyTappedOnItem) {
+              openLiftPopup(liftId);
             }
-            this.alreadyTappedOnItem = false;
+            alreadyTappedOnItem = false;
           }, 200);
         }
       } */
+}
+
+function openLiftWithDetails(liftId) {
+  chatPopup.detailsOpen.value = true;
+  openLiftPopup(liftId);
+}
+
+function openLiftPopup(liftId) {
+  var lift = userStore.user.chatLifts.find((l) => l.id == liftId);
+  chatPopup.data.value = lift;
+  liftCodePopup.isOpen.value = false; // just to be sure
+  chatPopup.isOpen.value = true;
+}
+
+function openShortLiftInfo(liftId) {
+  var lift = userStore.user.chatLifts.find((l) => l.id == liftId);
+  liftCodePopup.data.value = lift;
+  liftCodePopup.isOpen.value = true;
+}
+
+function quickRespondLiftRequest(liftId, requestingUser, accepted) {
+  respondLiftRequest({
+    liftId: liftId,
+    user: {
+      id: requestingUser.id,
+      name: requestingUser.name,
+      surname: requestingUser.surname,
     },
+    accepted: accepted,
+    reason: null, // no reason or futher information when doing quick response
+  });
+}
 
-    openLiftWithDetails(liftId) {
-      this.chatPopup.detailsOpen = true;
-      this.openLiftPopup(liftId);
+function acceptAllRequestsOfLift(liftId) {
+  respondLiftRequest({
+    liftId: liftId,
+    user: {
+      id: -1, // when transferring this as userId, API will affect changes to all current requests on that lift
     },
+    accepted: true,
+    reason: null,
+  });
+}
 
-    openLiftPopup(liftId) {
-      var lift = this.lifts.find(l => l.id == liftId);
-      this.chatPopup.data = lift;
-      this.liftCodePopup.isOpen = false; // just to be sure
-      this.chatPopup.isOpen = true;
-    },
+function respondLiftRequest(eventObj) {
+  userStore.respondLiftRequest(eventObj);
+  userStore.getLiftRequests().then(() => {
+    alert('error at reloading after responding a lift request');
+  });
+  keyToBeIncremented.value++;
+}
 
-    openShortLiftInfo(liftId) {
-      var lift = this.lifts.find(l => l.id == liftId);
-      this.liftCodePopup.data = lift;
-      this.liftCodePopup.isOpen = true;
-    },
+function cancelRequest(liftId) {
+  // here will come the cancelling code
+  userStore.cancelRequest(liftId);
+}
 
-    finalize(reset) {
-      this.timer = setTimeout(() => {
-        reset();
-      }, 50);
-    },
+function closeLift() {
+  chatPopup.data.value = null;
+  chatPopup.isOpen.value = false;
+}
 
-    quickRespondLiftRequest(liftId, requestingUser, accepted) {
-      this.respondLiftRequest({
-        liftId: liftId,
-        user: {
-          id: requestingUser.id,
-          name: requestingUser.name,
-          surname: requestingUser.surname
-        },
-        accepted: accepted,
-        reason: null // no reason or futher information when doing quick response
-      });
-    },
-
-    acceptAllRequestsOfLift(liftId) {
-      this.respondLiftRequest({
-        liftId: liftId,
-        user: {
-          id: -1 // when transferring this as userId, API will affect changes to all current requests on that lift
-        },
-        accepted: true,
-        reason: null
-      });
-    },
-
-    respondLiftRequest(eventObj) {
-      this.$store.dispatch("auth/respondLiftRequest", eventObj);
-      this.$store.dispatch("auth/getLiftRequests", {
-        res: _ => {},
-        rej: _ => {
-          alert("error at reloading after responding a lift request");
-        }
-      });
-      this.keyToBeIncremented++;
-    },
-
-    cancelRequest(liftId) {
-      // here will come the cancelling code
-      this.$store.dispatch("auth/cancelRequest", liftId);
-    },
-
-    closeLift() {
-      this.chatPopup.data = null;
-      this.chatPopup.isOpen = false;
-    },
-
-    leave(event) {
-      this.closeLift();
-      this.$store.dispatch("auth/leaveLift", event);
-    }
-  },
-
-  mounted() {
-    this.$store.commit("setPage", {
-      name: "Fahrten"
-    });
-  }
-});
+function leave(event) {
+  closeLift();
+  userStore.leaveLift(event.liftId);
+}
 </script>

@@ -14,79 +14,54 @@
   </div>
 </template>
 
-<script>
-import { scroll } from "quasar";
+<script setup>
+import { useAppStore } from 'src/stores/app';
+import { sendApiRequest } from 'src/utils/ApiAccess';
+import { onMounted } from 'vue';
 
-import {
-  sendApiRequest,
-  PING,
-  SQL_GET_MARKETPLACE_OFFER,
-  TEST_PUSH,
-  NOTIFY_USERS_IN_LIFT
-} from "../ApiAccess";
+const appStore = useAppStore();
 
-export default {
-  components: {},
-  data() {
-    return {
-      lift: null,
-      name: "",
-      err: null
-    };
-  },
-  computed: {},
-  methods: {
-    go() {
-      var uid = "wG3cG4M7NFMJzJYcreFjLrJC9Q23";
-      uid += "a";
-      sendApiRequest(
-        TEST_PUSH,
-        {},
-        data => {},
-        err => {
-          throw err;
-        }
-      );
-    },
+let lift = null;
+let name = '';
+let err = null;
 
-    pushTest(code) {
-      var uid = "";
-      switch (code) {
-        case "Bernd":
-          uid = "wG3cG4M7NFMJzJYcreFjLrJC9Q23";
-          break;
-        case "Bernd2":
-          uid = "9V2F272TmUV6EMIl9bJHHZW5tPE2";
-          break;
-        case "Finn":
-          uid = "QTs2vuk6O0RHjr8uDyLBwb9DZ5G3";
-          break;
-      }
-      sendApiRequest(
-        TEST_PUSH,
-        {
-          receiverFbId: uid,
-          title: "Heyho",
-          message: "Von jemandem an " + code
-        },
-        _ => {},
-        _ => {}
-      );
-    },
+function go() {
+  var uid = 'wG3cG4M7NFMJzJYcreFjLrJC9Q23';
+  uid += 'a';
+  sendApiRequest(TEST_PUSH, {});
+}
 
-    notifyTest() {
-      sendApiRequest(NOTIFY_USERS_IN_LIFT, {
-        liftId: 51091511115776,
-        title: "Hey Leute",
-        message: "Bernd hat euch was zu sagen"
-      });
-    }
-  },
-
-  mounted() {
-    this.$store.commit("setPage", "Spielwiese");
+function pushTest(code) {
+  var uid = '';
+  switch (code) {
+    case 'Bernd':
+      uid = 'wG3cG4M7NFMJzJYcreFjLrJC9Q23';
+      break;
+    case 'Bernd2':
+      uid = '9V2F272TmUV6EMIl9bJHHZW5tPE2';
+      break;
+    case 'Finn':
+      uid = 'QTs2vuk6O0RHjr8uDyLBwb9DZ5G3';
+      break;
   }
-};
+  sendApiRequest(TEST_PUSH, {
+    receiverFbId: uid,
+    title: 'Heyho',
+    message: 'Von jemandem an ' + code,
+  });
+}
+
+function notifyTest() {
+  sendApiRequest(NOTIFY_USERS_IN_LIFT, {
+    liftId: 51091511115776,
+    title: 'Hey Leute',
+    message: 'Bernd hat euch was zu sagen',
+  });
+}
+
+onMounted(() => {
+  appStore.setPage({ name: 'Spielwiese'});
+});
 </script>
 
 <style lang="scss" scoped></style>

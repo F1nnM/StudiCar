@@ -1,170 +1,173 @@
 <template>
-  <!-- obviously I had to play around a lot to get it work pretty with MainLayout and Navbar
-Is not really a module/component by literal sense as it is very tight connected to MainLayout -->
-  <q-dialog
-    :model-value="modelValue"
-    @update:model-value="emit"
-    persistent
-    maximized
-    transition-show="slide-down"
-    transition-hide="slide-up"
-    class="bg-white"
-  >
-    <div>
-      <q-toolbar :shrink="false" class="bg-primary text-white">
-        <q-toolbar-title>StudiCar Code Scanner</q-toolbar-title>
-
-        <q-btn dense flat size="md" icon="close" @click="closeScanner">
-          <q-tooltip class="bg-white text-primary">Close</q-tooltip>
-        </q-btn>
-      </q-toolbar>
-      <div>
+  <!-- explaining by itself, had to play around a lot to get it work pretty with MainLayout and Navbar
+Is not really a module/component by nature as it is that hard connected to MainLayout -->
+  <div>
+    <div :class="'bg-primary scanner-container' + (open ? ' open' : '')">
+      <q-slide-transition>
         <div class="scanning-overlay">
           <qrcode-stream
-            :style="'transition .5s; opacity:' + (scannerReady ? 1 : 0)"
-            v-if="modelValue"
+            :style="
+              'height: 100vh; transition: .5s; opacity:' +
+              (scannerReady ? 1 : 0)
+            "
+            v-if="open"
             @init="onInit"
-            @decode="onDecode"
+            @decode="decoded"
             v-touch-swipe.mouse="swiped"
           >
+            <q-dialog
+              v-model="otherQR"
+              transition-show="jump-up"
+              transition-hide="jump-up"
+            >
+              <div class="text-no-wrap text-h5 q-pa-xl bg-black text-primary">
+                kein StudiCar Code
+              </div>
+            </q-dialog>
+            <div class="overlay-inner">
+              <p>
+                <b>StudiCar</b> Code
+                <!-- <q-btn round flat size="sm" icon="help_outline" @click="scannerHelp = true" /> -->
+              </p>
+              <p>
+                <small>Bitte halte dein Gerät ruhig</small>
+              </p>
+              <div></div>
+            </div>
           </qrcode-stream>
         </div>
-      </div>
+      </q-slide-transition>
+      <div v-if="!open" style="height: 100vh"></div>
+      <q-dialog v-model="scannerHelp">
+        <q-card>
+          <q-card-section class="row items-center q-pa-md">
+            <div class="text-h6">Hilfe zum Code</div>
+            <q-space />
+            <q-btn icon="close" flat round dense v-close-popup />
+          </q-card-section>
+
+          <q-card-section class="q-pa-md">
+            Der StudiCar Code kann benutzt werden, um Fahrtangebote zu teilen
+            oder andere Benutzerprofile anzusehen. Um einen Code zu erzeugen,
+            geh einfach in deinem Profil auf eine deiner Fahrten und tipp auf
+            das kleine Code-Symbol. Diesen Code kann dann ein anderer StudiCar
+            Benutzer scannen und sieht direkt den geteilten Inhalt.
+            <br />Du musst den Code übrigens nicht besonders genau platzieren.
+            Es reicht, wenn er vollständig im Bild und gut zu sehen ist.
+          </q-card-section>
+        </q-card>
+      </q-dialog>
     </div>
-  </q-dialog>
+  </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import {
-  QrcodeStream,
-  QrcodeDropZone,
-  QrcodeCapture,
-} from "vue3-qrcode-reader";
-
-export default defineComponent({
-  components: {
-    QrcodeStream,
+<script setup>
+const props = defineProps({
+  open: {
+    type: Boolean,
+    required: true,
   },
-  name: "QrScanner",
+});
+const { open } = toRefs(props);
 
-  props: {
-    modelValue: Boolean,
+let result = '';
+let otherQR = false;
+let error = '';
+let scannerReady = false;
+let scannerHelp = false;
+
+watch(
+  open,
+  (newValue, oldValue) => {
+    if (newValue == true && oldValue == false) scannerReady = false; // so that we always have fade animation on scanner init
   },
-  emits: ["swipe", "result", "update:model-value"],
+  { immediate: true }
+);
 
-  data() {
-    return {
-      result: "",
-      otherQR: false,
-      error: "",
-      scannerReady: false,
-      scannerHelp: false,
-    };
-  },
-  computed: {},
-  watch: {
-    modelValue: {
-      immediate: true,
-      handler(new_, old_) {
-        if (new_ == true && old_ == false) this.scannerReady = false; // so that we always have fade animation on scanner init
-      },
-    },
-  },
-  methods: {
-    emit() {
-      this.$emit("update:model-value", this.modelValue);
-    },
+function emit() {
+  $emit('input', open);
+}
 
-    closeScanner() {
-      this.$emit("update:model-value", false);
-    },
+async function onInit(promise) {
+  promise
+    .then((_) => {
+      scannerReady = true;
+    })
+    .catch((error) => {
+      scannerReady = false;
+      var errObj = ((_) => {
+        switch (error.name) {
+          case 'NotAllowedError':
+            return {
+              m: 'Zugriff blockiert',
+              c: 'Du hast StudiCar verboten, auf die Kamera zuzugreifen. Für dieses Problem haben wir im Support Lösungen bereitgestellt.',
+            };
+          case 'NotFoundError':
+            return {
+              m: 'Keine Kamera',
+              c: 'StudiCar konnte keine Kamera finden',
+            };
+          case 'NotSupportedError':
+            return {
+              m: 'Zertifikatsfehler',
+              c: 'Bitte melde dich beim Support, wenn das Problem weiterhin besteht',
+            };
+          case 'NotReadableError':
+            return {
+              m: 'Zugriff verweigert',
+              c: 'Deine Kamera wird im Moment von einem anderen Prozess verwendet',
+            };
+          case 'OverconstrainedError':
+            return {
+              m: 'Nicht kompatibel',
+              c: 'Deine Kamera scheint nicht kompatibel zu sein. Bitte schreibe dem Support dein Gerätemodell',
+            };
+          case 'StreamApiNotSupportedError':
+            return {
+              m: 'Stream API Fehler',
+              c: 'Dein Browser unterstützt die Stream API nicht. Probier es bitte mit einem anderen Browser',
+            };
+          default:
+            return {
+              m: 'Fehler aufgetreten',
+              c: error.toString(),
+            };
+        }
+      })();
 
-    async onInit(promise) {
-      promise
-        .then((_) => {
-          this.scannerReady = true;
-        })
-        .catch((error) => {
-          this.scannerReady = false;
-          var errObj = ((_) => {
-            switch (error.name) {
-              case "NotAllowedError":
-                return {
-                  m: "Zugriff blockiert",
-                  c: "Du hast StudiCar verboten, auf die Kamera zuzugreifen. Für dieses Problem haben wir im Support Lösungen bereitgestellt.",
-                };
-              case "NotFoundError":
-                return {
-                  m: "Keine Kamera",
-                  c: "StudiCar konnte keine Kamera finden",
-                };
-              case "NotSupportedError":
-                return {
-                  m: "Zertifikatsfehler",
-                  c: "Bitte melde dich beim Support, wenn das Problem weiterhin besteht",
-                };
-              case "NotReadableError":
-                return {
-                  m: "Zugriff verweigert",
-                  c: "Deine Kamera wird im Moment von einem anderen Prozess verwendet",
-                };
-              case "OverconstrainedError":
-                return {
-                  m: "Nicht kompatibel",
-                  c: "Deine Kamera scheint nicht kompatibel zu sein. Bitte schreibe dem Support dein Gerätemodell",
-                };
-              case "StreamApiNotSupportedError":
-                return {
-                  m: "Stream API Fehler",
-                  c: "Dein Browser unterstützt die Stream API nicht. Probier es bitte mit einem anderen Browser",
-                };
-              default:
-                return {
-                  m: "Fehler aufgetreten",
-                  c: error.toString(),
-                };
-            }
-          })();
+      errorMessage(errObj);
+      emit();
+    });
+}
+function errorMessage(errObj) {
+  $q.notify({
+    type: 'negative',
+    message: errObj.m,
+    caption: errObj.c || '', // when no caption set, empty string
+  });
+}
+function decoded(res) {
+  const type = res.slice(0, 1),
+    key = res.slice(1);
 
-          this.errorMessage(errObj);
-          this.emit();
-        });
-    },
+  if ('ul'.includes(type))
+    $emit('result', {
+      type: type,
+      res: key,
+    });
+  else {
+    otherQR = true;
+    setTimeout(() => {
+      otherQR = false;
+    }, 1500);
+  }
+}
+function swiped(info) {
+  $emit('swipe', info);
+}
 
-    errorMessage(errObj) {
-      this.$q.notify({
-        type: "negative",
-        message: errObj.m,
-        caption: errObj.c || "",
-      });
-    },
-
-    onDecode(res) {
-      const type = res.slice(0, 1),
-        key = res.slice(1);
-
-      if ("ul".includes(type))
-        this.$emit("result", {
-          type: type,
-          res: key,
-        });
-      else {
-        this.otherQR = true;
-        setTimeout(() => {
-          this.otherQR = false;
-        }, 1500);
-      }
-    },
-
-    swiped(info) {
-      this.$emit("swipe", info);
-    },
-  },
-
-  ready() {
-    this.scannerReady = false;
-  },
+onMounted(() => {
+  scannerReady = false;
 });
 </script>
 
@@ -172,7 +175,7 @@ export default defineComponent({
 .scanning {
   position: relative;
   &:after {
-    content: "";
+    content: '';
     position: absolute;
     top: 0%;
     left: 0;
@@ -194,7 +197,7 @@ export default defineComponent({
   height: 100%;
   width: 100%;
   &:after {
-    content: "";
+    content: '';
     position: absolute;
     width: 5px;
     height: 5px;
@@ -229,7 +232,7 @@ export default defineComponent({
   max-height: 0vh;
   position: relative;
   &:after {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
@@ -293,7 +296,7 @@ export default defineComponent({
       position: relative;
       &:after {
         position: absolute;
-        content: "";
+        content: '';
         bottom: 0;
         left: 0;
         display: block;

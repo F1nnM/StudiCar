@@ -7,29 +7,23 @@
     :offset="[10, 10]"
   >
     <div
-      :class="
-        `q-pa-sm tooltip-styling ${
-          transparent || rgba ? 'tooltip-transparent' : ''
-        } 
-      rounded-borders text-dark ${dark ? 'dark-mode' : ''}`
-      "
+      :class="`q-pa-sm tooltip-styling ${
+        transparent || rgba ? 'tooltip-transparent' : ''
+      } 
+      rounded-borders text-dark ${dark ? 'dark-mode' : ''}`"
     >
       <slot></slot>
     </div>
   </q-tooltip>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "Tooltip",
-  props: {
-    transparent: Boolean,
-    rgba: Boolean,
-    dark: Boolean
-  }
+<script setup>
+const props = defineProps({
+  transparent: Boolean,
+  rgba: Boolean,
+  dark: Boolean,
 });
+const { transparent, rgba, dark } = toRefs(props);
 </script>
 
 <style lang="scss" scoped>

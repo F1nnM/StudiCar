@@ -12,18 +12,13 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
+<script setup>
+import { useUserStore } from 'src/stores/user';
 
-export default defineComponent({
-  name: "SignOutButton",
-  methods: {
-    signOut() {
-      this.$store.dispatch("auth/signOut");
-    },
-  },
-});
+const userStore = useUserStore();
+function signOut() {
+  userStore.signOut();
+}
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

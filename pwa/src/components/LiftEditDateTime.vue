@@ -8,8 +8,8 @@
 
         <q-item-section>
           <q-btn-toggle
-            v-bind:model-value="modelValue.dateTab"
-            v-on:update:model-value="dateTabChanged($event)"
+            v-bind:value="value.dateTab"
+            v-on:input="dateTabChanged($event)"
             @click="setDateTab"
             no-caps
             rounded
@@ -28,15 +28,15 @@
             clickable
             @click="
               (_) => {
-                if (this.modelValue.dateTab == 'fix') $refs.datepicker.toggle();
+                if (value.dateTab == 'fix') $refs.datepicker.toggle();
                 else $refs.datepicker.showPopup();
               }
             "
             borderless
             readonly
-            :model-value="
-              modelValue.dateTab == 'fix'
-                ? modelValue.date || '- Datum -'
+            :value="
+              value.dateTab == 'fix'
+                ? value.date || '- Datum -'
                 : getWeekDayFromIndex
             "
           >
@@ -47,13 +47,12 @@
                 flat
                 @click="
                   (_) => {
-                    if (modelValue.dateTab == 'weekly')
-                      $refs.datepicker.showPopup();
+                    if (value.dateTab == 'weekly') $refs.datepicker.showPopup();
                   }
                 "
               >
                 <q-menu
-                  v-if="modelValue.dateTab == 'fix'"
+                  v-if="value.dateTab == 'fix'"
                   ref="datepicker"
                   transition-show="jump-down"
                   transition-hide="jump-up"
@@ -63,11 +62,11 @@
                     :subtitle="`Maximal 30 Tage im Voraus`"
                     event-color="primary"
                     mask="YYYY-MM-DD"
-                    v-bind:model-value="modelValue.date"
-                    v-on:update:model-value="dateChanged($event)"
+                    v-bind:value="value.date"
+                    v-on:input="dateChanged($event)"
                     :events="[todayString]"
                     :options="dateOptions"
-                    @update:model-value="$refs.datepicker.hide()"
+                    @input="$refs.datepicker.hide()"
                   />
                 </q-menu>
                 <q-select
@@ -78,8 +77,8 @@
                   label="Wochentag auswählen"
                   transition-show="jump-down"
                   transition-hide="jump-up"
-                  v-bind:model-value="modelValue.date"
-                  v-on:update:model-value="dateChanged($event)"
+                  v-bind:value="value.date"
+                  v-on:input="dateChanged($event)"
                   :options="getRepeatingDayOptions"
                 />
               </q-btn>
@@ -97,8 +96,8 @@
 
         <q-item-section>
           <q-btn-toggle
-            v-bind:model-value="modelValue.timeTab"
-            v-on:update:model-value="dateChanged($event)"
+            v-bind:value="value.timeTab"
+            v-on:input="dateChanged($event)"
             no-caps
             rounded
             unelevated
@@ -126,7 +125,7 @@
               readonly
               borderless
               square
-              :model-value="modelValue.time || '- Zeit -'"
+              :value="value.time || '- Zeit -'"
             >
               <template v-slot:append>
                 <q-btn icon="edit" color="grey-9" flat>
@@ -137,8 +136,8 @@
                   >
                     <q-time
                       format24h
-                      v-bind:model-value="modelValue.time"
-                      v-on:update:model-value="timeChanged($event)"
+                      v-bind:value="value.time"
+                      v-on:input="timeChanged($event)"
                       mask="HH:mm"
                       color="primary"
                     />
@@ -153,112 +152,87 @@
   </div>
 </template>
 
-<script>
-import { date } from "quasar";
-import Tooltip from "components/Tooltip";
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "LiftEditDateTime",
-  components: {
-    Tooltip,
-  },
-  props: {
-    modelValue: Object,
-  },
-  data() {
-    return {
-      localValue: this.modelValue,
-    };
-  },
-  watch: {
-    open: function (val) {},
-  },
-  computed: {
-    getWeekDayFromIndex() {
-      // getter for display while editing
-      var day = this.getRepeatingDayOptions.find(
-        (d) => d.value == this.modelValue.date
-      );
-      return day ? day.label : null;
-    },
-
-    todayString() {
-      return date.formatDate(new Date(), "YYYY/MM/DD");
-    },
-
-    getRepeatingDayOptions() {
-      return [
-        "Montag",
-        "Dienstag",
-        "Mittwoch",
-        "Donnerstag",
-        "Freitag",
-        "Samstag",
-      ].map((val, index) => ({
-        label: val,
-        value: index + 1,
-      }));
-    },
-
-    isDirectionValueCorrect() {
-      const l = this.modelValue;
-      return (
-        (l.destination == "home" && l.timeTab == "depart") ||
-        (l.destination == "school" && l.timeTab == "arrive")
-      );
-    },
-
-    arriveValue() {
-      return this.isDirectionValueCorrect ? "arrive" : "depart";
-    },
-
-    departValue() {
-      return this.isDirectionValueCorrect ? "depart" : "arrive";
-    },
-  },
-  methods: {
-    dateChanged($event) {
-      this.localValue.date = $event;
-      this.$emit("input", this.localValue);
-    },
-
-    dateTabChanged($event) {
-      this.localValue.dateTab = $event;
-      this.$emit("input", this.localValue);
-    },
-
-    timeChanged($event) {
-      this.localValue.time = $event;
-      this.$emit("input", this.localValue);
-    },
-
-    timeTabChanged($event) {
-      this.localValue.timeTab = $event;
-      this.$emit("input", this.localValue);
-    },
-
-    emit(val) {
-      this.$emit("input", val);
-    },
-
-    setDateTab() {
-      var tab = this.modelValue.dateTab;
-      if (tab == "weekly") this.localValue.date = 1;
-      // default on monday
-      else this.localValue.date = date.formatDate(new Date(), "YYYY-MM-DD");
-      this.$emit("input", this.localValue);
-    },
-
-    dateOptions(d) {
-      const limit = 30;
-
-      var a = date.getDateDiff(d, new Date(), "days");
-      a = a < limit && a >= 0;
-      return a;
-    },
-  },
+<script setup>
+const props = defineProps({
+  value: Object,
 });
+const { value } = toRefs(props);
+
+let localValue = toRef(props.value);
+
+const getWeekDayFromIndex = computed(() => {
+  // getter for display while editing
+  var day = getRepeatingDayOptions.find((d) => d.value == value.date);
+  return day ? day.label : null;
+});
+const todayString = computed(() => {
+  return date.formatDate(new Date(), 'YYYY/MM/DD');
+});
+const getRepeatingDayOptions = computed(() => {
+  return [
+    'Montag',
+    'Dienstag',
+    'Mittwoch',
+    'Donnerstag',
+    'Freitag',
+    'Samstag',
+  ].map((val, index) => ({
+    label: val,
+    value: index + 1,
+  }));
+});
+const isDirectionValueCorrect = computed(() => {
+  const l = value;
+  return (
+    (l.destination == 'home' && l.timeTab == 'depart') ||
+    (l.destination == 'school' && l.timeTab == 'arrive')
+  );
+});
+const arriveValue = computed(() => {
+  return isDirectionValueCorrect.value ? 'arrive' : 'depart';
+});
+const departValue = computed(() => {
+  return isDirectionValueCorrect.value ? 'depart' : 'arrive';
+});
+function dateChanged($event) {
+  localValue.date = $event;
+  $emit('input', localValue);
+}
+
+function dateTabChanged($event) {
+  localValue.dateTab = $event;
+  $emit('input', localValue);
+}
+
+function timeChanged($event) {
+  localValue.time = $event;
+  $emit('input', localValue);
+}
+
+function timeTabChanged($event) {
+  localValue.timeTab = $event;
+  $emit('input', localValue);
+}
+
+function emit(val) {
+  $emit('input', val);
+}
+
+function setDateTab() {
+  var tab = value.dateTab;
+  if (tab == 'weekly') localValue.date = 1;
+  // default on monday
+  else localValue.date = date.formatDate(new Date(), 'YYYY-MM-DD');
+  $emit('input', localValue);
+}
+
+function dateOptions(d) {
+  const limit = 30;
+
+  var a = date.getDateDiff(d, new Date(), 'days');
+  a = a < limit && a >= 0;
+  return a;
+}
 </script>
 
 <style lang="scss" scoped>
