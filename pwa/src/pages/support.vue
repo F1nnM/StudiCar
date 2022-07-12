@@ -242,7 +242,7 @@
               :key="v.id"
             >
               <q-expansion-item style="width: 80vw">
-                <template v-slot:header class="text-subtitle1 full-width">{{
+                <template v-slot:header>{{
                   v.title
                 }}</template>
                 <q-card>
@@ -371,8 +371,7 @@ function loadFAQ(res) {
           }, 100); // wait 100ms until rendered
         }
         res();
-      },
-      (error) => {}
+      }
     );
   }
 }

@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-import * as api from '../ApiAccess';
+import * as api from '../utils/ApiAccess';
 
 const result = ref([]);
 const err = ref(null);

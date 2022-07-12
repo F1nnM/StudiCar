@@ -43,7 +43,7 @@
     </div>
     <div v-else>
       <q-splitter v-model="splitterPos.current" disable>
-        <template v-slot:before class="relative-position">
+        <template v-slot:before>
           <!-- <q-btn
             class="absolute-position absolute-left absolute-top z-top "
             icon="keyboard_arrow_left"
@@ -61,7 +61,7 @@
                 :src="imageUrl"
                 class="other-user-image"
               >
-                <template v-slot:loading class="text-center relative">
+                <template v-slot:loading>
                   <div class="absolute-center">Bild wird geladen...</div>
                 </template>
                 <template v-slot:error>
