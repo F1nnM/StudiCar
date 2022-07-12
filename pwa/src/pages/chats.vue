@@ -114,7 +114,10 @@
                       />
                       <q-btn
                         @click="switchTab(true)"
-                        :disable="pendingRequestTab == userStore.user.liftRequests.length - 1"
+                        :disable="
+                          pendingRequestTab ==
+                          userStore.user.liftRequests.length - 1
+                        "
                         icon="keyboard_arrow_right"
                         dense
                         flat
@@ -263,23 +266,22 @@
 <script setup>
 const userStore = useUserStore();
 const appStore = useAppStore();
-let ownId = userStore.user.uid;
-let alreadyTappedOnItem = false;
-let liftTab = 'current';
-let pendingRequestTab = 0;
-let chatPopup = {
+
+const liftTab = ref('current');
+const pendingRequestTab = ref(0);
+const chatPopup = ref({
   isOpen: false,
   detailsOpen: false,
   data: null,
-};
-let liftCodePopup = {
+});
+const liftCodePopup = ref({
   isOpen: false,
   data: null,
-};
-let keyToBeIncremented = 0;
+});
+const keyToBeIncremented = ref(0);
 
 watch(liftTab, (newTab) => {
-  if (newTab == 'current') pendingRequestTab = 0; // fallback, because there are edge cases that hide incoming offers when this tab != 0
+  if (newTab == 'current') pendingRequestTab.value = 0; // fallback, because there are edge cases that hide incoming offers when this tab != 0
 });
 
 onMounted(() => {
@@ -399,10 +401,12 @@ const barStyle = computed(() => {
   };
 });
 const qrInput = computed(() => {
-  var data = liftCodePopup.data;
   return {
     type: 'lift',
-    data: (data ? data.id : '') + '#i' + ownId,
+    data:
+      (liftCodePopup.data.value ? liftCodePopup.data.id.value : '') +
+      '#i' +
+      userStore.user.uid,
   };
 });
 const totalRequests = computed(() => {
@@ -425,13 +429,12 @@ async function refreshContent(res, rej) {
 }
 
 function switchTab(right) {
-  var a = pendingRequestTab,
-    max = userStore.user.liftRequests.length - 1,
-    min = 0;
+  const max = userStore.user.liftRequests.length - 1;
+  constmin = 0;
   if (right) {
-    if (a < max) pendingRequestTab++;
+    if (pendingRequestTab.value < max) pendingRequestTab.value++;
   } else {
-    if (a > min) pendingRequestTab--;
+    if (pendingRequestTab.value > min) pendingRequestTab.value--;
   }
 }
 
@@ -508,27 +511,21 @@ function openTheLift(liftId) {
 }
 
 function openLiftWithDetails(liftId) {
-  chatPopup.detailsOpen = true;
+  chatPopup.detailsOpen.value = true;
   openLiftPopup(liftId);
 }
 
 function openLiftPopup(liftId) {
   var lift = userStore.user.chatLifts.find((l) => l.id == liftId);
-  chatPopup.data = lift;
-  liftCodePopup.isOpen = false; // just to be sure
-  chatPopup.isOpen = true;
+  chatPopup.data.value = lift;
+  liftCodePopup.isOpen.value = false; // just to be sure
+  chatPopup.isOpen.value = true;
 }
 
 function openShortLiftInfo(liftId) {
   var lift = userStore.user.chatLifts.find((l) => l.id == liftId);
-  liftCodePopup.data = lift;
-  liftCodePopup.isOpen = true;
-}
-
-function finalize(reset) {
-  timer = setTimeout(() => {
-    reset();
-  }, 50);
+  liftCodePopup.data.value = lift;
+  liftCodePopup.isOpen.value = true;
 }
 
 function quickRespondLiftRequest(liftId, requestingUser, accepted) {
@@ -560,7 +557,7 @@ function respondLiftRequest(eventObj) {
   userStore.getLiftRequests().then(() => {
     alert('error at reloading after responding a lift request');
   });
-  keyToBeIncremented++;
+  keyToBeIncremented.value++;
 }
 
 function cancelRequest(liftId) {
@@ -569,12 +566,12 @@ function cancelRequest(liftId) {
 }
 
 function closeLift() {
-  chatPopup.data = null;
-  chatPopup.isOpen = false;
+  chatPopup.data.value = null;
+  chatPopup.isOpen.value = false;
 }
 
 function leave(event) {
   closeLift();
-  userStore.leaveLift(event.liftId)
+  userStore.leaveLift(event.liftId);
 }
 </script>

@@ -17,9 +17,9 @@
 <script setup>
 import * as api from '../ApiAccess';
 
-let result = [];
-let err = null;
-let columns = [
+const result = ref([]);
+const err = ref(null);
+const columns = [
   {
     name: 'key',
     align: 'center',
@@ -31,24 +31,24 @@ let columns = [
 ];
 
 function call() {
-  result = [];
-  err = false; // simple reset
+  result.value = [];
+  err.value = false; // simple reset
   api.sendApiRequest(
     api.TEST_API,
     {},
     (data) => {
-      result = Object.entries(data).map(([key, value]) => ({
+      result.value = Object.entries(data).map(([key, value]) => ({
         key,
         value,
       }));
       // taken from https://stackoverflow.com/questions/36411566/how-to-transpose-a-javascript-object-into-a-key-value-array
     },
-    (err) => {
-      result = Object.entries(data).map(([key, value]) => ({
+    (err_data) => {
+      result.value = Object.entries(err_data).map(([key, value]) => ({
         key,
         value,
       }));
-      err = true;
+      err.value = true;
     }
   );
 }

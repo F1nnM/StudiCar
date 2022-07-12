@@ -166,24 +166,23 @@
 <script setup>
 import { onMounted } from 'vue';
 
-let filter = {
+const filter = ref({
   visibility: {
     label: 'Alle anzeigen',
     value: 'all',
   }, // show all questions by default
   notAnswered: true, // show only already answered questions by default
-};
-let catTab = 'bedienung';
-let loading = 1;
-let updatedQuestion = {
+});
+const catTab = ref('bedienung');
+const updatedQuestion = ref({
   answer: '',
   instantPublish: false,
-};
-let faq = {
+});
+const faq = ref({
   bedienung: [],
   sonstiges: [],
-};
-let filterOptions = [
+});
+const filterOptions = ref([
   {
     label: 'Nur bereits veröffentlichte',
     value: 'published',
@@ -196,12 +195,12 @@ let filterOptions = [
     label: 'Alle anzeigen',
     value: 'all',
   },
-];
+]);
 
 const getCurrentList = computed(() => {
-  return faq[catTab].filter((e) => {
+  return faq[catTab.value].value.filter((e) => {
     var ok1 = () => {
-      switch (filter.visibility.value) {
+      switch (filter.value.visibility.value) {
         case 'all':
           return true;
           break;
@@ -214,7 +213,7 @@ const getCurrentList = computed(() => {
       }
     };
     var ok2 = () => {
-      if (filter.notAnswered) return !e.answer;
+      if (filter.value.notAnswered) return !e.answer;
       return true;
     };
 
@@ -235,8 +234,8 @@ function showHideQuestion(id, isPublic) {
       },
       mode: 2, // special mode, just invert public value
     },
-    (data) => {
-      var index = faq[catTab].map((el) => {
+    () => {
+      faq[catTab.value].value.map((el) => {
         if (el.id != id) return el;
         else
           return Object.assign(el, {
@@ -257,20 +256,20 @@ function updateQuestion(id) {
     {
       data: {
         id: id,
-        answer: updatedQuestion.answer,
-        instantPublish: updatedQuestion.instantPublish,
+        answer: updatedQuestion.value.answer,
+        instantPublish: updatedQuestion.value.instantPublish,
         orgaId: 1,
       },
       mode: 1, // normal mode, just update question
     },
     (data) => {
-      var index = faq[catTab].map((el) => {
+      var index = faq[catTab.value].value.map((el) => {
         if (el.id != id) return el;
         else
           return Object.assign(el, {
             // just merging the new and the old object (and additional changing time to current)
-            answer: updatedQuestion.answer,
-            isPublic: updatedQuestion.instantPublish,
+            answer: updatedQuestion.value.answer,
+            isPublic: updatedQuestion.value.instantPublish,
             orgaId: 1,
             lastChange: Date.now(),
           });
@@ -286,11 +285,9 @@ onMounted(() => {
     (faq_) => {
       //everything fine
       faq = faq_;
-      loading = 2;
     },
     (err) => {
       alert(err);
-      loading = -1;
     }
   );
 });
