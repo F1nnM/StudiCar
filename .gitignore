@@ -4,3 +4,5 @@ studicar.sql
 .vscode/settings.json
 referencepwa
 pwa_old
+**/*.key
+**/*.pem
