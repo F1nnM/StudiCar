@@ -460,6 +460,11 @@
 </template>
 
 <script setup>
+import { useQuasar } from 'quasar'
+
+const $q = useQuasar()
+defineExpose({ $q })
+
 import { useAppStore } from 'src/stores/app';
 import { useUserStore } from 'src/stores/user';
 import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from 'src/utils/ApiAccess';
@@ -472,31 +477,31 @@ const { username } = toRefs(props);
 const userStore = useUserStore();
 const appStore = useAppStore();
 
-let ppPath = '';
-let openUpload = false;
-let shareProfileQR = false;
-let friendInfoData = null;
-let statsFriendsTab = 'stats';
-let statsTimeTab = 'current';
-let file = null;
-let newPPictureBase64 = '';
-let friendsPage = 0;
-let uploadingProfilePicture = false;
-let prefExpanded = false;
+const ppPath = ref('');
+const openUpload = ref(false);
+const shareProfileQR = ref(false);
+const friendInfoData = ref(null);
+const statsFriendsTab = ref('stats');
+const statsTimeTab = ref('current');
+const file = ref(null);
+const newPPictureBase64 = ref('');
+const friendsPage = ref(0);
+const uploadingProfilePicture = ref(false);
+const prefExpanded = ref(false);
 
-let openEditPrefs = false; // prefs settings
-let openEditPrefsTab = 'talk';
-let newPrefs = {
+const openEditPrefs = ref(false); // prefs settings
+const openEditPrefsTab = ref('talk');
+const newPrefs = ref({
   talk: '',
   talkMorning: '',
   smoking: '',
   music: '',
-};
-let prefsDocu = appStore.prefsDocu;
-let imageForColors = null;
+});
+const prefsDocu = ref(appStore.prefsDocu);
+const imageForColors = ref(null);
 
-let openEditDescription = false;
-let newDescription = '';
+const openEditDescription = ref(false);
+const newDescription = ref('');
 
 function loadFile(file) {
   file = file;
@@ -546,7 +551,7 @@ function uploadProfilePicture() {
         imageData: newPPictureBase64,
       },
       () => {
-        ppPath += '&timestamp=' + Date.now();
+        ppPath.value += '&timestamp=' + Date.now();
         openUpload = false;
         file = null;
         newPPictureBase64 = '';
@@ -572,7 +577,7 @@ function resetPP() {
       SQL_RESET_PROFILE_PICTURE,
       {},
       () => {
-        ppPath += '&timestamp=' + Date.now();
+        ppPath.value += '&timestamp=' + Date.now();
         openUpload = false;
         uploadingProfilePicture = false;
       },
@@ -716,7 +721,7 @@ onMounted(() => {
   buildGetRequestUrl(GET_USER_PROFILE_PIC, {
     fbid: userStore.user.uid,
   }).then((url) => {
-    ppPath = url;
+    ppPath.value = url;
   });
 });
 </script>

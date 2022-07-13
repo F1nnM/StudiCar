@@ -264,6 +264,11 @@
 </template>
 
 <script setup>
+import { useUserStore } from 'src/stores/user';
+import { useAppStore } from 'src/stores/app';
+
+import { date } from 'quasar';
+
 const userStore = useUserStore();
 const appStore = useAppStore();
 
@@ -319,7 +324,7 @@ const lastMessages = computed(() => {
 const recentChats = computed(() => {
   const now = new Date();
   const dayLimit = 14;
-  return lastMessages.filter((m) => {
+  return lastMessages.value.filter((m) => {
     return false == isOverLimit(m.timestamp, now, dayLimit);
   });
 
@@ -331,7 +336,7 @@ const recentChats = computed(() => {
 const olderChats = computed(() => {
   const now = new Date();
   const dayLimit = 14;
-  return lastMessages.filter((m) => {
+  return lastMessages.value.filter((m) => {
     return true == isOverLimit(m.timestamp, now, dayLimit);
   });
 
@@ -377,7 +382,7 @@ const bigTabOptions = computed(() => {
   ];
 });
 const bigTabOptionsWithoutLabel = computed(() => {
-  return JSON.parse(JSON.stringify(bigTabOptions)).map((item) => {
+  return JSON.parse(JSON.stringify(bigTabOptions.value)).map((item) => {
     delete item.label;
     return item;
   });
@@ -404,7 +409,7 @@ const qrInput = computed(() => {
   return {
     type: 'lift',
     data:
-      (liftCodePopup.data.value ? liftCodePopup.data.id.value : '') +
+      (liftCodePopup.value.data ? liftCodePopup.value.data.id : '') +
       '#i' +
       userStore.user.uid,
   };

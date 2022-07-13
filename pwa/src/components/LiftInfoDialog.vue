@@ -276,6 +276,11 @@ import { useUserStore } from 'src/stores/user';
 import { buildGetRequestUrl, GET_USER_PROFILE_PIC } from 'src/utils/ApiAccess';
 import { onMounted } from 'vue';
 
+import { useQuasar } from 'quasar'
+
+const $q = useQuasar()
+defineExpose({ $q })
+
 const props = defineProps({
   value: Boolean,
   lift: Object,

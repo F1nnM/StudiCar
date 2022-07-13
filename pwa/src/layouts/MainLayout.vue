@@ -135,7 +135,7 @@
           />
         </div>
       </q-list>
-      <ExtendedHr color="grey-7" size="xs" />
+      <ExtHr color="grey-7" size="xs" />
       <div class="q-pa-md text-grey-7 row justify-between">
         <span>
           StudiCar

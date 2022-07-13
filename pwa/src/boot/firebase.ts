@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { boot } from 'quasar/wrappers';
+import { useAppStore } from 'src/stores/app';
 import { useUserStore } from 'src/stores/user';
 import { setUpPush } from 'src/utils/MessagingHelper';
 
@@ -18,12 +19,20 @@ export default boot(({ router, store }) => {
 
   // Register the Firebase authentication listener
   const userStore = useUserStore(store);
+  const appStore = useAppStore(store);
   onAuthStateChanged(getAuth(), (user) => {
     if (user) {
-      if (userStore.loggedIn) router.replace({ name: 'marketplace' });
+      if (userStore.loggedIn)
+        if (appStore.nextPage) {
+          router.replace({ path: appStore.nextPage });
+          appStore.resetWantedPage();
+        } else router.replace({ name: 'marketplace' });
       else {
         userStore.loadDataFromSignedInUser(user.uid).then(() => {
-          router.replace({ name: 'marketplace' });
+          if (appStore.nextPage) {
+            router.replace({ path: appStore.nextPage });
+            appStore.resetWantedPage();
+          } else router.replace({ name: 'marketplace' });
           setUpPush(user.uid);
         });
       }

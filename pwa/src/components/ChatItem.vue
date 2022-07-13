@@ -62,6 +62,12 @@
 </template>
 
 <script setup>
+import { date } from 'quasar';
+import { useQuasar } from 'quasar'
+
+const $q = useQuasar()
+defineExpose({ $q })
+
 const props = defineProps({
   message: {
     type: Object,

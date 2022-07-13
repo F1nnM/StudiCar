@@ -542,6 +542,7 @@
 
 <script setup>
 import { useUserStore } from 'src/stores/user';
+import { useAppStore } from 'src/stores/app';
 
 const maxDaysAhead = 30;
 const lift = ref({
@@ -597,7 +598,7 @@ const allAddresses = computed(() => {
 });
 
 const hasOwnAddresses = computed(() => {
-  return allAddresses.filter((item) => item.id > 3).length > 0;
+  return allAddresses.value.filter((item) => item.id > 3).length > 0;
 });
 
 const hasOwnCars = computed(() => {

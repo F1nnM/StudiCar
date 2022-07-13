@@ -480,19 +480,19 @@ const filtersActive = computed(() => {
 });
 
 const getSortedOffers = computed(() => {
-  var offers = getFilteredOffers;
-
+  var offers = getFilteredOffers.value;
+  console.log(offers)
   // here comes the sorting code
 
   if (sort != {}) {
     switch (sort.val) {
       case 'distance':
-        offers.value.sort((a, b) => {
+        offers.sort((a, b) => {
           return a.distance - b.distance;
         });
         break;
       case 'seats':
-        offers.value.sort((a, b) => {
+        offers.sort((a, b) => {
           if (a.seatsOccupied == b.seatsOccupied)
             return b.seatsOffered - a.seatsOffered;
           // when same seats, then descending to avaiable seats
@@ -535,7 +535,7 @@ const getSortedOffers = computed(() => {
         // API not implemented yet
         break;
       case 'timeDiff':
-        offers.value.sort((a, b) => {
+        offers.sort((a, b) => {
           var aTime =
               a.date +
               ' ' +

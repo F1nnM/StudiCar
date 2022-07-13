@@ -548,6 +548,11 @@
 </template>
 
 <script setup>
+import { useQuasar } from 'quasar'
+
+const $q = useQuasar()
+defineExpose({ $q })
+
 import { useAppStore } from 'src/stores/app';
 import { useUserStore } from 'src/stores/user';
 

@@ -19,7 +19,7 @@ export const useAppStore = defineStore('app', {
       supportData: null,
       info: null,
       scroll: 0,
-      nextPage: '',
+      nextPage: null,
       oldVersionRunning: false,
       settings: {
         askAgainWhenAppreciatingNewPassenger: true,
@@ -139,7 +139,7 @@ export const useAppStore = defineStore('app', {
     },
 
     resetWantedPage() {
-      this.nextPage = '';
+      this.nextPage = null;
     },
 
     setDataSaver(value: boolean) {

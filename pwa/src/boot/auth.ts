@@ -1,4 +1,5 @@
 import { boot } from 'quasar/wrappers'
+import { useAppStore } from 'src/stores/app'
 import { useUserStore } from 'src/stores/user'
 
 export default boot(({ router, store }) => {
@@ -7,14 +8,15 @@ export default boot(({ router, store }) => {
     const authRequired = to.matched.some(route => route.meta.requiresAuth)
 
     const userStore = useUserStore(store)
+    const appStore = useAppStore(store)
 
     if (authRequired) {
-      console.log(userStore.loggedIn)
       if (userStore.loggedIn) {
         // User is already signed in. Continue on.
        next()
       } else {
         // Not signed in. Redirect to login page.
+        appStore.setWantedPage(to.path)
         next({
           name: 'signIn'
         })

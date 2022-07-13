@@ -164,6 +164,7 @@
 
 <script setup>
 import { useUserStore } from 'src/stores/user';
+import { useAppStore } from 'src/stores/app';
 
 let email = '';
 let password = '';
@@ -176,6 +177,7 @@ let agbTab = 'agb';
 let step = 1;
 
 const userStore = useUserStore();
+const appStore = useAppStore();
 
 const $router = useRouter();
 
@@ -199,7 +201,10 @@ function onSubmit() {
   userStore
     .registerWithEmail(email, password, name, surname)
     .then((user) => {
-      $router.replace({ name: 'marketplace' });
+      if (appStore.nextPage) {
+        $router.replace({ path: appStore.nextPage });
+        appStore.resetWantedPage();
+      } else $router.replace({ name: 'marketplace' });
     })
     .catch((error) => {
       $q.notify('Invalid Login!');
