@@ -7,10 +7,8 @@ module.exports = [
   "Rosen sind rot, Uni verpennt, Geld kommt trotzdem - Dualer Student",
   "Da schreibe ich ein halbes Jahr mit ihm und plötzlich kommt nichts mehr. Irgendwelche Tipps, oder soll ich mir direkt einen neuen Kuli kaufen?",
   "Was haben der Duale Student und Kohlensäure gemeinsam? Sie steigen beide aus der Limo.",
-  "Kohlensäure gemeinsam? Sie steigen beide aus der Limo.",
   "Ich sorge für eine hohe Durchfallquote - Manfred, 55, Mensakoch",
-  "Was macht die Uni?" -
-    "Nichts macht die Uni, ich muss alles selber machen ...",
+  "\"Was macht die Uni?\" - \"Nichts macht die Uni, ich muss alles selber machen ...",
   'Die schönsten Worte sind nicht "Ich liebe dich" sondern "nicht klausurrelevant"',
   "Der Unterschied zwischen Theorie und Praxis ist Vergleichbar mit Einkaufszettel und Kassenbon",
   "Du bist Student, wenn es dich beruhigt, dass dein Freund auch noch nicht angefangen hat zu lernen. 2 Tage vor der Klausur",

@@ -3,13 +3,13 @@
   <div>
     <q-img
       v-if="true"
-      :src="randomImage.value"
+      :src="randomImage"
       style="height: 35vh"
       class="text-white"
     >
       <div class="row full-width q-pa-md">
         <div class="text-h6 col-10 text-weight-light">{{ greetingFull }}</div>
-        <q-icon size="sm" class="col-2" :name="greetingIcon.value" />
+        <q-icon size="sm" class="col-2" :name="greetingIcon" />
       </div>
       <div
         v-if="caption && appStore.settings.enablePostillonNewsFeed"
@@ -38,29 +38,44 @@ const { caption } = toRefs(props);
 
 const appStore = useAppStore();
 
-const randomImage = computed(async () => {
-  var morningMax = 8;
-  var dayMax = 14;
-  var eveningMax = 13; // currently hard coded, could be optimized by automatically reading all files from dir
-  var error = false;
+const morningMax = 8;
+const dayMax = 14;
+const eveningMax = 13;
+const images = computed(() => {
+  let images = { morning: [], day: [], evening: [], error: null };
+  for (let i = 0; i < morningMax; i++) {
+    images.morning.push(`/drawer_images/morning/m${i}.jpg`);
+  }
+  for (let i = 0; i < dayMax; i++) {
+    images.day.push(`/drawer_images/day/d${i}.jpg`);
+  }
+  for (let i = 0; i < eveningMax; i++) {
+    images.evening.push(`/drawer_images/evening/e${i}.jpg`);
+  }
+  images.error = '/drawer_images/sad.svg';
+  return images;
+});
 
-  var imgPath;
-
+const random = Math.random();
+const randomImage = computed(() => {
+  let image;
+  let error = false;
+  console.log(images.value);
   switch (appStore.greeting) {
     case 'Guten Morgen':
-      imgPath = 'morning/m' + Math.floor(Math.random() * morningMax);
+      image = images.value.morning[Math.floor(random * morningMax)];
       break;
     case 'Willkommen':
-      imgPath = 'day/d' + Math.floor(Math.random() * dayMax);
+      image = images.value.day[Math.floor(random * dayMax)];
       break;
     case 'Guten Abend':
-      imgPath = 'evening/e' + Math.floor(Math.random() * eveningMax);
+      image = images.value.evening[Math.floor(random * eveningMax)];
       break;
     default:
       error = true;
   }
-  if (error) return import('../assets/sad.svg');
-  else return import('../assets/drawer_images/' + imgPath + '.jpg');
+  if (error) return images.error;
+  else return image;
 });
 
 const userStore = useUserStore();
@@ -69,7 +84,7 @@ const greetingFull = computed(() => {
   return appStore.greeting + ', ' + userStore.user.name.split(' ')[0];
 });
 
-const greetingIcon = () => {
+const greetingIcon = computed(() => {
   switch (appStore.greeting) {
     case 'Guten Abend':
       return 'nights_stay';
@@ -83,5 +98,5 @@ const greetingIcon = () => {
     default:
       return 'report_problem';
   }
-};
+});
 </script>
