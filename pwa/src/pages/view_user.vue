@@ -646,8 +646,8 @@ async function initLoad() {
   splitterPos.current = splitterPos.normal;
 
   return new Promise((res, rej) => {
-    sendApiRequest(
-      SQL_GET_USER_DATA,
+    api.sendApiRequest(
+      api.SQL_GET_USER_DATA,
       {
         fbid: otherFbId,
         secretFbId: '/°', // I hope nobody will ever have this secretFbId, cause then our server is gonna crash

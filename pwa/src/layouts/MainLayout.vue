@@ -247,10 +247,6 @@
 <script setup>
 import { useAppStore } from 'src/stores/app';
 import { useUserStore } from 'src/stores/user';
-import {
-  sendApiRequest,
-  GET_NEWSTICKER,
-} from '../utils/ApiAccess';
 
 const userStore = useUserStore();
 const appStore = useAppStore();
@@ -498,7 +494,7 @@ let scannerHelpNeeded = () => {
 };
 
 let reloadNews = () => {
-  sendApiRequest(GET_NEWSTICKER, {})
+  api.sendApiRequest(api.GET_NEWSTICKER, {})
     .then((data) => {
       newsticker.value = data.ticker;
     })

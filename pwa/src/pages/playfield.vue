@@ -16,7 +16,6 @@
 
 <script setup>
 import { useAppStore } from 'src/stores/app';
-import { sendApiRequest } from 'src/utils/ApiAccess';
 import { onMounted } from 'vue';
 
 const appStore = useAppStore();
@@ -28,7 +27,7 @@ let err = null;
 function go() {
   var uid = 'wG3cG4M7NFMJzJYcreFjLrJC9Q23';
   uid += 'a';
-  sendApiRequest(TEST_PUSH, {});
+  api.sendApiRequest(api.TEST_PUSH, {});
 }
 
 function pushTest(code) {
@@ -44,7 +43,7 @@ function pushTest(code) {
       uid = 'QTs2vuk6O0RHjr8uDyLBwb9DZ5G3';
       break;
   }
-  sendApiRequest(TEST_PUSH, {
+  api.sendApiRequest(api.TEST_PUSH, {
     receiverFbId: uid,
     title: 'Heyho',
     message: 'Von jemandem an ' + code,
@@ -52,7 +51,7 @@ function pushTest(code) {
 }
 
 function notifyTest() {
-  sendApiRequest(NOTIFY_USERS_IN_LIFT, {
+  api.sendApiRequest(api.NOTIFY_USERS_IN_LIFT, {
     liftId: 51091511115776,
     title: 'Hey Leute',
     message: 'Bernd hat euch was zu sagen',

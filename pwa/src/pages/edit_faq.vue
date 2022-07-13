@@ -225,8 +225,8 @@ function formatDateForLastChange(dateObj) {
   return date.formatDate(dateObj, 'DD.MM., H:mm') + ' Uhr';
 }
 function showHideQuestion(id, isPublic) {
-  sendApiRequest(
-    SQL_UPDATE_FAQ_QUESTION,
+  api.sendApiRequest(
+    api.SQL_UPDATE_FAQ_QUESTION,
     {
       data: {
         newValue: !isPublic,
@@ -251,8 +251,8 @@ function showHideQuestion(id, isPublic) {
   );
 }
 function updateQuestion(id) {
-  sendApiRequest(
-    SQL_UPDATE_FAQ_QUESTION,
+  api.sendApiRequest(
+    api.SQL_UPDATE_FAQ_QUESTION,
     {
       data: {
         id: id,
@@ -279,8 +279,8 @@ function updateQuestion(id) {
 }
 
 onMounted(() => {
-  sendApiRequest(
-    SQL_GET_ALL_FAQ,
+  api.sendApiRequest(
+    api.SQL_GET_ALL_FAQ,
     {},
     (faq_) => {
       //everything fine

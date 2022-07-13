@@ -311,8 +311,8 @@ function refreshContent(res) {
 
 function sendQuestion() {
   sendProgress = 1;
-  sendApiRequest(
-    SQL_ADD_QUESTION,
+  api.sendApiRequest(
+    api.SQL_ADD_QUESTION,
     {
       question: question,
       category: category.label,
@@ -329,8 +329,8 @@ function sendQuestion() {
 function loadFAQ(res) {
   if (tab == 'faq' && (!appStore.supportData || res)) {
     // when res give, then force and use it as resolver
-    sendApiRequest(
-      SQL_GET_SUPPORT_DATA,
+    api.sendApiRequest(
+      api.SQL_GET_SUPPORT_DATA,
       {},
       (data) => {
         data.faq.forEach((item) => {

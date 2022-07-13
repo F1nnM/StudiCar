@@ -194,7 +194,7 @@ const dialogOpen = computed({
 });
 
 async function refreshContent(res, rej) {
-  sendApiRequest(SQL_GET_TEAM, {}, (data) => {
+  api.sendApiRequest(api.SQL_GET_TEAM, {}, (data) => {
     appStore.setInfo(data);
     info = data;
 
@@ -209,8 +209,8 @@ onMounted(() => {
   });
 
   if (!appStore.info) {
-    sendApiRequest(
-      SQL_GET_TEAM,
+    api.sendApiRequest(
+      api.SQL_GET_TEAM,
       {},
       (data) => {
         appStore.setInfo(data);

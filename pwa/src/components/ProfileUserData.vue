@@ -256,10 +256,13 @@
               <div v-if="file" class="row full-width">
                 <!-- and this area will be shown when not no image has been selected yet -->
                 <div class="col-8 text-center">
-                  <canvas
-                    id="newImage"
+                  <div
+                    :width="newImageWidth"
+                    :height="newImageHeight"
+                    ref="newimage"
                     class="shadow-11 rounded-borders"
-                    style="object-fit: contain; max-height: 20vh"
+                    style="object-fit: contain; max-height: 20vh; background-image: url('{{ newPPictureBase64 }}'); background-size: cover; background-position: center;"
+
                   />
                 </div>
                 <div class="col-4">
@@ -503,49 +506,40 @@ const imageForColors = ref(null);
 const openEditDescription = ref(false);
 const newDescription = ref('');
 
+const newImageHeight = ref(null)
+const newImageWidth = ref(null)
+const newimage = ref(null)
+
 function loadFile(event) {
-  const file = event.target.files[0];
+  file.value = event.target.files[0];
   const size = 300; // represents the height
   const ratio = 1; // default ratio at profile pictures
 
   const width = size * ratio;
   const reader = new FileReader();
   reader.onerror = (error) => console.log(error);
-  reader.readAsDataURL(file);
-  reader.onload = (event) => {
+  reader.onloadend = () => {
     var img = new Image();
-    img.src = event.target.result;
+    img.src = reader.result;
 
-    (img.onload = () => {
-      const elem = document.getElementById('newImage');
-      elem.width = width;
-      elem.height = size;
-
-      const ctx = elem.getContext('2d');
-      if (img.width >= img.height) {
-        // landscape or square: width has to be cropped
-        var scale = img.height / size,
-          indent = (img.width - img.height) / scale; // indent has to be half of the difference and negative, additionally divided by scale
-        ctx.drawImage(img, indent / -2, 0, width + indent, size);
-      } else {
-        // portrait
-        var scale = img.width / size,
-          indent = (img.height - img.width) / scale; // indent has to be half of the difference and negative, additionally divided by scale
-        ctx.drawImage(img, 0, indent / -2, width, size + indent);
-      }
-      newPPictureBase64 = elem.toDataURL();
-    }),
-      (reader.onerror = (error) => {
+    img.onload = () => {
+      newImageHeight.value = img.height;
+      newImageWidth.value = img.width;
+      newPPictureBase64.value = reader.result;
+    }
+  }
+  reader.onerror = (error) => {
         alert(error);
-      });
-  };
+      }
+  reader.readAsDataURL(file.value);
+ 
 }
 
 function uploadProfilePicture() {
   if (newPPictureBase64) {
-    uploadingProfilePicture = true;
-    sendApiRequest(
-      SQL_UPDATE_PROFILE_PICTURE,
+    uploadingProfilePicture.value = true;
+    api.sendApiRequest(
+      api.SQL_UPDATE_PROFILE_PICTURE,
       {
         imageData: newPPictureBase64,
       },
@@ -572,8 +566,8 @@ function resetPP() {
     persistent: true,
   }).onOk(() => {
     uploadingProfilePicture = true;
-    sendApiRequest(
-      SQL_RESET_PROFILE_PICTURE,
+    api.sendApiRequest(
+      api.SQL_RESET_PROFILE_PICTURE,
       {},
       () => {
         ppPath.value += '&timestamp=' + Date.now();

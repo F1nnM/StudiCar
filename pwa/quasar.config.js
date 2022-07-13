@@ -108,7 +108,12 @@ module.exports = configure(function (/* ctx */) {
               'vue-router',
               'pinia',
               //'@vueuse/core',
-              'quasar'
+              'quasar',
+              {
+                'src/utils/ApiAccess': [
+                  ['*', 'api']
+                ]
+              }
             ],
           },
         ],

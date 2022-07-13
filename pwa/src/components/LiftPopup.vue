@@ -910,8 +910,8 @@ async function sendMessage(type, blob) {
 }
 
 async function loadMedia(uuid) {
-  sendApiRequest(
-    SQL_LOAD_MESSAGE_MEDIA,
+  api.sendApiRequest(
+    api.SQL_LOAD_MESSAGE_MEDIA,
     {
       uuid: uuid,
     },

@@ -58,8 +58,8 @@ function getContent(force) {
   } else {
     loaded = false;
     $refs.text_anchor.innerHTML = '';
-    sendApiRequest(
-      GET_LEGAL,
+    api.sendApiRequest(
+      api.GET_LEGAL,
       {
         view: view,
       },

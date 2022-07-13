@@ -594,8 +594,8 @@ const newAddressFilled = computed(() => {
 });
 
 onMounted(() => {
-  sendApiRequest(
-    GET_CAR_MODELS,
+  api.sendApiRequest(
+    api.GET_CAR_MODELS,
     {},
     (data) => {
       newCarOptions = data;

@@ -178,8 +178,8 @@ function refresh() {
 }
 
 function callServer() {
-  sendApiRequest(
-    SQL_GET_MARKETPLACE_OFFER,
+  api.sendApiRequest(
+    api.SQL_GET_MARKETPLACE_OFFER,
     {
       uuid: liftId, // a uuid, is as a longer and more secure liftId
       invitingUserId: invitingUserId,
