@@ -242,7 +242,7 @@
             @closeLift="closeLift"
             @closeAndLeave="leave"
           />
-          <QrGen
+          <QrGenerator
             position="bottom"
             v-model="liftCodePopup.isOpen"
             linearProgress
@@ -252,7 +252,7 @@
             {{ liftCodePopup.data ? liftCodePopup.data.start.name : '' }}
             <span class="q-mx-xs">›</span>
             {{ liftCodePopup.data ? liftCodePopup.data.destination.name : '' }}
-          </QrGen>
+          </QrGenerator>
         </div>
         <div v-else class="text-caption">
           Du nimmst noch an keinen Fahrten teil. Frage auf dem Marktplatz bei

@@ -44,7 +44,7 @@
         class="color-preview rounded-bottom-borders col-xs-4"
         :style="`background-color: ${colorPicker.color}`"
       >
-        <q-img v-if="imageSrc" :src="imageSrcFromJS" />
+        <q-img v-if="imageSrc" src="assets/app-icon_color_preview.png" />
         <div style="background: transparent" class="dotted-border"></div>
         <!-- when no src given or src not valid, preview field will span entire height -->
       </div>
@@ -53,10 +53,6 @@
 </template>
 
 <script setup>
-const props = defineProps({
-  imageSrc: String,
-});
-const { imageSrc } = toRefs(props);
 
 let colorPicker = {
   tab: 'field',
@@ -67,9 +63,6 @@ function emit() {
   $emit('input', colorPicker.color);
 }
 
-const imageSrcFromJS = computed(() => {
-  return import('../assets/' + imageSrc);
-});
 </script>
 
 <style lang="scss" scoped>

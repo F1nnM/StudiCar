@@ -340,7 +340,6 @@
             Anhand der Autofarbe können andere Nutzer dein Auto besser erkennen
           </div>
           <ImageColorPicker
-            imageSrc="app-icon_color_preview.png"
             v-model="newCar.color"
           />
         </q-step>

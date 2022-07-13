@@ -36,7 +36,7 @@
                   "
                 >
                   <div class="pan-anchor"></div>
-                  <VueQrcode
+                  <vue-qrcode
                     v-touch-swipe.mouse.left="setDataTabToRaw"
                     style="border: 1px solid black"
                     class="rounded-borders"
@@ -215,6 +215,8 @@
 </template>
 
 <script setup>
+import VueQrcode from '@chenfengyuan/vue-qrcode'
+
 const props = defineProps({
   input: {
     type: Object,
@@ -239,8 +241,10 @@ const {
   position,
 } = toRefs(props);
 
+import { getCssVar } from 'quasar';
+
 let color = {
-  dark: primColor ? colors.getBrand('primary') : '#000000FF',
+  dark: primColor ? getCssVar('primary') : '#000000FF',
   light: '#FFFFFFFF',
 };
 let showInfo = false;

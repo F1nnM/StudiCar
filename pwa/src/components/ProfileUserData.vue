@@ -224,7 +224,7 @@
       </q-card>
     </q-dialog>
 
-    <QrGen
+    <QrGenerator
       v-model="shareProfileQR"
       :label="username"
       linearProgress
@@ -460,10 +460,10 @@
 </template>
 
 <script setup>
-import { useQuasar } from 'quasar'
+import { useQuasar } from 'quasar';
 
-const $q = useQuasar()
-defineExpose({ $q })
+const $q = useQuasar();
+defineExpose({ $q });
 
 import { useAppStore } from 'src/stores/app';
 import { useUserStore } from 'src/stores/user';
@@ -503,14 +503,13 @@ const imageForColors = ref(null);
 const openEditDescription = ref(false);
 const newDescription = ref('');
 
-function loadFile(file) {
-  file = file;
-  const size = 300, // represents the height
-    ratio = 1; // default ratio at profile pictures
+function loadFile(event) {
+  const file = event.target.files[0];
+  const size = 300; // represents the height
+  const ratio = 1; // default ratio at profile pictures
 
-  const width = size * ratio,
-    fileName = file.name,
-    reader = new FileReader();
+  const width = size * ratio;
+  const reader = new FileReader();
   reader.onerror = (error) => console.log(error);
   reader.readAsDataURL(file);
   reader.onload = (event) => {
