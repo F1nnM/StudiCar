@@ -122,5 +122,7 @@ server.on('request', async (req, res) => {
 
 });
 
-
-server.listen(443);
+if (process.env.USE_HTTPS=="true")
+  server.listen(443);
+else
+  server.listen(80)
