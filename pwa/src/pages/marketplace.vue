@@ -481,7 +481,6 @@ const filtersActive = computed(() => {
 
 const getSortedOffers = computed(() => {
   var offers = getFilteredOffers.value;
-  console.log(offers)
   // here comes the sorting code
 
   if (sort != {}) {
