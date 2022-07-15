@@ -952,10 +952,12 @@ async function getFriends(fbId) {
   return friendsFormatted;
 }
 
-function endWithJSON(res, JSON) {
+function endWithJSON(res, data) {
   if (res.sent == true) return;
   res.setHeader("Content-Type", "application/json");
-  res.end(JSON);
+  if (typeof data == "object")
+    data = JSON.stringify(data);
+  res.end(data);
 }
 
 async function isUserVerified(fbid) {

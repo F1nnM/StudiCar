@@ -116,7 +116,7 @@ const { car, expandable, compactView } = toRefs(props);
 let showDetails = false;
 const carColor = computed(() => {
   // at the time of writing this the component was used both with and without #-prefix in color
-  var c = car.color;
+  var c = car.value.color;
   if (!c.includes('#')) return '#' + c;
   else return c;
 });

@@ -8,9 +8,8 @@
 
         <q-item-section>
           <q-btn-toggle
-            v-bind:value="value.dateTab"
-            v-on:input="dateTabChanged($event)"
-            @click="setDateTab"
+            :modelValue="modelValue.dateTab"
+            @update:modelValue="dateTabChanged($event)"
             no-caps
             rounded
             unelevated
@@ -28,15 +27,15 @@
             clickable
             @click="
               (_) => {
-                if (value.dateTab == 'fix') $refs.datepicker.toggle();
+                if (modelValue.dateTab == 'fix') $refs.datepicker.toggle();
                 else $refs.datepicker.showPopup();
               }
             "
             borderless
             readonly
-            :value="
-              value.dateTab == 'fix'
-                ? value.date || '- Datum -'
+            :modelValue="
+              modelValue.dateTab == 'fix'
+                ? modelValue.date || '- Datum -'
                 : getWeekDayFromIndex
             "
           >
@@ -47,12 +46,13 @@
                 flat
                 @click="
                   (_) => {
-                    if (value.dateTab == 'weekly') $refs.datepicker.showPopup();
+                    if (modelValue.dateTab == 'weekly')
+                      $refs.datepicker.showPopup();
                   }
                 "
               >
                 <q-menu
-                  v-if="value.dateTab == 'fix'"
+                  v-if="modelValue.dateTab == 'fix'"
                   ref="datepicker"
                   transition-show="jump-down"
                   transition-hide="jump-up"
@@ -62,11 +62,13 @@
                     :subtitle="`Maximal 30 Tage im Voraus`"
                     event-color="primary"
                     mask="YYYY-MM-DD"
-                    v-bind:value="value.date"
-                    v-on:input="dateChanged($event)"
+                    :modelValue="modelValue.date"
+                    @update:modelValue="
+                      dateChanged($event);
+                      $refs.datepicker.hide();
+                    "
                     :events="[todayString]"
                     :options="dateOptions"
-                    @input="$refs.datepicker.hide()"
                   />
                 </q-menu>
                 <q-select
@@ -77,8 +79,8 @@
                   label="Wochentag auswählen"
                   transition-show="jump-down"
                   transition-hide="jump-up"
-                  v-bind:value="value.date"
-                  v-on:input="dateChanged($event)"
+                  :modelValue="modelValue.date"
+                  @update:modelValue="dateChanged($event)"
                   :options="getRepeatingDayOptions"
                 />
               </q-btn>
@@ -96,8 +98,8 @@
 
         <q-item-section>
           <q-btn-toggle
-            v-bind:value="value.timeTab"
-            v-on:input="dateChanged($event)"
+            :modelValue="modelValue.timeTab"
+            @update:modelValue="timeTabChanged($event)"
             no-caps
             rounded
             unelevated
@@ -106,10 +108,10 @@
             outline
             toggle-color="primary"
             color="white"
-            text-color="g rey-3"
+            text-color="grey-5"
             :options="[
-              { label: 'Ankunft um', value: arriveValue },
-              { label: 'Abfahrt um', value: departValue },
+              { label: 'Ankunft um', value: 'arrive' },
+              { label: 'Abfahrt um', value: 'depart' },
             ]"
           />
           <Tooltip rgba>
@@ -125,7 +127,7 @@
               readonly
               borderless
               square
-              :value="value.time || '- Zeit -'"
+              :modelValue="modelValue.time || '- Zeit -'"
             >
               <template v-slot:append>
                 <q-btn icon="edit" color="grey-9" flat>
@@ -136,8 +138,8 @@
                   >
                     <q-time
                       format24h
-                      v-bind:value="value.time"
-                      v-on:input="timeChanged($event)"
+                      :modelValue="null"
+                      @update:modelValue="timeChanged($event); $refs.timepicker.toggle()"
                       mask="HH:mm"
                       color="primary"
                     />
@@ -153,16 +155,18 @@
 </template>
 
 <script setup>
+const emit = defineEmits(['update:modelValue']);
 const props = defineProps({
-  value: Object,
+  modelValue: Object,
 });
-const { value } = toRefs(props);
-
-let localValue = toRef(props.value);
+const { modelValue } = toRefs(props);
+import { date } from 'quasar';
 
 const getWeekDayFromIndex = computed(() => {
   // getter for display while editing
-  var day = getRepeatingDayOptions.find((d) => d.value == value.date);
+  var day = getRepeatingDayOptions.value.find(
+    (d) => d.value == modelValue.value.date
+  );
   return day ? day.label : null;
 });
 const todayString = computed(() => {
@@ -181,50 +185,44 @@ const getRepeatingDayOptions = computed(() => {
     value: index + 1,
   }));
 });
-const isDirectionValueCorrect = computed(() => {
-  const l = value;
-  return (
-    (l.destination == 'home' && l.timeTab == 'depart') ||
-    (l.destination == 'school' && l.timeTab == 'arrive')
-  );
-});
-const arriveValue = computed(() => {
-  return isDirectionValueCorrect.value ? 'arrive' : 'depart';
-});
-const departValue = computed(() => {
-  return isDirectionValueCorrect.value ? 'depart' : 'arrive';
-});
+
 function dateChanged($event) {
-  localValue.date = $event;
-  $emit('input', localValue);
+  const updated = {
+    ...modelValue.value,
+    date: $event,
+  };
+  emit('update:modelValue', updated);
 }
 
 function dateTabChanged($event) {
-  localValue.dateTab = $event;
-  $emit('input', localValue);
+  const updated = {
+    ...modelValue.value,
+    dateTab: $event,
+  };
+
+  if ($event == 'weekly') updated.date = 1;
+  // default on monday
+  else updated.date = date.formatDate(new Date(), 'YYYY-MM-DD');
+  
+  emit('update:modelValue', updated);
 }
 
 function timeChanged($event) {
-  localValue.time = $event;
-  $emit('input', localValue);
+  const updated = {
+    ...modelValue.value,
+    time: $event,
+  };
+  emit('update:modelValue', updated);
 }
 
 function timeTabChanged($event) {
-  localValue.timeTab = $event;
-  $emit('input', localValue);
+  const updated = {
+    ...modelValue.value,
+    timeTab: $event,
+  };
+  emit('update:modelValue', updated);
 }
 
-function emit(val) {
-  $emit('input', val);
-}
-
-function setDateTab() {
-  var tab = value.dateTab;
-  if (tab == 'weekly') localValue.date = 1;
-  // default on monday
-  else localValue.date = date.formatDate(new Date(), 'YYYY-MM-DD');
-  $emit('input', localValue);
-}
 
 function dateOptions(d) {
   const limit = 30;

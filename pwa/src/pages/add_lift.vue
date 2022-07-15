@@ -39,7 +39,7 @@
     </div>
     <q-dialog
       v-else
-      :value="true"
+      :model-value="true"
       :maximized="uploading == 0"
       persistent
       transition-show="slide-up"
@@ -544,6 +544,8 @@
 import { useUserStore } from 'src/stores/user';
 import { useAppStore } from 'src/stores/app';
 
+import {date} from 'quasar';
+
 const maxDaysAhead = 30;
 const lift = ref({
   destination: 'school', // default set to school, user selects first home/school, then exact address
@@ -569,6 +571,7 @@ const lift = ref({
 const step = ref(1);
 const uploading = ref(0); // 0 means not uploading, 1 means upload in progress, 2 means upload successful and -1 means error
 const overviewTab = ref('route');
+const uploadingDoneValue = ref(0);
 
 function stepInc() {
   step.value = step.value + 1;
@@ -584,9 +587,9 @@ const userStore = useUserStore();
 watch(uploading, (newv) => {
   if (newv == 2) {
     setTimeout((_) => {
-      uploadingDoneValue = 100;
+      uploadingDoneValue.value = 100;
     }, 100); // when uploading done, this value is set to 100 to make cool check animation possible
-  } else uploadingDoneValue = 0;
+  } else uploadingDoneValue.value = 0;
 });
 
 const todayString = computed(() => {
@@ -602,12 +605,12 @@ const hasOwnAddresses = computed(() => {
 });
 
 const hasOwnCars = computed(() => {
-  return userCars.length > 0;
+  return userCars.value.length > 0;
 });
 
 const carOptions = computed(() => {
   let cars = [];
-  for (let car of userCars) {
+  for (let car of userCars.value) {
     cars.push(car.licensePlate + ' - ' + car.brand + ' ' + car.model);
   }
   return cars;
@@ -619,9 +622,8 @@ const userCars = computed(() => {
 
 const getCarData = computed(() => {
   // returns data of selected car, so that user for example can see how many seats would be default
-  let cars = userCars;
-  let obj = cars.find((item) => {
-    return item.carId == lift.carId;
+  let obj = userCars.value.find((item) => {
+    return item.carId == lift.value.carId;
   });
   return obj
     ? obj
@@ -632,41 +634,41 @@ const getCarData = computed(() => {
 });
 
 const startCity = computed(() => {
-  var start = lift.startAddressId || 1,
-    address = allAddresses.find((a) => a.id == start);
+  var start = lift.value.startAddressId || 1,
+    address = allAddresses.value.find((a) => a.id == start);
   return address.city;
 });
 
 const destCity = computed(() => {
-  var dest = lift.destinationAddressId || 1,
-    address = allAddresses.find((a) => a.id == dest);
+  var dest = lift.value.destinationAddressId || 1,
+    address = allAddresses.value.find((a) => a.id == dest);
   return address.city;
 });
 
 const getExactAddresses = computed(() => {
-  if (lift.destination == 'school') {
-    return allAddresses.filter((item) => item.id < 4); // filter only the schools, which have IDs 1 to 3
+  if (lift.value.destination == 'school') {
+    return allAddresses.value.filter((item) => item.id < 4); // filter only the schools, which have IDs 1 to 3
 
     // a[0].imagePath = require(pathBegin + 'HDH_cube.jpg')
     // a[1].imagePath = require(pathBegin + 'HDH_old.jpg')
     // a[2].imagePath = require(pathBegin + 'WIB_ext.jpg')
-  } else if (lift.destination == 'home') {
-    return allAddresses.filter((item) => item.id > 3); // filter only private adresses, IDs 1 to 3 are reserved for schools
+  } else if (lift.value.destination == 'home') {
+    return allAddresses.value.filter((item) => item.id > 3); // filter only private adresses, IDs 1 to 3 are reserved for schools
   }
   return null;
 });
 
 const getExactStartingPoints = computed(() => {
-  if (lift.destination != 'school') {
-    return allAddresses.filter((item) => item.id < 4); // filter only the schools, which have IDs 1 to 3
-  } else if (lift.destination != 'home') {
-    return allAddresses.filter((item) => item.id > 3); // filter only private adresses, IDs 1 to 3 are reserved for schools
+  if (lift.value.destination != 'school') {
+    return allAddresses.value.filter((item) => item.id < 4); // filter only the schools, which have IDs 1 to 3
+  } else if (lift.value.destination != 'home') {
+    return allAddresses.value.filter((item) => item.id > 3); // filter only private adresses, IDs 1 to 3 are reserved for schools
   }
   return null;
 });
 
 const departing = computed(() => {
-  var dest = lift.destination;
+  var dest = lift.value.destination;
   if (dest == 'home') return true;
   else if (dest == 'school') return false;
   else return null;
@@ -683,14 +685,14 @@ function dateOptions(d) {
 }
 
 async function addLift() {
-  if (lift.seats == 0) {
+  if (lift.value.seats == 0) {
     // case when user didn't want to change number of seats at this lift
-    lift.seats = getCarData.seats;
+    lift.value.seats = getCarData.seats;
   }
   uploading.value = 1;
-  lift.departAt = departing;
-  lift.timeTab = departing ? 'depart' : 'arrive';
-  await userStore.addLift(lift);
+  lift.value.departAt = departing;
+  lift.value.timeTab = departing ? 'depart' : 'arrive';
+  await userStore.addLift(lift.value);
   lift.value = {
     destination: 'school', // default set to school, user selects first home/school, then exact address
     destinationAddressId: 0,
