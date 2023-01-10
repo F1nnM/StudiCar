@@ -12,7 +12,7 @@
   "author": "Finn Melzer <studicar@mfinn.de>",
   "dependencies": {
     "dotenv": "^16.0.0",
-    "firebase-admin": "^9.4.2",
+    "firebase-admin": "^11.4.1",
     "image-size": "^0.8.3",
     "jdenticon": "^2.2.0",
     "mariadb": "^3.0.0",
